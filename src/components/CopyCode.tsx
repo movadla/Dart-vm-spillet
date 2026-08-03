@@ -1,0 +1,42 @@
+'use client'
+
+import { useState } from 'react'
+
+const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+
+interface Props {
+  code: string
+  fontSize?: number
+  color?: string
+  letterSpacing?: string
+}
+
+export default function CopyCode({ code, fontSize = 18, color = '#dc2626', letterSpacing = '0.12em' }: Props) {
+  const [copied, setCopied] = useState(false)
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(code)
+    } catch {}
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <button
+      onClick={handleCopy}
+      title="Trykk for å kopiere"
+      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+    >
+      <span style={{
+        fontFamily: SPORT, fontSize, fontWeight: 900,
+        color: copied ? '#22c55e' : color,
+        letterSpacing: copied ? '0.04em' : letterSpacing,
+        transition: 'color 0.15s, letter-spacing 0.15s',
+        lineHeight: 1,
+      }}>
+        {copied ? '✓ Kopiert' : code}
+      </span>
+    </button>
+  )
+}

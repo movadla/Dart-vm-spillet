@@ -1,0 +1,16 @@
+name: Sync match results
+
+on:
+  # VM er ferdigspilt (finalen 2026-07-19) — ingen flere kamper å synke, og football-data.org
+  # ga mangelfulle måldata for finalen (se commit d13710f), så automatisk re-synk kan rulle
+  # tilbake manuelle rettinger. Schedule-trigger fjernet; kjør manuelt via "Run workflow" om
+  # det noensinne trengs igjen (f.eks. neste turnering).
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call sync-results
+        run: |
+          curl -sf "https://www.vmspillet.com/api/sync-results?secret=${{ secrets.SYNC_SECRET }}"

@@ -1,0 +1,12 @@
+{
+  "name": "VM-Spillet 2026",
+  "short_name": "VM-Spillet",
+  "description": "Velg 8 lag. Følg dem gjennom turneringen. Vinn potten.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#dc2626",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

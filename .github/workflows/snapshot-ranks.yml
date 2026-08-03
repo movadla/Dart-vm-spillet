@@ -1,0 +1,16 @@
+name: Snapshot ranks
+
+on:
+  schedule:
+    # Daglig 06:00 UTC (08:00 norsk) — etter at gårsdagens kamper er ferdige og synket.
+    # Brukes som baseline for rang-piler ▲/▼ (endring siden i går).
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call snapshot-ranks
+        run: |
+          curl -sf "https://www.vmspillet.com/api/snapshot-ranks?secret=${{ secrets.SYNC_SECRET }}"
