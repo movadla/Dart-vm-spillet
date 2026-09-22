@@ -5,7 +5,7 @@ import { STAGE_ORDER } from '@/config/scoring'
 
 const supabase = getSupabaseAdmin()
 
-const VALID_STAGES = STAGE_ORDER.filter((s) => s !== 'winner')
+const VALID_STAGES: readonly string[] = STAGE_ORDER
 
 export async function POST(req: NextRequest) {
   const authError = checkAdminAuth(req)

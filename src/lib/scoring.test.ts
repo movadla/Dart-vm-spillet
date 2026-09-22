@@ -1,79 +1,110 @@
 import { describe, it, expect } from 'vitest'
-import { calcAdvancementBonus, calcPlayerPoints, calcParticipantPoints, isPlayerEliminated } from './scoring'
-
-describe('calcAdvancementBonus', () => {
-  it('returns 0 when no stage reached', () => {
-    expect(calcAdvancementBonus(null)).toBe(0)
-  })
-
-  it('is cumulative through the stage order', () => {
-    expect(calcAdvancementBonus('r1')).toBe(5)
-    expect(calcAdvancementBonus('r2')).toBe(10)
-    expect(calcAdvancementBonus('r3')).toBe(20)
-    expect(calcAdvancementBonus('r4')).toBe(30)
-    expect(calcAdvancementBonus('qf')).toBe(45)
-    expect(calcAdvancementBonus('sf')).toBe(65)
-    expect(calcAdvancementBonus('final')).toBe(90)
-    expect(calcAdvancementBonus('winner')).toBe(125)
-  })
-
-  it('returns 0 for an unknown stage', () => {
-    expect(calcAdvancementBonus('group')).toBe(0)
-  })
-})
+import { calcPlayerPoints, calcParticipantPoints, isPlayerEliminated, isPlayerChampion, furthestStageReached } from './scoring'
 
 describe('calcPlayerPoints', () => {
-  it('multiplies advancement points by the pot multiplier', () => {
-    const pick = { player_name: 'Luke Littler', pot_number: 1 }
-    const advancement = [{ player_name: 'Luke Littler', stage_reached: 'qf' }]
-    const result = calcPlayerPoints(pick, advancement)
-    expect(result.advPts).toBe(45)
+  it('gir 1p per vunnet sett og 2p per kampseier', () => {
+    const pick = { player_name: 'A', pot_number: 1 }
+    const matches = [
+      { player1: 'A', player2: 'B', sets1: 6, sets2: 2, stage: 'r1', winner: 'A' },
+    ]
+    const result = calcPlayerPoints(pick, matches)
+    expect(result.setPts).toBe(6)
+    expect(result.advPts).toBe(2)
+    expect(result.winnerBonus).toBe(0)
     expect(result.multiplier).toBe(1)
-    expect(result.total).toBe(45)
+    expect(result.total).toBe(8)
   })
 
-  it('applies the underdog multiplier for lower pots', () => {
-    const pick = { player_name: 'Owen Bates', pot_number: 5 }
-    const advancement = [{ player_name: 'Owen Bates', stage_reached: 'r2' }]
-    const result = calcPlayerPoints(pick, advancement)
-    expect(result.multiplier).toBe(3)
-    expect(result.total).toBe(30)
+  it('teller sett også fra tapte kamper, men ikke avansement-poeng', () => {
+    const pick = { player_name: 'A', pot_number: 1 }
+    const matches = [
+      { player1: 'A', player2: 'B', sets1: 3, sets2: 6, stage: 'r1', winner: 'B' },
+    ]
+    const result = calcPlayerPoints(pick, matches)
+    expect(result.setPts).toBe(3)
+    expect(result.advPts).toBe(0)
+    expect(result.total).toBe(3)
   })
 
-  it('returns 0 total when the player has no advancement row', () => {
-    const pick = { player_name: 'Ukjent Spiller', pot_number: 2 }
-    const result = calcPlayerPoints(pick, [])
+  it('gir turneringsseier-bonus kun ved seier i finalen', () => {
+    const pick = { player_name: 'A', pot_number: 1 }
+    const matches = [
+      { player1: 'A', player2: 'B', sets1: 6, sets2: 2, stage: 'sf', winner: 'A' },
+      { player1: 'A', player2: 'C', sets1: 7, sets2: 3, stage: 'final', winner: 'A' },
+    ]
+    const result = calcPlayerPoints(pick, matches)
+    expect(result.setPts).toBe(13)
+    expect(result.advPts).toBe(4)
+    expect(result.winnerBonus).toBe(5)
+    expect(result.total).toBe(22)
+  })
+
+  it('multipliserer totalsummen med pott-multiplikatoren', () => {
+    const pick = { player_name: 'A', pot_number: 6 }
+    const matches = [
+      { player1: 'A', player2: 'B', sets1: 3, sets2: 1, stage: 'r1', winner: 'A' },
+    ]
+    const result = calcPlayerPoints(pick, matches)
+    expect(result.multiplier).toBe(4)
+    expect(result.total).toBe((3 + 2) * 4)
+  })
+
+  it('returnerer 0 for en spiller uten registrerte kamper', () => {
+    const result = calcPlayerPoints({ player_name: 'Ukjent', pot_number: 2 }, [])
     expect(result.total).toBe(0)
   })
 })
 
 describe('calcParticipantPoints', () => {
-  it('sums points across all picks', () => {
+  it('summerer poeng på tvers av alle picks', () => {
     const picks = [
       { player_name: 'A', pot_number: 1 },
-      { player_name: 'B', pot_number: 5 },
+      { player_name: 'B', pot_number: 6 },
     ]
-    const advancement = [
-      { player_name: 'A', stage_reached: 'r1' },
-      { player_name: 'B', stage_reached: 'r1' },
+    const matches = [
+      { player1: 'A', player2: 'X', sets1: 6, sets2: 0, stage: 'r1', winner: 'A' },
+      { player1: 'B', player2: 'Y', sets1: 3, sets2: 1, stage: 'r1', winner: 'B' },
     ]
-    // A: 5 * 1 = 5, B: 5 * 3 = 15
-    expect(calcParticipantPoints(picks, advancement)).toBe(20)
+    // A: (6+2)*1 = 8, B: (3+2)*4 = 20
+    expect(calcParticipantPoints(picks, matches)).toBe(28)
   })
 })
 
 describe('isPlayerEliminated', () => {
-  it('is false when the player has no recorded matches', () => {
-    expect(isPlayerEliminated('Luke Littler', [])).toBe(false)
+  it('er false uten registrerte kamper', () => {
+    expect(isPlayerEliminated('A', [])).toBe(false)
   })
 
-  it('is false when the player won their last recorded match', () => {
+  it('er false når spilleren vant sin siste kamp', () => {
     const matches = [{ player1: 'A', player2: 'B', sets1: 6, sets2: 2, stage: 'r1', winner: 'A' }]
     expect(isPlayerEliminated('A', matches)).toBe(false)
   })
 
-  it('is true when the player lost a recorded match', () => {
+  it('er true når spilleren tapte en kamp', () => {
     const matches = [{ player1: 'A', player2: 'B', sets1: 2, sets2: 6, stage: 'r1', winner: 'B' }]
     expect(isPlayerEliminated('A', matches)).toBe(true)
+  })
+})
+
+describe('isPlayerChampion', () => {
+  it('er true kun ved seier i finalen', () => {
+    const matches = [{ player1: 'A', player2: 'B', sets1: 7, sets2: 3, stage: 'final', winner: 'A' }]
+    expect(isPlayerChampion('A', matches)).toBe(true)
+    expect(isPlayerChampion('B', matches)).toBe(false)
+  })
+})
+
+describe('furthestStageReached', () => {
+  const stageOrder = ['r1', 'r2', 'r3'] as const
+  it('finner den høyeste runden spilleren har deltatt i', () => {
+    const matches = [
+      { player1: 'A', player2: 'B', sets1: 6, sets2: 2, stage: 'r1', winner: 'A' },
+      { player1: 'A', player2: 'C', sets1: 6, sets2: 4, stage: 'r2', winner: 'A' },
+    ]
+    expect(furthestStageReached('A', matches, stageOrder)).toBe('r2')
+  })
+
+  it('returnerer null uten kamper', () => {
+    expect(furthestStageReached('A', [], stageOrder)).toBeNull()
   })
 })

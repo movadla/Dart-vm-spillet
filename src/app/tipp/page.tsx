@@ -6,8 +6,9 @@ import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
 import { POTS } from '@/data/pots'
 import Flag from '@/components/Flag'
-import { SCORING, STAGE_ORDER, STAGE_LABELS } from '@/config/scoring'
-import { getFirstMatchInfo, getSecondRoundOpponent } from '@/lib/bracketProjection'
+import { SCORING } from '@/config/scoring'
+import { getFirstMatchInfo, getSeedLabel } from '@/lib/bracketProjection'
+import { DrawBracket } from '@/components/DrawBracket'
 import StepSlideshow from '@/components/StepSlideshow'
 import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
 
@@ -700,19 +701,19 @@ const inputStyle: React.CSSProperties = {
       </div>
       {showScoreInfo && (
         <div style={{ marginBottom: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px', fontSize: 12 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 6 }}>Poeng (kumulativt per runde)</div>
-          {(() => {
-            let cumulative = 0
-            return STAGE_ORDER.map((stage) => {
-              cumulative += SCORING.advancement[stage]
-              return (
-                <div key={stage} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ color: 'rgba(255,255,255,0.45)' }}>{STAGE_LABELS[stage]}</span>
-                  <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{cumulative}p</span>
-                </div>
-              )
-            })
-          })()}
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 6 }}>Poeng</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Per vunnet sett</span>
+            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{SCORING.perSetWon}p</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Per kampseier (avansement)</span>
+            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{SCORING.perAdvancement}p</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'rgba(255,255,255,0.45)' }}>For å vinne turneringen</span>
+            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>+{SCORING.tournamentWinner}p</span>
+          </div>
           <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
           {(() => {
             // Grupper sammenhengende potter med samme multiplikator til én linje.
@@ -778,40 +779,31 @@ const inputStyle: React.CSSProperties = {
         </div>
 
         {/* Motstander-panel — dukker opp til høyre når en spiller er valgt */}
-        <div style={{ width: 122, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto' }}>
+        <div style={{ width: 132, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto' }}>
           {selectedPlayer ? (() => {
             const info = getFirstMatchInfo(selectedPlayer)
             if (!info) return null
-            const round2 = info.type === 'match' ? getSecondRoundOpponent(selectedPlayer) : null
+
+            const pairA = {
+              a: { name: selectedPlayer, seedLabel: getSeedLabel(selectedPlayer), highlighted: true },
+              b: { name: info.opponent.name, seedLabel: getSeedLabel(info.opponent.name), faded: info.opponent.isFiller },
+            }
+            const pairB = {
+              a: { name: info.round2Pair[0].name, seedLabel: getSeedLabel(info.round2Pair[0].name), faded: info.round2Pair[0].isFiller },
+              b: { name: info.round2Pair[1].name, seedLabel: getSeedLabel(info.round2Pair[1].name), faded: info.round2Pair[1].isFiller },
+            }
+
             return (
               <>
                 <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
                   Eksempel-trekning
                 </div>
-
-                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 8px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>1. runde</div>
-                  {info.type === 'match' ? (
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: 1.25 }}>{info.opponent}</div>
-                  ) : (
-                    <div style={{ fontSize: 11, fontWeight: 800, color: '#4ade80', letterSpacing: '0.04em' }}>BYE</div>
-                  )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px' }}>
+                  <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>1. RUNDE</span>
+                  <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>2. RUNDE</span>
                 </div>
 
-                <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.25)', fontSize: 12, lineHeight: 1 }}>↓</div>
-
-                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 8px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>2. runde</div>
-                  {info.type === 'bye' ? (
-                    <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.75)', lineHeight: 1.3 }}>
-                      {info.vsA}<span style={{ color: 'rgba(255,255,255,0.35)' }}> / </span>{info.vsB}
-                    </div>
-                  ) : round2 ? (
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: 1.25 }}>{round2}</div>
-                  ) : (
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>—</div>
-                  )}
-                </div>
+                <DrawBracket pairA={pairA} pairB={pairB} compact vertical />
 
                 <Link
                   href={`/vm-info?tab=trekning&spiller=${encodeURIComponent(selectedPlayer)}`}

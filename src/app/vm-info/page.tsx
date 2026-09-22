@@ -6,9 +6,10 @@ import SmartBackButton from '@/components/SmartBackButton'
 import { POTS, getIso2 } from '@/data/pots'
 import Flag from '@/components/Flag'
 import { supabase } from '@/lib/supabase'
-import { STAGE_ORDER, STAGE_LABELS, SCORING, type Stage } from '@/config/scoring'
+import { STAGE_ORDER, STAGE_LABELS, SCORING, CHAMPION_LABEL } from '@/config/scoring'
 import type { MatchResult } from '@/lib/scoring'
-import { getFirstMatchInfo, getBracketSection } from '@/lib/bracketProjection'
+import { getFirstMatchInfo, getBracketSection, getSeedLabel, R1_MATCHES } from '@/lib/bracketProjection'
+import { DrawBracket, PairBox } from '@/components/DrawBracket'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
@@ -47,6 +48,7 @@ export default function VmInfoPage() {
   const [participantId, setParticipantId] = useState<string | null>(null)
   const [matches, setMatches] = useState<MatchResult[]>([])
   const [drawPlayer, setDrawPlayer] = useState<string>('')
+  const [showFullBracket, setShowFullBracket] = useState(false)
   const rulesRef = useRef<HTMLDivElement>(null)
 
   // Påmelding stenger ved kickoff — CTA-lenker peker til Min side i stedet for stengt /tipp.
@@ -101,8 +103,7 @@ export default function VmInfoPage() {
   // (r1 → final), pluss en avsluttende VM-vinner-kolonne. Vi kjenner ikke fremtidige
   // parringer (ingen datakilde for det), så runder uten registrerte kamper får bare
   // én "Ikke spilt"-plassholderboks — det er nok til å vise bracket-formen.
-  const BRACKET_STAGES = STAGE_ORDER.filter((s): s is Exclude<Stage, 'winner'> => s !== 'winner')
-  const bracketColumns = BRACKET_STAGES.map((stage) => ({
+  const bracketColumns = STAGE_ORDER.map((stage) => ({
     stage,
     rows: matches.filter((m) => (m.stage ?? 'r1') === stage),
   }))
@@ -240,7 +241,7 @@ export default function VmInfoPage() {
               {/* VM-vinner */}
               <div style={{ width: 148, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#f59e0b', textAlign: 'center', padding: '0 2px 8px', borderBottom: '1px solid rgba(245,158,11,0.25)', marginBottom: 10 }}>
-                  {STAGE_LABELS.winner}
+                  {CHAMPION_LABEL}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center' }}>
                   {champion ? (
@@ -295,31 +296,22 @@ export default function VmInfoPage() {
             const info = getFirstMatchInfo(drawPlayer)
             const section = getBracketSection(drawPlayer)
             if (!info) return null
+            const pairA = {
+              a: { name: drawPlayer, seedLabel: getSeedLabel(drawPlayer), highlighted: true },
+              b: { name: info.opponent.name, seedLabel: getSeedLabel(info.opponent.name), faded: info.opponent.isFiller },
+            }
+            const pairB = {
+              a: { name: info.round2Pair[0].name, seedLabel: getSeedLabel(info.round2Pair[0].name), faded: info.round2Pair[0].isFiller },
+              b: { name: info.round2Pair[1].name, seedLabel: getSeedLabel(info.round2Pair[1].name), faded: info.round2Pair[1].isFiller },
+            }
             return (
               <>
                 <div style={CARD}>
-                  <div style={LABEL}>Første kamp</div>
-                  {info.type === 'match' ? (
-                    <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Flag iso2={getIso2(drawPlayer)} size={20} />
-                      <span>{drawPlayer}</span>
-                      <span style={{ color: 'rgba(255,255,255,0.3)' }}>vs</span>
-                      <Flag iso2={getIso2(info.opponent)} size={20} />
-                      <span>{info.opponent}</span>
-                      {info.isFiller && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>(kvalifisert spiller)</span>}
-                      <span style={{ marginLeft: 'auto', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>1. runde</span>
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)' }}>
-                      <div style={{ marginBottom: 6 }}>
-                        <Flag iso2={getIso2(drawPlayer)} size={20} /> <strong>{drawPlayer}</strong> har bye i 1. runde.
-                      </div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
-                        Møter vinneren av <strong style={{ color: '#fff' }}>{info.vsA}</strong>{info.vsAFiller && ' (kval.)'} vs{' '}
-                        <strong style={{ color: '#fff' }}>{info.vsB}</strong>{info.vsBFiller && ' (kval.)'} i 2. runde.
-                      </div>
-                    </div>
-                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px', marginBottom: 8 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>1. runde</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>2. runde</span>
+                  </div>
+                  <DrawBracket pairA={pairA} pairB={pairB} />
                 </div>
 
                 {section.length > 0 && (
@@ -341,6 +333,31 @@ export default function VmInfoPage() {
               </>
             )
           })()}
+
+          <button
+            onClick={() => setShowFullBracket((s) => !s)}
+            style={{ padding: '12px', background: showFullBracket ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, color: '#fff', fontSize: 13, fontWeight: 700, letterSpacing: '0.03em', cursor: 'pointer' }}
+          >
+            {showFullBracket ? 'Skjul hele bracketen' : 'Vis hele bracketen →'}
+          </button>
+
+          {showFullBracket && (
+            <div style={CARD}>
+              <div style={LABEL}>Runde 1 — hele feltet ({R1_MATCHES.length} kamper, 128 spillere)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
+                {R1_MATCHES.map(([a, b], i) => (
+                  <div key={i}>
+                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginBottom: 3 }}>Kamp {i + 1}</div>
+                    <PairBox
+                      a={{ name: a, seedLabel: getSeedLabel(a), faded: a.startsWith('Kvalifisert spiller'), highlighted: a === drawPlayer }}
+                      b={{ name: b, seedLabel: getSeedLabel(b), faded: b.startsWith('Kvalifisert spiller'), highlighted: b === drawPlayer }}
+                      compact
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -351,10 +368,10 @@ export default function VmInfoPage() {
           <div ref={rulesRef} style={CARD}>
             <div style={LABEL}>Kort fortalt</div>
             {([
-              'Du velger én spiller fra hver av 5 potter',
+              'Du velger én spiller fra hver av 6 potter',
               'Pottene er basert på PDC-ranking og vinnerodds',
               'Valgene kan endres frem til VM starter',
-              'Du får poeng for hver runde spilleren din vinner — poengene legges sammen etter hvert som han går videre',
+              'Du får poeng for hvert sett spilleren din vinner og for hver kampseier — pluss bonus om han vinner hele turneringen',
             ] as string[]).map((t, i) => (
               <div key={t} style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', padding: '9px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
                 {t}
@@ -363,15 +380,21 @@ export default function VmInfoPage() {
           </div>
 
           <div style={CARD}>
-            <div style={LABEL}>Poeng per runde</div>
-            {STAGE_ORDER.map((stage, i) => (
-              <div key={stage} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{STAGE_LABELS[stage]}</span>
-                <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.advancement[stage]}p</span>
-              </div>
-            ))}
+            <div style={LABEL}>Poengoversikt</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0' }}>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>Per vunnet sett</span>
+              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.perSetWon}p</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>Per kampseier (avansement)</span>
+              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.perAdvancement}p</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>For å vinne hele turneringen</span>
+              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.tournamentWinner}p</span>
+            </div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 10, lineHeight: 1.5 }}>
-              Poengene er kumulative — en spiller som når kvartfinale får poeng for alle rundene frem til og med kvartfinalen.
+              Alt legges sammen fortløpende gjennom turneringen, og summen ganges med pott-multiplikatoren.
             </div>
           </div>
 

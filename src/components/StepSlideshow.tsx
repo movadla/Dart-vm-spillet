@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Flag from '@/components/Flag'
 import { POTS } from '@/data/pots'
-import { STAGE_ORDER, SCORING, type Stage } from '@/config/scoring'
+import { SCORING, STAGE_LABELS, type Stage } from '@/config/scoring'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
@@ -26,17 +26,15 @@ function findPick(name: string) {
   return { potNumber: pot.potNumber, player }
 }
 
-function cumulativePoints(stage: Stage): number {
-  const idx = STAGE_ORDER.indexOf(stage)
-  return STAGE_ORDER.slice(0, idx + 1).reduce((sum, s) => sum + SCORING.advancement[s], 0)
-}
-
 const RESULT_PLAYER = findPick('Luke Littler').player
 const RESULT_STAGE: Stage = 'qf'
 const RESULT_OPPONENT = 'Gerwyn Price'
-const RESULT_POINTS = cumulativePoints(RESULT_STAGE)
+const RESULT_SETS_WON = 6
+const RESULT_SET_PTS = RESULT_SETS_WON * SCORING.perSetWon
+const RESULT_ADV_PTS = SCORING.perAdvancement
+const RESULT_POINTS = RESULT_SET_PTS + RESULT_ADV_PTS
 
-const LEADERBOARD_TOTAL = 112
+const LEADERBOARD_TOTAL = 34
 const LEADERBOARD_RANK = 4
 const LEADERBOARD_OF = 128
 
@@ -207,7 +205,7 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
           <div style={{ animation: 'slide-enter 0.5s cubic-bezier(0.22,1,0.36,1) both' }}>
             <PhaseHeading eyebrow="Eksempel · steg 2" title="Følg dem gjennom dart-VM" />
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
-              Spillerne dine kjemper seg gjennom sluttspillet i PDC World Championship.
+              1p per sett vunnet, 2p for kampseier — jo lenger de går, jo mer poeng.
             </div>
             <div
               style={{
@@ -218,31 +216,29 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 20px rgba(0,0,0,0.25)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <Flag iso2={RESULT_PLAYER.iso2} size={20} />
                 <span style={{ flex: 1, fontSize: 13, fontWeight: 800, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {RESULT_PLAYER.name}
                 </span>
-                <span style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>6–2</span>
+                <span style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>{RESULT_SETS_WON}–2</span>
                 <span style={{ flex: 1, fontSize: 13, color: 'rgba(255,255,255,0.5)', textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {RESULT_OPPONENT}
                 </span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>
-                  Kvartfinale
-                </span>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 10 }}>
+                {STAGE_LABELS[RESULT_STAGE]}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                <span>{RESULT_SETS_WON} sett × 1p = {RESULT_SET_PTS}p</span>
+                <span style={{ color: 'rgba(255,255,255,0.2)' }}>+</span>
+                <span>kampseier = {RESULT_ADV_PTS}p</span>
                 <span
                   className="multiplier-badge"
                   style={{
-                    fontFamily: SPORT,
-                    fontSize: 14,
-                    fontWeight: 900,
-                    color: '#f59e0b',
-                    background: 'rgba(245,158,11,0.12)',
-                    border: '1px solid rgba(245,158,11,0.3)',
-                    borderRadius: 8,
-                    padding: '4px 10px',
+                    marginLeft: 'auto', fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: '#f59e0b',
+                    background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)',
+                    borderRadius: 8, padding: '4px 10px', flexShrink: 0,
                   }}
                 >
                   +{RESULT_POINTS}p

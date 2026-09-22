@@ -3,8 +3,8 @@ import { createHmac } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
 const supabase = getSupabaseAdmin()
-import { calcParticipantPoints, MatchResult, AdvancementRow } from '@/lib/scoring'
-import { SCORING, type Stage } from '@/config/scoring'
+import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
+import { SCORING } from '@/config/scoring'
 import { buildDailyEmail, buildDailyPlainText, VM_TOTAL_DAYS } from '@/lib/email-daily'
 
 export const maxDuration = 60
@@ -54,10 +54,9 @@ export async function GET(request: Request) {
   const cutoff24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
   const vmDay = currentVmDay(now)
 
-  const [{ data: participants }, { data: matches }, { data: advancement }] = await Promise.all([
+  const [{ data: participants }, { data: matches }] = await Promise.all([
     supabase.from('participants').select('id, name, email, email_opt_out').order('created_at'),
-    supabase.from('match_results').select('player1, player2, sets1, sets2, stage, played_at'),
-    supabase.from('advancement').select('player_name, stage_reached'),
+    supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner, played_at'),
   ])
 
   const activeParticipants = (participants ?? []).filter(p => !p.email_opt_out)
@@ -69,7 +68,6 @@ export async function GET(request: Request) {
     .in('participant_id', activeParticipants.map(p => p.id))
 
   const matchResults = (matches as MatchResultWithDate[]) ?? []
-  const advRows = (advancement as AdvancementRow[]) ?? []
   const recentMatches24h = matchResults.filter(m => m.played_at && m.played_at >= cutoff24h)
   const recentResults = recentMatches24h
     .slice()
@@ -78,7 +76,7 @@ export async function GET(request: Request) {
 
   const leaderboard: LeaderboardRow[] = activeParticipants.map(p => {
     const picks = (allPicks ?? []).filter(pk => pk.participant_id === p.id)
-    return { ...p, picks, points: calcParticipantPoints(picks, advRows) }
+    return { ...p, picks, points: calcParticipantPoints(picks, matchResults) }
   }).sort((a, b) => b.points - a.points)
 
   // Overall-rang + ligaer per deltaker (til «Dine ligaer»-seksjonen)
@@ -118,12 +116,16 @@ export async function GET(request: Request) {
 
   const payloads = recipients.map(row => {
     const pointsDelta = row.picks.reduce((sum, pick) => {
-      const recentWins = recentMatches24h.filter(m =>
-        (m.player1 === pick.player_name || m.player2 === pick.player_name) && m.winner === pick.player_name
-      )
-      if (!recentWins.length) return sum
-      const stagePts = recentWins.reduce((s, m) => s + (m.stage ? SCORING.advancement[m.stage as Stage] ?? 0 : 0), 0)
-      return sum + stagePts * (SCORING.underdogMultiplier[pick.pot_number] ?? 1)
+      const recent = recentMatches24h.filter(m => m.player1 === pick.player_name || m.player2 === pick.player_name)
+      if (!recent.length) return sum
+      const rawPts = recent.reduce((s, m) => {
+        const isP1 = m.player1 === pick.player_name
+        const setPts = (isP1 ? m.sets1 : m.sets2) * SCORING.perSetWon
+        const advPts = m.winner === pick.player_name ? SCORING.perAdvancement : 0
+        const winnerBonus = m.winner === pick.player_name && m.stage === 'final' ? SCORING.tournamentWinner : 0
+        return s + setPts + advPts + winnerBonus
+      }, 0)
+      return sum + rawPts * (SCORING.underdogMultiplier[pick.pot_number] ?? 1)
     }, 0)
     const ctaUrl = `${BASE_URL}/deltaker/${row.id}`
     const unsubscribeUrl = `${BASE_URL}/api/unsubscribe?id=${row.id}&token=${makeUnsubscribeToken(row.id)}`

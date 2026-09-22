@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { calcParticipantPoints, AdvancementRow } from '@/lib/scoring'
+import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
 
 const supabase = getSupabaseAdmin()
 
@@ -18,13 +18,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const [{ data: participants }, { data: advancement }] = await Promise.all([
+  const [{ data: participants }, { data: matches }] = await Promise.all([
     supabase.from('participants').select('id'),
-    supabase.from('advancement').select('player_name, stage_reached'),
+    supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner'),
   ])
   if (!participants?.length) return NextResponse.json({ ok: true, snapshotted: 0, note: 'ingen deltakere' })
 
-  const advRows = (advancement as AdvancementRow[]) ?? []
+  const matchResults = (matches as MatchResult[]) ?? []
 
   // Hent alle picks (paginert, unngå 1000-rad-grensen)
   const allPicks: Pick[] = []
@@ -37,7 +37,7 @@ export async function GET(req: Request) {
 
   const picksByParticipant: Record<string, Pick[]> = {}
   for (const p of allPicks) (picksByParticipant[p.participant_id] ??= []).push(p)
-  const pointsOf = (id: string) => calcParticipantPoints(picksByParticipant[id] ?? [], advRows)
+  const pointsOf = (id: string) => calcParticipantPoints(picksByParticipant[id] ?? [], matchResults)
 
   const today = new Date().toISOString().slice(0, 10)
   const rows: { scope: string; participant_id: string; rank_pos: number; snapshot_date: string }[] = []

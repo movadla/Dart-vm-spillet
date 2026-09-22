@@ -1,19 +1,13 @@
-// Simulerer 1000 dart-VM-turneringer med 50 tilfeldige deltakere hver, for å teste
-// om den enkle poengmodellen (1p/sett, 2p/avansement, 5p for turneringsseier, ×multiplikator)
-// gir spenning gjennom hele turneringen eller om den blir avgjort for tidlig.
+// Simulerer 1000 dart-VM-turneringer (128 spillere, ingen walkover) med 50 tilfeldige
+// deltakere hver, for å teste om den enkle poengmodellen (1p/sett, 2p/avansement,
+// 5p for turneringsseier, ×multiplikator) gir spenning gjennom hele turneringen
+// eller om den blir avgjort for tidlig.
 //
 // Kjør: npx tsx scripts/simulate-scoring-suspense.ts
 
 import { POTS } from '@/data/pots'
-import { R1_MATCHES, getRound2Seed } from '@/lib/bracketProjection'
-
-// ── Ny, enkel poengmodell (under vurdering — ikke koblet til appen ennå) ──
-const SCORING = {
-  perSetWon: 1,
-  perAdvancement: 2,
-  tournamentWinner: 5,
-  underdogMultiplier: { 1: 1, 2: 1, 3: 2, 4: 2, 5: 3, 6: 4 } as Record<number, number>,
-}
+import { R1_MATCHES } from '@/lib/bracketProjection'
+import { SCORING } from '@/config/scoring'
 
 const STAGES = ['r1', 'r2', 'r3', 'r4', 'qf', 'sf', 'final'] as const
 type MatchStage = typeof STAGES[number]
@@ -29,7 +23,7 @@ interface Pick { player_name: string; pot_number: number }
 const ALL_PLAYERS = POTS.flatMap((p) => p.players)
 const SEEDED = ALL_PLAYERS.filter((p) => p.seedNumber != null).sort((a, b) => a.seedNumber! - b.seedNumber!)
 
-// Rangeringstall for alle 96 braketturneringsplasser (lavere = sterkere). Ekte spillere bruker
+// Rangeringstall for alle 128 braketturneringsplasser (lavere = sterkere). Ekte spillere bruker
 // pdcRanking; plasseringsspillere ("Kvalifisert spiller N") får et fast, svakt tall.
 const RANK: Record<string, number> = {}
 for (const p of ALL_PLAYERS) RANK[p.name] = p.pdcRanking
@@ -66,18 +60,13 @@ function mulberry32(seed: number) {
 function simulateTournament(rand: () => number): MatchResult[] {
   const all: MatchResult[] = []
 
-  // Runde 1 (32 kamper blant useedede + plasseringsspillere)
+  // Runde 1: 64 kamper blant alle 128 spillere (ingen walkover/bye).
   const r1 = R1_MATCHES.map(([a, b]) => playMatch(a, b, 'r1', rand))
   all.push(...r1)
 
-  // Runde 2: 32 seedede (bye) + 32 runde 1-vinnere, paret via seedingen.
-  const r2Pairs: [string, string][] = r1.map((m, i) => [m.winner, getRound2Seed(i)!])
-  const r2 = r2Pairs.map(([a, b]) => playMatch(a, b, 'r2', rand))
-  all.push(...r2)
-
-  // Runde 3–Finale: rent utslagsspill, nabo-par av forrige rundes vinnere.
-  let prevWinners = r2.map((m) => m.winner)
-  const laterStages: MatchStage[] = ['r3', 'r4', 'qf', 'sf', 'final']
+  // Runde 2–Finale: rent utslagsspill, nabo-par av forrige rundes vinnere.
+  let prevWinners = r1.map((m) => m.winner)
+  const laterStages: MatchStage[] = ['r2', 'r3', 'r4', 'qf', 'sf', 'final']
   for (const stage of laterStages) {
     const matches: MatchResult[] = []
     for (let i = 0; i < prevWinners.length; i += 2) {

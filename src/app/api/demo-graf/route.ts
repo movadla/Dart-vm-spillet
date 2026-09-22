@@ -1,44 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { calcAdvancementBonus } from '@/lib/scoring'
-import { SCORING, STAGE_ORDER, type Stage } from '@/config/scoring'
+import { calcParticipantPoints, type MatchResult, type PickWithPot } from '@/lib/scoring'
 
-interface MatchRow {
-  player1: string
-  player2: string
-  stage: string
-  winner: string | null
+interface MatchRow extends MatchResult {
   played_at: string
-}
-
-interface PickRow {
-  participant_id: string
-  pot_number: number
-  player_name: string
-}
-
-// Utleder hvilken runde en spiller hadde nådd basert på registrerte kamper frem til dette punktet:
-// den siste (høyeste) runden de spilte i, uavhengig av om de vant eller tapte den.
-function inferStageReached(playerName: string, matches: MatchRow[]): string | null {
-  let furthest: Stage | null = null
-  for (const m of matches) {
-    if (m.player1 !== playerName && m.player2 !== playerName) continue
-    const stage = m.stage as Stage
-    const idx = STAGE_ORDER.indexOf(stage)
-    if (idx === -1) continue
-    if (!furthest || idx > STAGE_ORDER.indexOf(furthest)) furthest = stage
-  }
-  return furthest
-}
-
-function calcPointsAtDate(picks: PickRow[], matches: MatchRow[]): number {
-  let total = 0
-  for (const pick of picks) {
-    const advPts = calcAdvancementBonus(inferStageReached(pick.player_name, matches))
-    const multiplier = SCORING.underdogMultiplier[pick.pot_number] ?? 1
-    total += advPts * multiplier
-  }
-  return total
 }
 
 export async function GET() {
@@ -49,15 +14,15 @@ export async function GET() {
     supabase.from('participants').select('id, name').order('created_at'),
     supabase
       .from('match_results')
-      .select('player1, player2, stage, winner, played_at')
+      .select('player1, player2, sets1, sets2, stage, winner, played_at')
       .order('played_at'),
     supabase.from('picks').select('participant_id, pot_number, player_name'),
   ])
 
   const matches = (allMatches ?? []) as MatchRow[]
-  const picks = (allPicks ?? []) as PickRow[]
+  const picks = (allPicks ?? []) as (PickWithPot & { participant_id: string })[]
 
-  const picksByParticipant = new Map<string, PickRow[]>()
+  const picksByParticipant = new Map<string, PickWithPot[]>()
   for (const pick of picks) {
     if (!picksByParticipant.has(pick.participant_id))
       picksByParticipant.set(pick.participant_id, [])
@@ -84,7 +49,7 @@ export async function GET() {
     cumulative = cumulative.concat(matchesByDate.get(date)!)
     const point: DataPoint = { date }
     for (const p of activeParticipants) {
-      point[p.id] = calcPointsAtDate(picksByParticipant.get(p.id) ?? [], cumulative)
+      point[p.id] = calcParticipantPoints(picksByParticipant.get(p.id) ?? [], cumulative)
     }
     series.push(point)
   }

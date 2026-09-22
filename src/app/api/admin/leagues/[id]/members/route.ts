@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { checkAdminAuth } from '@/lib/adminAuth'
-import { calcParticipantPoints, AdvancementRow } from '@/lib/scoring'
+import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
 
 interface Pick { participant_id: string; pot_number: number; player_name: string }
 
@@ -23,9 +23,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     .map((m) => (m.participant as unknown as { id: string; name: string; email: string } | null)?.id)
     .filter(Boolean) as string[]
 
-  const [{ data: picks }, { data: advancement }] = await Promise.all([
+  const [{ data: picks }, { data: matches }] = await Promise.all([
     supabase.from('picks').select('participant_id, pot_number, player_name').in('participant_id', participantIds),
-    supabase.from('advancement').select('player_name, stage_reached'),
+    supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner'),
   ])
 
   const rows = members
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       const p = m.participant as unknown as { id: string; name: string; email: string } | null
       if (!p) return null
       const playerPicks = ((picks as Pick[]) ?? []).filter((pk) => pk.participant_id === p.id)
-      const points = calcParticipantPoints(playerPicks, (advancement as AdvancementRow[]) ?? [])
+      const points = calcParticipantPoints(playerPicks, (matches as MatchResult[]) ?? [])
       return { id: p.id, name: p.name, email: p.email, points }
     })
     .filter(Boolean)

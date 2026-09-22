@@ -8,13 +8,8 @@ export async function POST(req: NextRequest) {
 
   const supabase = getSupabaseAdmin()
 
-  const [matchRes, advRes] = await Promise.all([
-    supabase.from('match_results').delete().neq('player1', ''),
-    supabase.from('advancement').delete().neq('player_name', ''),
-  ])
-
-  if (matchRes.error) return NextResponse.json({ error: matchRes.error.message }, { status: 500 })
-  if (advRes.error)   return NextResponse.json({ error: advRes.error.message  }, { status: 500 })
+  const { error } = await supabase.from('match_results').delete().neq('player1', '')
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return NextResponse.json({ success: true })
 }

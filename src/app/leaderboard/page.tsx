@@ -4,7 +4,8 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
 const supabase = getSupabaseAdmin()
 import { POTS } from '@/data/pots'
-import { calcParticipantPoints, isPlayerEliminated, MatchResult, AdvancementRow } from '@/lib/scoring'
+import { calcParticipantPoints, isPlayerEliminated, isPlayerChampion, furthestStageReached, MatchResult } from '@/lib/scoring'
+import { STAGE_ORDER } from '@/config/scoring'
 import LeaderboardCountdown from './LeaderboardCountdown'
 import LeaderboardMyPage from './LeaderboardMyPage'
 import LeaderboardRows, { LeaderboardRow } from './LeaderboardRows'
@@ -21,16 +22,14 @@ interface Participant { id: string; name: string }
 interface Pick { participant_id: string; pot_number: number; player_name: string }
 
 async function getData() {
-  const [{ data: participants }, { data: matches }, { data: advancement }] = await Promise.all([
+  const [{ data: participants }, { data: matches }] = await Promise.all([
     supabase.from('participants').select('id, name').order('created_at'),
-    supabase.from('match_results').select('player1, player2, sets1, sets2, stage'),
-    supabase.from('advancement').select('player_name, stage_reached'),
+    supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner'),
   ])
 
   const matchResults = (matches as MatchResult[]) ?? []
-  const advRows = (advancement as AdvancementRow[]) ?? []
 
-  if (!participants?.length) return { rows: [], matchResults, advRows, baseline: {} as Record<string, number> }
+  if (!participants?.length) return { rows: [], matchResults, baseline: {} as Record<string, number> }
 
   const ids = (participants as Participant[]).map((p) => p.id)
   const { data: picks } = await supabase
@@ -40,7 +39,7 @@ async function getData() {
 
   const rows = (participants as Participant[]).map((p) => {
     const playerPicks = ((picks as Pick[]) ?? []).filter((pk) => pk.participant_id === p.id)
-    const points = calcParticipantPoints(playerPicks, advRows)
+    const points = calcParticipantPoints(playerPicks, matchResults)
     // Sum av hver spillers kamper (for underveis-visning av antall spilte kamper).
     const matchesPlayed = playerPicks.reduce((sum, pk) =>
       sum + matchResults.filter(m => m.player1 === pk.player_name || m.player2 === pk.player_name).length, 0)
@@ -55,12 +54,12 @@ async function getData() {
   // Rang-piler: baseline = siste lagrede rangering (overall)
   const baseline = await getRankBaseline('overall')
 
-  return { rows, matchResults, advRows, baseline }
+  return { rows, matchResults, baseline }
 }
 
 export default async function LeaderboardPage() {
   const beforeKickoff = new Date() < KICKOFF
-  const { rows, matchResults, advRows, baseline } = await getData()
+  const { rows, matchResults, baseline } = await getData()
   const vmStarted = !beforeKickoff
 
   const enrichedRows: LeaderboardRow[] = rows.map(({ participant, picks: playerPicks, points, matchesPlayed }, i) => {
@@ -74,8 +73,9 @@ export default async function LeaderboardPage() {
       flags: playerPicks.map(pk => {
         const pot = POTS.find(p => p.potNumber === pk.pot_number)
         const iso2 = pot?.players.find(pl => pl.name === pk.player_name)?.iso2 ?? ''
-        const stageReached = advRows.find(a => a.player_name === pk.player_name)?.stage_reached
-        const medal = stageReached === 'winner' ? 'gold' : stageReached === 'final' ? 'silver' : undefined
+        const stageReached = furthestStageReached(pk.player_name, matchResults, STAGE_ORDER)
+        const champion = isPlayerChampion(pk.player_name, matchResults)
+        const medal = champion ? 'gold' : stageReached === 'final' ? 'silver' : undefined
         return { iso2, eliminated: isPlayerEliminated(pk.player_name, matchResults), medal }
       }),
     }

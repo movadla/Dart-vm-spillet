@@ -26,8 +26,3 @@ create table match_results (
   winner text,
   played_at timestamptz default now()
 );
-
-create table advancement (
-  player_name text primary key,
-  stage_reached text not null
-);

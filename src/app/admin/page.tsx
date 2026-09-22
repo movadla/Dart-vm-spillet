@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { POTS, getIso2 } from '@/data/pots'
 import Flag from '@/components/Flag'
-import { STAGE_ORDER, STAGE_LABELS, SCORING } from '@/config/scoring'
+import { STAGE_ORDER, STAGE_LABELS } from '@/config/scoring'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const ALL_PLAYERS = POTS.flatMap((p) => p.players.map((pl) => pl.name)).sort((a, b) => a.localeCompare(b, 'no'))
-const MATCH_STAGES = STAGE_ORDER.filter((s) => s !== 'winner')
+const MATCH_STAGES = STAGE_ORDER
 
 type Tab = 'deltakere' | 'ligaer' | 'statistikk' | 'verktøy' | 'epost'
 
@@ -352,9 +352,6 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
   const [linksLoading, setLinksLoading] = useState(true)
   const [matchForm, setMatchForm] = useState({ player1: '', player2: '', sets1: '', sets2: '', stage: 'r1' })
   const [matchMsg, setMatchMsg] = useState('')
-  const [advForm, setAdvForm] = useState({ player: '', stage: 'r1' })
-  const [advMsg, setAdvMsg] = useState('')
-
   useEffect(() => {
     fetch('/api/admin/magic-links', { headers })
       .then((r) => r.json())
@@ -369,26 +366,6 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
       if (res.ok) { setMatchMsg('✅ Resultat lagret'); setMatchForm({ player1: '', player2: '', sets1: '', sets2: '', stage: 'r1' }) }
       else setMatchMsg('❌ Feil ved lagring')
     } catch { setMatchMsg('❌ Serverfeil') }
-  }
-
-  async function submitAdvancement(e: React.FormEvent) {
-    e.preventDefault(); setAdvMsg('')
-    try {
-      const res = await fetch('/api/admin/advancement', { method: 'POST', headers, body: JSON.stringify({ player_name: advForm.player, stage: advForm.stage }) })
-      if (res.ok) { setAdvMsg('✅ Avansement lagret'); setAdvForm({ player: '', stage: 'r1' }) }
-      else setAdvMsg('❌ Feil ved lagring')
-    } catch { setAdvMsg('❌ Serverfeil') }
-  }
-
-  async function deleteAdvancement() {
-    if (!advForm.player) { setAdvMsg('❌ Velg en spiller først'); return }
-    if (!confirm(`Slette avansement for ${advForm.player}?`)) return
-    setAdvMsg('')
-    try {
-      const res = await fetch('/api/admin/advancement', { method: 'DELETE', headers, body: JSON.stringify({ player_name: advForm.player }) })
-      if (res.ok) { setAdvMsg(`✅ Avansement for ${advForm.player} slettet`); setAdvForm({ player: '', stage: 'r1' }) }
-      else setAdvMsg('❌ Feil ved sletting')
-    } catch { setAdvMsg('❌ Serverfeil') }
   }
 
   return (
@@ -425,33 +402,6 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
             </div>
             <button type="submit" style={btn('primary')}>Lagre resultat</button>
             {matchMsg && <div style={{ fontSize: 13, color: matchMsg.startsWith('✅') ? '#22c55e' : '#ef4444', textAlign: 'center' }}>{matchMsg}</div>}
-          </form>
-        </div>
-      </div>
-
-      {/* Avansement */}
-      <div style={{ ...card, overflow: 'visible' }}>
-        <div style={cardHead}><span style={label}>Oppdater avansement</span></div>
-        <div style={{ padding: '16px 18px' }}>
-          <form onSubmit={submitAdvancement} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div>
-              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Spiller</label>
-              <select style={selectStyle} value={advForm.player} onChange={(e) => setAdvForm((f) => ({ ...f, player: e.target.value }))} required>
-                <option value="">Velg spiller</option>
-                {ALL_PLAYERS.map((name) => <option key={name} value={name}>{name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Stadium nådd</label>
-              <select style={selectStyle} value={advForm.stage} onChange={(e) => setAdvForm((f) => ({ ...f, stage: e.target.value }))}>
-                {STAGE_ORDER.map((s) => <option key={s} value={s}>{STAGE_LABELS[s]} (+{SCORING.advancement[s]}p)</option>)}
-              </select>
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button type="submit" style={{ ...btn('primary'), flex: 1 }}>Lagre avansement</button>
-              <button type="button" style={{ ...btn('danger'), flex: 1 }} onClick={deleteAdvancement}>Slett avansement</button>
-            </div>
-            {advMsg && <div style={{ fontSize: 13, color: advMsg.startsWith('✅') ? '#22c55e' : '#ef4444', textAlign: 'center' }}>{advMsg}</div>}
           </form>
         </div>
       </div>

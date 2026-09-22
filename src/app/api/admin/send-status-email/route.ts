@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 import { createHmac } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { checkAdminAuth } from '@/lib/adminAuth'
-import { calcParticipantPoints, MatchResult, AdvancementRow } from '@/lib/scoring'
+import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
 import { SCORING } from '@/config/scoring'
 import { buildDailyEmail, buildDailyPlainText, VM_TOTAL_DAYS } from '@/lib/email-daily'
 
@@ -40,10 +40,9 @@ export async function POST(req: NextRequest) {
   const cutoff24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
   const vmDay = currentVmDay(now)
 
-  const [{ data: allParticipants }, { data: matches }, { data: advancement }] = await Promise.all([
+  const [{ data: allParticipants }, { data: matches }] = await Promise.all([
     supabase.from('participants').select('id, name, email, email_opt_out').order('created_at'),
     supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner, played_at'),
-    supabase.from('advancement').select('player_name, stage_reached'),
   ])
 
   const allActive = (allParticipants ?? []).filter((p) => !p.email_opt_out)
@@ -54,7 +53,6 @@ export async function POST(req: NextRequest) {
     .in('participant_id', allActive.map((p) => p.id))
 
   const matchResults = (matches as MatchResultWithDate[]) ?? []
-  const advRows = (advancement as AdvancementRow[]) ?? []
   const recentMatches24h = matchResults.filter((m) => m.played_at && m.played_at >= cutoff24h)
   const recentResults = recentMatches24h
     .slice()
@@ -63,7 +61,7 @@ export async function POST(req: NextRequest) {
 
   const leaderboard = allActive.map((p) => {
     const picks = (allPicks ?? []).filter((pk) => pk.participant_id === p.id)
-    return { ...p, picks, points: calcParticipantPoints(picks, advRows) }
+    return { ...p, picks, points: calcParticipantPoints(picks, matchResults) }
   }).sort((a, b) => b.points - a.points)
 
   const pointsById: Record<string, number> = {}
@@ -114,12 +112,14 @@ export async function POST(req: NextRequest) {
         m.player1 === pick.player_name || m.player2 === pick.player_name
       )
       if (!recent.length) return sum
-      // Ikke-kumulativt poeng for runden(e) spilleren vant siste 24t (calcTeamMatchPoints finnes
-      // ikke lenger i lib/scoring.ts — avansement gir bare kumulativ sum, ikke delta per kamp).
-      const matchPts = recent
-        .filter((m) => m.winner === pick.player_name && m.stage)
-        .reduce((s, m) => s + (SCORING.advancement[m.stage as keyof typeof SCORING.advancement] ?? 0), 0)
-      return sum + matchPts * (SCORING.underdogMultiplier[pick.pot_number] ?? 1)
+      const rawPts = recent.reduce((s, m) => {
+        const isP1 = m.player1 === pick.player_name
+        const setPts = (isP1 ? m.sets1 : m.sets2) * SCORING.perSetWon
+        const advPts = m.winner === pick.player_name ? SCORING.perAdvancement : 0
+        const winnerBonus = m.winner === pick.player_name && m.stage === 'final' ? SCORING.tournamentWinner : 0
+        return s + setPts + advPts + winnerBonus
+      }, 0)
+      return sum + rawPts * (SCORING.underdogMultiplier[pick.pot_number] ?? 1)
     }, 0)
     const ctaUrl = `${BASE_URL}/deltaker/${row.id}`
     const unsubscribeUrl = `${BASE_URL}/api/unsubscribe?id=${row.id}&token=${makeUnsubscribeToken(row.id)}`

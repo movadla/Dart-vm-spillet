@@ -40,48 +40,47 @@ Alle miljøvariabler settes i Vercel-dashboardet (Settings → Environment Varia
 src/
 ├── app/
 │   ├── page.tsx               # Forside
-│   ├── tipp/                  # Registreringsflyten (5-stegs slideshow, ett per pott)
+│   ├── tipp/                  # Registreringsflyten (6-stegs slideshow, ett per pott)
 │   ├── deltaker/[id]/         # "Min side" for hver deltaker
 │   ├── leaderboard/           # Poengtoppen
-│   ├── vm-info/               # Info om turneringen og reglene
+│   ├── vm-info/               # Info om turneringen, reglene og trekningen
 │   ├── liga/                  # Private ligaer
-│   ├── admin/                 # Manuell registrering av kampresultater og avansement
+│   ├── admin/                 # Manuell registrering av kampresultater
 │   └── api/
 │       ├── admin/             # Admin-endepunkter (krever ADMIN_SECRET)
 │       └── ...
 ├── data/
 │   └── pots.ts                 # 6 potter med dartspillere (PDC-seeding)
 ├── lib/
-│   └── scoring.ts               # Poengberegning (rent avansement-basert)
+│   ├── scoring.ts               # Poengberegning (avledet direkte fra match_results)
+│   └── bracketProjection.ts     # Deterministisk eksempel-trekning (128 spillere, ingen walkover)
 └── config/
     └── scoring.ts               # Poengkonfigurasjon
 ```
 
 ## Poengberegning
 
-Konfigureres i `src/config/scoring.ts`. PDC-VM er et rent utslagsspill uten gruppespill, så poeng kommer utelukkende fra hvor langt en spiller avanserer — kumulativt gjennom rundene:
+Konfigureres i `src/config/scoring.ts`. Enkel modell — alt avledes direkte fra registrerte kampresultater, ingen separat avansement-tracking:
 
-| Runde | Poeng (kumulativt) |
+| Hendelse | Poeng |
 |---|---|
-| 1. runde | 5 |
-| 2. runde | 10 |
-| 3. runde | 20 |
-| 4. runde | 30 |
-| Kvartfinale | 45 |
-| Semifinale | 65 |
-| Finale | 90 |
-| VM-vinner | 125 |
+| Per vunnet sett | 1p |
+| Per kampseier (avansement) | 2p |
+| For å vinne hele turneringen | +5p |
 
-Poengsummen multipliseres med en underdogs-multiplikator per pott: pott 1–2 = ×1, pott 3–4 = ×2, pott 5 = ×3, pott 6 = ×4.
+Alt legges sammen fortløpende gjennom turneringen, og summen ganges med en underdogs-multiplikator per pott: pott 1–2 = ×1, pott 3–4 = ×2, pott 5 = ×3, pott 6 = ×4.
 
 Pott 1 er kun en duell mellom verdens to beste (#1 og #2), deretter utvides potten nedover: pott 2 (3 spillere), pott 3 (5), pott 4 (6), pott 5 (8), pott 6 (resten — useedede/kvalifiserte).
 
+Validert med `scripts/simulate-scoring-suspense.ts` — 1000 simulerte turneringer med 50 tilfeldige deltakere for å sjekke at ledelsen ikke låses for tidlig.
+
+## Trekning
+
+PDC har ikke publisert den faktiske trekningen ennå (kommer normalt medio november). `src/lib/bracketProjection.ts` genererer en deterministisk eksempel-trekning for hele 128-spiller-braketten (rent utslagsspill, ingen walkover) basert på standard turneringsseeding, tydelig merket som eksempel i UI-et — under `/vm-info` (fanen «Trekning») og når man velger spiller i `/tipp`. Bytt ut med ekte data når trekningen er kjent.
+
 ## Manuell resultatregistrering
 
-Det finnes ingen fri live-API for PDC-darts, så alle kampresultater og avansement legges inn manuelt via `/admin`:
-
-- **Kampresultat:** spiller 1/spiller 2, sett 1/sett 2, runde — skrives til `match_results`.
-- **Avansement:** hvilken runde en spiller har nådd — skrives til `advancement` og styrer poengsummen direkte.
+Det finnes ingen fri live-API for PDC-darts, så alle kampresultater legges inn manuelt via `/admin`: spiller 1/spiller 2, sett 1/sett 2, runde — skrives til `match_results`. Poengsum, hvilken runde en spiller har nådd, og hvem som er slått ut, avledes automatisk derfra.
 
 ## Kjør tester
 
@@ -89,16 +88,15 @@ Det finnes ingen fri live-API for PDC-darts, så alle kampresultater og avanseme
 npm test
 ```
 
-Enhetstester dekker poengberegningslogikken (`src/lib/scoring.test.ts`).
+Enhetstester dekker poengberegningslogikken (`src/lib/scoring.test.ts`) og trekningslogikken (`src/lib/bracketProjection.test.ts`).
 
 ## Database-tabeller (Supabase)
 
 | Tabell | Beskrivelse |
 |---|---|
 | `participants` | Påmeldte deltakere |
-| `picks` | Spillervalg per deltaker (5 rader per person) |
-| `match_results` | Manuelt registrerte kampresultater |
-| `advancement` | Hvilken runde hver spiller har nådd |
+| `picks` | Spillervalg per deltaker (6 rader per person) |
+| `match_results` | Manuelt registrerte kampresultater — eneste kilde til poeng og status |
 | `leagues` | Private ligaer |
 | `league_members` | Deltakere i ligaer |
 

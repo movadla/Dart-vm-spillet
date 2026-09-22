@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { calcParticipantPoints, AdvancementRow } from '@/lib/scoring'
+import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
 
 const supabase = getSupabaseAdmin()
 
 export const revalidate = 30
 
 export async function GET() {
-  const [{ data: participants }, { data: advancement }] = await Promise.all([
+  const [{ data: participants }, { data: matches }] = await Promise.all([
     supabase.from('participants').select('id, name').order('created_at'),
-    supabase.from('advancement').select('player_name, stage_reached'),
+    supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner'),
   ])
 
-  const advRows = (advancement as AdvancementRow[]) ?? []
+  const matchResults = (matches as MatchResult[]) ?? []
 
   if (!participants?.length) return NextResponse.json({ rows: [], total: 0 })
 
@@ -25,7 +25,7 @@ export async function GET() {
   const rows = participants
     .map((p) => {
       const pp = (picks ?? []).filter((pk) => pk.participant_id === p.id)
-      return { id: p.id, name: p.name, points: calcParticipantPoints(pp, advRows) }
+      return { id: p.id, name: p.name, points: calcParticipantPoints(pp, matchResults) }
     })
     .sort((a, b) => b.points - a.points)
 

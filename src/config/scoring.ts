@@ -1,6 +1,6 @@
 // Rekkefølge følger PDC World Darts Championship sitt faktiske format:
 // rent utslagsspill, ingen gruppespill, ingen bronsefinale.
-export const STAGE_ORDER = ['r1', 'r2', 'r3', 'r4', 'qf', 'sf', 'final', 'winner'] as const
+export const STAGE_ORDER = ['r1', 'r2', 'r3', 'r4', 'qf', 'sf', 'final'] as const
 export type Stage = typeof STAGE_ORDER[number]
 
 export const STAGE_LABELS: Record<Stage, string> = {
@@ -11,19 +11,16 @@ export const STAGE_LABELS: Record<Stage, string> = {
   qf: 'Kvartfinale',
   sf: 'Semifinale',
   final: 'Finale',
-  winner: 'VM-vinner',
 }
 
+export const CHAMPION_LABEL = 'VM-vinner'
+
+// Enkel poengmodell: 1p per vunnet sett, 2p per kampseier (avansement), 5p bonus for å vinne
+// hele turneringen — multiplisert med pott-multiplikatoren. Validert med
+// scripts/simulate-scoring-suspense.ts (1000 simulerte turneringer).
 export const SCORING = {
-  advancement: {
-    r1: 5,
-    r2: 5,
-    r3: 10,
-    r4: 10,
-    qf: 15,
-    sf: 20,
-    final: 25,
-    winner: 35,
-  } as Record<Stage, number>,
+  perSetWon: 1,
+  perAdvancement: 2,
+  tournamentWinner: 5,
   underdogMultiplier: { 1: 1, 2: 1, 3: 2, 4: 2, 5: 3, 6: 4 } as Record<number, number>,
 }

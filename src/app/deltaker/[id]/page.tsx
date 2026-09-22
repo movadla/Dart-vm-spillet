@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
 const supabase = getSupabaseAdmin()
 import { notFound } from 'next/navigation'
-import { calcParticipantPoints, type PickWithPot, type AdvancementRow, type MatchResult } from '@/lib/scoring'
+import { calcParticipantPoints, type PickWithPot, type MatchResult } from '@/lib/scoring'
 import { STAGE_ORDER, STAGE_LABELS, type Stage } from '@/config/scoring'
 import CountUp from './CountUp'
 import MinSideAccordions from './MinSideAccordions'
@@ -37,13 +37,11 @@ export default async function DeltakerPage({ params, searchParams }: { params: P
     { data: participant },
     { data: picksData },
     { data: matches },
-    { data: advancement },
     { data: allPicksData },
   ] = await Promise.all([
     supabase.from('participants').select('id, name, email, created_at').eq('id', id).single(),
     supabase.from('picks').select('pot_number, player_name').eq('participant_id', id).order('pot_number'),
     supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner'),
-    supabase.from('advancement').select('player_name, stage_reached'),
     supabase.from('picks').select('participant_id, pot_number, player_name'),
   ])
 
@@ -52,23 +50,22 @@ export default async function DeltakerPage({ params, searchParams }: { params: P
   const p = participant as Participant
   const picks = (picksData as PickWithPot[]) ?? []
   const matchResults = (matches as MatchResult[]) ?? []
-  const advRows = (advancement as AdvancementRow[]) ?? []
 
-  const totalPoints = calcParticipantPoints(picks, advRows)
+  const totalPoints = calcParticipantPoints(picks, matchResults)
   const editable = new Date() < DEADLINE
   const vmStarted = new Date() >= DEADLINE
 
   // Turneringens gjeldende fase — høyeste runde med registrert kampresultat,
-  // ev. 'winner' hvis noen allerede er kåret til VM-vinner.
-  const displayStage: Stage | null = (() => {
-    if (advRows.some(a => a.stage_reached === 'winner')) return 'winner'
+  // eller "kåret vinner" dersom finalen er avgjort.
+  const finalWon = matchResults.some(m => m.stage === 'final' && m.winner != null)
+  const displayStage: Stage | 'winner' | null = (() => {
+    if (finalWon) return 'winner'
     let maxIdx = -1
     for (const m of matchResults) {
       const idx = STAGE_INDEX[m.stage ?? 'r1']
       if (idx !== undefined && idx > maxIdx) maxIdx = idx
     }
     if (maxIdx >= 0) return STAGE_ORDER[maxIdx]
-    if (advRows.length > 0) return 'r1'
     return null
   })()
 
@@ -81,7 +78,7 @@ export default async function DeltakerPage({ params, searchParams }: { params: P
   }
   const totalParticipants = byParticipant.size
   const rank = Array.from(byParticipant.values())
-    .filter(pp => calcParticipantPoints(pp, advRows) > totalPoints)
+    .filter(pp => calcParticipantPoints(pp, matchResults) > totalPoints)
     .length + 1
 
   return (
@@ -126,7 +123,7 @@ export default async function DeltakerPage({ params, searchParams }: { params: P
               <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.82)', flexShrink: 0 }}>Mine spillere</div>
               <div style={{ flex: 1, height: 1, background: 'linear-gradient(270deg, transparent, rgba(255,255,255,0.1))' }} />
             </div>
-            <PicksClient picks={picks} advancement={advRows} matchResults={matchResults} totalPoints={totalPoints} vmStarted={vmStarted} pointsAccent="green" pointsColWidth={64} alignPointsTop stageBadgeInline stageBadgeColor="#4ade80" hideTotal />
+            <PicksClient picks={picks} matchResults={matchResults} totalPoints={totalPoints} vmStarted={vmStarted} pointsAccent="green" pointsColWidth={64} alignPointsTop stageBadgeInline stageBadgeColor="#4ade80" hideTotal />
           </div>
 
           {/* ── LIGAER (under) ── */}
@@ -175,7 +172,7 @@ export default async function DeltakerPage({ params, searchParams }: { params: P
                 </Link>
               )}
             </div>
-            <PicksClient picks={picks} advancement={advRows} matchResults={matchResults} totalPoints={totalPoints} vmStarted={vmStarted} pointsAccent="green" pointsColWidth={48} alignPointsTop stageBadgeInline stageBadgeColor="#4ade80" />
+            <PicksClient picks={picks} matchResults={matchResults} totalPoints={totalPoints} vmStarted={vmStarted} pointsAccent="green" pointsColWidth={48} alignPointsTop stageBadgeInline stageBadgeColor="#4ade80" />
           </div>
         </>
       )}

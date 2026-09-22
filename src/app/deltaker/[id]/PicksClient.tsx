@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Flag from '@/components/Flag'
 import { getIso2 } from '@/data/pots'
 import { STAGE_ORDER, STAGE_LABELS, type Stage } from '@/config/scoring'
-import { calcPlayerPoints, isPlayerEliminated, type PickWithPot, type AdvancementRow, type MatchResult } from '@/lib/scoring'
+import { calcPlayerPoints, isPlayerEliminated, isPlayerChampion, furthestStageReached, type PickWithPot, type MatchResult } from '@/lib/scoring'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
@@ -16,7 +16,6 @@ const STAGE_INDEX: Record<string, number> = Object.fromEntries(STAGE_ORDER.map((
 
 interface Props {
   picks: PickWithPot[]
-  advancement: AdvancementRow[]
   matchResults: MatchResult[]
   totalPoints: number
   vmStarted: boolean
@@ -44,7 +43,7 @@ function findLastMatch(playerName: string, matchResults: MatchResult[]): MatchRe
   )
 }
 
-export default function PicksClient({ picks, advancement, matchResults, totalPoints, vmStarted, pointsAccent = 'gold', pointsColWidth, alignPointsTop, stageBadgeColor, stageBadgeInline, hideTotal }: Props) {
+export default function PicksClient({ picks, matchResults, totalPoints, vmStarted, pointsAccent = 'gold', pointsColWidth, alignPointsTop, stageBadgeColor, stageBadgeInline, hideTotal }: Props) {
   const [open, setOpen] = useState<string | null>(null)
   const accentGreen = pointsAccent === 'green'
 
@@ -64,15 +63,15 @@ export default function PicksClient({ picks, advancement, matchResults, totalPoi
         const isLast = idx === picks.length - 1
 
         const potColor = POT_COLORS[(pick.pot_number - 1 + POT_COLORS.length) % POT_COLORS.length]
-        const advRow = advancement.find(a => a.player_name === pick.player_name)
-        const stageReached = advRow?.stage_reached ?? null
-        const stageLabel = stageReached ? (STAGE_LABELS[stageReached as Stage] ?? null) : null
-        const { advPts, multiplier, total } = calcPlayerPoints(pick, advancement)
+        const stageReached = furthestStageReached(pick.player_name, matchResults, STAGE_ORDER)
+        const champion = isPlayerChampion(pick.player_name, matchResults)
+        const stageLabel = champion ? 'VM-vinner' : stageReached ? (STAGE_LABELS[stageReached as Stage] ?? null) : null
+        const { setPts, advPts, winnerBonus, multiplier, total } = calcPlayerPoints(pick, matchResults)
         const eliminated = isPlayerEliminated(pick.player_name, matchResults)
         const lastMatch = findLastMatch(pick.player_name, matchResults)
 
         // VM-vinner → gull. Tapte finalen → sølv. PDC har ingen bronsefinale.
-        const medalColor = stageReached === 'winner' ? '#fbbf24'
+        const medalColor = champion ? '#fbbf24'
           : (stageReached === 'final' && eliminated) ? '#9ca3af'
           : null
         const accentColor = eliminated ? 'rgba(255,255,255,0.08)' : (medalColor ?? potColor)
@@ -186,11 +185,13 @@ export default function PicksClient({ picks, advancement, matchResults, totalPoi
                 </div>
 
                 {/* Poengsum */}
-                {stageLabel && (
+                {total > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 6, background: 'rgba(34,197,94,0.06)', borderLeft: '2px solid rgba(34,197,94,0.3)' }}>
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', flex: 1 }}>{stageLabel}</span>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', flex: 1 }}>
+                      {setPts}p sett + {advPts}p kamp{winnerBonus > 0 ? ` + ${winnerBonus}p VM-seier` : ''}
+                    </span>
                     <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: '#f59e0b' }}>
-                      {multiplier > 1 ? `${advPts} × ${multiplier} = +${total}p` : `+${total}p`}
+                      {multiplier > 1 ? `×${multiplier} = +${total}p` : `+${total}p`}
                     </span>
                   </div>
                 )}

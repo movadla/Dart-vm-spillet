@@ -4,7 +4,8 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
 const supabase = getSupabaseAdmin()
 import { POTS } from '@/data/pots'
-import { calcParticipantPoints, isPlayerEliminated, MatchResult, AdvancementRow } from '@/lib/scoring'
+import { calcParticipantPoints, isPlayerEliminated, isPlayerChampion, furthestStageReached, MatchResult } from '@/lib/scoring'
+import { STAGE_ORDER } from '@/config/scoring'
 import CopyCode from '@/components/CopyCode'
 import DeadlineCountdown from '@/app/deltaker/[id]/DeadlineCountdown'
 import RankList, { RankEntry } from '@/components/RankList'
@@ -31,27 +32,25 @@ async function getData(code: string) {
     .select('participant:participants(id, name)')
     .eq('league_id', league.id)
 
-  if (!members?.length) return { league, rows: [], matchResults: [], advRows: [] }
+  if (!members?.length) return { league, rows: [], matchResults: [] }
 
   const ids = members
     .map((m) => (m.participant as unknown as { id: string; name: string } | null)?.id)
     .filter(Boolean) as string[]
 
-  const [{ data: picks }, { data: matches }, { data: advancement }] = await Promise.all([
+  const [{ data: picks }, { data: matches }] = await Promise.all([
     supabase.from('picks').select('participant_id, pot_number, player_name').in('participant_id', ids),
-    supabase.from('match_results').select('player1, player2, sets1, sets2, stage'),
-    supabase.from('advancement').select('player_name, stage_reached'),
+    supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner'),
   ])
 
   const matchResults = (matches as MatchResult[]) ?? []
-  const advRows = (advancement as AdvancementRow[]) ?? []
 
   const rows = members
     .map((m) => {
       const p = m.participant as unknown as { id: string; name: string } | null
       if (!p) return null
       const playerPicks = ((picks as Pick[]) ?? []).filter((pk) => pk.participant_id === p.id)
-      const points = calcParticipantPoints(playerPicks, advRows)
+      const points = calcParticipantPoints(playerPicks, matchResults)
       // Sum av hver spillers kamper (for underveis-visning av antall spilte kamper).
       const matchesPlayed = playerPicks.reduce((sum, pk) =>
         sum + matchResults.filter((mt) => mt.player1 === pk.player_name || mt.player2 === pk.player_name).length, 0)
@@ -60,7 +59,7 @@ async function getData(code: string) {
     .filter((r): r is NonNullable<typeof r> => r !== null)
     .sort((a, b) => b.points - a.points)
 
-  return { league, rows, matchResults, advRows }
+  return { league, rows, matchResults }
 }
 
 export default async function LigaPage({ params }: { params: Promise<{ code: string }> }) {
@@ -68,7 +67,7 @@ export default async function LigaPage({ params }: { params: Promise<{ code: str
   const data = await getData(code)
   if (!data) notFound()
 
-  const { league, rows, matchResults, advRows } = data
+  const { league, rows, matchResults } = data
   const vmStarted = new Date() >= KICKOFF
 
   // Rang-piler kun for utvalgte ligaer (f.eks. Ståle Solbakken Fan Club)
@@ -130,8 +129,9 @@ export default async function LigaPage({ params }: { params: Promise<{ code: str
             flags: playerPicks.map((pk) => {
               const pot = POTS.find((p) => p.potNumber === pk.pot_number)
               const iso2 = pot?.players.find((pl) => pl.name === pk.player_name)?.iso2 ?? ''
-              const stageReached = advRows.find((a) => a.player_name === pk.player_name)?.stage_reached
-              const medal = stageReached === 'winner' ? 'gold' : stageReached === 'final' ? 'silver' : undefined
+              const stageReached = furthestStageReached(pk.player_name, matchResults, STAGE_ORDER)
+              const champion = isPlayerChampion(pk.player_name, matchResults)
+              const medal = champion ? 'gold' : stageReached === 'final' ? 'silver' : undefined
               return { iso2, eliminated: isPlayerEliminated(pk.player_name, matchResults), medal }
             }),
           }))}
