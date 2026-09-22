@@ -138,7 +138,10 @@ function CountdownBar({ cd }: { cd: TimeLeft }) {
           <div key={l} style={{ display: 'flex', alignItems: 'flex-start' }}>
             {i > 0 && <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.12)', margin: '5px 8px 0', flexShrink: 0 }} />}
             <div style={{ textAlign: 'center', minWidth: 56 }}>
-              <div key={v} className="digit-tick" style={{ fontFamily: SPORT, fontSize: 38, fontWeight: 900, color: '#fff', lineHeight: 1, letterSpacing: '-1px', fontVariantNumeric: 'tabular-nums' }}>{String(v).padStart(2, '0')}</div>
+              {/* suppressHydrationWarning: verdien er klokkeslett-avhengig og kan ha rukket å tikke
+                  ett sekund mellom SSR og hydrering — begge render-verdiene er korrekte, bare
+                  ulikt tidspunkt, og korrigeres umiddelbart av intervallet i useEffect */}
+              <div key={v} suppressHydrationWarning className="digit-tick" style={{ fontFamily: SPORT, fontSize: 38, fontWeight: 900, color: '#fff', lineHeight: 1, letterSpacing: '-1px', fontVariantNumeric: 'tabular-nums' }}>{String(v).padStart(2, '0')}</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 4 }}>{l}</div>
             </div>
           </div>
@@ -161,7 +164,7 @@ function StickyHeader({ visible, isLive }: { visible: boolean; isLive: boolean }
       padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 20px 12px',
     }}>
       <span style={{ fontFamily: SPORT, fontSize: 19, fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
-        VM <span style={{ color: '#dc2626' }}>2026</span>
+        DART-VM <span style={{ color: '#dc2626' }}>2026</span>
       </span>
       <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
         <Link href="/vm-info" className="text-link" style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textDecoration: 'none', letterSpacing: '0.03em' }}>
@@ -274,7 +277,7 @@ export default function HomePage() {
         </div>
 
       {/* ── HERO ── */}
-      <div style={{ flex: 1, position: 'relative', padding: '24px 20px 72px', textAlign: 'center' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', padding: '24px 20px 72px', textAlign: 'center' }}>
 
         <div style={{ position: 'relative' }}>
           {/* Tittel */}
@@ -293,7 +296,7 @@ export default function HomePage() {
           {!isLive && <CountdownBar cd={cd} />}
 
           {/* CTA */}
-          <div style={{ marginTop: 100 }} />
+          <div style={{ marginTop: 40 }} />
           {participantId ? (
             <>
               <Link

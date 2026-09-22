@@ -36,7 +36,9 @@ const RESULT_POINTS = RESULT_SET_PTS + RESULT_ADV_PTS
 
 const LEADERBOARD_TOTAL = 34
 const LEADERBOARD_RANK = 4
-const LEADERBOARD_OF = 128
+// Bevisst IKKE 128 (antall spillere i braketten) — det ville lest ut som en
+// turneringsplassering. Dette er antall DELTAKERE i tippekonkurransen (ubegrenset i praksis).
+const LEADERBOARD_OF = 52
 
 const LAST_PHASE = 3
 
@@ -285,7 +287,7 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
                 <div style={{ fontFamily: SPORT, fontSize: 40, fontWeight: 900, color: '#fbbf24', lineHeight: 1, letterSpacing: '-1.5px' }}>
                   #{LEADERBOARD_RANK}
                 </div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', marginTop: 2 }}>av {LEADERBOARD_OF}</div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', marginTop: 2 }}>av {LEADERBOARD_OF} deltakere</div>
               </div>
             </div>
           </div>

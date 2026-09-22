@@ -44,7 +44,9 @@ export default function LeaderboardCountdown() {
           { value: cd.seconds, label: 'sek' },
         ].map(({ value, label }, i) => (
           <div key={i} style={{ textAlign: 'center' }}>
-            <div key={value} className="digit-tick" style={{
+            {/* suppressHydrationWarning: verdien kan ha tikket ett sekund mellom SSR og
+                hydrering — begge render-verdiene er korrekte, korrigeres straks av intervallet over */}
+            <div key={value} suppressHydrationWarning className="digit-tick" style={{
               fontFamily: SPORT, fontSize: 44, fontWeight: 900, color: '#fff',
               lineHeight: 1, letterSpacing: '-1px',
               background: 'rgba(255,255,255,0.06)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',

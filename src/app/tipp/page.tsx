@@ -429,8 +429,8 @@ const inputStyle: React.CSSProperties = {
   // ── Steg 0: Slideshow-intro (kun nye deltakere) ──
   if (step === 0) {
     return (
-      <div className="page-bg" style={{ minHeight: '100vh', color: '#fff' }}>
-        <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="page-bg" style={{ height: '100dvh', color: '#fff', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <Link href="/" className="back-btn">← Hjem</Link>
           {slideshowSlide < 3 && (
             <button
@@ -445,13 +445,15 @@ const inputStyle: React.CSSProperties = {
           )}
         </div>
 
-        <StepSlideshow
-          onStart={() => {
-            try { localStorage.setItem('vm_tipp_intro_seen', '1') } catch {}
-            setStep(1)
-          }}
-          onSlide={(s) => setSlideshowSlide(s)}
-        />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 0, padding: '0 20px' }}>
+          <StepSlideshow
+            onStart={() => {
+              try { localStorage.setItem('vm_tipp_intro_seen', '1') } catch {}
+              setStep(1)
+            }}
+            onSlide={(s) => setSlideshowSlide(s)}
+          />
+        </div>
 
       </div>
     )
@@ -702,7 +704,7 @@ const inputStyle: React.CSSProperties = {
               borderRadius: 100,
             }}>
               <span style={{ fontFamily: SPORT, fontSize: 17, fontWeight: 900, color: multiplier === 2 ? '#f59e0b' : '#ef4444', lineHeight: 1 }}>×{multiplier}</span>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 600, lineHeight: 1 }}>{multiplier === 2 ? 'dobbelt' : 'trippelt'} poeng</span>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 600, lineHeight: 1 }}>{multiplier === 2 ? 'dobbelt' : multiplier === 3 ? 'trippelt' : 'firedobbelt'} poeng</span>
             </div>
           ) : (
             <div style={{ marginTop: 4 }} />
@@ -755,7 +757,7 @@ const inputStyle: React.CSSProperties = {
 
       {/* Spillerliste + motstander-bracket side om side */}
       <div style={{ flex: 1, display: 'flex', gap: 10, minHeight: 0, marginBottom: 14 }}>
-        <div role="radiogroup" aria-label={`Velg spiller fra ${pot.name}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0, overflowY: 'auto' }}>
+        <div role="radiogroup" aria-label={`Velg spiller fra ${pot.name}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'safe center', gap: 5, minWidth: 0, overflowY: 'auto' }}>
           {pot.players.map((player) => {
             const isSelected = selectedPlayer === player.name
             return (
@@ -797,7 +799,7 @@ const inputStyle: React.CSSProperties = {
         </div>
 
         {/* Motstander-panel — dukker opp til høyre når en spiller er valgt */}
-        <div style={{ width: 132, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto' }}>
+        <div style={{ width: 132, flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'safe center', gap: 8, overflowY: 'auto' }}>
           {selectedPlayer ? (() => {
             const info = getFirstMatchInfo(selectedPlayer)
             if (!info) return null

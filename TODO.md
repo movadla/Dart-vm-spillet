@@ -20,7 +20,10 @@
 - [ ] Færre kandidater per pott (i dag: 2/3/5/6/8/mange i pott 6) — vurder et mer kuratert,
       strammere utvalg per nivå
 - [ ] Til gjengjeld: vis flere detaljer per spiller når man utforsker/velger (i dag bare
-      navn, nasjonalitet, PDC-ranking, odds) — f.eks. nylig form, historikk, statistikk
+      navn, nasjonalitet, PDC-ranking, odds) — konkret forslag fra Morten (2026-09-23):
+      enkel oversikt med vinnerodds, PDC-ranking, snitt i 2026 (three-dart average),
+      og «største hinder på veien til VM-seier» (f.eks. hvem/hvilken runde som historisk
+      har vært vanskeligst — eks. Littler i runde 4)
 
 ## Periodisk
 
