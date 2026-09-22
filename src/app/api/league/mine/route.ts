@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
 const supabase = getSupabaseAdmin()
-import { calcParticipantPoints, MatchResult, AdvancementRow } from '@/lib/scoring'
+import { calcParticipantPoints, AdvancementRow } from '@/lib/scoring'
 
 export async function GET(req: NextRequest) {
   const participantId = req.nextUrl.searchParams.get('participantId')
@@ -21,11 +21,7 @@ export async function GET(req: NextRequest) {
 
   if (rawLeagues.length === 0) return NextResponse.json({ leagues: [] })
 
-  const [{ data: matchResults }, { data: advancement }] = await Promise.all([
-    supabase.from('match_results').select('home_team, away_team, home_goals, away_goals, stage'),
-    supabase.from('advancement').select('team_name, stage_reached'),
-  ])
-  const mr = (matchResults as MatchResult[]) ?? []
+  const { data: advancement } = await supabase.from('advancement').select('player_name, stage_reached')
   const adv = (advancement as AdvancementRow[]) ?? []
 
   const leagues = await Promise.all(rawLeagues.map(async (league) => {
@@ -38,13 +34,13 @@ export async function GET(req: NextRequest) {
 
     const { data: picks } = await supabase
       .from('picks')
-      .select('participant_id, pot_number, team_name')
+      .select('participant_id, pot_number, player_name')
       .in('participant_id', memberIds)
 
     const allPicks = picks ?? []
-    const myPts = calcParticipantPoints(allPicks.filter(p => p.participant_id === participantId), mr, adv)
+    const myPts = calcParticipantPoints(allPicks.filter(p => p.participant_id === participantId), adv)
     const rank = memberIds.filter(id => {
-      const pts = calcParticipantPoints(allPicks.filter(p => p.participant_id === id), mr, adv)
+      const pts = calcParticipantPoints(allPicks.filter(p => p.participant_id === id), adv)
       return pts > myPts
     }).length + 1
 

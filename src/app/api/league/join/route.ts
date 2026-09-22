@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
 const supabase = getSupabaseAdmin()
 
-const KICKOFF = new Date('2026-06-11T19:00:00Z')
+const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
 export async function POST(req: NextRequest) {
   if (new Date() >= KICKOFF) {

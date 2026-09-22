@@ -1,35 +1,34 @@
 import { POTS } from '@/data/pots'
 
-const allTeams = POTS.flatMap(p => p.teams)
-export const flagFor = (name: string) => allTeams.find(t => t.name === name)?.flag ?? ''
-export const iso2For = (name: string) => allTeams.find(t => t.name === name)?.iso2 ?? ''
+const allPlayers = POTS.flatMap(p => p.players)
+export const iso2For = (name: string) => allPlayers.find(pl => pl.name === name)?.iso2 ?? ''
 
 const POT_COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#f97316', '#8b5cf6', '#06b6d4', '#ef4444', '#ec4899']
 
 const PREHEADER_PADDING = '&nbsp;'.repeat(100)
 
-export function buildWelcomeText(name: string, ctaUrl: string, picks: { team: string; flag: string }[]): string {
-  const pickLines = picks.map((p, i) => `  ${i + 1}. ${p.flag} ${p.team}`).join('\n')
+export function buildWelcomeText(name: string, ctaUrl: string, picks: { team: string; iso2: string }[]): string {
+  const pickLines = picks.map((p, i) => `  ${i + 1}. ${p.team}`).join('\n')
   return [
-    'VM-SPILLET 2026',
+    'DART-VM-SPILLET 2026',
     '',
     `Hei ${name},`,
-    'Du er nå påmeldt VM-Spillet 2026!',
+    'Du er nå påmeldt Dart-VM-spillet!',
     '',
-    'Dine 8 lag:',
+    `Dine ${picks.length} spillere:`,
     pickLines,
     '',
     `Se din side: ${ctaUrl}`,
     '',
-    'Du kan endre valgene dine når som helst frem til VM starter 11. juni kl. 21:00.',
+    'Du kan endre valgene dine når som helst frem til dart-VM starter 11. desember kl. 19:00.',
     '',
     '---',
-    'Du mottar daglige oppdateringer under VM (11. juni – 19. juli).',
+    'Du mottar daglige oppdateringer under dart-VM.',
   ].join('\n')
 }
 
-export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: string; flag: string; iso2: string }[]): string {
-  const preheader = `Velkommen til VM-Spillet 2026`
+export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: string; iso2: string }[]): string {
+  const preheader = `Velkommen til Dart-VM-spillet`
   const snaaUrl = 'https://www.vmspillet.com/snaasamannen-email.png'
 
   const pickRows = picks.map((pick, i) => {
@@ -67,7 +66,7 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="supported-color-schemes" content="dark">
-  <title>Du er påmeldt — VM-Spillet 2026</title>
+  <title>Du er påmeldt — Dart-VM-spillet</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&display=swap');
   </style>
@@ -90,9 +89,9 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
             <!-- Logo -->
             <tr>
               <td align="left" style="padding-bottom:8px;">
-                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#4ade80;margin-bottom:8px;text-shadow:0 0 16px rgba(34,197,94,0.5);">— Snåsamannen 2026 —</div>
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#4ade80;margin-bottom:8px;text-shadow:0 0 16px rgba(34,197,94,0.5);">— PDC World Championship —</div>
                 <div style="font-family:'Barlow Condensed','Arial Narrow',Impact,Arial,sans-serif;font-weight:900;text-transform:uppercase;font-size:64px;letter-spacing:-2px;line-height:1;white-space:nowrap;text-shadow:0 0 48px rgba(220,38,38,0.45),0 0 96px rgba(59,130,246,0.25);">
-                  <span style="color:rgba(255,255,255,0.35);">VM-</span><span style="color:#ffffff;">SPILLET</span><span style="font-size:28px;letter-spacing:0.04em;color:rgba(255,255,255,0.22);padding-left:10px;vertical-align:middle;">2026</span>
+                  <span style="color:rgba(255,255,255,0.35);">DART-VM-</span><span style="color:#ffffff;">SPILLET</span><span style="font-size:28px;letter-spacing:0.04em;color:rgba(255,255,255,0.22);padding-left:10px;vertical-align:middle;">2026</span>
                 </div>
               </td>
             </tr>
@@ -119,7 +118,7 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                   <tr>
                     <td style="width:50%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1));"></td>
-                    <td style="white-space:nowrap;padding:0 10px;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.82);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Dine lag</td>
+                    <td style="white-space:nowrap;padding:0 10px;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.82);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Dine spillere</td>
                     <td style="width:50%;height:1px;background:linear-gradient(270deg,transparent,rgba(255,255,255,0.1));"></td>
                   </tr>
                 </table>
@@ -139,7 +138,7 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
             <tr>
               <td style="padding-bottom:24px;">
                 <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.4);line-height:1.7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-                  Du kan endre valgene dine når som helst frem til VM starter <strong style="color:rgba(255,255,255,0.65);">11. juni kl. 21:00</strong>.
+                  Du kan endre valgene dine når som helst frem til dart-VM starter <strong style="color:rgba(255,255,255,0.65);">11. desember kl. 19:00</strong>.
                 </p>
               </td>
             </tr>
@@ -178,8 +177,8 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
             <tr>
               <td>
                 <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.15);line-height:2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-                  Du mottar daglige oppdateringer under VM (11. juni – 19. juli).<br>
-                  Valg kan endres frem til kampstart 11. juni.
+                  Du mottar daglige oppdateringer under dart-VM.<br>
+                  Valg kan endres frem til turneringsstart 11. desember.
                 </p>
               </td>
             </tr>

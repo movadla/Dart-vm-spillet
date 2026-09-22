@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { calcParticipantPoints, MatchResult, AdvancementRow } from '@/lib/scoring'
+import { calcParticipantPoints, AdvancementRow } from '@/lib/scoring'
 
 const supabase = getSupabaseAdmin()
 
 // Ligaer som skal ha rang-piler (i tillegg til 'overall'). Bruk invite_code.
 const SNAPSHOT_LEAGUES = ['4B86F9', 'QTXXCF']
 
-interface Pick { participant_id: string; pot_number: number; team_name: string }
+interface Pick { participant_id: string; pot_number: number; player_name: string }
 
 // Lagrer dagens rangering (overall + utvalgte ligaer) i rank_snapshot.
 // Kjøres daglig (GitHub Actions). Pilene på leaderboard/liga = snapshot-rang − dagens rang.
@@ -18,20 +18,18 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const [{ data: participants }, { data: matches }, { data: advancement }] = await Promise.all([
+  const [{ data: participants }, { data: advancement }] = await Promise.all([
     supabase.from('participants').select('id'),
-    supabase.from('match_results').select('home_team, away_team, home_goals, away_goals, stage'),
-    supabase.from('advancement').select('team_name, stage_reached'),
+    supabase.from('advancement').select('player_name, stage_reached'),
   ])
   if (!participants?.length) return NextResponse.json({ ok: true, snapshotted: 0, note: 'ingen deltakere' })
 
-  const matchResults = (matches as MatchResult[]) ?? []
   const advRows = (advancement as AdvancementRow[]) ?? []
 
   // Hent alle picks (paginert, unngå 1000-rad-grensen)
   const allPicks: Pick[] = []
   for (let from = 0; ; from += 1000) {
-    const { data } = await supabase.from('picks').select('participant_id, pot_number, team_name').range(from, from + 999)
+    const { data } = await supabase.from('picks').select('participant_id, pot_number, player_name').range(from, from + 999)
     if (!data?.length) break
     allPicks.push(...(data as Pick[]))
     if (data.length < 1000) break
@@ -39,7 +37,7 @@ export async function GET(req: Request) {
 
   const picksByParticipant: Record<string, Pick[]> = {}
   for (const p of allPicks) (picksByParticipant[p.participant_id] ??= []).push(p)
-  const pointsOf = (id: string) => calcParticipantPoints(picksByParticipant[id] ?? [], matchResults, advRows)
+  const pointsOf = (id: string) => calcParticipantPoints(picksByParticipant[id] ?? [], advRows)
 
   const today = new Date().toISOString().slice(0, 10)
   const rows: { scope: string; participant_id: string; rank_pos: number; snapshot_date: string }[] = []

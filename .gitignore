@@ -44,5 +44,7 @@ next-env.d.ts
 # cloudflare tunnel
 cloudflared.exe
 cloudflared-err.log
+dev-server.log
+tunnel.log
 
 .vercel

@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const supabase = getSupabaseAdmin()
   const [{ data: pData }, { data: pkData }] = await Promise.all([
     supabase.from('participants').select('name, email').eq('id', participantId).single(),
-    supabase.from('picks').select('pot_number, team_name').eq('participant_id', participantId),
+    supabase.from('picks').select('pot_number, player_name').eq('participant_id', participantId),
   ])
 
   if (!pData) return NextResponse.json({ error: 'Ikke funnet' }, { status: 404 })

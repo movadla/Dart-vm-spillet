@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminAuth } from '@/lib/adminAuth'
 import { POTS } from '@/data/pots'
-import { buildWelcomeHtml, flagFor, iso2For } from '@/lib/email-welcome'
+import { buildWelcomeHtml } from '@/lib/email-welcome'
 import { buildDailyEmail } from '@/lib/email-daily'
 import { buildBroadcastHtml } from '@/lib/email-broadcast'
 
 const DEMO_PICKS = POTS.map(pot => ({
-  team: pot.teams[0].name,
-  flag: flagFor(pot.teams[0].name),
-  iso2: iso2For(pot.teams[0].name),
+  team: pot.players[0].name,
+  flag: '',
+  iso2: pot.players[0].iso2,
 }))
 
 export async function GET(req: NextRequest) {
@@ -37,8 +37,8 @@ export async function GET(req: NextRequest) {
         { name: 'Kontorligaen', code: 'WOLF42', rank: 1, total: 8 },
       ],
       recentResults: [
-        { home: 'Mexico', away: 'Sør-Afrika', homeGoals: 2, awayGoals: 0 },
-        { home: 'Sør-Korea', away: 'Tsjekkia', homeGoals: 1, awayGoals: 1 },
+        { player1: 'Luke Littler', player2: 'Gary Anderson', sets1: 4, sets2: 1 },
+        { player1: 'Michael van Gerwen', player2: 'Rob Cross', sets1: 4, sets2: 3 },
       ],
     })
   } else if (type === 'broadcast') {

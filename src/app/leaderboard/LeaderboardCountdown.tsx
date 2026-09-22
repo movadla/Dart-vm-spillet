@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-const KICKOFF = new Date('2026-06-11T19:00:00Z')
+const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
 function getTimeUntil(target: Date) {
   const diff = Math.max(0, target.getTime() - Date.now())
@@ -58,7 +58,7 @@ export default function LeaderboardCountdown() {
       </div>
 
       <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 24 }}>
-        VM starter 11. juni 2026
+        Dart-VM starter 11. desember 2026
       </div>
 
       {!isLoggedIn && (

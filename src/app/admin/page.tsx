@@ -3,10 +3,13 @@
 import { useEffect, useState, Suspense, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { POTS } from '@/data/pots'
+import { POTS, getIso2 } from '@/data/pots'
+import Flag from '@/components/Flag'
+import { STAGE_ORDER, STAGE_LABELS, SCORING } from '@/config/scoring'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-const ALL_TEAMS = POTS.flatMap((p) => p.teams.map((t) => ({ name: t.name, flag: t.flag, pot: p.name }))).sort((a, b) => a.name.localeCompare(b.name, 'no'))
+const ALL_PLAYERS = POTS.flatMap((p) => p.players.map((pl) => pl.name)).sort((a, b) => a.localeCompare(b, 'no'))
+const MATCH_STAGES = STAGE_ORDER.filter((s) => s !== 'winner')
 
 type Tab = 'deltakere' | 'ligaer' | 'statistikk' | 'verktøy' | 'epost'
 
@@ -299,7 +302,7 @@ function StatistikkTab({ participantCount: totalCount, headers }: { participantC
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>{selectedLeagueId ? 'Deltakere i liga' : 'Deltakere'}</div>
         </div>
         <div style={{ background: '#141414', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 16, textAlign: 'center' }}>
-          <div style={{ fontFamily: SPORT, fontSize: 36, fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>{participantCount * 8}</div>
+          <div style={{ fontFamily: SPORT, fontSize: 36, fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>{participantCount * POTS.length}</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>Totale picks</div>
         </div>
       </div>
@@ -325,12 +328,11 @@ function StatistikkTab({ participantCount: totalCount, headers }: { participantC
         ) : potTeams.length === 0 ? (
           <div style={{ padding: 24, color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>Ingen picks ennå.</div>
         ) : potTeams.slice(0, 10).map(({ team, count }, i) => {
-          const teamData = ALL_TEAMS.find((t) => t.name === team)
           const pct = Math.round((count / max) * 100)
           return (
             <div key={team} style={{ padding: '10px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                <span style={{ fontSize: 13, fontWeight: 600 }}>{teamData?.flag ?? ''} {team}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}><Flag iso2={getIso2(team)} size={16} /> {team}</span>
                 <span style={{ fontSize: 12, color: i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.4)', fontWeight: 700 }}>{count} ({participantCount > 0 ? Math.round(count / participantCount * 100) : 0}%)</span>
               </div>
               <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
@@ -346,13 +348,11 @@ function StatistikkTab({ participantCount: totalCount, headers }: { participantC
 
 // ─── Tab: Verktøy ─────────────────────────────────────────────────────────────
 function VerktøyTab({ headers }: { headers: Record<string, string> }) {
-  const [syncMsg, setSyncMsg] = useState('')
-  const [syncing, setSyncing] = useState(false)
   const [links, setLinks] = useState<MagicLink[]>([])
   const [linksLoading, setLinksLoading] = useState(true)
-  const [matchForm, setMatchForm] = useState({ home: '', away: '', homeGoals: '', awayGoals: '', stage: 'group' })
+  const [matchForm, setMatchForm] = useState({ player1: '', player2: '', sets1: '', sets2: '', stage: 'r1' })
   const [matchMsg, setMatchMsg] = useState('')
-  const [advForm, setAdvForm] = useState({ team: '', stage: 'group' })
+  const [advForm, setAdvForm] = useState({ player: '', stage: 'r1' })
   const [advMsg, setAdvMsg] = useState('')
 
   useEffect(() => {
@@ -362,23 +362,11 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
       .finally(() => setLinksLoading(false))
   }, [])
 
-  async function triggerSync() {
-    setSyncing(true); setSyncMsg('')
-    try {
-      const res = await fetch('/api/admin/sync', { method: 'POST', headers })
-      const data = await res.json()
-      setSyncMsg(res.ok
-        ? `✅ Synk fullført — ${(data.matches?.inserted ?? 0) + (data.matches?.updated ?? 0)} kamper, ${data.goals?.matchesUpdated ?? 0} kamper med mål oppdatert`
-        : `❌ ${data.error ?? 'Synk feilet'}`)
-    } catch { setSyncMsg('❌ Nettverksfeil') }
-    finally { setSyncing(false) }
-  }
-
   async function submitMatchResult(e: React.FormEvent) {
     e.preventDefault(); setMatchMsg('')
     try {
-      const res = await fetch('/api/admin/match-result', { method: 'POST', headers, body: JSON.stringify({ home: matchForm.home, away: matchForm.away, homeGoals: parseInt(matchForm.homeGoals), awayGoals: parseInt(matchForm.awayGoals), stage: matchForm.stage }) })
-      if (res.ok) { setMatchMsg('✅ Resultat lagret'); setMatchForm({ home: '', away: '', homeGoals: '', awayGoals: '', stage: 'group' }) }
+      const res = await fetch('/api/admin/match-result', { method: 'POST', headers, body: JSON.stringify({ player1: matchForm.player1, player2: matchForm.player2, sets1: parseInt(matchForm.sets1), sets2: parseInt(matchForm.sets2), stage: matchForm.stage }) })
+      if (res.ok) { setMatchMsg('✅ Resultat lagret'); setMatchForm({ player1: '', player2: '', sets1: '', sets2: '', stage: 'r1' }) }
       else setMatchMsg('❌ Feil ved lagring')
     } catch { setMatchMsg('❌ Serverfeil') }
   }
@@ -386,59 +374,45 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
   async function submitAdvancement(e: React.FormEvent) {
     e.preventDefault(); setAdvMsg('')
     try {
-      const res = await fetch('/api/admin/advancement', { method: 'POST', headers, body: JSON.stringify({ team: advForm.team, stage: advForm.stage }) })
-      if (res.ok) { setAdvMsg('✅ Avansement lagret'); setAdvForm({ team: '', stage: 'group' }) }
+      const res = await fetch('/api/admin/advancement', { method: 'POST', headers, body: JSON.stringify({ player_name: advForm.player, stage: advForm.stage }) })
+      if (res.ok) { setAdvMsg('✅ Avansement lagret'); setAdvForm({ player: '', stage: 'r1' }) }
       else setAdvMsg('❌ Feil ved lagring')
     } catch { setAdvMsg('❌ Serverfeil') }
   }
 
   async function deleteAdvancement() {
-    if (!advForm.team) { setAdvMsg('❌ Velg et lag først'); return }
-    if (!confirm(`Slette avansement for ${advForm.team}?`)) return
+    if (!advForm.player) { setAdvMsg('❌ Velg en spiller først'); return }
+    if (!confirm(`Slette avansement for ${advForm.player}?`)) return
     setAdvMsg('')
     try {
-      const res = await fetch('/api/admin/advancement', { method: 'DELETE', headers, body: JSON.stringify({ team: advForm.team }) })
-      if (res.ok) { setAdvMsg(`✅ Avansement for ${advForm.team} slettet`); setAdvForm({ team: '', stage: 'group' }) }
+      const res = await fetch('/api/admin/advancement', { method: 'DELETE', headers, body: JSON.stringify({ player_name: advForm.player }) })
+      if (res.ok) { setAdvMsg(`✅ Avansement for ${advForm.player} slettet`); setAdvForm({ player: '', stage: 'r1' }) }
       else setAdvMsg('❌ Feil ved sletting')
     } catch { setAdvMsg('❌ Serverfeil') }
   }
 
   return (
     <>
-      {/* Synk */}
-      <div style={{ ...card, overflow: 'visible' }}>
-        <div style={cardHead}><span style={label}>Synkroniser resultater</span></div>
-        <div style={{ padding: '16px 18px' }}>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '0 0 14px' }}>
-            Henter siste kampresultater fra football-data.org og oppdaterer poengsum for alle deltakere.
-          </p>
-          <button style={btn('primary')} onClick={triggerSync} disabled={syncing}>
-            {syncing ? 'Synker...' : '⟳ Kjør synk nå'}
-          </button>
-          {syncMsg && <div style={{ fontSize: 13, marginTop: 12, color: syncMsg.startsWith('✅') ? '#22c55e' : '#ef4444' }}>{syncMsg}</div>}
-        </div>
-      </div>
-
       {/* Kampresultat-skjema */}
       <div style={{ ...card, overflow: 'visible' }}>
         <div style={cardHead}><span style={label}>Legg inn kampresultat manuelt</span></div>
         <div style={{ padding: '16px 18px' }}>
           <form onSubmit={submitMatchResult} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {(['home', 'away'] as const).map((key) => (
+              {(['player1', 'player2'] as const).map((key) => (
                 <div key={key}>
-                  <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>{key === 'home' ? 'Hjemmelag' : 'Bortelag'}</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>{key === 'player1' ? 'Spiller 1' : 'Spiller 2'}</label>
                   <select style={selectStyle} value={matchForm[key]} onChange={(e) => setMatchForm((f) => ({ ...f, [key]: e.target.value }))} required>
-                    <option value="">Velg lag</option>
-                    {ALL_TEAMS.map((t) => <option key={t.name} value={t.name}>{t.flag} {t.name}</option>)}
+                    <option value="">Velg spiller</option>
+                    {ALL_PLAYERS.map((name) => <option key={name} value={name}>{name}</option>)}
                   </select>
                 </div>
               ))}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {(['homeGoals', 'awayGoals'] as const).map((key) => (
+              {(['sets1', 'sets2'] as const).map((key) => (
                 <div key={key}>
-                  <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>{key === 'homeGoals' ? 'Hjemmemål' : 'Bortemål'}</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>{key === 'sets1' ? 'Sett 1' : 'Sett 2'}</label>
                   <input style={inputStyle} type="number" min={0} placeholder="0" value={matchForm[key]} onChange={(e) => setMatchForm((f) => ({ ...f, [key]: e.target.value }))} required />
                 </div>
               ))}
@@ -446,12 +420,7 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
             <div>
               <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Fase</label>
               <select style={selectStyle} value={matchForm.stage} onChange={(e) => setMatchForm((f) => ({ ...f, stage: e.target.value }))}>
-                <option value="group">Gruppespill</option>
-                <option value="r32">R32</option>
-                <option value="r16">R16</option>
-                <option value="qf">Kvartfinale</option>
-                <option value="sf">Semifinale</option>
-                <option value="final">Finale</option>
+                {MATCH_STAGES.map((s) => <option key={s} value={s}>{STAGE_LABELS[s]}</option>)}
               </select>
             </div>
             <button type="submit" style={btn('primary')}>Lagre resultat</button>
@@ -466,22 +435,16 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
         <div style={{ padding: '16px 18px' }}>
           <form onSubmit={submitAdvancement} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Lag</label>
-              <select style={selectStyle} value={advForm.team} onChange={(e) => setAdvForm((f) => ({ ...f, team: e.target.value }))} required>
-                <option value="">Velg lag</option>
-                {ALL_TEAMS.map((t) => <option key={t.name} value={t.name}>{t.flag} {t.name}</option>)}
+              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Spiller</label>
+              <select style={selectStyle} value={advForm.player} onChange={(e) => setAdvForm((f) => ({ ...f, player: e.target.value }))} required>
+                <option value="">Velg spiller</option>
+                {ALL_PLAYERS.map((name) => <option key={name} value={name}>{name}</option>)}
               </select>
             </div>
             <div>
               <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Stadium nådd</label>
               <select style={selectStyle} value={advForm.stage} onChange={(e) => setAdvForm((f) => ({ ...f, stage: e.target.value }))}>
-                <option value="group">Videre fra gruppe (+5p)</option>
-                <option value="r32">Vinner R32 (+8p)</option>
-                <option value="r16">Vinner R16 (+12p)</option>
-                <option value="qf">Vinner QF (+17p)</option>
-                <option value="sf">Vinner SF (+24p)</option>
-                <option value="final">I finalen</option>
-                <option value="winner">VM-vinner (+32p)</option>
+                {STAGE_ORDER.map((s) => <option key={s} value={s}>{STAGE_LABELS[s]} (+{SCORING.advancement[s]}p)</option>)}
               </select>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
@@ -816,7 +779,7 @@ function EpostTab({ participantCount, participants, headers }: { participantCoun
         <form onSubmit={sendBroadcast} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Emne</label>
-            <input style={inputStyle} type="text" placeholder="VM-Spillet 2026 — …" value={subject} onChange={(e) => setSubject(e.target.value)} required />
+            <input style={inputStyle} type="text" placeholder="Dart-VM-spillet — …" value={subject} onChange={(e) => setSubject(e.target.value)} required />
           </div>
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Innhold</label>
@@ -886,14 +849,13 @@ function AdminContent() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0a', color: '#fff', padding: '32px 16px 56px', position: 'relative', overflow: 'hidden' }}>
-      <img src="/snåsamannen.png" alt="" style={{ position: 'absolute', right: -10, top: 0, width: 260, opacity: 0.32, pointerEvents: 'none', zIndex: 0, filter: 'brightness(1.0) saturate(0.7) contrast(1.05)', maskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)' }} />
       <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link href="/" style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, textDecoration: 'none' }}>← Hjem</Link>
         <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', fontSize: 12, cursor: 'pointer', padding: 0 }}>Logg ut</button>
       </div>
 
       <div style={{ fontFamily: SPORT, fontSize: 52, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, marginBottom: 24 }}>
-        <div style={{ color: 'rgba(255,255,255,0.3)' }}>VM 2026</div>
+        <div style={{ color: 'rgba(255,255,255,0.3)' }}>Dart-VM 2026</div>
         <div style={{ color: '#fff' }}>Admin</div>
       </div>
 

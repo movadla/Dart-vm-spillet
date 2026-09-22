@@ -14,7 +14,7 @@ interface Props {
 
 export default function ShareButton({
   url,
-  title = 'VM-Spillet 2026',
+  title = 'Dart-VM-spillet',
   text,
   label = 'Del med venner',
   variant = 'default',

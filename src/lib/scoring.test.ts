@@ -1,210 +1,79 @@
 import { describe, it, expect } from 'vitest'
-import {
-  calcTeamMatchPoints,
-  calcAdvancementBonus,
-  calcTeamPoints,
-  calcParticipantPoints,
-  type MatchResult,
-} from './scoring'
-
-describe('calcTeamMatchPoints', () => {
-  it('returns 0 when team has no matches', () => {
-    expect(calcTeamMatchPoints('Brazil', [])).toBe(0)
-  })
-
-  it('returns 0 when team is not in any match', () => {
-    const matches: MatchResult[] = [
-      { home_team: 'France', away_team: 'Germany', home_goals: 2, away_goals: 1 },
-    ]
-    expect(calcTeamMatchPoints('Brazil', matches)).toBe(0)
-  })
-
-  it('win as home team: win bonus + goals', () => {
-    // 3-1: win (3p) + 3 goals (3p) = 6
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 3, away_goals: 1 },
-    ]
-    expect(calcTeamMatchPoints('Brazil', matches)).toBe(6)
-  })
-
-  it('win as away team: win bonus + goals', () => {
-    // Brazil wins 2-0 away: win (3p) + 2 goals (2p) = 5
-    const matches: MatchResult[] = [
-      { home_team: 'Germany', away_team: 'Brazil', home_goals: 0, away_goals: 2 },
-    ]
-    expect(calcTeamMatchPoints('Brazil', matches)).toBe(5)
-  })
-
-  it('draw: draw bonus + goals', () => {
-    // 1-1: draw (1p) + 1 goal (1p) = 2
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 1, away_goals: 1 },
-    ]
-    expect(calcTeamMatchPoints('Brazil', matches)).toBe(2)
-  })
-
-  it('0-0 draw gives only draw bonus', () => {
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 0, away_goals: 0 },
-    ]
-    expect(calcTeamMatchPoints('Brazil', matches)).toBe(1)
-  })
-
-  it('loss with goals: only goal points, no win/draw bonus', () => {
-    // 1-3 loss: 1 goal (1p)
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 1, away_goals: 3 },
-    ]
-    expect(calcTeamMatchPoints('Brazil', matches)).toBe(1)
-  })
-
-  it('loss with 0 goals: 0 points', () => {
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 0, away_goals: 2 },
-    ]
-    expect(calcTeamMatchPoints('Brazil', matches)).toBe(0)
-  })
-
-  it('accumulates points across multiple matches', () => {
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 2, away_goals: 0 }, // win: 3+2=5
-      { home_team: 'France', away_team: 'Brazil', home_goals: 1, away_goals: 1 },  // draw: 1+1=2
-      { home_team: 'Brazil', away_team: 'Spain', home_goals: 0, away_goals: 1 },   // loss: 0
-    ]
-    expect(calcTeamMatchPoints('Brazil', matches)).toBe(7)
-  })
-})
+import { calcAdvancementBonus, calcPlayerPoints, calcParticipantPoints, isPlayerEliminated } from './scoring'
 
 describe('calcAdvancementBonus', () => {
-  it('returns 0 for null', () => {
+  it('returns 0 when no stage reached', () => {
     expect(calcAdvancementBonus(null)).toBe(0)
   })
 
-  it('returns 0 for unknown stage', () => {
-    expect(calcAdvancementBonus('unknown')).toBe(0)
+  it('is cumulative through the stage order', () => {
+    expect(calcAdvancementBonus('r1')).toBe(5)
+    expect(calcAdvancementBonus('r2')).toBe(10)
+    expect(calcAdvancementBonus('r3')).toBe(20)
+    expect(calcAdvancementBonus('r4')).toBe(30)
+    expect(calcAdvancementBonus('qf')).toBe(45)
+    expect(calcAdvancementBonus('sf')).toBe(65)
+    expect(calcAdvancementBonus('final')).toBe(90)
+    expect(calcAdvancementBonus('winner')).toBe(125)
   })
 
-  it('group = 5', () => {
-    expect(calcAdvancementBonus('group')).toBe(5)
-  })
-
-  it('r32 = 5 + 10 = 15', () => {
-    expect(calcAdvancementBonus('r32')).toBe(15)
-  })
-
-  it('r16 = 5 + 10 + 15 = 30', () => {
-    expect(calcAdvancementBonus('r16')).toBe(30)
-  })
-
-  it('qf = 5 + 10 + 15 + 20 = 50', () => {
-    expect(calcAdvancementBonus('qf')).toBe(50)
-  })
-
-  it('sf = 50 (intermediate, same as qf)', () => {
-    expect(calcAdvancementBonus('sf')).toBe(50)
-  })
-
-  it('bronze = 50 + 15 = 65', () => {
-    expect(calcAdvancementBonus('bronze')).toBe(65)
-  })
-
-  it('silver = 50 + 20 = 70', () => {
-    expect(calcAdvancementBonus('silver')).toBe(70)
-  })
-
-  it('gold = 50 + 40 = 90', () => {
-    expect(calcAdvancementBonus('gold')).toBe(90)
+  it('returns 0 for an unknown stage', () => {
+    expect(calcAdvancementBonus('group')).toBe(0)
   })
 })
 
-describe('calcTeamPoints', () => {
-  it('returns zeros for team with no matches and no advancement', () => {
-    const result = calcTeamPoints({ team_name: 'Brazil', pot_number: 1 }, [], [])
-    expect(result).toEqual({ matchPts: 0, advPts: 0, multiplier: 1, total: 0 })
+describe('calcPlayerPoints', () => {
+  it('multiplies advancement points by the pot multiplier', () => {
+    const pick = { player_name: 'Luke Littler', pot_number: 1 }
+    const advancement = [{ player_name: 'Luke Littler', stage_reached: 'qf' }]
+    const result = calcPlayerPoints(pick, advancement)
+    expect(result.advPts).toBe(45)
+    expect(result.multiplier).toBe(1)
+    expect(result.total).toBe(45)
   })
 
-  it('pot 5 applies ×2 multiplier', () => {
-    const matches: MatchResult[] = [
-      { home_team: 'Turkey', away_team: 'Germany', home_goals: 1, away_goals: 0 },
-    ]
-    const result = calcTeamPoints({ team_name: 'Turkey', pot_number: 5 }, matches, [])
-    // win 1-0: 3 (win) + 1 (goal) = 4 raw → 4 × 2 = 8
-    expect(result.multiplier).toBe(2)
-    expect(result.matchPts).toBe(4)
-    expect(result.total).toBe(8)
-  })
-
-  it('pot 7 applies ×3 multiplier', () => {
-    const matches: MatchResult[] = [
-      { home_team: 'Australia', away_team: 'Germany', home_goals: 2, away_goals: 0 },
-    ]
-    const advancement = [{ team_name: 'Australia', stage_reached: 'group' }]
-    const result = calcTeamPoints({ team_name: 'Australia', pot_number: 7 }, matches, advancement)
-    // matchPts: win(3)+goals(2)=5, advPts: 5, raw=10 → 10 × 3 = 30
+  it('applies the underdog multiplier for lower pots', () => {
+    const pick = { player_name: 'Owen Bates', pot_number: 5 }
+    const advancement = [{ player_name: 'Owen Bates', stage_reached: 'r2' }]
+    const result = calcPlayerPoints(pick, advancement)
     expect(result.multiplier).toBe(3)
     expect(result.total).toBe(30)
   })
 
-  it('sums match points and advancement bonus', () => {
-    // matchPts=5 (win 2-0), advPts=5 (group), total=10
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 2, away_goals: 0 },
-    ]
-    const advancement = [{ team_name: 'Brazil', stage_reached: 'group' }]
-    const result = calcTeamPoints({ team_name: 'Brazil', pot_number: 1 }, matches, advancement)
-    expect(result.matchPts).toBe(5)
-    expect(result.advPts).toBe(5)
-    expect(result.total).toBe(10)
-  })
-
-  it('handles missing advancement row gracefully', () => {
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 1, away_goals: 0 },
-    ]
-    const result = calcTeamPoints({ team_name: 'Brazil', pot_number: 1 }, matches, [])
-    // win 1-0: 3 (win) + 1 (goal) = 4 matchPts, no advPts
-    expect(result.total).toBe(4)
-    expect(result.advPts).toBe(0)
-  })
-
-  it('gold scenario: all stages reached', () => {
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 2, away_goals: 1 }, // 3+2=5
-    ]
-    const advancement = [{ team_name: 'Brazil', stage_reached: 'gold' }]
-    const result = calcTeamPoints({ team_name: 'Brazil', pot_number: 1 }, matches, advancement)
-    expect(result.matchPts).toBe(5)
-    expect(result.advPts).toBe(90)
-    expect(result.total).toBe(95)
+  it('returns 0 total when the player has no advancement row', () => {
+    const pick = { player_name: 'Ukjent Spiller', pot_number: 2 }
+    const result = calcPlayerPoints(pick, [])
+    expect(result.total).toBe(0)
   })
 })
 
 describe('calcParticipantPoints', () => {
-  it('returns 0 for empty picks', () => {
-    expect(calcParticipantPoints([], [], [])).toBe(0)
+  it('sums points across all picks', () => {
+    const picks = [
+      { player_name: 'A', pot_number: 1 },
+      { player_name: 'B', pot_number: 5 },
+    ]
+    const advancement = [
+      { player_name: 'A', stage_reached: 'r1' },
+      { player_name: 'B', stage_reached: 'r1' },
+    ]
+    // A: 5 * 1 = 5, B: 5 * 3 = 15
+    expect(calcParticipantPoints(picks, advancement)).toBe(20)
+  })
+})
+
+describe('isPlayerEliminated', () => {
+  it('is false when the player has no recorded matches', () => {
+    expect(isPlayerEliminated('Luke Littler', [])).toBe(false)
   })
 
-  it('sums total points across all picks', () => {
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 2, away_goals: 0 }, // Brazil: win(3)+goals(2)=5
-      { home_team: 'France', away_team: 'Spain', home_goals: 1, away_goals: 1 },   // France: draw(1)+goal(1)=2
-    ]
-    const picks = [
-      { team_name: 'Brazil', pot_number: 1 },
-      { team_name: 'France', pot_number: 2 },
-    ]
-    expect(calcParticipantPoints(picks, matches, [])).toBe(7)
+  it('is false when the player won their last recorded match', () => {
+    const matches = [{ player1: 'A', player2: 'B', sets1: 6, sets2: 2, stage: 'r1', winner: 'A' }]
+    expect(isPlayerEliminated('A', matches)).toBe(false)
   })
 
-  it('ignores picks whose teams have no results yet', () => {
-    const picks = [
-      { team_name: 'Brazil', pot_number: 1 },
-      { team_name: 'Japan', pot_number: 5 },
-    ]
-    const matches: MatchResult[] = [
-      { home_team: 'Brazil', away_team: 'Germany', home_goals: 1, away_goals: 0 },
-    ]
-    // Brazil: 4p, Japan: 0p
-    expect(calcParticipantPoints(picks, matches, [])).toBe(4)
+  it('is true when the player lost a recorded match', () => {
+    const matches = [{ player1: 'A', player2: 'B', sets1: 2, sets2: 6, stage: 'r1', winner: 'B' }]
+    expect(isPlayerEliminated('A', matches)).toBe(true)
   })
 })

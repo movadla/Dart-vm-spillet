@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-const DEADLINE = new Date('2026-06-11T19:00:00Z')
+const DEADLINE = new Date('2026-12-11T19:00:00Z')
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
 function getTimeLeft() {

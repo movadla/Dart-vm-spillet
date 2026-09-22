@@ -3,7 +3,6 @@
 import React from 'react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import LiveMatchesBar from '@/components/LiveMatchesBar'
 
 function getTimeUntil(target: Date) {
   const now = new Date()
@@ -17,16 +16,14 @@ function getTimeUntil(target: Date) {
   }
 }
 
-const KICKOFF = new Date('2026-06-11T19:00:00Z')
+const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
-function IconBall() {
+function IconTarget() {
   return (
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
       <circle cx="11" cy="11" r="9" stroke="white" strokeWidth="1.5" strokeOpacity="0.85"/>
-      <path d="M11 2 L13.2 6.8 L11 10 L8.8 6.8 Z" fill="white" fillOpacity="0.7"/>
-      <path d="M19.8 9.5 L16.2 9 L13.8 11.8 L15.5 15.8 L19.2 13.5 Z" fill="white" fillOpacity="0.7"/>
-      <path d="M2.2 9.5 L5.8 13.5 L7.5 11.8 L5.2 9 L2.2 9.5 Z" fill="white" fillOpacity="0.7"/>
-      <path d="M6.8 16.5 L8.5 12 L11 10.5 L13.5 12 L15.2 16.5 L11 18.5 Z" fill="white" fillOpacity="0.35"/>
+      <circle cx="11" cy="11" r="5.5" stroke="white" strokeWidth="1.5" strokeOpacity="0.6"/>
+      <circle cx="11" cy="11" r="2" fill="white" fillOpacity="0.8"/>
     </svg>
   )
 }
@@ -58,7 +55,6 @@ const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact
 type TimeLeft = { days: number; hours: number; minutes: number; seconds: number }
 type MyStats = { name: string; points: number; rank: number; totalParticipants: number }
 type PreviewRow = { id: string; name: string; points: number }
-type UpcomingMatch = { id: number; date: string; time: string; home: string; away: string; stage: string }
 
 function MiniDashboard({ participantId }: { participantId: string }) {
   const [stats, setStats] = React.useState<MyStats | null>(null)
@@ -239,7 +235,6 @@ export default function HomePage() {
   const [cd, setCd] = useState(getTimeUntil(KICKOFF))
   const [participantId, setParticipantId] = useState<string | null>(null)
   const [headerVisible, setHeaderVisible] = useState(false)
-  const [nextMatches, setNextMatches] = useState<UpcomingMatch[]>([])
   const ctaRef = useRef<HTMLAnchorElement>(null)
 
   const isLive = KICKOFF <= new Date()
@@ -262,14 +257,6 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  useEffect(() => {
-    if (!isLive) return
-    fetch('/api/upcoming-matches?limit=5')
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.matches) setNextMatches(d.matches) })
-      .catch(() => {})
-  }, [isLive])
-
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0a', backgroundImage: 'radial-gradient(ellipse 80% 40% at 50% 25%, rgba(255,255,255,0.025) 0%, transparent 70%)', color: '#fff' }}>
       <StickyHeader visible={headerVisible} isLive={isLive} />
@@ -287,28 +274,13 @@ export default function HomePage() {
       <div style={{ flex: 1, position: 'relative', padding: '24px 20px 72px', textAlign: 'center' }}>
 
         <div style={{ position: 'relative' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/snåsamannen.png" alt="" aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '55%', transform: 'translateX(-50%) translateY(-50%)', width: 380, height: 'auto', opacity: 0.24, pointerEvents: 'none', userSelect: 'none', zIndex: 0, filter: 'brightness(1.0) saturate(0.7) contrast(1.05)', maskImage: 'radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, black 30%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, black 30%, transparent 75%)' }} />
-          {/* FIFA-label + flagg */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 36 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>FIFA World Cup 2026</span>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 8, opacity: 0.75 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://flagcdn.com/28x21/us.png" width="28" height="21" alt="" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://flagcdn.com/28x21/ca.png" width="28" height="21" alt="" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://flagcdn.com/28x21/mx.png" width="28" height="21" alt="" />
-            </div>
-          </div>
-
           {/* Tittel */}
           <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', marginBottom: 24, lineHeight: 1 }}>
             <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 15, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, marginBottom: 6, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
-              — Snåsamannen 2026 —
+              — PDC World Championship —
             </div>
             <div style={{ fontSize: 76, letterSpacing: '-2px', lineHeight: 1 }}>
-              <span style={{ color: 'rgba(255,255,255,0.38)' }}>VM-</span>
+              <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
               <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
           </div>
@@ -358,28 +330,6 @@ export default function HomePage() {
             </>
           )}
 
-
-          {/* Neste kamper (etter kampstart) */}
-          {isLive && <LiveMatchesBar />}
-          {isLive && nextMatches.length > 0 && (
-            <div style={{ marginTop: 12, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '14px 18px', textAlign: 'left' }}>
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: 8 }}>Neste kamper</div>
-              {nextMatches.map((m, i) => (
-                <div key={m.id} style={{ marginTop: i > 0 ? 8 : 0 }}>
-                  {(i === 0 || nextMatches[i - 1].stage !== m.stage) && (
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.22)', textTransform: 'uppercase', marginBottom: 4, marginTop: i > 0 ? 6 : 0 }}>{m.stage}</div>
-                  )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, width: 32, flexShrink: 0 }}>{m.date.slice(8,10)}.{m.date.slice(5,7)}</span>
-                    <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#fff', textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.home}</span>
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', flexShrink: 0 }}>–</span>
-                    <span style={{ flex: 1, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.65)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.away}</span>
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, width: 36, textAlign: 'right', flexShrink: 0 }}>{m.time}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Scroll-indikator */}
@@ -400,8 +350,8 @@ export default function HomePage() {
         </div>
         <div className="how-it-works-grid">
         {[
-          { icon: <IconBall />,   glow: 'rgba(34,197,94,0.22)',   title: 'Velg 8 lag',        desc: 'Velg ett lag fra hvert av de 8 nivåene' },
-          { icon: <IconChart />,  glow: 'rgba(245,158,11,0.22)',  title: 'Poeng underveis',   desc: 'Mål, seiere og avansement gir poeng for hvert av lagene dine' },
+          { icon: <IconTarget />, glow: 'rgba(34,197,94,0.22)',   title: 'Velg 5 spillere',   desc: 'Velg én dartspiller fra hvert av de 5 nivåene' },
+          { icon: <IconChart />,  glow: 'rgba(245,158,11,0.22)',  title: 'Poeng underveis',   desc: 'Avansement i sluttspillet gir poeng for hver av spillerne dine' },
           { icon: <IconTrophy />, glow: 'rgba(251,191,36,0.22)',  title: 'Spill mot venner',  desc: 'Opprett private ligaer og sammenlign deg med andre på leaderboardet' },
         ].map(({ icon, glow, title, desc }) => (
           <div key={title} className="how-it-works-card" style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>

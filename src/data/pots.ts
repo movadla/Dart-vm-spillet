@@ -1,143 +1,138 @@
-export interface Team {
+export interface Player {
   name: string
-  flag: string
+  nationality: string
   iso2: string
-  fifaRanking: number
-  vmGroup: string
+  pdcRanking: number
+  seedNumber: number | null
   odds: string
-  wikipedia?: string
 }
 
 export interface Pot {
   potNumber: number
   name: string
   emoji: string
-  teams: Team[]
+  players: Player[]
 }
 
 export const POT_NAMES = [
-  '⭐ Stjernene',
-  '💪 Gigantene',
-  '🏆 Outsiderne',
-  '🔥 Jokerne',
-  '🌍 Underdogs',
-  '🔍 Overraskelsene',
-  '⚔️ Langskuddene',
-  '🎲 Miraklene',
+  '⭐ Toppseedet',
+  '💪 Storfavoritter',
+  '🏆 Seedet outsidere',
+  '🔥 Kvalifiserte',
+  '🎲 Wildcards',
 ]
 
+// Seed 1–32 hentet fra PDC Order of Merit (Wikipedia, snapshot 2026-09-13).
+// Pott 4/5 (useedede) er en illustrativ liste over kjente PDC-profesjonelle —
+// oppdater med det faktiske deltakerfeltet når PDC publiserer trekningen for
+// sesongens VM (vanligvis medio november).
 export const POTS: Pot[] = [
   {
     potNumber: 1,
-    name: '⭐ Stjernene',
+    name: '⭐ Toppseedet',
     emoji: '⭐',
-    teams: [
-      { name: 'Frankrike',         flag: '🇫🇷', iso2: 'fr',     fifaRanking: 1,  vmGroup: 'I', odds: '5.5',    wikipedia: 'https://en.wikipedia.org/wiki/France_national_football_team' },
-      { name: 'Spania',            flag: '🇪🇸', iso2: 'es',     fifaRanking: 2,  vmGroup: 'H', odds: '6.0',    wikipedia: 'https://en.wikipedia.org/wiki/Spain_national_football_team' },
-      { name: 'England',           flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', iso2: 'gb-eng', fifaRanking: 4,  vmGroup: 'L', odds: '7.5',    wikipedia: 'https://en.wikipedia.org/wiki/England_national_football_team' },
+    players: [
+      { name: 'Luke Littler',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 1, seedNumber: 1, odds: '2.5' },
+      { name: 'Luke Humphries',    nationality: 'England',     iso2: 'gb-eng', pdcRanking: 2, seedNumber: 2, odds: '3.5' },
+      { name: 'Gian van Veen',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 3, seedNumber: 3, odds: '9.0' },
+      { name: 'Gerwyn Price',      nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 4, seedNumber: 4, odds: '11.0' },
+      { name: 'Jonny Clayton',     nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 5, seedNumber: 5, odds: '13.0' },
+      { name: 'James Wade',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 6, seedNumber: 6, odds: '15.0' },
+      { name: 'Michael van Gerwen',nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 7, seedNumber: 7, odds: '9.0' },
+      { name: 'Josh Rock',         nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 8, seedNumber: 8, odds: '17.0' },
     ],
   },
   {
     potNumber: 2,
-    name: '💪 Gigantene',
+    name: '💪 Storfavoritter',
     emoji: '💪',
-    teams: [
-      { name: 'Brasil',    flag: '🇧🇷', iso2: 'br', fifaRanking: 6,  vmGroup: 'C', odds: '9.0',  wikipedia: 'https://en.wikipedia.org/wiki/Brazil_national_football_team' },
-      { name: 'Argentina', flag: '🇦🇷', iso2: 'ar', fifaRanking: 3,  vmGroup: 'J', odds: '9.5',  wikipedia: 'https://en.wikipedia.org/wiki/Argentina_national_football_team' },
-      { name: 'Portugal',  flag: '🇵🇹', iso2: 'pt', fifaRanking: 5,  vmGroup: 'K', odds: '11.0', wikipedia: 'https://en.wikipedia.org/wiki/Portugal_national_football_team' },
-      { name: 'Tyskland',  flag: '🇩🇪', iso2: 'de', fifaRanking: 10, vmGroup: 'E', odds: '15.0', wikipedia: 'https://en.wikipedia.org/wiki/Germany_national_football_team' },
+    players: [
+      { name: 'Stephen Bunting',   nationality: 'England',     iso2: 'gb-eng', pdcRanking: 9,  seedNumber: 9,  odds: '21.0' },
+      { name: 'Danny Noppert',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 10, seedNumber: 10, odds: '26.0' },
+      { name: 'Gary Anderson',     nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 11, seedNumber: 11, odds: '34.0' },
+      { name: 'Wessel Nijman',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 12, seedNumber: 12, odds: '26.0' },
+      { name: 'Ryan Searle',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 13, seedNumber: 13, odds: '34.0' },
+      { name: 'Ross Smith',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 14, seedNumber: 14, odds: '41.0' },
+      { name: 'Chris Dobey',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 15, seedNumber: 15, odds: '41.0' },
+      { name: 'Nathan Aspinall',   nationality: 'England',     iso2: 'gb-eng', pdcRanking: 16, seedNumber: 16, odds: '34.0' },
     ],
   },
   {
     potNumber: 3,
-    name: '🏆 Outsiderne',
+    name: '🏆 Seedet outsidere',
     emoji: '🏆',
-    teams: [
-      { name: 'Nederland', flag: '🇳🇱', iso2: 'nl', fifaRanking: 8,  vmGroup: 'F', odds: '21.0', wikipedia: 'https://en.wikipedia.org/wiki/Netherlands_national_football_team' },
-      { name: 'Norge',     flag: '🇳🇴', iso2: 'no', fifaRanking: 37, vmGroup: 'I', odds: '26.0', wikipedia: 'https://en.wikipedia.org/wiki/Norway_national_football_team' },
-      { name: 'Belgia',    flag: '🇧🇪', iso2: 'be', fifaRanking: 9,  vmGroup: 'G', odds: '34.0', wikipedia: 'https://en.wikipedia.org/wiki/Belgium_national_football_team' },
-      { name: 'USA',       flag: '🇺🇸', iso2: 'us', fifaRanking: 16, vmGroup: 'D', odds: '41.0', wikipedia: 'https://en.wikipedia.org/wiki/United_States_men%27s_national_soccer_team' },
-      { name: 'Colombia',  flag: '🇨🇴', iso2: 'co', fifaRanking: 13, vmGroup: 'K', odds: '41.0', wikipedia: 'https://en.wikipedia.org/wiki/Colombia_national_football_team' },
+    players: [
+      { name: 'Jermaine Wattimena',    nationality: 'Nederland',      iso2: 'nl',     pdcRanking: 17, seedNumber: 17, odds: '81.0' },
+      { name: 'Luke Woodhouse',        nationality: 'England',        iso2: 'gb-eng', pdcRanking: 18, seedNumber: 18, odds: '81.0' },
+      { name: 'Martin Schindler',      nationality: 'Tyskland',       iso2: 'de',     pdcRanking: 19, seedNumber: 19, odds: '81.0' },
+      { name: 'Krzysztof Ratajski',    nationality: 'Polen',          iso2: 'pl',     pdcRanking: 20, seedNumber: 20, odds: '101.0' },
+      { name: 'Rob Cross',             nationality: 'England',        iso2: 'gb-eng', pdcRanking: 21, seedNumber: 21, odds: '51.0' },
+      { name: 'Damon Heta',            nationality: 'Australia',      iso2: 'au',     pdcRanking: 22, seedNumber: 22, odds: '101.0' },
+      { name: 'Dirk van Duijvenbode',  nationality: 'Nederland',      iso2: 'nl',     pdcRanking: 23, seedNumber: 23, odds: '101.0' },
+      { name: 'Mike De Decker',        nationality: 'Belgia',         iso2: 'be',     pdcRanking: 24, seedNumber: 24, odds: '101.0' },
+      { name: 'Ryan Joyce',            nationality: 'England',        iso2: 'gb-eng', pdcRanking: 25, seedNumber: 25, odds: '151.0' },
+      { name: 'Cameron Menzies',       nationality: 'Skottland',      iso2: 'gb-sct', pdcRanking: 26, seedNumber: 26, odds: '151.0' },
+      { name: 'Andrew Gilding',        nationality: 'England',        iso2: 'gb-eng', pdcRanking: 27, seedNumber: 27, odds: '151.0' },
+      { name: 'Kevin Doets',           nationality: 'Nederland',      iso2: 'nl',     pdcRanking: 28, seedNumber: 28, odds: '151.0' },
+      { name: 'Daryl Gurney',          nationality: 'Nord-Irland',    iso2: 'gb-nir', pdcRanking: 29, seedNumber: 29, odds: '151.0' },
+      { name: 'Dave Chisnall',         nationality: 'England',        iso2: 'gb-eng', pdcRanking: 30, seedNumber: 30, odds: '201.0' },
+      { name: 'Joe Cullen',            nationality: 'England',        iso2: 'gb-eng', pdcRanking: 31, seedNumber: 31, odds: '151.0' },
+      { name: 'Ritchie Edhouse',       nationality: 'England',        iso2: 'gb-eng', pdcRanking: 32, seedNumber: 32, odds: '201.0' },
     ],
   },
   {
     potNumber: 4,
-    name: '🔥 Jokerne',
+    name: '🔥 Kvalifiserte',
     emoji: '🔥',
-    teams: [
-      { name: 'Uruguay', flag: '🇺🇾', iso2: 'uy', fifaRanking: 17, vmGroup: 'H', odds: '51.0', wikipedia: 'https://en.wikipedia.org/wiki/Uruguay_national_football_team' },
-      { name: 'Marokko', flag: '🇲🇦', iso2: 'ma', fifaRanking: 7,  vmGroup: 'C', odds: '51.0', wikipedia: 'https://en.wikipedia.org/wiki/Morocco_national_football_team' },
-      { name: 'Japan',   flag: '🇯🇵', iso2: 'jp', fifaRanking: 18, vmGroup: 'F', odds: '51.0', wikipedia: 'https://en.wikipedia.org/wiki/Japan_national_football_team' },
-      { name: 'Mexico',  flag: '🇲🇽', iso2: 'mx', fifaRanking: 15, vmGroup: 'A', odds: '76.0', wikipedia: 'https://en.wikipedia.org/wiki/Mexico_national_football_team' },
-      { name: 'Sverige', flag: '🇸🇪', iso2: 'se', fifaRanking: 23, vmGroup: 'F', odds: '76.0', wikipedia: 'https://en.wikipedia.org/wiki/Sweden_national_football_team' },
-      { name: 'Kroatia', flag: '🇭🇷', iso2: 'hr', fifaRanking: 11, vmGroup: 'L', odds: '81.0', wikipedia: 'https://en.wikipedia.org/wiki/Croatia_national_football_team' },
+    players: [
+      { name: 'Ryan Meikle',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 33, seedNumber: null, odds: '251.0' },
+      { name: 'Callan Rydz',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 34, seedNumber: null, odds: '251.0' },
+      { name: 'Ricardo Pietreczko', nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 35, seedNumber: null, odds: '251.0' },
+      { name: 'Niels Zonneveld',    nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 36, seedNumber: null, odds: '251.0' },
+      { name: 'Ian White',         nationality: 'England',     iso2: 'gb-eng', pdcRanking: 37, seedNumber: null, odds: '301.0' },
+      { name: 'Mensur Suljović',    nationality: 'Østerrike',   iso2: 'at',     pdcRanking: 38, seedNumber: null, odds: '301.0' },
+      { name: 'Vincent van der Voort', nationality: 'Nederland', iso2: 'nl',    pdcRanking: 39, seedNumber: null, odds: '301.0' },
+      { name: 'Kim Huybrechts',     nationality: 'Belgia',      iso2: 'be',     pdcRanking: 40, seedNumber: null, odds: '301.0' },
+      { name: 'Brendan Dolan',      nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 41, seedNumber: null, odds: '301.0' },
+      { name: 'Keane Barry',        nationality: 'Irland',      iso2: 'ie',     pdcRanking: 42, seedNumber: null, odds: '301.0' },
+      { name: 'Connor Scutt',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 43, seedNumber: null, odds: '351.0' },
+      { name: 'William Borland',    nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 44, seedNumber: null, odds: '351.0' },
+      { name: 'Alan Soutar',        nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 45, seedNumber: null, odds: '351.0' },
+      { name: 'Scott Williams',     nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 46, seedNumber: null, odds: '351.0' },
+      { name: 'Adam Hunt',          nationality: 'England',     iso2: 'gb-eng', pdcRanking: 47, seedNumber: null, odds: '351.0' },
+      { name: "William O'Connor",   nationality: 'Irland',      iso2: 'ie',     pdcRanking: 48, seedNumber: null, odds: '351.0' },
     ],
   },
   {
     potNumber: 5,
-    name: '🌍 Underdogs',
-    emoji: '🌍',
-    teams: [
-      { name: 'Sveits',    flag: '🇨🇭', iso2: 'ch', fifaRanking: 19, vmGroup: 'B', odds: '81.0',  wikipedia: 'https://en.wikipedia.org/wiki/Switzerland_national_football_team' },
-      { name: 'Ecuador',   flag: '🇪🇨', iso2: 'ec', fifaRanking: 23, vmGroup: 'E', odds: '91.0',  wikipedia: 'https://en.wikipedia.org/wiki/Ecuador_national_football_team' },
-      { name: 'Senegal',   flag: '🇸🇳', iso2: 'sn', fifaRanking: 14, vmGroup: 'I', odds: '101.0', wikipedia: 'https://en.wikipedia.org/wiki/Senegal_national_football_team' },
-      { name: 'Tyrkia',    flag: '🇹🇷', iso2: 'tr', fifaRanking: 22, vmGroup: 'D', odds: '101.0', wikipedia: 'https://en.wikipedia.org/wiki/Turkey_national_football_team' },
-      { name: 'Østerrike', flag: '🇦🇹', iso2: 'at', fifaRanking: 24, vmGroup: 'J', odds: '101.0', wikipedia: 'https://en.wikipedia.org/wiki/Austria_national_football_team' },
-      { name: 'Canada',    flag: '🇨🇦', iso2: 'ca', fifaRanking: 30, vmGroup: 'B', odds: '151.0', wikipedia: 'https://en.wikipedia.org/wiki/Canada_men%27s_national_soccer_team' },
-      { name: 'Paraguay',  flag: '🇵🇾', iso2: 'py', fifaRanking: 40, vmGroup: 'D', odds: '151.0', wikipedia: 'https://en.wikipedia.org/wiki/Paraguay_national_football_team' },
-    ],
-  },
-  {
-    potNumber: 6,
-    name: '🔍 Overraskelsene',
-    emoji: '🔍',
-    teams: [
-      { name: 'Algerie',          flag: '🇩🇿', iso2: 'dz',     fifaRanking: 26, vmGroup: 'J', odds: '201.0', wikipedia: 'https://en.wikipedia.org/wiki/Algeria_national_football_team' },
-      { name: 'Tsjekkia',         flag: '🇨🇿', iso2: 'cz',     fifaRanking: 41, vmGroup: 'A', odds: '201.0', wikipedia: 'https://en.wikipedia.org/wiki/Czech_Republic_national_football_team' },
-      { name: 'Elfenbenskysten',  flag: '🇨🇮', iso2: 'ci',     fifaRanking: 34, vmGroup: 'E', odds: '201.0', wikipedia: 'https://en.wikipedia.org/wiki/Ivory_Coast_national_football_team' },
-      { name: 'Sør-Korea',        flag: '🇰🇷', iso2: 'kr',     fifaRanking: 25, vmGroup: 'A', odds: '251.0', wikipedia: 'https://en.wikipedia.org/wiki/South_Korea_national_football_team' },
-      { name: 'Egypt',            flag: '🇪🇬', iso2: 'eg',     fifaRanking: 29, vmGroup: 'G', odds: '251.0', wikipedia: 'https://en.wikipedia.org/wiki/Egypt_national_football_team' },
-      { name: 'Skottland',        flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', iso2: 'gb-sct', fifaRanking: 36, vmGroup: 'C', odds: '251.0', wikipedia: 'https://en.wikipedia.org/wiki/Scotland_national_football_team' },
-      { name: 'Ghana',            flag: '🇬🇭', iso2: 'gh',     fifaRanking: 74, vmGroup: 'L', odds: '251.0', wikipedia: 'https://en.wikipedia.org/wiki/Ghana_national_football_team' },
-    ],
-  },
-  {
-    potNumber: 7,
-    name: '⚔️ Langskuddene',
-    emoji: '⚔️',
-    teams: [
-      { name: 'Bosnia-Hercegovina', flag: '🇧🇦', iso2: 'ba', fifaRanking: 41, vmGroup: 'B', odds: '251.0',  wikipedia: 'https://en.wikipedia.org/wiki/Bosnia_and_Herzegovina_national_football_team' },
-      { name: 'Iran',               flag: '🇮🇷', iso2: 'ir', fifaRanking: 21, vmGroup: 'G', odds: '501.0',  wikipedia: 'https://en.wikipedia.org/wiki/Iran_national_football_team' },
-      { name: 'Australia',          flag: '🇦🇺', iso2: 'au', fifaRanking: 27, vmGroup: 'D', odds: '501.0',  wikipedia: 'https://en.wikipedia.org/wiki/Australia_national_football_team' },
-      { name: 'Tunisia',            flag: '🇹🇳', iso2: 'tn', fifaRanking: 44, vmGroup: 'F', odds: '501.0',  wikipedia: 'https://en.wikipedia.org/wiki/Tunisia_national_football_team' },
-      { name: 'Congo DR',           flag: '🇨🇩', iso2: 'cd', fifaRanking: 48, vmGroup: 'K', odds: '751.0',  wikipedia: 'https://en.wikipedia.org/wiki/DR_Congo_national_football_team' },
-      { name: 'Saudi-Arabia',       flag: '🇸🇦', iso2: 'sa', fifaRanking: 61, vmGroup: 'H', odds: '1001.0', wikipedia: 'https://en.wikipedia.org/wiki/Saudi_Arabia_national_football_team' },
-      { name: 'New Zealand',        flag: '🇳🇿', iso2: 'nz', fifaRanking: 85, vmGroup: 'G', odds: '1001.0', wikipedia: 'https://en.wikipedia.org/wiki/New_Zealand_national_football_team' },
-      { name: 'Qatar',              flag: '🇶🇦', iso2: 'qa', fifaRanking: 55, vmGroup: 'B', odds: '1001.0', wikipedia: 'https://en.wikipedia.org/wiki/Qatar_national_football_team' },
-    ],
-  },
-  {
-    potNumber: 8,
-    name: '🎲 Miraklene',
+    name: '🎲 Wildcards',
     emoji: '🎲',
-    teams: [
-      { name: 'Irak',       flag: '🇮🇶', iso2: 'iq', fifaRanking: 34, vmGroup: 'I', odds: '1001.0', wikipedia: 'https://en.wikipedia.org/wiki/Iraq_national_football_team' },
-      { name: 'Jordan',     flag: '🇯🇴', iso2: 'jo', fifaRanking: 39, vmGroup: 'J', odds: '1001.0', wikipedia: 'https://en.wikipedia.org/wiki/Jordan_national_football_team' },
-      { name: 'Kapp Verde', flag: '🇨🇻', iso2: 'cv', fifaRanking: 42, vmGroup: 'H', odds: '1001.0', wikipedia: 'https://en.wikipedia.org/wiki/Cape_Verde_national_football_team' },
-      { name: 'Usbekistan', flag: '🇺🇿', iso2: 'uz', fifaRanking: 46, vmGroup: 'K', odds: '1001.0', wikipedia: 'https://en.wikipedia.org/wiki/Uzbekistan_national_football_team' },
-      { name: 'Panama',     flag: '🇵🇦', iso2: 'pa', fifaRanking: 33, vmGroup: 'L', odds: '1001.0', wikipedia: 'https://en.wikipedia.org/wiki/Panama_national_football_team' },
-      { name: 'Sør-Afrika', flag: '🇿🇦', iso2: 'za', fifaRanking: 43, vmGroup: 'A', odds: '1001.0', wikipedia: 'https://en.wikipedia.org/wiki/South_Africa_national_football_team' },
-      { name: 'Curaçao',   flag: '🇨🇼', iso2: 'cw', fifaRanking: 44, vmGroup: 'E', odds: '2501.0', wikipedia: 'https://en.wikipedia.org/wiki/Cura%C3%A7ao_national_football_team' },
-      { name: 'Haiti',      flag: '🇭🇹', iso2: 'ht', fifaRanking: 45, vmGroup: 'C', odds: '2501.0', wikipedia: 'https://en.wikipedia.org/wiki/Haiti_national_football_team' },
+    players: [
+      { name: 'Steve Beaton',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 49, seedNumber: null, odds: '501.0' },
+      { name: 'Jeffrey de Zwaan',  nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 50, seedNumber: null, odds: '501.0' },
+      { name: 'Madars Razma',      nationality: 'Latvia',      iso2: 'lv',     pdcRanking: 51, seedNumber: null, odds: '501.0' },
+      { name: 'Robert Owen',       nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 52, seedNumber: null, odds: '501.0' },
+      { name: 'Jim Williams',      nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 53, seedNumber: null, odds: '501.0' },
+      { name: 'Jason Lowe',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 54, seedNumber: null, odds: '501.0' },
+      { name: 'Ryan Murray',       nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 55, seedNumber: null, odds: '501.0' },
+      { name: 'Chris Landman',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 56, seedNumber: null, odds: '751.0' },
+      { name: 'Danny van Trijp',   nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 57, seedNumber: null, odds: '751.0' },
+      { name: 'Jamie Hughes',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 58, seedNumber: null, odds: '751.0' },
+      { name: 'Niko Springer',     nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 59, seedNumber: null, odds: '751.0' },
+      { name: 'Florian Hempel',    nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 60, seedNumber: null, odds: '751.0' },
+      { name: 'Boris Krčmar',      nationality: 'Kroatia',     iso2: 'hr',     pdcRanking: 61, seedNumber: null, odds: '1001.0' },
+      { name: 'Gabriel Clemens',   nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 62, seedNumber: null, odds: '751.0' },
+      { name: 'Owen Bates',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 63, seedNumber: null, odds: '1001.0' },
+      { name: 'Nathan Girvan',     nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 64, seedNumber: null, odds: '1001.0' },
     ],
   },
 ]
 
-/** Slår opp iso2-kode (for flagcdn.com) fra lagnavn. Returnerer '' ved ukjent lag. */
-export function getIso2(teamName: string): string {
+/** Slår opp iso2-kode (for flagcdn.com) fra spillernavn. Returnerer '' ved ukjent spiller. */
+export function getIso2(playerName: string): string {
   for (const pot of POTS) {
-    const team = pot.teams.find(t => t.name === teamName)
-    if (team) return team.iso2
+    const player = pot.players.find(p => p.name === playerName)
+    if (player) return player.iso2
   }
   return ''
 }

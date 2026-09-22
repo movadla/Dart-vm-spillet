@@ -6,7 +6,7 @@ import Link from 'next/link'
 import CopyCode from '@/components/CopyCode'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-const KICKOFF = new Date('2026-06-11T19:00:00Z')
+const KICKOFF = new Date('2026-12-11T19:00:00Z')
 const isBeforeKickoff = new Date() < KICKOFF
 
 function ShareLeagueButton({ name, code }: { name: string; code: string }) {
@@ -17,7 +17,7 @@ function ShareLeagueButton({ name, code }: { name: string; code: string }) {
     const url = `${window.location.origin}/liga/${code}`
     const text = `Bli med i ${name}! Kode: ${code}`
     if (navigator.share) {
-      try { await navigator.share({ title: `${name} – VM-Spillet 2026`, text, url }) } catch {}
+      try { await navigator.share({ title: `${name} – Dart-VM-spillet`, text, url }) } catch {}
     } else {
       await navigator.clipboard.writeText(`${text}\n${url}`)
       setCopied(true)

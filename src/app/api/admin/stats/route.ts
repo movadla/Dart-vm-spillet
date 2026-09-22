@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  let query = supabase.from('picks').select('participant_id, pot_number, team_name')
+  let query = supabase.from('picks').select('participant_id, pot_number, player_name')
   if (participantIds) query = query.in('participant_id', participantIds)
 
   const { data: picks, error } = await query
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
   const byPot: Record<number, Record<string, number>> = {}
   for (const pick of picks) {
     if (!byPot[pick.pot_number]) byPot[pick.pot_number] = {}
-    byPot[pick.pot_number][pick.team_name] = (byPot[pick.pot_number][pick.team_name] ?? 0) + 1
+    byPot[pick.pot_number][pick.player_name] = (byPot[pick.pot_number][pick.player_name] ?? 0) + 1
   }
 
   const sorted: Record<number, { team: string; count: number }[]> = {}

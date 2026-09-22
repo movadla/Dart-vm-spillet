@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { POTS } from '@/data/pots'
 import { Resend } from 'resend'
-import { buildWelcomeHtml, buildWelcomeText, flagFor, iso2For } from '@/lib/email-welcome'
+import { buildWelcomeHtml, buildWelcomeText, iso2For } from '@/lib/email-welcome'
 
 const VALID_PICKS: Record<number, Set<string>> = Object.fromEntries(
-  POTS.map(p => [p.potNumber, new Set(p.teams.map(t => t.name))])
+  POTS.map(p => [p.potNumber, new Set(p.players.map(pl => pl.name))])
 )
 
-const KICKOFF = new Date('2026-06-11T19:00:00Z')
+const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
 export async function POST(req: NextRequest) {
   if (new Date() > KICKOFF) {
@@ -33,15 +33,15 @@ export async function POST(req: NextRequest) {
     }
 
     const pickEntries = Object.entries(picks as Record<string, string>)
-    if (pickEntries.length !== 8) {
-      return NextResponse.json({ error: 'Du må velge ett lag fra alle 8 potter' }, { status: 400 })
+    if (pickEntries.length !== POTS.length) {
+      return NextResponse.json({ error: `Du må velge én spiller fra alle ${POTS.length} potter` }, { status: 400 })
     }
-    for (let pot = 1; pot <= 8; pot++) {
+    for (let pot = 1; pot <= POTS.length; pot++) {
       if (!picks[pot] || typeof picks[pot] !== 'string') {
         return NextResponse.json({ error: `Mangler valg fra pot ${pot}` }, { status: 400 })
       }
       if (!VALID_PICKS[pot]?.has(picks[pot])) {
-        return NextResponse.json({ error: `Ugyldig lag i pot ${pot}` }, { status: 400 })
+        return NextResponse.json({ error: `Ugyldig spiller i pot ${pot}` }, { status: 400 })
       }
     }
 
@@ -69,10 +69,10 @@ export async function POST(req: NextRequest) {
 
     // Insert picks
     const pickRows = Object.entries(picks as Record<string, string>).map(
-      ([potNumber, teamName]) => ({
+      ([potNumber, playerName]) => ({
         participant_id: participant.id,
         pot_number: parseInt(potNumber, 10),
-        team_name: teamName,
+        player_name: playerName,
       })
     )
 
@@ -115,12 +115,12 @@ async function sendWelcomeEmail(p: {
 
   const sortedPicks = Object.entries(p.picks)
     .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([, team]) => ({ team, flag: flagFor(team), iso2: iso2For(team) }))
+    .map(([, team]) => ({ team, iso2: iso2For(team) }))
 
   await resend.emails.send({
-    from: `Snåsamannen 2026 - VM-Spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`,
+    from: `Dart-VM-spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`,
     to: p.email,
-    subject: 'Du er påmeldt — VM-Spillet 2026',
+    subject: 'Du er påmeldt — Dart-VM-spillet',
     html: buildWelcomeHtml(p.name, ctaUrl, sortedPicks),
     text: buildWelcomeText(p.name, ctaUrl, sortedPicks),
   })

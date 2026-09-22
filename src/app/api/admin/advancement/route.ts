@@ -3,21 +3,22 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
 const supabase = getSupabaseAdmin()
 import { checkAdminAuth } from '@/lib/adminAuth'
+import { STAGE_ORDER } from '@/config/scoring'
 
-const VALID_STAGES = ['group', 'r32', 'r16', 'qf', 'sf', 'bronze', 'silver', 'gold']
+const VALID_STAGES = STAGE_ORDER
 
 export async function POST(req: NextRequest) {
   const authError = checkAdminAuth(req)
   if (authError) return authError
-  const { team, stage } = await req.json()
+  const { player_name, stage } = await req.json()
 
-  if (!team || !stage || !VALID_STAGES.includes(stage)) {
+  if (!player_name || !stage || !VALID_STAGES.includes(stage)) {
     return NextResponse.json({ error: 'Ugyldig data' }, { status: 400 })
   }
 
   const { error } = await supabase
     .from('advancement')
-    .upsert({ team_name: team.trim(), stage_reached: stage }, { onConflict: 'team_name' })
+    .upsert({ player_name: player_name.trim(), stage_reached: stage }, { onConflict: 'player_name' })
 
   if (error) {
     return NextResponse.json({ error: 'Kunne ikke lagre avansement' }, { status: 500 })
@@ -29,16 +30,16 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const authError = checkAdminAuth(req)
   if (authError) return authError
-  const { team } = await req.json()
+  const { player_name } = await req.json()
 
-  if (!team) {
-    return NextResponse.json({ error: 'Mangler lagnavn' }, { status: 400 })
+  if (!player_name) {
+    return NextResponse.json({ error: 'Mangler spillernavn' }, { status: 400 })
   }
 
   const { error } = await supabase
     .from('advancement')
     .delete()
-    .eq('team_name', team.trim())
+    .eq('player_name', player_name.trim())
 
   if (error) {
     return NextResponse.json({ error: 'Kunne ikke slette avansement' }, { status: 500 })

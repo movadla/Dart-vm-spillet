@@ -1,13 +1,13 @@
-# VM-tipping 2026
+# Dart-VM-spillet
 
-Fantasy-sport-app for FIFA World Cup 2026. Deltakere velger 8 lag (ett fra hver seedingspott) og følger dem gjennom mesterskapet. Poeng beregnes automatisk basert på kampresultater og avansement.
+Fantasy-tippespill for PDC World Darts Championship. Deltakere velger én dartspiller fra hver av 5 potter (seedingsnivåer) og følger dem gjennom det rene utslagsbrakettet. Poeng beregnes ut fra hvor langt hver spiller avanserer i turneringen.
 
 ## Tech stack
 
 - **Frontend/Backend:** Next.js 16 (App Router) — TypeScript
 - **Database:** Supabase (PostgreSQL)
 - **Hosting:** Vercel
-- **Resultatsync:** football-data.org API (automatisk via cron)
+- **Resultater:** lagt inn manuelt av admin (ingen fri live-API for PDC-darts)
 - **E-post:** Resend
 - **Tester:** Vitest
 
@@ -30,11 +30,9 @@ Alle miljøvariabler settes i Vercel-dashboardet (Settings → Environment Varia
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | ✅ |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | ✅ |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side) | ✅ |
-| `FOOTBALL_DATA_API_KEY` | API-nøkkel fra football-data.org | ✅ |
-| `SYNC_SECRET` | Tilfeldig hemmelighet for å trigge manuell resultatsync | ✅ |
 | `ADMIN_SECRET` | Hemmelighet for admin-API-endepunkter | ✅ |
 | `RESEND_API_KEY` | API-nøkkel fra Resend (daglig e-post) | ✅ |
-| `NEXT_PUBLIC_BASE_URL` | Full URL til appen, f.eks. `https://vm.example.com` | ✅ |
+| `NEXT_PUBLIC_BASE_URL` | Full URL til appen, f.eks. `https://dartvm.example.com` | ✅ |
 
 ## Arkitektur
 
@@ -42,62 +40,46 @@ Alle miljøvariabler settes i Vercel-dashboardet (Settings → Environment Varia
 src/
 ├── app/
 │   ├── page.tsx               # Forside
-│   ├── tipp/                  # Registreringsflyten (8-stegs slideshow)
+│   ├── tipp/                  # Registreringsflyten (5-stegs slideshow, ett per pott)
 │   ├── deltaker/[id]/         # "Min side" for hver deltaker
 │   ├── leaderboard/           # Poengtoppen
-│   ├── vm-info/               # Info om VM og regler
+│   ├── vm-info/               # Info om turneringen og reglene
 │   ├── liga/                  # Private ligaer
+│   ├── admin/                 # Manuell registrering av kampresultater og avansement
 │   └── api/
-│       ├── sync-results/      # Automatisk resultatsync fra football-data.org
 │       ├── admin/             # Admin-endepunkter (krever ADMIN_SECRET)
 │       └── ...
 ├── data/
-│   ├── pots.ts                # 48 lag fordelt på 8 potter
-│   └── schedule.ts            # Kampprogram (gruppespillet)
+│   └── pots.ts                 # 5 potter med dartspillere (PDC-seeding)
 ├── lib/
-│   ├── scoring.ts             # Poengberegning
-│   └── teamNames.ts           # Mapping fra football-data.org navn til norske navn
+│   └── scoring.ts               # Poengberegning (rent avansement-basert)
 └── config/
-    └── scoring.ts             # Poengkonfigurasjon
+    └── scoring.ts               # Poengkonfigurasjon
 ```
 
 ## Poengberegning
 
-Konfigureres i `src/config/scoring.ts`:
+Konfigureres i `src/config/scoring.ts`. PDC-VM er et rent utslagsspill uten gruppespill, så poeng kommer utelukkende fra hvor langt en spiller avanserer — kumulativt gjennom rundene:
 
-| Hendelse | Poeng |
+| Runde | Poeng (kumulativt) |
 |---|---|
-| Mål scoret | 1p per mål |
-| Seier | 4p |
-| Uavgjort | 1p |
-| Videre fra gruppe | 5p |
-| Vinner R32 | +8p (kumulativt) |
-| Vinner R16 | +12p |
-| Vinner QF | +17p |
-| Vinner SF | +24p |
-| VM-vinner | +32p |
+| 1. runde | 5 |
+| 2. runde | 10 |
+| 3. runde | 20 |
+| 4. runde | 30 |
+| Kvartfinale | 45 |
+| Semifinale | 65 |
+| Finale | 90 |
+| VM-vinner | 125 |
 
-Kamppoeng multipliseres med en underdogs-multiplikator per pott (konfigurerbar). Avansementspoeng er kumulative — et lag som vinner VM får poeng for alle runder.
+Poengsummen multipliseres med en underdogs-multiplikator per pott: pott 1–2 = ×1, pott 3–4 = ×2, pott 5 = ×3.
 
-## Automatisk resultatsync
+## Manuell resultatregistrering
 
-Kampresultater hentes fra football-data.org og skrives til Supabase automatisk.
+Det finnes ingen fri live-API for PDC-darts, så alle kampresultater og avansement legges inn manuelt via `/admin`:
 
-**Cron-jobb** (konfigurert i `vercel.json`) kaller `/api/sync-results` regelmessig.
-
-**Manuell trigger:**
-```
-GET /api/sync-results?secret=<SYNC_SECRET>
-```
-
-**Avansement** (hvilken runde et lag nådde) oppdateres via admin-APIet:
-```
-POST /api/admin/advancement
-Headers: x-admin-secret: <ADMIN_SECRET>
-Body: { "team": "Brasil", "stage": "sf" }
-```
-
-Gyldige stages: `group`, `r32`, `r16`, `qf`, `sf`, `final`, `winner`
+- **Kampresultat:** spiller 1/spiller 2, sett 1/sett 2, runde — skrives til `match_results`.
+- **Avansement:** hvilken runde en spiller har nådd — skrives til `advancement` og styrer poengsummen direkte.
 
 ## Kjør tester
 
@@ -105,15 +87,17 @@ Gyldige stages: `group`, `r32`, `r16`, `qf`, `sf`, `final`, `winner`
 npm test
 ```
 
-25 enhetstester dekker all poengberegningslogikk.
+Enhetstester dekker poengberegningslogikken (`src/lib/scoring.test.ts`).
 
 ## Database-tabeller (Supabase)
 
 | Tabell | Beskrivelse |
 |---|---|
 | `participants` | Påmeldte deltakere |
-| `picks` | Lagvalg per deltaker (8 rader per person) |
-| `match_results` | Kampresultater fra football-data.org |
-| `advancement` | Hvilken runde hvert lag nådde |
+| `picks` | Spillervalg per deltaker (5 rader per person) |
+| `match_results` | Manuelt registrerte kampresultater |
+| `advancement` | Hvilken runde hver spiller har nådd |
 | `leagues` | Private ligaer |
 | `league_members` | Deltakere i ligaer |
+
+Se `supabase/schema.sql` for et nytt oppsett, eller `supabase/migrate_to_darts.sql` for å migrere en eksisterende `cl-spillet`/`vm-tipping`-database.

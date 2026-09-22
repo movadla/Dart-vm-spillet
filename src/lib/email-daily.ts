@@ -1,10 +1,10 @@
 export const VM_TOTAL_DAYS = 39
 
 export interface MatchResultLite {
-  home: string
-  away: string
-  homeGoals: number
-  awayGoals: number
+  player1: string
+  player2: string
+  sets1: number
+  sets2: number
 }
 
 export interface LeagueStanding {
@@ -50,7 +50,7 @@ const PREHEADER_PADDING = ('&nbsp;&#847;&zwnj;').repeat(200)
 export function buildDailyPlainText(p: PlainTextParams): string {
   const delta = p.pointsDelta > 0 ? `+${p.pointsDelta}p siden i går\n` : ''
   const results = p.recentResults?.length
-    ? '\nGårsdagens resultater:\n' + p.recentResults.map((r) => `  ${r.home} ${r.homeGoals}–${r.awayGoals} ${r.away}`).join('\n') + '\n'
+    ? '\nGårsdagens resultater:\n' + p.recentResults.map((r) => `  ${r.player1} ${r.sets1}–${r.sets2} ${r.player2}`).join('\n') + '\n'
     : ''
   const leagueLines = [
     ...(p.leagues ?? []).map((l) => `  ${l.name}: ${l.rank}. av ${l.total}`),
@@ -93,14 +93,14 @@ export function buildDailyEmail(p: EmailParams): string {
                 <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Gårsdagens resultater</div>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border:1px solid rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;background:#12161f;">
                   ${results.map((r, i) => {
-                    const homeWin = r.homeGoals > r.awayGoals
-                    const awayWin = r.awayGoals > r.homeGoals
+                    const p1Win = r.sets1 > r.sets2
+                    const p2Win = r.sets2 > r.sets1
                     return `<tr>
                     <td style="padding:10px 14px;${i > 0 ? 'border-top:1px solid rgba(255,255,255,0.06);' : ''}">
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="table-layout:fixed;"><tr>
-                        <td width="44%" align="right" style="font-size:13px;color:${homeWin ? '#ffffff' : 'rgba(255,255,255,0.5)'};font-weight:${homeWin ? 700 : 400};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.home}</td>
-                        <td width="12%" align="center" style="font-family:'Barlow Condensed','Arial Narrow',Impact,Arial,sans-serif;font-size:17px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;white-space:nowrap;">${r.homeGoals}&#8211;${r.awayGoals}</td>
-                        <td width="44%" align="left" style="font-size:13px;color:${awayWin ? '#ffffff' : 'rgba(255,255,255,0.5)'};font-weight:${awayWin ? 700 : 400};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.away}</td>
+                        <td width="44%" align="right" style="font-size:13px;color:${p1Win ? '#ffffff' : 'rgba(255,255,255,0.5)'};font-weight:${p1Win ? 700 : 400};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.player1}</td>
+                        <td width="12%" align="center" style="font-family:'Barlow Condensed','Arial Narrow',Impact,Arial,sans-serif;font-size:17px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;white-space:nowrap;">${r.sets1}&#8211;${r.sets2}</td>
+                        <td width="44%" align="left" style="font-size:13px;color:${p2Win ? '#ffffff' : 'rgba(255,255,255,0.5)'};font-weight:${p2Win ? 700 : 400};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.player2}</td>
                       </tr></table>
                     </td>
                   </tr>`
@@ -155,7 +155,7 @@ export function buildDailyEmail(p: EmailParams): string {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="supported-color-schemes" content="dark">
-  <title>VM-Spillet 2026</title>
+  <title>Dart-VM-spillet</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&display=swap');
   </style>
@@ -177,9 +177,9 @@ export function buildDailyEmail(p: EmailParams): string {
             <!-- Logo -->
             <tr>
               <td align="left" style="padding-bottom:8px;">
-                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#4ade80;margin-bottom:8px;text-shadow:0 0 16px rgba(34,197,94,0.5);">— Snåsamannen 2026 —</div>
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#4ade80;margin-bottom:8px;text-shadow:0 0 16px rgba(34,197,94,0.5);">— PDC World Championship —</div>
                 <div style="font-family:'Barlow Condensed','Arial Narrow',Impact,Arial,sans-serif;font-weight:900;text-transform:uppercase;font-size:64px;letter-spacing:-2px;line-height:1;white-space:nowrap;text-shadow:0 0 48px rgba(220,38,38,0.45),0 0 96px rgba(59,130,246,0.25);">
-                  <span style="color:rgba(255,255,255,0.35);">VM-</span><span style="color:#ffffff;">SPILLET</span><span style="font-size:28px;letter-spacing:0.04em;color:rgba(255,255,255,0.22);padding-left:10px;vertical-align:middle;">2026</span>
+                  <span style="color:rgba(255,255,255,0.35);">DART-VM-</span><span style="color:#ffffff;">SPILLET</span><span style="font-size:28px;letter-spacing:0.04em;color:rgba(255,255,255,0.22);padding-left:10px;vertical-align:middle;">2026</span>
                 </div>
               </td>
             </tr>
@@ -246,7 +246,7 @@ ${leaguesHtml}${resultsHtml}
             <tr>
               <td>
                 <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.15);line-height:2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-                  Du mottar dette fordi du er påmeldt VM-Spillet 2026.<br>
+                  Du mottar dette fordi du er påmeldt Dart-VM-spillet.<br>
                   <a href="${unsubscribeUrl}" style="color:rgba(255,255,255,0.28);text-decoration:underline;">Meld deg av daglige oppdateringer</a>
                 </p>
               </td>

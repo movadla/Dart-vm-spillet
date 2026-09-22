@@ -6,19 +6,20 @@ import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
 import { POTS } from '@/data/pots'
 import Flag from '@/components/Flag'
-import { SCORING } from '@/config/scoring'
+import { SCORING, STAGE_ORDER, STAGE_LABELS } from '@/config/scoring'
 import StepSlideshow from '@/components/StepSlideshow'
 import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-const KICKOFF = new Date('2026-06-11T19:00:00Z')
+const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
 const POT_COLORS = [
-  '#f59e0b', '#3b82f6', '#22c55e', '#f97316',
-  '#8b5cf6', '#06b6d4', '#ef4444', '#ec4899',
+  '#f59e0b', '#3b82f6', '#22c55e', '#f97316', '#8b5cf6',
 ]
 
-const ALL_TEAMS = POTS.flatMap(p => p.teams)
+const POT_COUNT = POTS.length
+const REGISTRATION_STEP = POT_COUNT + 1
+const SUMMARY_STEP = POT_COUNT + 2
 
 const CONFETTI_PIECES = [
   { color: '#dc2626', left: 8,  size: 8, delay: 0,    rect: false },
@@ -76,7 +77,7 @@ function ProgressDots({ step, onGuide, onStep }: { step: number; onGuide?: () =>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <SmartBackButton />
-        <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.12em' }}>STEG {step} AV 8</div>
+        <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.12em' }}>STEG {step} AV {POT_COUNT}</div>
         {onGuide
           ? <button onClick={onGuide} className="btn-hover" style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}>Guide</button>
           : <div style={{ width: 40 }} />
@@ -92,7 +93,7 @@ function TippContent() {
   const editId = searchParams.get('edit')
   const isEditMode = !!editId
 
-  // 0: intro (new users only), 1–8: picks, 9: registration (non-edit), 10: summary
+  // 0: intro (new users only), 1–POT_COUNT: picks, REGISTRATION_STEP: registration (non-edit), SUMMARY_STEP: summary
   const [step, setStep] = useState(isEditMode ? 1 : 0)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -126,7 +127,7 @@ function TippContent() {
           if (data.participant) { setName(data.participant.name); setEmail(data.participant.email) }
           if (data.picks) {
             const existing: Record<number, string> = {}
-            data.picks.forEach((p: { pot_number: number; team_name: string }) => { existing[p.pot_number] = p.team_name })
+            data.picks.forEach((p: { pot_number: number; player_name: string }) => { existing[p.pot_number] = p.player_name })
             setPicks(existing)
           }
         }
@@ -219,7 +220,7 @@ const inputStyle: React.CSSProperties = {
           <div style={{ fontSize: 48, color: '#dc2626' }}>stengt</div>
         </div>
         <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', marginBottom: 32, maxWidth: 280 }}>
-          VM 2026 er i gang. Påmelding og endring av picks er ikke lenger mulig.
+          Dart-VM 2026 er i gang. Påmelding og endring av picks er ikke lenger mulig.
         </p>
         <Link href="/leaderboard" style={{ display: 'inline-block', padding: '14px 28px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontWeight: 800, fontSize: 14, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 12, textDecoration: 'none', fontFamily: SPORT, boxShadow: '0 4px 20px rgba(220,38,38,0.3)', marginBottom: 12 }}>
           Se leaderboard →
@@ -241,7 +242,6 @@ const inputStyle: React.CSSProperties = {
 
     return (
       <div className="page-bg" style={{ minHeight: '100vh', padding: '40px 20px 56px', color: '#fff', position: 'relative', overflow: 'hidden' }}>
-        <img src="/snåsamannen.png" alt="" style={{ position: 'absolute', right: -10, top: 0, width: 260, opacity: 0.32, pointerEvents: 'none', zIndex: 0, filter: 'brightness(1.0) saturate(0.7) contrast(1.05)', maskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)' }} />
         <div style={{ marginBottom: 24 }}>
           <Link href={`/deltaker/${editId}`} className="back-btn">← Tilbake</Link>
         </div>
@@ -336,16 +336,15 @@ const inputStyle: React.CSSProperties = {
     return (
       <div className="page-bg" style={{ minHeight: '100vh', padding: '40px 20px 56px', color: '#fff', position: 'relative' }}>
         <Confetti />
-        <img src="/snåsamannen.png" alt="" style={{ position: 'absolute', right: -10, top: 0, width: 260, opacity: 0.32, pointerEvents: 'none', zIndex: 0, filter: 'brightness(1.0) saturate(0.7) contrast(1.05)', maskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)' }} />
 
         {/* Brand banner — VM-SPILLET */}
         <div style={{ position: 'relative', height: 145, marginBottom: 20, pointerEvents: 'none', zIndex: 1 }}>
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
             <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
-              — Snåsamannen 2026 —
+              — PDC World Championship —
             </div>
             <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 52, letterSpacing: '-1px', lineHeight: 1 }}>
-              <span style={{ color: 'rgba(255,255,255,0.38)' }}>VM-</span>
+              <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
               <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
           </div>
@@ -359,8 +358,8 @@ const inputStyle: React.CSSProperties = {
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 4, fontSize: 22 }}>
             {POTS.map(pot => {
-              const team = pot.teams.find(t => t.name === picks[pot.potNumber])
-              return <Flag key={pot.potNumber} iso2={team?.iso2 ?? ''} size={22} />
+              const player = pot.players.find(p => p.name === picks[pot.potNumber])
+              return <Flag key={pot.potNumber} iso2={player?.iso2 ?? ''} size={22} />
             })}
           </div>
         </div>
@@ -371,15 +370,15 @@ const inputStyle: React.CSSProperties = {
             Dine valg
           </div>
           {POTS.map((pot) => {
-            const team = pot.teams.find((t) => t.name === picks[pot.potNumber])
-            const color = POT_COLORS[pot.potNumber - 1]
+            const player = pot.players.find((p) => p.name === picks[pot.potNumber])
+            const color = POT_COLORS[(pot.potNumber - 1) % POT_COLORS.length]
             return (
-              <div key={pot.potNumber} style={{ display: 'flex', borderBottom: pot.potNumber < 8 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+              <div key={pot.potNumber} style={{ display: 'flex', borderBottom: pot.potNumber < POT_COUNT ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
                 <div style={{ width: 44, flexShrink: 0, background: `${color}18`, borderRight: `2px solid ${color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <span style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color, lineHeight: 1 }}>{pot.potNumber}</span>
                 </div>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px' }}>
-                  <Flag iso2={team?.iso2 ?? ''} size={24} />
+                  <Flag iso2={player?.iso2 ?? ''} size={24} />
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700 }}>{picks[pot.potNumber]}</div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Nivå {pot.potNumber}</div>
@@ -394,7 +393,7 @@ const inputStyle: React.CSSProperties = {
         <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '14px 16px', marginBottom: 24, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)' }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', marginBottom: 12 }}>Hva skjer nå?</div>
           {([
-            ['1', 'VM starter 11. juni 2026, kl. 21:00'],
+            ['1', 'Dart-VM starter 11. desember 2026, kl. 19:00'],
             ['2', 'Du kan endre valg frem til turneringen begynner'],
           ] as [string, string][]).map(([n, text]) => (
             <div key={n} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 6 }}>
@@ -447,26 +446,25 @@ const inputStyle: React.CSSProperties = {
     )
   }
 
-  // ── Steg 9: Registrering (kun nye deltakere) ──
-  if (step === 9) {
+  // ── Registrering (kun nye deltakere) ──
+  if (step === REGISTRATION_STEP) {
     const valid = name.trim().length > 1 && email.includes('@')
     return (
       <div className="page-bg" style={{ minHeight: '100vh', padding: '40px 20px 56px', color: '#fff', position: 'relative' }}>
-        <img src="/snåsamannen.png" alt="" style={{ position: 'absolute', right: -10, top: 0, width: 260, opacity: 0.32, pointerEvents: 'none', zIndex: 0, filter: 'brightness(1.0) saturate(0.7) contrast(1.05)', maskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)' }} />
         {/* Brand banner */}
         <div style={{ position: 'relative', height: 145, marginBottom: 20, pointerEvents: 'none', zIndex: 1 }}>
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
             <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
-              — Snåsamannen 2026 —
+              — PDC World Championship —
             </div>
             <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 52, letterSpacing: '-1px', lineHeight: 1 }}>
-              <span style={{ color: 'rgba(255,255,255,0.38)' }}>VM-</span>
+              <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
               <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
           </div>
         </div>
         <div style={{ marginBottom: 24 }}>
-          <button onClick={() => setStep(10)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 13, cursor: 'pointer', padding: 0 }}>← Tilbake</button>
+          <button onClick={() => setStep(SUMMARY_STEP)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 13, cursor: 'pointer', padding: 0 }}>← Tilbake</button>
         </div>
         <div style={{ marginBottom: 28 }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Siste steg</div>
@@ -544,20 +542,19 @@ const inputStyle: React.CSSProperties = {
     )
   }
 
-  // ── Steg 10: Oppsummering ──
-  if (step === 10) {
-    const allPicked = Object.keys(picks).length === 8
+  // ── Oppsummering ──
+  if (step === SUMMARY_STEP) {
+    const allPicked = Object.keys(picks).length === POT_COUNT
     return (
       <div className="page-bg" style={{ minHeight: '100vh', padding: '40px 20px 56px', color: '#fff', position: 'relative' }}>
-        <img src="/snåsamannen.png" alt="" style={{ position: 'absolute', right: -10, top: 0, width: 260, opacity: 0.32, pointerEvents: 'none', zIndex: 0, filter: 'brightness(1.0) saturate(0.7) contrast(1.05)', maskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)' }} />
         {/* Brand banner */}
         <div style={{ position: 'relative', height: 145, marginBottom: 20, pointerEvents: 'none', zIndex: 1 }}>
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
             <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
-              — Snåsamannen 2026 —
+              — PDC World Championship —
             </div>
             <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 52, letterSpacing: '-1px', lineHeight: 1 }}>
-              <span style={{ color: 'rgba(255,255,255,0.38)' }}>VM-</span>
+              <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
               <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
           </div>
@@ -574,25 +571,25 @@ const inputStyle: React.CSSProperties = {
           </div>
           {name && <div style={{ color: '#fff' }}>{name}</div>}
         </div>
-        <p style={{ color: 'rgba(255,255,255,0.35)', marginBottom: 24, fontSize: 13 }}>{Object.keys(picks).length} av 8 lag valgt</p>
+        <p style={{ color: 'rgba(255,255,255,0.35)', marginBottom: 24, fontSize: 13 }}>{Object.keys(picks).length} av {POT_COUNT} spillere valgt</p>
 
         <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', marginBottom: 20, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
           {POTS.map((pot) => {
-            const teamName = picks[pot.potNumber]
-            const team = pot.teams.find((t) => t.name === teamName)
-            const color = POT_COLORS[pot.potNumber - 1]
+            const playerName = picks[pot.potNumber]
+            const player = pot.players.find((p) => p.name === playerName)
+            const color = POT_COLORS[(pot.potNumber - 1) % POT_COLORS.length]
             const multiplier = SCORING.underdogMultiplier[pot.potNumber]
             return (
-              <div key={pot.potNumber} style={{ display: 'flex', borderBottom: pot.potNumber < 8 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+              <div key={pot.potNumber} style={{ display: 'flex', borderBottom: pot.potNumber < POT_COUNT ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
                 <div style={{ width: 44, flexShrink: 0, background: `${color}18`, borderRight: `2px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <span style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color, lineHeight: 1 }}>{pot.potNumber}</span>
                 </div>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', minWidth: 0 }}>
-                  <Flag iso2={team?.iso2 ?? ''} size={26} />
+                  <Flag iso2={player?.iso2 ?? ''} size={26} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700 }}>{teamName ?? 'Ikke valgt'}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700 }}>{playerName ?? 'Ikke valgt'}</div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
-                      Gruppe {team?.vmGroup ?? '–'}
+                      PDC-ranking #{player?.pdcRanking ?? '–'}
                     </div>
                   </div>
                   {multiplier > 1 && (
@@ -620,7 +617,7 @@ const inputStyle: React.CSSProperties = {
 
         <button
           disabled={!allPicked || submitting}
-          onClick={isEditMode ? handleSubmit : () => setStep(9)}
+          onClick={isEditMode ? handleSubmit : () => setStep(REGISTRATION_STEP)}
           style={{
             display: 'block', width: '100%', padding: '16px',
             background: allPicked && !submitting ? 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)' : 'rgba(255,255,255,0.07)',
@@ -640,7 +637,7 @@ const inputStyle: React.CSSProperties = {
           </p>
         )}
         <button
-          onClick={() => setStep(8)}
+          onClick={() => setStep(POT_COUNT)}
           style={{ display: 'block', width: '100%', padding: '13px', background: 'transparent', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
         >
           ← Tilbake
@@ -649,33 +646,20 @@ const inputStyle: React.CSSProperties = {
     )
   }
 
-  // ── Steg 1–8: Velg lag ──
+  // ── Steg 1–POT_COUNT: Velg spiller ──
   const potIndex = step - 1
   const pot = POTS[potIndex]
-  const selectedTeam = picks[pot.potNumber]
-  const selectedTeamData = pot.teams.find(t => t.name === selectedTeam)
-  const groupTeams = selectedTeamData
-    ? ALL_TEAMS.filter(t => t.vmGroup === selectedTeamData.vmGroup)
-    : []
+  const selectedPlayer = picks[pot.potNumber]
   const multiplier = SCORING.underdogMultiplier[pot.potNumber]
-  const color = POT_COLORS[potIndex]
-  const panelOpen = !!selectedTeam
-
-  // Lag allerede valgt fra andre potter (for konflikt-indikator i gruppe-panelet)
-  const pickedFromOtherPots = new Map(
-    Object.entries(picks)
-      .filter(([potNum]) => parseInt(potNum) !== pot.potNumber)
-      .map(([potNum, teamName]) => [teamName, parseInt(potNum)] as [string, number])
-  )
+  const color = POT_COLORS[potIndex % POT_COLORS.length]
 
   function goNext() {
-    if (step < 8) setStep(s => s + 1)
-    else setStep(10)
+    if (step < POT_COUNT) setStep(s => s + 1)
+    else setStep(SUMMARY_STEP)
   }
 
   return (
     <div className="page-bg" style={{ height: '100dvh', padding: '24px 16px 20px', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
-        <img src="/snåsamannen.png" alt="" style={{ position: 'absolute', right: -10, top: 0, width: 240, opacity: 0.32, pointerEvents: 'none', zIndex: 0, filter: 'brightness(1.0) saturate(0.7) contrast(1.05)', maskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)' }} />
       <ProgressDots step={step} onGuide={() => { setStep(0); setSlideshowSlide(0) }} onStep={setStep} />
 
       {/* Pot-header */}
@@ -689,7 +673,7 @@ const inputStyle: React.CSSProperties = {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: SPORT, fontSize: 26, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
-            Velg ditt lag
+            Velg din spiller
           </div>
           {multiplier > 1 ? (
             <div key={step} className="multiplier-badge" style={{
@@ -715,158 +699,93 @@ const inputStyle: React.CSSProperties = {
       </div>
       {showScoreInfo && (
         <div style={{ marginBottom: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px', fontSize: 12 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 6 }}>Poeng</div>
-          {([
-            ['Mål', '+1p per mål'],
-            ['Seier (gruppespill)', '+3p'],
-            ['Uavgjort (gruppespill)', '+1p'],
-            ['Videre fra gruppe', '+5p'],
-            ['Vinner 1/16-finale', '+10p'],
-            ['Vinner 1/8-finale', '+15p'],
-            ['Vinner kvartfinale', '+20p'],
-            ['Bronsemedalje', '+15p'],
-            ['Sølvmedalje', '+20p'],
-            ['Gullmedalje', '+40p'],
-          ] as [string,string][]).map(([label, val]) => (
-            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ color: 'rgba(255,255,255,0.45)' }}>{label}</span>
-              <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{val}</span>
-            </div>
-          ))}
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 6 }}>Poeng (kumulativt per runde)</div>
+          {(() => {
+            let cumulative = 0
+            return STAGE_ORDER.map((stage) => {
+              cumulative += SCORING.advancement[stage]
+              return (
+                <div key={stage} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ color: 'rgba(255,255,255,0.45)' }}>{STAGE_LABELS[stage]}</span>
+                  <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{cumulative}p</span>
+                </div>
+              )
+            })
+          })()}
           <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Nivå 5 & 6 scorer dobbelt</span>
+            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Pott 1 & 2 scorer normalt</span>
+            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>×1</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Pott 3 & 4 scorer dobbelt</span>
             <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>×2</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Nivå 7 & 8 scorer trippelt</span>
+            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Pott 5 scorer trippelt</span>
             <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#ef4444' }}>×3</span>
           </div>
         </div>
       )}
 
-
-      {step === 1 && (
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textAlign: 'center', marginBottom: 10, letterSpacing: '0.02em' }}>
-          Trykk på et lag for å se VM-puljen
-        </div>
-      )}
-
-      {/* Team list + group panel */}
-      <div style={{ display: 'flex', flex: 1, marginBottom: 16, overflowY: 'auto' }}>
-
-        {/* Left: vertical team list */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0 }}>
-          {pot.teams.map((team) => {
-            const isSelected = selectedTeam === team.name
-            return (
-              <button
-                key={team.name}
-                className="draft-team-btn"
-                onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: team.name }))}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10, padding: '13px 14px',
-                  background: isSelected ? `${color}15` : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${isSelected ? color + '55' : 'rgba(255,255,255,0.07)'}`,
-                  borderRadius: 12, cursor: 'pointer', color: '#fff', textAlign: 'left',
-                  width: '100%', transition: 'background 0.18s, border-color 0.18s, box-shadow 0.18s, filter 0.15s',
-                  boxShadow: isSelected ? `inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 16px ${color}35, 0 0 0 1px ${color}22` : 'none',
-                }}
-              >
-                <Flag iso2={team.iso2} size={26} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontFamily: SPORT, fontSize: 16, fontWeight: 900, textTransform: 'uppercase',
-                    color: isSelected ? '#fff' : 'rgba(255,255,255,0.8)', lineHeight: 1,
-                    letterSpacing: '0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                  }}>{team.name}</div>
-                </div>
-
+      {/* Spillerliste */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0, marginBottom: 16, overflowY: 'auto' }}>
+        {pot.players.map((player) => {
+          const isSelected = selectedPlayer === player.name
+          return (
+            <button
+              key={player.name}
+              className="draft-team-btn"
+              onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '13px 14px',
+                background: isSelected ? `${color}15` : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${isSelected ? color + '55' : 'rgba(255,255,255,0.07)'}`,
+                borderRadius: 12, cursor: 'pointer', color: '#fff', textAlign: 'left',
+                width: '100%', transition: 'background 0.18s, border-color 0.18s, box-shadow 0.18s, filter 0.15s',
+                boxShadow: isSelected ? `inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 16px ${color}35, 0 0 0 1px ${color}22` : 'none',
+              }}
+            >
+              <Flag iso2={player.iso2} size={26} />
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
-                  width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
-                  background: isSelected ? color : 'rgba(255,255,255,0.07)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'background 0.18s',
-                }}>
-                  {isSelected && <span style={{ fontSize: 9, fontWeight: 900, color: '#000', lineHeight: 1 }}>✓</span>}
-                </div>
-              </button>
-            )
-          })}
-        </div>
+                  fontFamily: SPORT, fontSize: 16, fontWeight: 900, textTransform: 'uppercase',
+                  color: isSelected ? '#fff' : 'rgba(255,255,255,0.8)', lineHeight: 1,
+                  letterSpacing: '0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                }}>{player.name}</div>
+              </div>
 
-        {/* Right: group panel (glides in) */}
-        <div style={{
-          maxWidth: panelOpen ? 200 : 0,
-          transition: 'max-width 0.35s cubic-bezier(0.4,0,0.2,1)',
-          overflow: 'hidden',
-          flexShrink: 0,
-        }}>
-          <div style={{ width: 192, marginLeft: 8 }}>
-            <div style={{
-              background: `${color}08`,
-              border: `1px solid ${color}22`,
-              borderRadius: 12,
-              padding: '10px 10px 8px',
-              opacity: panelOpen ? 1 : 0,
-              transition: 'opacity 0.2s ease 0.15s',
-            }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color, marginBottom: 2 }}>
-                VM-gruppe {selectedTeamData?.vmGroup}
+              <div style={{
+                width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
+                background: isSelected ? color : 'rgba(255,255,255,0.07)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background 0.18s',
+              }}>
+                {isSelected && <span style={{ fontSize: 9, fontWeight: 900, color: '#000', lineHeight: 1 }}>✓</span>}
               </div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)', marginBottom: 8, lineHeight: 1.3 }}>
-                Disse møtes i gruppespillet
-              </div>
-              {groupTeams.map(t => {
-                const isMe = t.name === selectedTeam
-                const alreadyPickedPot = pickedFromOtherPots.get(t.name)
-                const isConflict = alreadyPickedPot !== undefined
-                return (
-                  <div key={t.name} style={{
-                    display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px',
-                    borderRadius: 7, marginBottom: 3,
-                    background: isMe ? `${color}20` : isConflict ? 'rgba(251,191,36,0.1)' : 'transparent',
-                    border: `1px solid ${isConflict && !isMe ? 'rgba(251,191,36,0.28)' : 'transparent'}`,
-                  }}>
-                    <Flag iso2={t.iso2} size={18} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        fontSize: 13, fontWeight: isMe ? 800 : isConflict ? 700 : 400,
-                        color: isMe ? '#fff' : isConflict ? '#fbbf24' : 'rgba(255,255,255,0.4)',
-                        lineHeight: 1.2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
-                      }}>{t.name}</div>
-                      {isConflict && !isMe && (
-                        <div style={{ fontSize: 9, color: 'rgba(251,191,36,0.65)', fontWeight: 700, letterSpacing: '0.04em', marginTop: 1 }}>
-                          valgt
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
+            </button>
+          )
+        })}
       </div>
 
       {/* Neste-knapp */}
       <button
-        disabled={!selectedTeam}
+        disabled={!selectedPlayer}
         onClick={goNext}
-        className={selectedTeam ? 'btn-hover' : undefined}
+        className={selectedPlayer ? 'btn-hover' : undefined}
         style={{
           display: 'block', width: '100%', padding: '16px',
-          background: selectedTeam ? 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)' : 'rgba(255,255,255,0.07)',
-          color: selectedTeam ? '#fff' : 'rgba(255,255,255,0.25)',
+          background: selectedPlayer ? 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)' : 'rgba(255,255,255,0.07)',
+          color: selectedPlayer ? '#fff' : 'rgba(255,255,255,0.25)',
           border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800,
-          cursor: selectedTeam ? 'pointer' : 'not-allowed',
+          cursor: selectedPlayer ? 'pointer' : 'not-allowed',
           fontFamily: SPORT, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
           marginBottom: 10,
-          boxShadow: selectedTeam ? '0 4px 20px rgba(220,38,38,0.35)' : 'none',
+          boxShadow: selectedPlayer ? '0 4px 20px rgba(220,38,38,0.35)' : 'none',
           transition: 'background 0.2s, box-shadow 0.2s, filter 0.12s',
         }}
       >
-        {step < 8 ? 'Neste →' : 'Se oppsummering →'}
+        {step < POT_COUNT ? 'Neste →' : 'Se oppsummering →'}
       </button>
       <button
         onClick={() => setStep(step === 1 ? 0 : step - 1)}

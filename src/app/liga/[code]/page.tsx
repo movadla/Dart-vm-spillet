@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
 const supabase = getSupabaseAdmin()
 import { POTS } from '@/data/pots'
-import { calcParticipantPoints, isTeamEliminated, MatchResult, AdvancementRow } from '@/lib/scoring'
+import { calcParticipantPoints, isPlayerEliminated, MatchResult, AdvancementRow } from '@/lib/scoring'
 import CopyCode from '@/components/CopyCode'
 import DeadlineCountdown from '@/app/deltaker/[id]/DeadlineCountdown'
 import RankList, { RankEntry } from '@/components/RankList'
@@ -12,10 +12,10 @@ import { getRankBaseline, RANK_ARROW_LEAGUES } from '@/lib/rankSnapshot'
 
 export const revalidate = 30
 
-const KICKOFF = new Date('2026-06-11T19:00:00Z')
+const KICKOFF = new Date('2026-12-11T19:00:00Z')
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
-interface Pick { participant_id: string; pot_number: number; team_name: string }
+interface Pick { participant_id: string; pot_number: number; player_name: string }
 
 async function getData(code: string) {
   const { data: league } = await supabase
@@ -38,9 +38,9 @@ async function getData(code: string) {
     .filter(Boolean) as string[]
 
   const [{ data: picks }, { data: matches }, { data: advancement }] = await Promise.all([
-    supabase.from('picks').select('participant_id, pot_number, team_name').in('participant_id', ids),
-    supabase.from('match_results').select('home_team, away_team, home_goals, away_goals, stage'),
-    supabase.from('advancement').select('team_name, stage_reached'),
+    supabase.from('picks').select('participant_id, pot_number, player_name').in('participant_id', ids),
+    supabase.from('match_results').select('player1, player2, sets1, sets2, stage'),
+    supabase.from('advancement').select('player_name, stage_reached'),
   ])
 
   const matchResults = (matches as MatchResult[]) ?? []
@@ -51,10 +51,10 @@ async function getData(code: string) {
       const p = m.participant as unknown as { id: string; name: string } | null
       if (!p) return null
       const playerPicks = ((picks as Pick[]) ?? []).filter((pk) => pk.participant_id === p.id)
-      const points = calcParticipantPoints(playerPicks, matchResults, advRows)
-      // Sum av hvert lags kamper (innbyrdes kamp mellom to egne lag telles 2 ganger → alltid 24 etter gruppespill).
+      const points = calcParticipantPoints(playerPicks, advRows)
+      // Sum av hver spillers kamper (for underveis-visning av antall spilte kamper).
       const matchesPlayed = playerPicks.reduce((sum, pk) =>
-        sum + matchResults.filter((mt) => mt.home_team === pk.team_name || mt.away_team === pk.team_name).length, 0)
+        sum + matchResults.filter((mt) => mt.player1 === pk.player_name || mt.player2 === pk.player_name).length, 0)
       return { id: p.id, name: p.name, points, matchesPlayed, picks: playerPicks.sort((a, b) => a.pot_number - b.pot_number) }
     })
     .filter((r): r is NonNullable<typeof r> => r !== null)
@@ -78,7 +78,6 @@ export default async function LigaPage({ params }: { params: Promise<{ code: str
 
   return (
     <div className="page-bg" style={{ minHeight: '100vh', color: '#fff', padding: '32px 16px 56px', position: 'relative' }}>
-      <img src="/snåsamannen.png" alt="" style={{ position: 'absolute', right: -10, top: 0, width: 260, opacity: 0.32, pointerEvents: 'none', zIndex: 0, filter: 'brightness(1.0) saturate(0.7) contrast(1.05)', maskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)' }} />
 
       {/* Brand banner */}
       <div style={{ position: 'relative', height: 150, marginBottom: 16, pointerEvents: 'none', zIndex: 1 }}>
@@ -87,10 +86,10 @@ export default async function LigaPage({ params }: { params: Promise<{ code: str
         </div>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
           <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
-            — Snåsamannen 2026 —
+            — PDC World Championship —
           </div>
           <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 52, letterSpacing: '-1px', lineHeight: 1 }}>
-            <span style={{ color: 'rgba(255,255,255,0.38)' }}>VM-</span>
+            <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
             <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
           </div>
         </div>
@@ -130,10 +129,10 @@ export default async function LigaPage({ params }: { params: Promise<{ code: str
             rankDelta: vmStarted && baseline[id] != null ? baseline[id] - (i + 1) : undefined,
             flags: playerPicks.map((pk) => {
               const pot = POTS.find((p) => p.potNumber === pk.pot_number)
-              const iso2 = pot?.teams.find((t) => t.name === pk.team_name)?.iso2 ?? ''
-              const stageReached = advRows.find((a) => a.team_name === pk.team_name)?.stage_reached
-              const medal = stageReached === 'bronze' || stageReached === 'silver' || stageReached === 'gold' ? stageReached : undefined
-              return { iso2, eliminated: isTeamEliminated(pk.team_name, advRows, matchResults, vmStarted), medal }
+              const iso2 = pot?.players.find((pl) => pl.name === pk.player_name)?.iso2 ?? ''
+              const stageReached = advRows.find((a) => a.player_name === pk.player_name)?.stage_reached
+              const medal = stageReached === 'winner' ? 'gold' : stageReached === 'final' ? 'silver' : undefined
+              return { iso2, eliminated: isPlayerEliminated(pk.player_name, matchResults), medal }
             }),
           }))}
           vmStarted={vmStarted}

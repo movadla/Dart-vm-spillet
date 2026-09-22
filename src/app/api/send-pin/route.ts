@@ -45,12 +45,12 @@ export async function POST(req: NextRequest) {
   const domain = process.env.EMAIL_DOMAIN ?? 'resend.dev'
 
   const { error: sendError } = await resend.emails.send({
-    from: `VM-Spillet 2026 <oppdatering@${domain}>`,
+    from: `Dart-VM-spillet <oppdatering@${domain}>`,
     to: participant.email,
-    subject: 'Din VM-Spillet 2026 PIN-kode',
+    subject: 'Din Dart-VM-spillet PIN-kode',
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 20px;background:#fff">
-        <h2 style="margin:0 0 8px;font-size:28px;font-weight:900;color:#dc2626">VM 2026 · Draft</h2>
+        <h2 style="margin:0 0 8px;font-size:28px;font-weight:900;color:#dc2626">Dart-VM 2026 · Draft</h2>
         <p style="color:#555;margin:0 0 24px;font-size:15px">Hei ${participant.name},</p>
         <p style="color:#555;margin:0 0 16px;font-size:15px">Her er PIN-koden din:</p>
         <div style="font-size:52px;font-weight:900;letter-spacing:14px;color:#111;background:#f5f5f5;border-radius:12px;padding:24px 20px;text-align:center;margin:0 0 24px">${participant.pin}</div>

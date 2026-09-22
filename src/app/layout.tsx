@@ -15,9 +15,9 @@ const condensed = Barlow_Condensed({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL ?? 'https://vmspillet.com'),
-  title: 'VM-Spillet 2026',
-  description: 'Velg 8 lag. Følg dem gjennom turneringen. Vinn potten.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL ?? 'https://dartvmspillet.com'),
+  title: 'Dart-VM-spillet',
+  description: 'Velg 5 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
   manifest: '/manifest.json',
   icons: {
     apple: '/icon.svg',
@@ -25,17 +25,17 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'VM-Spillet',
+    title: 'Dart-VM-spillet',
   },
   openGraph: {
-    title: 'VM-Spillet 2026',
-    description: 'Velg 8 lag. Følg dem gjennom turneringen. Vinn potten.',
+    title: 'Dart-VM-spillet',
+    description: 'Velg 5 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'VM-Spillet 2026',
-    description: 'Velg 8 lag. Følg dem gjennom turneringen. Vinn potten.',
+    title: 'Dart-VM-spillet',
+    description: 'Velg 5 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
   },
 }
 

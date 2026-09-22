@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { POTS } from '@/data/pots'
 
-const KICKOFF = new Date('2026-06-11T19:00:00Z')
+const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
-// Bygg et oppslag: potNumber → Set<teamName> for rask validering
-const VALID_TEAMS: Record<number, Set<string>> = {}
+// Bygg et oppslag: potNumber → Set<playerName> for rask validering
+const VALID_PLAYERS: Record<number, Set<string>> = {}
 for (const pot of POTS) {
-  VALID_TEAMS[pot.potNumber] = new Set(pot.teams.map((t) => t.name))
+  VALID_PLAYERS[pot.potNumber] = new Set(pot.players.map((p) => p.name))
 }
 
 export async function POST(req: NextRequest) {
@@ -23,18 +23,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Mangler data' }, { status: 400 })
   }
 
-  // Valider picks: maks 8, gyldige potnummer og lagnavn
+  // Valider picks: maks POTS.length, gyldige potnummer og spillernavn
   const entries = Object.entries(picks as Record<string, string>)
-  if (entries.length > 8) {
+  if (entries.length > POTS.length) {
     return NextResponse.json({ error: 'For mange picks' }, { status: 400 })
   }
-  for (const [potStr, team] of entries) {
+  for (const [potStr, player] of entries) {
     const potNum = parseInt(potStr)
-    if (!Number.isInteger(potNum) || potNum < 1 || potNum > 8) {
+    if (!Number.isInteger(potNum) || potNum < 1 || potNum > POTS.length) {
       return NextResponse.json({ error: `Ugyldig pot: ${potStr}` }, { status: 400 })
     }
-    if (!VALID_TEAMS[potNum]?.has(team)) {
-      return NextResponse.json({ error: `Ugyldig lag for pot ${potNum}: ${team}` }, { status: 400 })
+    if (!VALID_PLAYERS[potNum]?.has(player)) {
+      return NextResponse.json({ error: `Ugyldig spiller for pot ${potNum}: ${player}` }, { status: 400 })
     }
   }
 
@@ -59,10 +59,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Kunne ikke slette gamle picks' }, { status: 500 })
   }
 
-  const rows = entries.map(([pot, team]) => ({
+  const rows = entries.map(([pot, player]) => ({
     participant_id: participantId,
     pot_number: parseInt(pot),
-    team_name: team,
+    player_name: player,
   }))
 
   if (rows.length > 0) {

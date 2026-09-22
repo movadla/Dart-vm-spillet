@@ -35,7 +35,7 @@ export default function AdminLogin() {
     <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div style={{ width: '100%', maxWidth: 360 }}>
         <div style={{ fontFamily: SPORT, fontSize: 48, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, marginBottom: 32, color: '#fff' }}>
-          <div style={{ color: 'rgba(255,255,255,0.3)' }}>VM 2026</div>
+          <div style={{ color: 'rgba(255,255,255,0.3)' }}>Dart-VM 2026</div>
           <div>Admin</div>
         </div>
 

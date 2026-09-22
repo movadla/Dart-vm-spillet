@@ -40,16 +40,16 @@ export default function Image() {
           letterSpacing: '-20px',
           display: 'flex',
         }}>
-          8
+          5
         </div>
 
         {/* Main text */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 16, display: 'flex' }}>
-            VM 2026
+            DART-VM 2026
           </div>
           <div style={{ fontSize: 160, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.85, letterSpacing: '-4px', color: '#ffffff', display: 'flex' }}>
-            VM-
+            DART-VM-
           </div>
           <div style={{ fontSize: 160, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.85, letterSpacing: '-4px', color: '#dc2626', display: 'flex' }}>
             SPILLET
@@ -65,7 +65,7 @@ export default function Image() {
           letterSpacing: '0.02em',
           display: 'flex',
         }}>
-          Velg 8 lag. Følg VM. Spill mot venner.
+          Velg 5 dartspillere. Følg dart-VM. Spill mot venner.
         </div>
       </div>
     ),

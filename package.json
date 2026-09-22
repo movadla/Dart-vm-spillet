@@ -1,17 +1,14 @@
 {
-  "name": "cl-spillet",
+  "name": "dart-vm-spillet",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "tunnel": "powershell -ExecutionPolicy Bypass -File start-dev.ps1",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "sim-round1": "npx tsx scripts/sim-round1.ts",
-    "cleanup-round1": "npx tsx scripts/cleanup-round1.ts",
-    "seed-demo": "npx tsx scripts/seed-demo.ts",
-    "cleanup-demo": "npx tsx scripts/cleanup-demo.ts"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.53.1",

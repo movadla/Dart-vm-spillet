@@ -54,12 +54,12 @@ export async function POST(req: NextRequest) {
   const domain = process.env.EMAIL_DOMAIN ?? 'resend.dev'
 
   const { error: sendError } = await resend.emails.send({
-    from: `VM-Spillet 2026 <oppdatering@${domain}>`,
+    from: `Dart-VM-spillet <oppdatering@${domain}>`,
     to: participant.email,
-    subject: 'Endre VM-Spillet-valgene dine',
+    subject: 'Endre Dart-VM-spillet-valgene dine',
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 20px;background:#fff">
-        <h2 style="margin:0 0 8px;font-size:28px;font-weight:900;color:#dc2626">VM-Spillet 2026</h2>
+        <h2 style="margin:0 0 8px;font-size:28px;font-weight:900;color:#dc2626">Dart-VM-spillet</h2>
         <p style="color:#555;margin:0 0 24px;font-size:15px">Hei ${participant.name},</p>
         <p style="color:#555;margin:0 0 28px;font-size:15px">Klikk knappen under for å endre VM-valgene dine. Lenken er gyldig i 1 time.</p>
         <a href="${link}" style="display:inline-block;padding:16px 32px;background:#dc2626;color:#fff;font-weight:900;font-size:16px;text-decoration:none;border-radius:12px;letter-spacing:0.04em">

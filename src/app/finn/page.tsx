@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
-const KICKOFF = new Date('2026-06-11T19:00:00Z')
+const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
 export default function FinnPage() {
   const router = useRouter()
@@ -54,7 +54,6 @@ export default function FinnPage() {
 
   return (
     <div className="page-bg" style={{ minHeight: '100vh', color: '#fff', padding: '40px 20px 56px', position: 'relative' }}>
-      <img src="/snåsamannen.png" alt="" style={{ position: 'absolute', right: -10, top: 0, width: 260, opacity: 0.32, pointerEvents: 'none', zIndex: 0, filter: 'brightness(1.0) saturate(0.7) contrast(1.05)', maskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 62% 42% at 56% 23%, black 0%, transparent 100%)' }} />
       <div style={{ marginBottom: 12, position: 'relative', zIndex: 1 }}>
         <Link href="/" className="back-btn">← Hjem</Link>
       </div>
@@ -63,10 +62,10 @@ export default function FinnPage() {
       <div style={{ position: 'relative', height: 145, marginBottom: 16, pointerEvents: 'none', zIndex: 1 }}>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
           <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
-            — Snåsamannen 2026 —
+            — PDC World Championship —
           </div>
           <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 52, letterSpacing: '-1px', lineHeight: 1 }}>
-            <span style={{ color: 'rgba(255,255,255,0.38)' }}>VM-</span>
+            <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
             <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
           </div>
         </div>

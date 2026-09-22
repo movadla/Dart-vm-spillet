@@ -6,7 +6,7 @@ import Flag from '@/components/Flag'
 import KickButton from '@/app/liga/[code]/KickButton'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-// Grønn pall-kaskade — matcher «Snåsamannen 2026»-grønn (#22c55e). 1.plass gløder, 2/3 avtar.
+// Grønn pall-kaskade (#22c55e). 1.plass gløder, 2/3 avtar.
 const RANK_COLORS = ['#4ade80', '#34d27a', '#2bb673']
 const RANK_BORDER = ['rgba(34,197,94,0.9)', 'rgba(34,197,94,0.4)', 'rgba(34,197,94,0.22)']
 const RANK_BG = ['linear-gradient(180deg, rgba(34,197,94,0.14) 0%, rgba(34,197,94,0.04) 100%)', 'rgba(34,197,94,0.035)', 'rgba(34,197,94,0.02)']

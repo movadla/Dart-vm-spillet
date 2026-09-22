@@ -1,52 +1,42 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { calcTeamMatchPoints, calcAdvancementBonus } from '@/lib/scoring'
-import { SCORING } from '@/config/scoring'
+import { calcAdvancementBonus } from '@/lib/scoring'
+import { SCORING, STAGE_ORDER, type Stage } from '@/config/scoring'
 
 interface MatchRow {
-  home_team: string
-  away_team: string
-  home_goals: number
-  away_goals: number
+  player1: string
+  player2: string
   stage: string
+  winner: string | null
   played_at: string
 }
 
 interface PickRow {
   participant_id: string
   pot_number: number
-  team_name: string
+  player_name: string
 }
 
-function inferStageReached(teamName: string, matches: MatchRow[]): string | null {
-  const inStage = (s: string) =>
-    matches.some(m => (m.home_team === teamName || m.away_team === teamName) && m.stage === s)
-
-  if (inStage('final')) {
-    const m = matches.find(
-      x => x.stage === 'final' && (x.home_team === teamName || x.away_team === teamName)
-    )
-    if (m) {
-      const isHome = m.home_team === teamName
-      return (isHome ? m.home_goals > m.away_goals : m.away_goals > m.home_goals) ? 'gold' : 'silver'
-    }
-    return 'sf'
+// Utleder hvilken runde en spiller hadde nådd basert på registrerte kamper frem til dette punktet:
+// den siste (høyeste) runden de spilte i, uavhengig av om de vant eller tapte den.
+function inferStageReached(playerName: string, matches: MatchRow[]): string | null {
+  let furthest: Stage | null = null
+  for (const m of matches) {
+    if (m.player1 !== playerName && m.player2 !== playerName) continue
+    const stage = m.stage as Stage
+    const idx = STAGE_ORDER.indexOf(stage)
+    if (idx === -1) continue
+    if (!furthest || idx > STAGE_ORDER.indexOf(furthest)) furthest = stage
   }
-  if (inStage('bronze')) return 'bronze'
-  if (inStage('sf')) return 'qf'
-  if (inStage('qf')) return 'r16'
-  if (inStage('r16')) return 'r32'
-  if (inStage('r32')) return 'group'
-  return null
+  return furthest
 }
 
 function calcPointsAtDate(picks: PickRow[], matches: MatchRow[]): number {
   let total = 0
   for (const pick of picks) {
-    const matchPts = calcTeamMatchPoints(pick.team_name, matches)
-    const advPts = calcAdvancementBonus(inferStageReached(pick.team_name, matches))
+    const advPts = calcAdvancementBonus(inferStageReached(pick.player_name, matches))
     const multiplier = SCORING.underdogMultiplier[pick.pot_number] ?? 1
-    total += (matchPts + advPts) * multiplier
+    total += advPts * multiplier
   }
   return total
 }
@@ -59,9 +49,9 @@ export async function GET() {
     supabase.from('participants').select('id, name').order('created_at'),
     supabase
       .from('match_results')
-      .select('home_team, away_team, home_goals, away_goals, stage, played_at')
+      .select('player1, player2, stage, winner, played_at')
       .order('played_at'),
-    supabase.from('picks').select('participant_id, pot_number, team_name'),
+    supabase.from('picks').select('participant_id, pot_number, player_name'),
   ])
 
   const matches = (allMatches ?? []) as MatchRow[]

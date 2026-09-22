@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 import { createHmac } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { checkAdminAuth } from '@/lib/adminAuth'
-import { calcParticipantPoints, calcTeamMatchPoints, MatchResult, AdvancementRow } from '@/lib/scoring'
+import { calcParticipantPoints, MatchResult, AdvancementRow } from '@/lib/scoring'
 import { SCORING } from '@/config/scoring'
 import { buildDailyEmail, buildDailyPlainText, VM_TOTAL_DAYS } from '@/lib/email-daily'
 
@@ -11,7 +11,7 @@ const supabase = getSupabaseAdmin()
 
 export const maxDuration = 60
 
-const VM_START = new Date('2026-06-11T19:00:00Z')
+const VM_START = new Date('2026-12-11T19:00:00Z')
 
 function currentVmDay(now: Date): number {
   const day = Math.ceil((now.getTime() - VM_START.getTime()) / (1000 * 60 * 60 * 24))
@@ -42,15 +42,15 @@ export async function POST(req: NextRequest) {
 
   const [{ data: allParticipants }, { data: matches }, { data: advancement }] = await Promise.all([
     supabase.from('participants').select('id, name, email, email_opt_out').order('created_at'),
-    supabase.from('match_results').select('home_team, away_team, home_goals, away_goals, stage, played_at'),
-    supabase.from('advancement').select('team_name, stage_reached'),
+    supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner, played_at'),
+    supabase.from('advancement').select('player_name, stage_reached'),
   ])
 
   const allActive = (allParticipants ?? []).filter((p) => !p.email_opt_out)
 
   const { data: allPicks } = await supabase
     .from('picks')
-    .select('participant_id, pot_number, team_name')
+    .select('participant_id, pot_number, player_name')
     .in('participant_id', allActive.map((p) => p.id))
 
   const matchResults = (matches as MatchResultWithDate[]) ?? []
@@ -59,11 +59,11 @@ export async function POST(req: NextRequest) {
   const recentResults = recentMatches24h
     .slice()
     .sort((a, b) => (a.played_at ?? '').localeCompare(b.played_at ?? ''))
-    .map((m) => ({ home: m.home_team, away: m.away_team, homeGoals: m.home_goals, awayGoals: m.away_goals }))
+    .map((m) => ({ player1: m.player1, player2: m.player2, sets1: m.sets1, sets2: m.sets2 }))
 
   const leaderboard = allActive.map((p) => {
     const picks = (allPicks ?? []).filter((pk) => pk.participant_id === p.id)
-    return { ...p, picks, points: calcParticipantPoints(picks, matchResults, advRows) }
+    return { ...p, picks, points: calcParticipantPoints(picks, advRows) }
   }).sort((a, b) => b.points - a.points)
 
   const pointsById: Record<string, number> = {}
@@ -106,15 +106,19 @@ export async function POST(req: NextRequest) {
   for (const m of memberRows) (leaguesByParticipant[m.participant_id] ??= []).push(m.league_id)
 
   const subject = `Status etter dag ${vmDay} av ${VM_TOTAL_DAYS} i VM`
-  const fromAddr = `Snåsamannen 2026 - VM-Spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`
+  const fromAddr = `Dart-VM-spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`
 
   const payloads = recipients.map((row) => {
-    const pointsDelta = row.picks.reduce((sum: number, pick: { team_name: string; pot_number: number }) => {
+    const pointsDelta = row.picks.reduce((sum: number, pick: { player_name: string; pot_number: number }) => {
       const recent = recentMatches24h.filter((m) =>
-        m.home_team === pick.team_name || m.away_team === pick.team_name
+        m.player1 === pick.player_name || m.player2 === pick.player_name
       )
       if (!recent.length) return sum
-      const matchPts = calcTeamMatchPoints(pick.team_name, recent as MatchResult[])
+      // Ikke-kumulativt poeng for runden(e) spilleren vant siste 24t (calcTeamMatchPoints finnes
+      // ikke lenger i lib/scoring.ts — avansement gir bare kumulativ sum, ikke delta per kamp).
+      const matchPts = recent
+        .filter((m) => m.winner === pick.player_name && m.stage)
+        .reduce((s, m) => s + (SCORING.advancement[m.stage as keyof typeof SCORING.advancement] ?? 0), 0)
       return sum + matchPts * (SCORING.underdogMultiplier[pick.pot_number] ?? 1)
     }, 0)
     const ctaUrl = `${BASE_URL}/deltaker/${row.id}`
