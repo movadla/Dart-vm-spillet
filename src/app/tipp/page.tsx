@@ -9,15 +9,13 @@ import Flag from '@/components/Flag'
 import { SCORING } from '@/config/scoring'
 import { getFirstMatchInfo, getSeedLabel } from '@/lib/bracketProjection'
 import { DrawBracket } from '@/components/DrawBracket'
+import { PlayerCard } from '@/components/PlayerCard'
 import StepSlideshow from '@/components/StepSlideshow'
 import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
+import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const KICKOFF = new Date('2026-12-11T19:00:00Z')
-
-const POT_COLORS = [
-  '#dc2626', '#f59e0b', '#3b82f6', '#22c55e', '#f97316', '#8b5cf6',
-]
 
 const POT_COUNT = POTS.length
 const REGISTRATION_STEP = POT_COUNT + 1
@@ -672,6 +670,7 @@ const inputStyle: React.CSSProperties = {
   const selectedPlayer = picks[pot.potNumber]
   const multiplier = SCORING.underdogMultiplier[pot.potNumber]
   const color = POT_COLORS[potIndex % POT_COLORS.length]
+  const colorDark = POT_COLORS_DARK[potIndex % POT_COLORS_DARK.length]
 
   function goNext() {
     if (step < POT_COUNT) setStep(s => s + 1)
@@ -757,45 +756,24 @@ const inputStyle: React.CSSProperties = {
 
       {/* Spillerliste + motstander-bracket side om side */}
       <div style={{ flex: 1, display: 'flex', gap: 10, minHeight: 0, marginBottom: 14 }}>
-        <div role="radiogroup" aria-label={`Velg spiller fra ${pot.name}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'safe center', gap: 5, minWidth: 0, overflowY: 'auto' }}>
-          {pot.players.map((player) => {
-            const isSelected = selectedPlayer === player.name
-            return (
-              <button
-                key={player.name}
-                className="draft-team-btn"
-                role="radio"
-                aria-checked={isSelected}
-                onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10, padding: '13px 14px',
-                  background: isSelected ? `${color}15` : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${isSelected ? color + '55' : 'rgba(255,255,255,0.07)'}`,
-                  borderRadius: 12, cursor: 'pointer', color: '#fff', textAlign: 'left',
-                  width: '100%', transition: 'background 0.18s, border-color 0.18s, box-shadow 0.18s, filter 0.15s',
-                  boxShadow: isSelected ? `inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 16px ${color}35, 0 0 0 1px ${color}22` : 'none',
-                }}
-              >
-                <Flag iso2={player.iso2} size={26} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontFamily: SPORT, fontSize: 16, fontWeight: 900, textTransform: 'uppercase',
-                    color: isSelected ? '#fff' : 'rgba(255,255,255,0.8)', lineHeight: 1,
-                    letterSpacing: '0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                  }}>{player.name}</div>
-                </div>
-
-                <div style={{
-                  width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
-                  background: isSelected ? color : 'rgba(255,255,255,0.07)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'background 0.18s',
-                }}>
-                  {isSelected && <span style={{ fontSize: 9, fontWeight: 900, color: '#000', lineHeight: 1 }}>✓</span>}
-                </div>
-              </button>
-            )
-          })}
+        <div
+          role="radiogroup"
+          aria-label={`Velg spiller fra ${pot.name}`}
+          style={{
+            flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(84px, 1fr))',
+            alignItems: 'start', alignContent: 'safe center', gap: 8, minWidth: 0, overflowY: 'auto', padding: '2px 2px 4px',
+          }}
+        >
+          {pot.players.map((player) => (
+            <PlayerCard
+              key={player.name}
+              player={player}
+              color={color}
+              colorDark={colorDark}
+              selected={selectedPlayer === player.name}
+              onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
+            />
+          ))}
         </div>
 
         {/* Motstander-panel — dukker opp til høyre når en spiller er valgt */}
