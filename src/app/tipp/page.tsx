@@ -7,7 +7,7 @@ import SmartBackButton from '@/components/SmartBackButton'
 import { POTS } from '@/data/pots'
 import Flag from '@/components/Flag'
 import { SCORING, STAGE_ORDER, STAGE_LABELS } from '@/config/scoring'
-import { getFirstMatchInfo } from '@/lib/bracketProjection'
+import { getFirstMatchInfo, getSecondRoundOpponent } from '@/lib/bracketProjection'
 import StepSlideshow from '@/components/StepSlideshow'
 import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
 
@@ -736,72 +736,99 @@ const inputStyle: React.CSSProperties = {
         </div>
       )}
 
-      {/* Spillerliste */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0, marginBottom: 16, overflowY: 'auto' }}>
-        {pot.players.map((player) => {
-          const isSelected = selectedPlayer === player.name
-          return (
-            <button
-              key={player.name}
-              className="draft-team-btn"
-              onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: '13px 14px',
-                background: isSelected ? `${color}15` : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${isSelected ? color + '55' : 'rgba(255,255,255,0.07)'}`,
-                borderRadius: 12, cursor: 'pointer', color: '#fff', textAlign: 'left',
-                width: '100%', transition: 'background 0.18s, border-color 0.18s, box-shadow 0.18s, filter 0.15s',
-                boxShadow: isSelected ? `inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 16px ${color}35, 0 0 0 1px ${color}22` : 'none',
-              }}
-            >
-              <Flag iso2={player.iso2} size={26} />
-              <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Spillerliste + motstander-bracket side om side */}
+      <div style={{ flex: 1, display: 'flex', gap: 10, minHeight: 0, marginBottom: 14 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0, overflowY: 'auto' }}>
+          {pot.players.map((player) => {
+            const isSelected = selectedPlayer === player.name
+            return (
+              <button
+                key={player.name}
+                className="draft-team-btn"
+                onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10, padding: '13px 14px',
+                  background: isSelected ? `${color}15` : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${isSelected ? color + '55' : 'rgba(255,255,255,0.07)'}`,
+                  borderRadius: 12, cursor: 'pointer', color: '#fff', textAlign: 'left',
+                  width: '100%', transition: 'background 0.18s, border-color 0.18s, box-shadow 0.18s, filter 0.15s',
+                  boxShadow: isSelected ? `inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 16px ${color}35, 0 0 0 1px ${color}22` : 'none',
+                }}
+              >
+                <Flag iso2={player.iso2} size={26} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontFamily: SPORT, fontSize: 16, fontWeight: 900, textTransform: 'uppercase',
+                    color: isSelected ? '#fff' : 'rgba(255,255,255,0.8)', lineHeight: 1,
+                    letterSpacing: '0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>{player.name}</div>
+                </div>
+
                 <div style={{
-                  fontFamily: SPORT, fontSize: 16, fontWeight: 900, textTransform: 'uppercase',
-                  color: isSelected ? '#fff' : 'rgba(255,255,255,0.8)', lineHeight: 1,
-                  letterSpacing: '0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                }}>{player.name}</div>
-              </div>
+                  width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
+                  background: isSelected ? color : 'rgba(255,255,255,0.07)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.18s',
+                }}>
+                  {isSelected && <span style={{ fontSize: 9, fontWeight: 900, color: '#000', lineHeight: 1 }}>✓</span>}
+                </div>
+              </button>
+            )
+          })}
+        </div>
 
-              <div style={{
-                width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
-                background: isSelected ? color : 'rgba(255,255,255,0.07)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'background 0.18s',
-              }}>
-                {isSelected && <span style={{ fontSize: 9, fontWeight: 900, color: '#000', lineHeight: 1 }}>✓</span>}
-              </div>
-            </button>
-          )
-        })}
-      </div>
+        {/* Motstander-panel — dukker opp til høyre når en spiller er valgt */}
+        <div style={{ width: 122, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto' }}>
+          {selectedPlayer ? (() => {
+            const info = getFirstMatchInfo(selectedPlayer)
+            if (!info) return null
+            const round2 = info.type === 'match' ? getSecondRoundOpponent(selectedPlayer) : null
+            return (
+              <>
+                <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
+                  Eksempel-trekning
+                </div>
 
-      {/* Første kamp / bye for valgt spiller */}
-      {selectedPlayer && (() => {
-        const info = getFirstMatchInfo(selectedPlayer)
-        if (!info) return null
-        return (
-          <div style={{ marginBottom: 14, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '11px 14px' }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 4 }}>
-              Eksempel-trekning · oppdateres når PDC trekker det ekte oppsettet
+                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>1. runde</div>
+                  {info.type === 'match' ? (
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: 1.25 }}>{info.opponent}</div>
+                  ) : (
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#4ade80', letterSpacing: '0.04em' }}>BYE</div>
+                  )}
+                </div>
+
+                <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.25)', fontSize: 12, lineHeight: 1 }}>↓</div>
+
+                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>2. runde</div>
+                  {info.type === 'bye' ? (
+                    <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.75)', lineHeight: 1.3 }}>
+                      {info.vsA}<span style={{ color: 'rgba(255,255,255,0.35)' }}> / </span>{info.vsB}
+                    </div>
+                  ) : round2 ? (
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: 1.25 }}>{round2}</div>
+                  ) : (
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>—</div>
+                  )}
+                </div>
+
+                <Link
+                  href={`/vm-info?tab=trekning&spiller=${encodeURIComponent(selectedPlayer)}`}
+                  target="_blank"
+                  style={{ display: 'block', textAlign: 'center', fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '7px 4px', marginTop: 2 }}
+                >
+                  Se hele bracketen
+                </Link>
+              </>
+            )
+          })() : (
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.2)', padding: '0 4px' }}>
+              Velg en spiller for å se motstander
             </div>
-            {info.type === 'match' ? (
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
-                Møter <strong style={{ color: '#fff' }}>{info.opponent}</strong> i 1. runde
-                {info.isFiller && <span style={{ color: 'rgba(255,255,255,0.35)' }}> (kvalifisert spiller)</span>}
-              </div>
-            ) : (
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
-                Bye i 1. runde — møter vinneren av{' '}
-                <strong style={{ color: '#fff' }}>{info.vsA}</strong>
-                {info.vsAFiller && <span style={{ color: 'rgba(255,255,255,0.35)' }}> (kval.)</span>} vs{' '}
-                <strong style={{ color: '#fff' }}>{info.vsB}</strong>
-                {info.vsBFiller && <span style={{ color: 'rgba(255,255,255,0.35)' }}> (kval.)</span>} i 2. runde
-              </div>
-            )}
-          </div>
-        )
-      })()}
+          )}
+        </div>
+      </div>
 
       {/* Neste-knapp */}
       <button

@@ -91,6 +91,13 @@ export function getRound2Seed(matchIndex: number): string | null {
   return SEED_TO_NAME.get(seed) ?? null
 }
 
+/** For en useedet spiller: hvilken seed venter i runde 2 dersom han vinner runde 1. */
+export function getSecondRoundOpponent(playerName: string): string | null {
+  const idx = R1_MATCHES.findIndex(([a, b]) => a === playerName || b === playerName)
+  if (idx === -1) return null
+  return getRound2Seed(idx)
+}
+
 /**
  * De 7 andre seedede spillerne i samme "kvartal" av braketten (gruppe på 8 sammenhengende
  * bracket-slots) — de du potensielt kan møte lenger ut i turneringen dersom alle vinner fram.

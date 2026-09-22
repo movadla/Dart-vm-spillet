@@ -87,6 +87,13 @@ export default function VmInfoPage() {
       setActiveTab('kamper')
     } else if (tab === 'regler') {
       setActiveTab('regler')
+    } else if (tab === 'trekning') {
+      setActiveTab('trekning')
+    }
+    const spiller = params.get('spiller')
+    if (spiller) {
+      setActiveTab('trekning')
+      setDrawPlayer(spiller)
     }
   }, [])
 
