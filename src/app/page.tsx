@@ -389,6 +389,10 @@ export default function HomePage() {
         <a href="mailto:kontakt@dart-vm-spillet.no" className="text-link" style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)', textDecoration: 'none', letterSpacing: '0.02em' }}>
           kontakt@dart-vm-spillet.no
         </a>
+        <span style={{ color: 'rgba(255,255,255,0.12)', margin: '0 8px' }}>·</span>
+        <Link href="/personvern" className="text-link" style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)', textDecoration: 'none', letterSpacing: '0.02em' }}>
+          Personvern
+        </Link>
       </div>
     </div>
   )

@@ -364,6 +364,9 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
   const [linksLoading, setLinksLoading] = useState(true)
   const [matchForm, setMatchForm] = useState({ player1: '', player2: '', sets1: '', sets2: '', stage: 'r1' })
   const [matchMsg, setMatchMsg] = useState('')
+  const [bulkText, setBulkText] = useState('')
+  const [bulkBusy, setBulkBusy] = useState(false)
+  const [bulkResult, setBulkResult] = useState<{ succeeded: number; failed: number; results: { index: number; ok: boolean; error?: string }[] } | null>(null)
   useEffect(() => {
     fetch('/api/admin/magic-links', { headers })
       .then((r) => r.json())
@@ -378,6 +381,29 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
       if (res.ok) { setMatchMsg('✅ Resultat lagret'); setMatchForm({ player1: '', player2: '', sets1: '', sets2: '', stage: 'r1' }) }
       else setMatchMsg('❌ Feil ved lagring')
     } catch { setMatchMsg('❌ Serverfeil') }
+  }
+
+  async function submitBulkImport() {
+    setBulkBusy(true); setBulkResult(null)
+    const lines = bulkText.split('\n').map((l) => l.trim()).filter(Boolean)
+    const matches = lines.map((line) => {
+      const [player1, player2, sets1, sets2, stage] = line.split(';').map((s) => s.trim())
+      return { player1, player2, sets1: Number(sets1), sets2: Number(sets2), stage: stage || 'r1' }
+    })
+    try {
+      const res = await fetch('/api/admin/match-result/bulk', { method: 'POST', headers, body: JSON.stringify({ matches }) })
+      const data = await res.json()
+      if (res.ok) {
+        setBulkResult(data)
+        if (data.failed === 0) setBulkText('')
+      } else {
+        setBulkResult({ succeeded: 0, failed: matches.length, results: [{ index: 0, ok: false, error: data.error ?? 'Ukjent feil' }] })
+      }
+    } catch {
+      setBulkResult({ succeeded: 0, failed: matches.length, results: [{ index: 0, ok: false, error: 'Serverfeil' }] })
+    } finally {
+      setBulkBusy(false)
+    }
   }
 
   return (
@@ -415,6 +441,43 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
             <button type="submit" style={btn('primary')}>Lagre resultat</button>
             {matchMsg && <div style={{ fontSize: 13, color: matchMsg.startsWith('✅') ? '#22c55e' : '#ef4444', textAlign: 'center' }}>{matchMsg}</div>}
           </form>
+        </div>
+      </div>
+
+      {/* Bulk-import kampresultater */}
+      <div style={{ ...card, overflow: 'visible' }}>
+        <div style={cardHead}><span style={label}>Importer flere kamper samtidig</span></div>
+        <div style={{ padding: '16px 18px' }}>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 0, marginBottom: 10, lineHeight: 1.5 }}>
+            Én kamp per linje: <code>spiller1;spiller2;sett1;sett2;fase</code> — fase er valgfri, standard er r1.
+          </p>
+          <textarea
+            value={bulkText}
+            onChange={(e) => setBulkText(e.target.value)}
+            placeholder={'Luke Littler;Gerwyn Price;6;2;r1\nMichael van Gerwen;Rob Cross;6;4;r1'}
+            rows={6}
+            style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 12, resize: 'vertical' }}
+          />
+          <button
+            type="button"
+            style={{ ...btn('primary'), marginTop: 10, opacity: bulkBusy || !bulkText.trim() ? 0.5 : 1 }}
+            disabled={bulkBusy || !bulkText.trim()}
+            onClick={submitBulkImport}
+          >
+            {bulkBusy ? 'Importerer...' : 'Importer'}
+          </button>
+          {bulkResult && (
+            <div style={{ marginTop: 12, fontSize: 12 }}>
+              <div style={{ color: bulkResult.failed === 0 ? '#22c55e' : '#f59e0b', fontWeight: 700, marginBottom: bulkResult.failed ? 8 : 0 }}>
+                {bulkResult.succeeded} lagret, {bulkResult.failed} feilet
+              </div>
+              {bulkResult.results.filter((r) => !r.ok).map((r) => (
+                <div key={r.index} style={{ color: '#ef4444', marginBottom: 2 }}>
+                  Linje {r.index + 1}: {r.error}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

@@ -549,6 +549,10 @@ const inputStyle: React.CSSProperties = {
         >
           {submitting ? 'Lagrer...' : 'Meld meg på →'}
         </button>
+        <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 12 }}>
+          Ved å melde deg på godtar du at vi lagrer navn og e-post for å drive spillet. Se{' '}
+          <Link href="/personvern" style={{ color: 'rgba(255,255,255,0.4)' }}>personvernsiden</Link> for detaljer.
+        </p>
       </div>
     )
   }

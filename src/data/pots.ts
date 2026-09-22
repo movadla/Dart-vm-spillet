@@ -24,6 +24,10 @@ export const POT_NAMES = [
 ]
 
 // Seed 1–32 hentet fra PDC Order of Merit (Wikipedia, snapshot 2026-09-13).
+// MERK: Order of Merit endres ukentlig gjennom sesongen — denne rangeringen vil trolig
+// IKKE stemme lenger med den faktiske seedingen i desember. Sjekk mot PDC sin offisielle
+// seeding-liste like før trekningen (se README.md → «Trekning — oppdatere med ekte data»)
+// og juster seedNumber/pdcRanking her deretter — ikke bare når selve trekningen legges inn.
 // Pott 6 (useedede/kvalifiserte) er en illustrativ liste over kjente PDC-profesjonelle —
 // oppdater med det faktiske deltakerfeltet når PDC publiserer trekningen for
 // sesongens VM (vanligvis medio november).

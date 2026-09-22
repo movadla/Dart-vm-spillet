@@ -16,3 +16,6 @@ drop table if exists match_goals;
 -- Poengmodellen er nå ren avledning fra match_results (sett vunnet + kampseiere +
 -- turneringsseier) — advancement-tabellen trengs ikke lenger.
 drop table if exists advancement;
+
+-- Vipps-betalingsflyten fra vm-tipping/CL-spillet er ikke koblet til noe i dart-vm-spillet.
+alter table participants drop column if exists vipps_confirmed;

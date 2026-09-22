@@ -74,9 +74,16 @@ Pott 1 er kun en duell mellom verdens to beste (#1 og #2), deretter utvides pott
 
 Validert med `scripts/simulate-scoring-suspense.ts` — 1000 simulerte turneringer med 50 tilfeldige deltakere for å sjekke at ledelsen ikke låses for tidlig.
 
-## Trekning
+## Trekning — oppdatere med ekte data i november
 
-PDC har ikke publisert den faktiske trekningen ennå (kommer normalt medio november). `src/lib/bracketProjection.ts` genererer en deterministisk eksempel-trekning for hele 128-spiller-braketten (rent utslagsspill, ingen walkover) basert på standard turneringsseeding, tydelig merket som eksempel i UI-et — under `/vm-info` (fanen «Trekning») og når man velger spiller i `/tipp`. Bytt ut med ekte data når trekningen er kjent.
+PDC har ikke publisert den faktiske trekningen ennå (kommer normalt medio november). `src/lib/bracketProjection.ts` genererer en deterministisk eksempel-trekning for hele 128-spiller-braketten (rent utslagsspill, ingen walkover) basert på standard turneringsseeding, tydelig merket som eksempel i UI-et — under `/vm-info` (fanen «Trekning») og når man velger spiller i `/tipp`.
+
+Slik oppdaterer du med ekte data når trekningen er kjent:
+
+1. **Sjekk feltstørrelsen først.** Hele modellen (`STAGE_ORDER` i `src/config/scoring.ts`, antall runder i braketten) er bygget for **128 spillere uten walkover**. Sjekk PDC sin offisielle trekning — er det et annet antall spillere, eller har noen bye i runde 1, må `bracketProjection.ts` og `STAGE_ORDER` justeres strukturelt, ikke bare data-verdiene. Dette er den delen som mest sannsynlig krever hjelp fra Claude/en utvikler, ikke en ren tekst-oppdatering.
+2. **Oppdater spillerlisten i `src/data/pots.ts`.** Pott 1–5 (de 32 seedede) bør stemme med PDC sin offisielle seeding-liste på trekningstidspunktet — juster `seedNumber`/`pdcRanking` om noen har flyttet på seg siden `pots.ts` sist ble oppdatert (kommentaren øverst i filen viser datoen for gjeldende øyeblikksbilde). Pott 6 sine 32 navngitte useedede spillere og de resterende plasseringsspillerne (`Kvalifisert spiller 1`–`64` i `bracketProjection.ts`) erstattes med det faktiske kvalifiserte feltet.
+3. **Erstatt selve trekningen.** `R1_MATCHES` i `bracketProjection.ts` er i dag *generert* (via `seedOrder()` + en deterministisk stokking) — ikke den ekte trekningen. Når PDC sin offisielle trekning foreligger, bytt ut generering-logikken med en hardkodet liste av de 64 faktiske runde 1-parene, i samme format: `[navn, navn][]`. Resten av filen (seed-labels, bracket-seksjoner) fungerer uendret så lenge `R1_MATCHES` har riktig format og alle 32 seedede spillerne faktisk finnes i den.
+4. **Kjør testene** (`npm test`) — `bracketProjection.test.ts` sjekker strukturelle invarianter (64 kamper, 128 distinkte spillere, seed 1/2 i hver sin halvdel) som bør holde uansett hvor dataene kommer fra.
 
 ## Manuell resultatregistrering
 

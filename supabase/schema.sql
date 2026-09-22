@@ -4,7 +4,6 @@ create table participants (
   email text not null,
   pin text not null,
   phone text,
-  vipps_confirmed boolean default false,
   created_at timestamptz default now()
 );
 
