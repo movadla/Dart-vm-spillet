@@ -4,7 +4,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 const nextConfig: NextConfig = {
   /* config options here */
   allowedDevOrigins: [
-    "muslim-trivia-explaining-somehow.trycloudflare.com",] as string[],
+    "duties-tony-fioricet-owners.trycloudflare.com",] as string[],
 };
 
 export default withSentryConfig(nextConfig, {
