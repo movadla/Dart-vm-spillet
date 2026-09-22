@@ -15,6 +15,13 @@
 - [ ] Nærmere desember: sjekk PDC sin offisielle seeding mot `src/data/pots.ts` (rangeringen der er et øyeblikksbilde fra september og vil ha glidd)
 - [ ] Når PDC publiserer den faktiske trekningen (normalt medio november): følg steg-for-steg-oppskriften i `README.md` → «Trekning — oppdatere med ekte data»
 
+## Idéer til senere (produktvurderinger, ikke bestemt ennå)
+
+- [ ] Færre kandidater per pott (i dag: 2/3/5/6/8/mange i pott 6) — vurder et mer kuratert,
+      strammere utvalg per nivå
+- [ ] Til gjengjeld: vis flere detaljer per spiller når man utforsker/velger (i dag bare
+      navn, nasjonalitet, PDC-ranking, odds) — f.eks. nylig form, historikk, statistikk
+
 ## Periodisk
 
 - [ ] Kjør en ny grundig gjennomgang av hele appen (som den 31-punkts-revisjonen 2026-09-22/23) — sikkerhet, feilhåndtering, testdekning, GDPR, tilgjengelighet, ytelse, admin-UX, leftover-referanser til gamle prosjekter. Gjør dette:
