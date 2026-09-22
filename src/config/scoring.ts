@@ -25,5 +25,5 @@ export const SCORING = {
     final: 25,
     winner: 35,
   } as Record<Stage, number>,
-  underdogMultiplier: { 1: 1, 2: 1, 3: 2, 4: 2, 5: 3 } as Record<number, number>,
+  underdogMultiplier: { 1: 1, 2: 1, 3: 2, 4: 2, 5: 3, 6: 4 } as Record<number, number>,
 }

@@ -17,7 +17,7 @@ interface Props {
 }
 
 // ── Eksempeldata til intro-sekvensen (illustrerer spillmekanikken, ikke ekte VM-resultater) ──
-const POT_COLORS = ['#d97706', '#2563eb', '#16a34a', '#ea580c', '#7c3aed']
+const POT_COLORS = ['#dc2626', '#d97706', '#2563eb', '#16a34a', '#ea580c', '#7c3aed']
 
 function findPick(name: string) {
   const pot = POTS.find((p) => p.players.some((pl) => pl.name === name))
@@ -168,9 +168,9 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
       <div style={{ minHeight: 268, marginBottom: 24 }}>
         {phase === 0 && (
           <div>
-            <PhaseHeading eyebrow="Eksempel · steg 1" title="Velg 5 dartspillere" />
+            <PhaseHeading eyebrow="Eksempel · steg 1" title="Velg 6 dartspillere" />
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
-              Én spiller fra hvert av de 5 nivåene – fra toppseedet til wildcard.
+              Én spiller fra hvert av de 6 nivåene – fra toppseedet til wildcard.
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {EXAMPLE_PICKS.map((pick, i) => {
@@ -317,7 +317,7 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
               Klar til å sette laget?
             </div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, marginBottom: 6 }}>
-              Velg dine 5 spillere og følg dem gjennom hele sluttspillet i PDC World Championship.
+              Velg dine 6 spillere og følg dem gjennom hele sluttspillet i PDC World Championship.
             </div>
           </div>
         )}

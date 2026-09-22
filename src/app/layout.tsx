@@ -17,7 +17,7 @@ const condensed = Barlow_Condensed({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL ?? 'https://dartvmspillet.com'),
   title: 'Dart-VM-spillet',
-  description: 'Velg 5 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
+  description: 'Velg 6 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
   manifest: '/manifest.json',
   icons: {
     apple: '/icon.svg',
@@ -29,13 +29,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Dart-VM-spillet',
-    description: 'Velg 5 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
+    description: 'Velg 6 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Dart-VM-spillet',
-    description: 'Velg 5 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
+    description: 'Velg 6 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
   },
 }
 

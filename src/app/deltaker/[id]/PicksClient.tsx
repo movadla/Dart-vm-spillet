@@ -10,7 +10,7 @@ import { calcPlayerPoints, isPlayerEliminated, type PickWithPot, type Advancemen
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
 // Fargekoding pr. pott (1–5).
-const POT_COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#f97316', '#8b5cf6']
+const POT_COLORS = ['#dc2626', '#f59e0b', '#3b82f6', '#22c55e', '#f97316', '#8b5cf6']
 
 const STAGE_INDEX: Record<string, number> = Object.fromEntries(STAGE_ORDER.map((s, i) => [s, i]))
 

@@ -1,6 +1,6 @@
 # Dart-VM-spillet
 
-Fantasy-tippespill for PDC World Darts Championship. Deltakere velger én dartspiller fra hver av 5 potter (seedingsnivåer) og følger dem gjennom det rene utslagsbrakettet. Poeng beregnes ut fra hvor langt hver spiller avanserer i turneringen.
+Fantasy-tippespill for PDC World Darts Championship. Deltakere velger én dartspiller fra hver av 6 potter (seedingsnivåer) og følger dem gjennom det rene utslagsbrakettet. Poeng beregnes ut fra hvor langt hver spiller avanserer i turneringen.
 
 ## Tech stack
 
@@ -50,7 +50,7 @@ src/
 │       ├── admin/             # Admin-endepunkter (krever ADMIN_SECRET)
 │       └── ...
 ├── data/
-│   └── pots.ts                 # 5 potter med dartspillere (PDC-seeding)
+│   └── pots.ts                 # 6 potter med dartspillere (PDC-seeding)
 ├── lib/
 │   └── scoring.ts               # Poengberegning (rent avansement-basert)
 └── config/
@@ -72,7 +72,9 @@ Konfigureres i `src/config/scoring.ts`. PDC-VM er et rent utslagsspill uten grup
 | Finale | 90 |
 | VM-vinner | 125 |
 
-Poengsummen multipliseres med en underdogs-multiplikator per pott: pott 1–2 = ×1, pott 3–4 = ×2, pott 5 = ×3.
+Poengsummen multipliseres med en underdogs-multiplikator per pott: pott 1–2 = ×1, pott 3–4 = ×2, pott 5 = ×3, pott 6 = ×4.
+
+Pott 1 er kun en duell mellom verdens to beste (#1 og #2), deretter utvides potten nedover: pott 2 (3 spillere), pott 3 (5), pott 4 (6), pott 5 (8), pott 6 (resten — useedede/kvalifiserte).
 
 ## Manuell resultatregistrering
 

@@ -11,7 +11,7 @@ create table participants (
 create table picks (
   id uuid primary key default gen_random_uuid(),
   participant_id uuid references participants(id) on delete cascade,
-  pot_number integer not null check (pot_number between 1 and 5),
+  pot_number integer not null check (pot_number between 1 and 6),
   player_name text not null,
   created_at timestamptz default now()
 );

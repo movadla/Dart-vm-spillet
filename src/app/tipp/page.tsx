@@ -7,6 +7,7 @@ import SmartBackButton from '@/components/SmartBackButton'
 import { POTS } from '@/data/pots'
 import Flag from '@/components/Flag'
 import { SCORING, STAGE_ORDER, STAGE_LABELS } from '@/config/scoring'
+import { getFirstMatchInfo } from '@/lib/bracketProjection'
 import StepSlideshow from '@/components/StepSlideshow'
 import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
 
@@ -14,7 +15,7 @@ const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact
 const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
 const POT_COLORS = [
-  '#f59e0b', '#3b82f6', '#22c55e', '#f97316', '#8b5cf6',
+  '#dc2626', '#f59e0b', '#3b82f6', '#22c55e', '#f97316', '#8b5cf6',
 ]
 
 const POT_COUNT = POTS.length
@@ -713,18 +714,25 @@ const inputStyle: React.CSSProperties = {
             })
           })()}
           <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Pott 1 & 2 scorer normalt</span>
-            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>×1</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Pott 3 & 4 scorer dobbelt</span>
-            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>×2</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Pott 5 scorer trippelt</span>
-            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#ef4444' }}>×3</span>
-          </div>
+          {(() => {
+            // Grupper sammenhengende potter med samme multiplikator til én linje.
+            const groups: { pots: number[]; mult: number }[] = []
+            for (const pot of POTS) {
+              const mult = SCORING.underdogMultiplier[pot.potNumber] ?? 1
+              const last = groups[groups.length - 1]
+              if (last && last.mult === mult) last.pots.push(pot.potNumber)
+              else groups.push({ pots: [pot.potNumber], mult })
+            }
+            return groups.map((g, i) => {
+              const label = g.pots.length === 1 ? `Pott ${g.pots[0]}` : `Pott ${g.pots[0]}–${g.pots[g.pots.length - 1]}`
+              return (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: i === groups.length - 1 ? 0 : 4 }}>
+                  <span style={{ color: 'rgba(255,255,255,0.45)' }}>{label} scorer ×{g.mult}</span>
+                  <span style={{ fontFamily: SPORT, fontWeight: 600, color: g.mult >= 3 ? '#ef4444' : '#f59e0b' }}>×{g.mult}</span>
+                </div>
+              )
+            })
+          })()}
         </div>
       )}
 
@@ -767,6 +775,33 @@ const inputStyle: React.CSSProperties = {
           )
         })}
       </div>
+
+      {/* Første kamp / bye for valgt spiller */}
+      {selectedPlayer && (() => {
+        const info = getFirstMatchInfo(selectedPlayer)
+        if (!info) return null
+        return (
+          <div style={{ marginBottom: 14, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '11px 14px' }}>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 4 }}>
+              Eksempel-trekning · oppdateres når PDC trekker det ekte oppsettet
+            </div>
+            {info.type === 'match' ? (
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
+                Møter <strong style={{ color: '#fff' }}>{info.opponent}</strong> i 1. runde
+                {info.isFiller && <span style={{ color: 'rgba(255,255,255,0.35)' }}> (kvalifisert spiller)</span>}
+              </div>
+            ) : (
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
+                Bye i 1. runde — møter vinneren av{' '}
+                <strong style={{ color: '#fff' }}>{info.vsA}</strong>
+                {info.vsAFiller && <span style={{ color: 'rgba(255,255,255,0.35)' }}> (kval.)</span>} vs{' '}
+                <strong style={{ color: '#fff' }}>{info.vsB}</strong>
+                {info.vsBFiller && <span style={{ color: 'rgba(255,255,255,0.35)' }}> (kval.)</span>} i 2. runde
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Neste-knapp */}
       <button

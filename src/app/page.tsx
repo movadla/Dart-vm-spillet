@@ -350,7 +350,7 @@ export default function HomePage() {
         </div>
         <div className="how-it-works-grid">
         {[
-          { icon: <IconTarget />, glow: 'rgba(34,197,94,0.22)',   title: 'Velg 5 spillere',   desc: 'Velg én dartspiller fra hvert av de 5 nivåene' },
+          { icon: <IconTarget />, glow: 'rgba(34,197,94,0.22)',   title: 'Velg 6 spillere',   desc: 'Velg én dartspiller fra hvert av de 6 nivåene' },
           { icon: <IconChart />,  glow: 'rgba(245,158,11,0.22)',  title: 'Poeng underveis',   desc: 'Avansement i sluttspillet gir poeng for hver av spillerne dine' },
           { icon: <IconTrophy />, glow: 'rgba(251,191,36,0.22)',  title: 'Spill mot venner',  desc: 'Opprett private ligaer og sammenlign deg med andre på leaderboardet' },
         ].map(({ icon, glow, title, desc }) => (

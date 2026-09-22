@@ -3,7 +3,7 @@
 
 alter table picks rename column team_name to player_name;
 alter table picks drop constraint if exists picks_pot_number_check;
-alter table picks add constraint picks_pot_number_check check (pot_number between 1 and 5);
+alter table picks add constraint picks_pot_number_check check (pot_number between 1 and 6);
 
 alter table advancement rename column team_name to player_name;
 

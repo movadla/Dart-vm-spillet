@@ -40,7 +40,7 @@ export default function Image() {
           letterSpacing: '-20px',
           display: 'flex',
         }}>
-          5
+          6
         </div>
 
         {/* Main text */}
@@ -65,7 +65,7 @@ export default function Image() {
           letterSpacing: '0.02em',
           display: 'flex',
         }}>
-          Velg 5 dartspillere. Følg dart-VM. Spill mot venner.
+          Velg 6 dartspillere. Følg dart-VM. Spill mot venner.
         </div>
       </div>
     ),

@@ -8,17 +8,19 @@ import Flag from '@/components/Flag'
 import { supabase } from '@/lib/supabase'
 import { STAGE_ORDER, STAGE_LABELS, SCORING, type Stage } from '@/config/scoring'
 import type { MatchResult } from '@/lib/scoring'
+import { getFirstMatchInfo, getBracketSection } from '@/lib/bracketProjection'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
 const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
-const POT_COLORS = ['#d97706', '#2563eb', '#16a34a', '#ea580c', '#7c3aed']
+const POT_COLORS = ['#dc2626', '#d97706', '#2563eb', '#16a34a', '#ea580c', '#7c3aed']
 
-type Tab = 'spillere' | 'kamper' | 'regler'
+type Tab = 'spillere' | 'kamper' | 'trekning' | 'regler'
 const TABS: { id: Tab; label: string }[] = [
   { id: 'spillere', label: 'Spillere' },
   { id: 'kamper',   label: 'Kamper'   },
+  { id: 'trekning', label: 'Trekning' },
   { id: 'regler',   label: 'Regler'   },
 ]
 
@@ -44,6 +46,7 @@ export default function VmInfoPage() {
   const [activeTab, setActiveTab] = useState<Tab>(() => (KICKOFF <= new Date() ? 'kamper' : 'regler'))
   const [participantId, setParticipantId] = useState<string | null>(null)
   const [matches, setMatches] = useState<MatchResult[]>([])
+  const [drawPlayer, setDrawPlayer] = useState<string>('')
   const rulesRef = useRef<HTMLDivElement>(null)
 
   // Påmelding stenger ved kickoff — CTA-lenker peker til Min side i stedet for stengt /tipp.
@@ -251,6 +254,86 @@ export default function VmInfoPage() {
 
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── TREKNING (projisert eksempel-trekning) ── */}
+      {activeTab === 'trekning' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ ...CARD, textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 1.5 }}>
+            Dette er en <strong style={{ color: '#fff' }}>eksempel-trekning</strong> — PDC har ikke publisert den faktiske
+            trekningen ennå (kommer normalt medio november). Oppsettet under viser hvordan braketten kunne sett ut,
+            og oppdateres når det ekte oppsettet er kjent.
+          </div>
+
+          <div style={CARD}>
+            <div style={LABEL}>Velg en spiller</div>
+            <select
+              value={drawPlayer}
+              onChange={(e) => setDrawPlayer(e.target.value)}
+              style={{ width: '100%', padding: '11px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, color: '#fff', fontSize: 14 }}
+            >
+              <option value="">— Velg spiller —</option>
+              {POTS.map((pot) => (
+                <optgroup key={pot.potNumber} label={pot.name}>
+                  {pot.players.map((p) => (
+                    <option key={p.name} value={p.name}>{p.name}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+
+          {drawPlayer && (() => {
+            const info = getFirstMatchInfo(drawPlayer)
+            const section = getBracketSection(drawPlayer)
+            if (!info) return null
+            return (
+              <>
+                <div style={CARD}>
+                  <div style={LABEL}>Første kamp</div>
+                  {info.type === 'match' ? (
+                    <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Flag iso2={getIso2(drawPlayer)} size={20} />
+                      <span>{drawPlayer}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.3)' }}>vs</span>
+                      <Flag iso2={getIso2(info.opponent)} size={20} />
+                      <span>{info.opponent}</span>
+                      {info.isFiller && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>(kvalifisert spiller)</span>}
+                      <span style={{ marginLeft: 'auto', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>1. runde</span>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)' }}>
+                      <div style={{ marginBottom: 6 }}>
+                        <Flag iso2={getIso2(drawPlayer)} size={20} /> <strong>{drawPlayer}</strong> har bye i 1. runde.
+                      </div>
+                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                        Møter vinneren av <strong style={{ color: '#fff' }}>{info.vsA}</strong>{info.vsAFiller && ' (kval.)'} vs{' '}
+                        <strong style={{ color: '#fff' }}>{info.vsB}</strong>{info.vsBFiller && ' (kval.)'} i 2. runde.
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {section.length > 0 && (
+                  <div style={CARD}>
+                    <div style={LABEL}>Andre seedede spillere i samme del av braketten</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {section.map((name) => (
+                        <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+                          <Flag iso2={getIso2(name)} size={18} />
+                          {name}
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 10 }}>
+                      Dette er spillere du potensielt kan møte senere i turneringen dersom begge går langt.
+                    </div>
+                  </div>
+                )}
+              </>
+            )
+          })()}
         </div>
       )}
 
