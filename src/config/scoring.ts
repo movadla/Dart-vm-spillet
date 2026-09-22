@@ -13,6 +13,9 @@ export const STAGE_LABELS: Record<Stage, string> = {
   final: 'Finale',
 }
 
+// «VM-vinner» er bevisst IKKE med i STAGE_ORDER/Stage — det er ikke en runde noen spiller
+// en kamp i, bare en avledet status (isPlayerChampion() i src/lib/scoring.ts) for den som
+// vant finalen. Brukes som visningstekst der en kamp-fase ikke er relevant.
 export const CHAMPION_LABEL = 'VM-vinner'
 
 // Enkel poengmodell: 1p per vunnet sett, 2p per kampseier (avansement), 5p bonus for å vinne

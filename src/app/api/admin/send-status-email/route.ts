@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
   const leaguesByParticipant: Record<string, string[]> = {}
   for (const m of memberRows) (leaguesByParticipant[m.participant_id] ??= []).push(m.league_id)
 
-  const subject = `Status etter dag ${vmDay} av ${VM_TOTAL_DAYS} i VM`
+  const subject = `Status etter dag ${vmDay} av ${VM_TOTAL_DAYS} i dart-VM`
   const fromAddr = `Dart-VM-spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`
 
   const payloads = recipients.map((row) => {

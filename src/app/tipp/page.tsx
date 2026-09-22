@@ -586,7 +586,10 @@ const inputStyle: React.CSSProperties = {
           </div>
           {name && <div style={{ color: '#fff' }}>{name}</div>}
         </div>
-        <p style={{ color: 'rgba(255,255,255,0.35)', marginBottom: 24, fontSize: 13 }}>{Object.keys(picks).length} av {POT_COUNT} spillere valgt</p>
+        <p style={{ color: 'rgba(255,255,255,0.35)', marginBottom: 8, fontSize: 13 }}>{Object.keys(picks).length} av {POT_COUNT} spillere valgt</p>
+        <Link href="/vm-info?tab=regler" target="_blank" style={{ display: 'inline-block', marginBottom: 24, fontSize: 12, color: 'rgba(255,255,255,0.3)', textDecoration: 'underline' }}>
+          Se reglene og poengsystemet →
+        </Link>
 
         <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', marginBottom: 20, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
           {POTS.map((pot) => {
@@ -752,13 +755,15 @@ const inputStyle: React.CSSProperties = {
 
       {/* Spillerliste + motstander-bracket side om side */}
       <div style={{ flex: 1, display: 'flex', gap: 10, minHeight: 0, marginBottom: 14 }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0, overflowY: 'auto' }}>
+        <div role="radiogroup" aria-label={`Velg spiller fra ${pot.name}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0, overflowY: 'auto' }}>
           {pot.players.map((player) => {
             const isSelected = selectedPlayer === player.name
             return (
               <button
                 key={player.name}
                 className="draft-team-btn"
+                role="radio"
+                aria-checked={isSelected}
                 onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10, padding: '13px 14px',

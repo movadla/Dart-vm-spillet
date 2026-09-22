@@ -104,7 +104,7 @@ export async function GET(request: Request) {
   const leaguesByParticipant: Record<string, string[]> = {}
   for (const m of memberRows) (leaguesByParticipant[m.participant_id] ??= []).push(m.league_id)
 
-  const subject = `Status etter dag ${vmDay} av ${VM_TOTAL_DAYS} i VM`
+  const subject = `Status etter dag ${vmDay} av ${VM_TOTAL_DAYS} i dart-VM`
 
   const recipients = testTo
     ? leaderboard.filter(r => r.email === testTo).length > 0

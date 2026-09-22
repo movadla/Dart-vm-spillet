@@ -1,4 +1,6 @@
-export const VM_TOTAL_DAYS = 39
+// PDC World Championship varer normalt ~3 uker (medio desember – 3. januar).
+// Juster når de faktiske turneringsdatoene er offentliggjort.
+export const VM_TOTAL_DAYS = 24
 
 export interface MatchResultLite {
   player1: string
@@ -58,10 +60,10 @@ export function buildDailyPlainText(p: PlainTextParams): string {
   ].filter(Boolean)
   const leagues = leagueLines.length ? '\nDine ligaer:\n' + leagueLines.join('\n') + '\n' : ''
   return [
-    'VM-SPILLET 2026',
+    'DART-VM-SPILLET 2026',
     '',
     `Hei ${p.name},`,
-    `Din status etter dag ${p.vmDay} av ${VM_TOTAL_DAYS} i VM`,
+    `Din status etter dag ${p.vmDay} av ${VM_TOTAL_DAYS} i dart-VM`,
     '',
     `Totalpoeng: ${p.points}`,
     delta,
@@ -193,7 +195,7 @@ export function buildDailyEmail(p: EmailParams): string {
             <!-- Dag-status -->
             <tr>
               <td style="padding-bottom:32px;padding-top:6px;">
-                <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:rgba(255,255,255,0.55);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Dag ${p.vmDay} av ${VM_TOTAL_DAYS} i VM</div>
+                <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:rgba(255,255,255,0.55);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Dag ${p.vmDay} av ${VM_TOTAL_DAYS} i dart-VM</div>
               </td>
             </tr>
 

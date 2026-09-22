@@ -85,6 +85,13 @@ Slik oppdaterer du med ekte data når trekningen er kjent:
 3. **Erstatt selve trekningen.** `R1_MATCHES` i `bracketProjection.ts` er i dag *generert* (via `seedOrder()` + en deterministisk stokking) — ikke den ekte trekningen. Når PDC sin offisielle trekning foreligger, bytt ut generering-logikken med en hardkodet liste av de 64 faktiske runde 1-parene, i samme format: `[navn, navn][]`. Resten av filen (seed-labels, bracket-seksjoner) fungerer uendret så lenge `R1_MATCHES` har riktig format og alle 32 seedede spillerne faktisk finnes i den.
 4. **Kjør testene** (`npm test`) — `bracketProjection.test.ts` sjekker strukturelle invarianter (64 kamper, 128 distinkte spillere, seed 1/2 i hver sin halvdel) som bør holde uansett hvor dataene kommer fra.
 
+## Cron-jobber
+
+`vercel.json` har en tom `crons`-liste med vilje — de to daglige jobbene (statusmail,
+rang-snapshot) kjøres i stedet via GitHub Actions (`.github/workflows/`), siden Vercel sin
+gratis Hobby-plan begrenser cron til én jobb i døgnet. Se kommentaren øverst i
+`.github/workflows/snapshot-ranks.yml` for hvilke repo-secrets som må settes.
+
 ## Manuell resultatregistrering
 
 Det finnes ingen fri live-API for PDC-darts, så alle kampresultater legges inn manuelt via `/admin`: spiller 1/spiller 2, sett 1/sett 2, runde — skrives til `match_results`. Poengsum, hvilken runde en spiller har nådd, og hvem som er slått ut, avledes automatisk derfra.
