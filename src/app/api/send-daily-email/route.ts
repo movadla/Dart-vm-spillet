@@ -48,7 +48,7 @@ export async function GET(request: Request) {
   const force = searchParams.get('force') === '1'
 
   const resend = new Resend(process.env.RESEND_API_KEY)
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://vmspillet.com'
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'
 
   const now = new Date()
   const cutoff24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
@@ -138,7 +138,7 @@ export async function GET(request: Request) {
     return {
       from: fromAddr,
       to: row.email,
-      reply_to: 'vmspillet2026@gmail.com',
+      reply_to: `kontakt@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}`,
       subject,
       headers: {
         'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}?subject=unsubscribe>`,

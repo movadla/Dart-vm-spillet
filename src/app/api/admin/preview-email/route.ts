@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   const type = req.nextUrl.searchParams.get('type') ?? 'welcome'
   const name = req.nextUrl.searchParams.get('name') ?? 'Ola Nordmann'
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://vmspillet.com'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'
 
   let html: string
 

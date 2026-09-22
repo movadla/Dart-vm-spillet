@@ -76,7 +76,6 @@ export function buildDailyPlainText(p: PlainTextParams): string {
 
 export function buildDailyEmail(p: EmailParams): string {
   const preheader = p.pointsDelta > 0 ? `+${p.pointsDelta} poeng siden i går` : `${p.points} poeng totalt`
-  const snaaUrl = 'https://www.vmspillet.com/snaasamannen-email.png'
 
   const deltaHtml = p.pointsDelta > 0
     ? `<div style="font-size:12px;font-weight:700;color:#f59e0b;letter-spacing:0.04em;margin-top:4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">+${p.pointsDelta}p siden i går</div>`
@@ -170,7 +169,7 @@ export function buildDailyEmail(p: EmailParams): string {
 
         <table role="presentation" cellspacing="0" cellpadding="0" width="100%" style="max-width:480px;">
           <tr>
-            <td style="background:#0d1117 url('${snaaUrl}') no-repeat right top;background-size:180px auto;">
+            <td style="background:#0d1117;">
 
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="position:relative;z-index:1;">
 

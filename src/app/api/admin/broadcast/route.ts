@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getSupabaseAdmin()
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://vmspillet.com'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'
 
   let participants: { id: string; email: string; name: string }[]
 

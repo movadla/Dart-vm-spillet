@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Kunne ikke lagre picks' }, { status: 500 })
     }
 
-    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://vmspillet.com'
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'
     sendWelcomeEmail({
       name: name.trim(),
       email: email.trim().toLowerCase(),

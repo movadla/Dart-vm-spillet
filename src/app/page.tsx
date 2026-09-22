@@ -383,8 +383,8 @@ export default function HomePage() {
 
       {/* ── KONTAKT ── */}
       <div style={{ padding: '0 20px 48px', textAlign: 'center' }}>
-        <a href="mailto:vmspillet2026@gmail.com" className="text-link" style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)', textDecoration: 'none', letterSpacing: '0.02em' }}>
-          vmspillet2026@gmail.com
+        <a href="mailto:kontakt@dart-vm-spillet.no" className="text-link" style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)', textDecoration: 'none', letterSpacing: '0.02em' }}>
+          kontakt@dart-vm-spillet.no
         </a>
       </div>
     </div>

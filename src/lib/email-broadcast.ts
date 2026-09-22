@@ -24,7 +24,6 @@ export function buildBroadcastHtml(name: string, subject: string, body: string, 
       : '<br>')
     .join('')
 
-  const snaaUrl = 'https://www.vmspillet.com/snaasamannen-email.png'
 
   return `<!DOCTYPE html>
 <html lang="no">
@@ -48,7 +47,7 @@ export function buildBroadcastHtml(name: string, subject: string, body: string, 
 
         <table role="presentation" cellspacing="0" cellpadding="0" width="100%" style="max-width:480px;">
           <tr>
-            <td style="background:#0d1117 url('${snaaUrl}') no-repeat right top;background-size:180px auto;">
+            <td style="background:#0d1117;">
 
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="position:relative;z-index:1;">
 

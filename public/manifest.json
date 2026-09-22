@@ -1,7 +1,7 @@
 {
-  "name": "VM-Spillet 2026",
-  "short_name": "VM-Spillet",
-  "description": "Velg 8 lag. Følg dem gjennom turneringen. Vinn potten.",
+  "name": "Dart-VM-spillet",
+  "short_name": "Dart-VM",
+  "description": "Velg 6 dartspillere. Følg dem gjennom PDC dart-VM. Vinn potten.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#080808",

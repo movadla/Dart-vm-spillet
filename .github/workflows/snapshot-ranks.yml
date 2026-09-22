@@ -1,4 +1,6 @@
 name: Snapshot ranks
+# Krever repo-secrets APP_BASE_URL (f.eks. https://dart-vm-spillet.vercel.app, uten avsluttende /)
+# og SYNC_SECRET (samme verdi som SYNC_SECRET i Vercel-miljøvariablene).
 
 on:
   schedule:
@@ -13,4 +15,4 @@ jobs:
     steps:
       - name: Call snapshot-ranks
         run: |
-          curl -sf "https://www.vmspillet.com/api/snapshot-ranks?secret=${{ secrets.SYNC_SECRET }}"
+          curl -sf "${{ secrets.APP_BASE_URL }}/api/snapshot-ranks?secret=${{ secrets.SYNC_SECRET }}"

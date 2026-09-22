@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
   await supabase.from('magic_links').insert({ token, participant_id: participantId, expires_at: expiresAt })
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://vmspillet.com'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'
   const link = `${baseUrl}/tipp?edit=${participantId}&token=${token}`
 
   const resend = new Resend(process.env.RESEND_API_KEY)

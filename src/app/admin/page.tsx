@@ -4,11 +4,16 @@ import { useEffect, useState, Suspense, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { POTS, getIso2 } from '@/data/pots'
+import { R1_MATCHES } from '@/lib/bracketProjection'
 import Flag from '@/components/Flag'
 import { STAGE_ORDER, STAGE_LABELS } from '@/config/scoring'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const ALL_PLAYERS = POTS.flatMap((p) => p.players.map((pl) => pl.name)).sort((a, b) => a.localeCompare(b, 'no'))
+// Runde 1 inneholder også 64 plasseringsspillere ("Kvalifisert spiller N") som ikke er valgbare
+// i pott-listene — de må likevel kunne velges her, ellers kan admin ikke registrere resultatet
+// for halvparten av runde 1-kampene.
+const ALL_MATCH_PLAYERS = Array.from(new Set([...ALL_PLAYERS, ...R1_MATCHES.flat()])).sort((a, b) => a.localeCompare(b, 'no'))
 const MATCH_STAGES = STAGE_ORDER
 
 type Tab = 'deltakere' | 'ligaer' | 'statistikk' | 'verktøy' | 'epost'
@@ -381,7 +386,7 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
                   <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>{key === 'player1' ? 'Spiller 1' : 'Spiller 2'}</label>
                   <select style={selectStyle} value={matchForm[key]} onChange={(e) => setMatchForm((f) => ({ ...f, [key]: e.target.value }))} required>
                     <option value="">Velg spiller</option>
-                    {ALL_PLAYERS.map((name) => <option key={name} value={name}>{name}</option>)}
+                    {ALL_MATCH_PLAYERS.map((name) => <option key={name} value={name}>{name}</option>)}
                   </select>
                 </div>
               ))}

@@ -29,7 +29,6 @@ export function buildWelcomeText(name: string, ctaUrl: string, picks: { team: st
 
 export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: string; iso2: string }[]): string {
   const preheader = `Velkommen til Dart-VM-spillet`
-  const snaaUrl = 'https://www.vmspillet.com/snaasamannen-email.png'
 
   const pickRows = picks.map((pick, i) => {
     const isLast = i === picks.length - 1
@@ -81,7 +80,7 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
 
         <table role="presentation" cellspacing="0" cellpadding="0" width="100%" style="max-width:480px;">
           <tr>
-            <td style="background:#0d1117 url('${snaaUrl}') no-repeat right top;background-size:180px auto;">
+            <td style="background:#0d1117;">
 
           <!-- Content -->
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="position:relative;z-index:1;">
