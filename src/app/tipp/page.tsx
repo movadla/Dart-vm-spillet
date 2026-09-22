@@ -118,6 +118,8 @@ function TippContent() {
   const tokenParam = searchParams.get('token')
   const [slideshowSlide, setSlideshowSlide] = useState(0)
 
+  // Henter eksisterende picks for redigering — «start lasting, så fetch»-mønsteret er korrekt.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!editId || !pinVerified) return
     setLoadingEdit(true)
@@ -139,14 +141,20 @@ function TippContent() {
     }
     load()
   }, [editId, pinVerified])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
+  // Kjøres med vilje kun ved mount (ikke når isEditMode/step endres senere) — sjekker om
+  // brukeren allerede har en lagret deltaker-id i localStorage (finnes ikke under SSR).
   useEffect(() => {
     if (isEditMode || step !== 0) return
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (localStorage.getItem('vm_participant_id')) setStep(1)
     } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!tokenParam || !editId || pinVerified) return
     setVerifyingToken(true)
@@ -162,6 +170,7 @@ function TippContent() {
       })
       .catch(() => { setVerifyingToken(false); setTokenError('Noe gikk galt') })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })

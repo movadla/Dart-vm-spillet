@@ -54,8 +54,10 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
 
   const onSlideRef = useRef(onSlide)
   const onCtaReadyRef = useRef(onCtaReady)
-  onSlideRef.current = onSlide
-  onCtaReadyRef.current = onCtaReady
+  useEffect(() => {
+    onSlideRef.current = onSlide
+    onCtaReadyRef.current = onCtaReady
+  })
 
   // Fade inn hele komponenten
   useEffect(() => {
@@ -73,9 +75,12 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
     if (next === LAST_PHASE) onCtaReadyRef.current?.()
   }
 
-  // Tell opp poengsummen når leaderboard-fasen vises
+  // Tell opp poengsummen når leaderboard-fasen vises — nullstiller med vilje hver gang
+  // fasen endres, det er selve animasjons-triggeren, ikke noe som kan flyttes til en
+  // lazy useState-initializer.
   useEffect(() => {
     if (phase !== 2) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCount(0)
     const steps = 24
     const stepTime = 900 / steps

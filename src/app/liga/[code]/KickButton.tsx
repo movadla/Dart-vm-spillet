@@ -15,12 +15,15 @@ export default function KickButton({ leagueId, memberId, memberName, createdBy }
   const [isAdmin, setIsAdmin] = useState(false)
   const [kicking, setKicking] = useState(false)
 
+  // localStorage finnes ikke under SSR — sjekkes med vilje etter mount.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       const myId = localStorage.getItem('vm_participant_id')
       setIsAdmin(myId === createdBy && myId !== memberId)
     } catch {}
   }, [createdBy, memberId])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!isAdmin) return null
 

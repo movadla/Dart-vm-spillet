@@ -15,6 +15,8 @@ export default function FinnPage() {
   const [error, setError] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
 
+  // localStorage finnes ikke under SSR — sjekkes med vilje etter mount.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       const saved = localStorage.getItem('vm_participant_id')
@@ -22,6 +24,7 @@ export default function FinnPage() {
     } catch {}
     setChecking(false)
   }, [router])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

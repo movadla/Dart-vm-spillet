@@ -56,12 +56,15 @@ export default function VmInfoPage() {
   const ctaHref = participantId ? `/deltaker/${participantId}` : isLive ? '/finn' : '/tipp'
   const ctaLabel = participantId ? 'Din side →' : isLive ? 'Min side →' : 'Velg spillere →'
 
+  // localStorage finnes ikke under SSR — sjekkes med vilje etter mount.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       const saved = localStorage.getItem('vm_participant_id')
       if (saved) setParticipantId(saved)
     } catch {}
   }, [])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (activeTab !== 'kamper') return
@@ -74,6 +77,9 @@ export default function VmInfoPage() {
       })
   }, [activeTab])
 
+  // Leser URL-parametre etter mount med vilje — window finnes ikke under SSR, en lazy
+  // useState-initializer ville gitt hydration-mismatch mellom server og klient.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('regler') === '1') {
@@ -98,6 +104,7 @@ export default function VmInfoPage() {
       setDrawPlayer(spiller)
     }
   }, [])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Sluttspillet vises som en horisontalt scrollbar bracket: én kolonne per runde
   // (r1 → final), pluss en avsluttende VM-vinner-kolonne. Vi kjenner ikke fremtidige

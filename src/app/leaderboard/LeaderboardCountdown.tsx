@@ -24,6 +24,8 @@ export default function LeaderboardCountdown() {
 
   useEffect(() => {
     const t = setInterval(() => setCd(getTimeUntil(KICKOFF)), 1000)
+    // localStorage finnes ikke under SSR — sjekkes med vilje etter mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     try { if (localStorage.getItem('vm_participant_id')) setIsLoggedIn(true) } catch {}
     return () => clearInterval(t)
   }, [])

@@ -9,6 +9,9 @@ interface DayRec { day: string; base: number; last: number }
 export default function PointsDelta({ participantId, totalPoints }: { participantId: string; totalPoints: number }) {
   const [delta, setDelta] = useState<number | null>(null)
 
+  // localStorage finnes ikke under SSR — leses/skrives med vilje etter mount for å unngå
+  // hydration-mismatch mellom server og klient.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     // «Siden i går»: baseline = poengnivå ved forrige dags siste besøk.
     // Baseline holdes fast gjennom hele dagen, så gjentatte besøk samme dag
@@ -34,6 +37,7 @@ export default function PointsDelta({ participantId, totalPoints }: { participan
       }
     } catch {}
   }, [participantId, totalPoints])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (delta === null || delta === 0) return null
 

@@ -15,6 +15,10 @@ const ALL_PLAYERS = POTS.flatMap((p) => p.players.map((pl) => pl.name)).sort((a,
 // for halvparten av runde 1-kampene.
 const ALL_MATCH_PLAYERS = Array.from(new Set([...ALL_PLAYERS, ...R1_MATCHES.flat()])).sort((a, b) => a.localeCompare(b, 'no'))
 const MATCH_STAGES = STAGE_ORDER
+// Statisk — auth går via httpOnly-cookien fra innlogging, ikke denne headeren. Hoistet til
+// modulnivå slik at den har stabil identitet på tvers av rerendere (unngår at useEffect/
+// useCallback-avhengighetslister må inkludere et objekt som ellers ville vært nytt hver gang).
+const ADMIN_HEADERS = { 'Content-Type': 'application/json' } as const
 
 type Tab = 'deltakere' | 'ligaer' | 'statistikk' | 'verktøy' | 'epost'
 
@@ -130,7 +134,7 @@ function LigaerTab({ headers }: { headers: Record<string, string> }) {
       .then((r) => r.json())
       .then((d) => setLeagues(d.leagues ?? []))
       .finally(() => setLoading(false))
-  }, [])
+  }, [headers])
 
   async function toggleLeague(id: string) {
     if (expandedId === id) { setExpandedId(null); return }
@@ -249,9 +253,12 @@ function StatistikkTab({ participantCount: totalCount, headers }: { participantC
     fetch('/api/admin/leagues', { headers })
       .then((r) => r.json())
       .then((d) => setLeagues(d.leagues ?? []))
-  }, [])
+  }, [headers])
 
+  // Refetch trigges med vilje av selectedLeagueId/totalCount — «start lasting, så fetch»
+  // er korrekt her, ikke noe som bør flyttes til en lazy initializer.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     const url = selectedLeagueId ? `/api/admin/stats?leagueId=${selectedLeagueId}` : '/api/admin/stats'
     fetch(url, { headers })
@@ -261,7 +268,7 @@ function StatistikkTab({ participantCount: totalCount, headers }: { participantC
         setParticipantCount(d.participantCount ?? totalCount)
       })
       .finally(() => setLoading(false))
-  }, [selectedLeagueId])
+  }, [selectedLeagueId, headers, totalCount])
 
   const potTeams = stats[selectedPot] ?? []
   const max = potTeams[0]?.count ?? 1
@@ -362,7 +369,7 @@ function VerktøyTab({ headers }: { headers: Record<string, string> }) {
       .then((r) => r.json())
       .then((d) => setLinks(d.links ?? []))
       .finally(() => setLinksLoading(false))
-  }, [])
+  }, [headers])
 
   async function submitMatchResult(e: React.FormEvent) {
     e.preventDefault(); setMatchMsg('')
@@ -770,7 +777,6 @@ function EpostTab({ participantCount, participants, headers }: { participantCoun
 // ─── Hoved-komponent ─────────────────────────────────────────────────────────
 function AdminContent() {
   const router = useRouter()
-  const adminHeaders = { 'Content-Type': 'application/json' }
 
   const [tab, setTab] = useState<Tab>('deltakere')
   const [participants, setParticipants] = useState<Participant[]>([])
@@ -780,14 +786,16 @@ function AdminContent() {
   const fetchParticipants = useCallback(async () => {
     setLoading(true); setFetchError(null)
     try {
-      const res = await fetch('/api/admin/participants', { headers: adminHeaders })
+      const res = await fetch('/api/admin/participants', { headers: ADMIN_HEADERS })
       if (res.ok) setParticipants((await res.json()).participants ?? [])
       else setFetchError('Kunne ikke hente deltakere')
     } catch { setFetchError('Nettverksfeil — prøv igjen') }
     finally { setLoading(false) }
   }, [])
 
-  useEffect(() => { fetchParticipants() }, [])
+  // «Hent på mount»-mønsteret er korrekt — fetchParticipants er stabil (useCallback, ingen deps).
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchParticipants() }, [fetchParticipants])
 
   const TABS: { id: Tab; label: string }[] = [
     { id: 'deltakere', label: 'Deltakere' },
@@ -829,12 +837,12 @@ function AdminContent() {
       </div>
 
       {tab === 'deltakere' && (
-        <DeltakereTab participants={participants} loading={loading} error={fetchError} headers={adminHeaders} onRefresh={fetchParticipants} />
+        <DeltakereTab participants={participants} loading={loading} error={fetchError} headers={ADMIN_HEADERS} onRefresh={fetchParticipants} />
       )}
-      {tab === 'ligaer' && <LigaerTab headers={adminHeaders} />}
-      {tab === 'statistikk' && <StatistikkTab participantCount={participants.length} headers={adminHeaders} />}
-      {tab === 'verktøy' && <VerktøyTab headers={adminHeaders} />}
-      {tab === 'epost' && <EpostTab participantCount={participants.length} participants={participants} headers={adminHeaders} />}
+      {tab === 'ligaer' && <LigaerTab headers={ADMIN_HEADERS} />}
+      {tab === 'statistikk' && <StatistikkTab participantCount={participants.length} headers={ADMIN_HEADERS} />}
+      {tab === 'verktøy' && <VerktøyTab headers={ADMIN_HEADERS} />}
+      {tab === 'epost' && <EpostTab participantCount={participants.length} participants={participants} headers={ADMIN_HEADERS} />}
     </div>
   )
 }

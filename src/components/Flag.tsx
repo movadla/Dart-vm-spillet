@@ -9,6 +9,9 @@ export default function Flag({ iso2, size = 20 }: { iso2: string; size?: number 
   const w = supported.reduce((prev, curr) => Math.abs(curr - size) < Math.abs(prev - size) ? curr : prev)
   const hSnapped = Math.round(w * 0.75)
   return (
+    // next/image gir ingen reell gevinst for et 20–64px ikon fra en ekstern CDN vi ikke
+    // kontrollerer, og krever remotePatterns-oppsett for flagcdn.com — vanlig <img> holder.
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={`https://flagcdn.com/${w}x${hSnapped}/${iso2.toLowerCase()}.png`}
       width={size}

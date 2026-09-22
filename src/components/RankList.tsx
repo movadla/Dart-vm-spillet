@@ -44,7 +44,10 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
   const [myId, setMyId] = useState<string | null>(null)
   const myRowRef = useRef<HTMLAnchorElement>(null)
 
+  // Leses etter mount (ikke lazy useState-init) med vilje — localStorage finnes ikke under SSR,
+  // så en lazy initializer ville gitt et hydration-mismatch mellom server og klient.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     try { setMyId(localStorage.getItem('vm_participant_id')) } catch {}
   }, [])
 

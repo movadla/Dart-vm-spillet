@@ -9,6 +9,8 @@ export default function LeaderboardMyPage() {
   const [id, setId] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
 
+  // localStorage finnes ikke under SSR — sjekkes med vilje etter mount.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       const saved = localStorage.getItem('vm_participant_id')
@@ -16,6 +18,7 @@ export default function LeaderboardMyPage() {
     } catch {}
     setReady(true)
   }, [])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!ready) return (
     <div className="skeleton" style={{ height: 46, borderRadius: 14, marginBottom: 16 }} />

@@ -2,36 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { checkAdminAuth } from '@/lib/adminAuth'
 import { STAGE_ORDER } from '@/config/scoring'
+import { validateMatchResultInput } from '@/lib/matchResultValidation'
 
 const supabase = getSupabaseAdmin()
-
-const VALID_STAGES: readonly string[] = STAGE_ORDER
 
 export async function POST(req: NextRequest) {
   const authError = checkAdminAuth(req)
   if (authError) return authError
   try {
     const body = await req.json()
-    const { player1, player2, sets1, sets2, stage } = body
-
-    if (!player1 || !player2 || sets1 === undefined || sets2 === undefined) {
-      return NextResponse.json({ error: 'Mangler data' }, { status: 400 })
+    const validation = validateMatchResultInput(body, STAGE_ORDER)
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
-
-    if (typeof sets1 !== 'number' || typeof sets2 !== 'number') {
-      return NextResponse.json({ error: 'Sett må være tall' }, { status: 400 })
-    }
-
-    if (player1 === player2) {
-      return NextResponse.json({ error: 'Spiller 1 og spiller 2 kan ikke være samme spiller' }, { status: 400 })
-    }
-
-    if (sets1 === sets2) {
-      return NextResponse.json({ error: 'Uavgjort er ikke gyldig — én spiller må ha flere sett enn den andre' }, { status: 400 })
-    }
-
-    const matchStage = VALID_STAGES.includes(stage) ? stage : 'r1'
-    const winner = sets1 > sets2 ? player1 : player2
+    const { player1, player2, sets1, sets2, stage: matchStage, winner } = validation.value
 
     // Upsert: oppdater hvis kampen allerede finnes — uavhengig av hvilken rekkefølge
     // spiller 1/2 ble lagret i første gang.

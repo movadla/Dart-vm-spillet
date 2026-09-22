@@ -239,12 +239,15 @@ export default function HomePage() {
 
   const isLive = KICKOFF <= new Date()
 
+  // localStorage finnes ikke under SSR — sjekkes med vilje etter mount.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       const saved = localStorage.getItem('vm_participant_id')
       if (saved) setParticipantId(saved)
     } catch {}
   }, [])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     const t = setInterval(() => setCd(getTimeUntil(KICKOFF)), 1000)
