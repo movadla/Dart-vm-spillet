@@ -26,14 +26,12 @@ function findPick(name: string) {
   return { potNumber: pot.potNumber, player }
 }
 
-const EXAMPLE_PICKS = ['Luke Littler', 'Rob Cross', 'Gabriel Clemens'].map(findPick)
-
 function cumulativePoints(stage: Stage): number {
   const idx = STAGE_ORDER.indexOf(stage)
   return STAGE_ORDER.slice(0, idx + 1).reduce((sum, s) => sum + SCORING.advancement[s], 0)
 }
 
-const RESULT_PLAYER = EXAMPLE_PICKS[0].player
+const RESULT_PLAYER = findPick('Luke Littler').player
 const RESULT_STAGE: Stage = 'qf'
 const RESULT_OPPONENT = 'Gerwyn Price'
 const RESULT_POINTS = cumulativePoints(RESULT_STAGE)
@@ -42,20 +40,18 @@ const LEADERBOARD_TOTAL = 112
 const LEADERBOARD_RANK = 4
 const LEADERBOARD_OF = 128
 
-// ── Fasetiming (ms fra mount) ──
-const PICK_REVEAL_TIMES = [250, 700, 1150]
-const PHASE_TIMES = [2200, 4200, 6200] // når fase 1, 2, 3 starter
+const LAST_PHASE = 3
 
 /**
- * Animert, fler-fase intro-sekvens for Dart-VM-spillet.
- * Steg 1: eksempel på spillervalg → Steg 2: eksempel på poenggivende resultat →
+ * Manuelt styrt, fler-fase intro-sekvens for Dart-VM-spillet — bruker trykker seg
+ * videre med «Neste»-knappen (ingen auto-advance).
+ * Steg 1: de faktiske pottene → Steg 2: eksempel på poenggivende resultat →
  * Steg 3: eksempel på poengsum/leaderboard → Steg 4: CTA.
  * Brukes som intro på forsiden og gjenbrukt på vm-info-siden.
  */
 export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = '/tipp', ctaLabel = 'VELG SPILLERE →' }: Props) {
   const [visible, setVisible] = useState(false)
   const [phase, setPhase] = useState(0)
-  const [revealedPicks, setRevealedPicks] = useState(0)
   const [count, setCount] = useState(0)
 
   const onSlideRef = useRef(onSlide)
@@ -69,31 +65,20 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
     return () => clearTimeout(t)
   }, [])
 
-  // Styr faseoverganger + spillerpick-stagger. Kjøres kun én gang på mount.
   useEffect(() => {
     onSlideRef.current?.(0)
-    const timers: ReturnType<typeof setTimeout>[] = []
-
-    PICK_REVEAL_TIMES.forEach((t, i) => {
-      timers.push(setTimeout(() => setRevealedPicks(i + 1), t))
-    })
-    PHASE_TIMES.forEach((t, i) => {
-      const nextPhase = i + 1
-      timers.push(
-        setTimeout(() => {
-          setPhase(nextPhase)
-          onSlideRef.current?.(nextPhase)
-          if (nextPhase === 3) onCtaReadyRef.current?.()
-        }, t)
-      )
-    })
-
-    return () => timers.forEach(clearTimeout)
   }, [])
 
-  // Tell opp poengsummen i leaderboard-fasen
+  function goToPhase(next: number) {
+    setPhase(next)
+    onSlideRef.current?.(next)
+    if (next === LAST_PHASE) onCtaReadyRef.current?.()
+  }
+
+  // Tell opp poengsummen når leaderboard-fasen vises
   useEffect(() => {
     if (phase !== 2) return
+    setCount(0)
     const steps = 24
     const stepTime = 900 / steps
     let i = 0
@@ -168,55 +153,49 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
       <div style={{ minHeight: 268, marginBottom: 24 }}>
         {phase === 0 && (
           <div>
-            <PhaseHeading eyebrow="Eksempel · steg 1" title="Velg 6 dartspillere" />
+            <PhaseHeading eyebrow="Steg 1" title="De 6 pottene" />
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
-              Én spiller fra hvert av de 6 nivåene – fra toppseedet til wildcard.
+              Du velger én spiller fra hver pott — fra ren duell øverst til det store feltet nederst.
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {EXAMPLE_PICKS.map((pick, i) => {
-                const color = POT_COLORS[pick.potNumber - 1]
-                if (i >= revealedPicks) return <div key={pick.player.name} style={{ height: 52 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 300, overflowY: 'auto' }}>
+              {POTS.map((pot) => {
+                const color = POT_COLORS[(pot.potNumber - 1) % POT_COLORS.length]
+                const mult = SCORING.underdogMultiplier[pot.potNumber] ?? 1
+                const example = pot.players[0]
                 return (
                   <div
-                    key={pick.player.name}
+                    key={pot.potNumber}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 12,
+                      gap: 10,
                       background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
                       border: '1px solid rgba(255,255,255,0.1)',
                       borderRadius: 12,
-                      padding: '11px 14px',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 20px rgba(0,0,0,0.25)',
-                      animation: 'slide-enter 0.45s cubic-bezier(0.22,1,0.36,1) both',
+                      padding: '9px 12px',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 6px 16px rgba(0,0,0,0.2)',
                     }}
                   >
                     <span
                       style={{
-                        fontFamily: SPORT,
-                        fontSize: 12,
-                        fontWeight: 900,
-                        color: '#000',
-                        background: color,
-                        borderRadius: 7,
-                        width: 26,
-                        height: 26,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
+                        fontFamily: SPORT, fontSize: 12, fontWeight: 900, color: '#000', background: color,
+                        borderRadius: 7, width: 24, height: 24, display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', flexShrink: 0,
                       }}
                     >
-                      {pick.potNumber}
+                      {pot.potNumber}
                     </span>
-                    <Flag iso2={pick.player.iso2} size={20} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {pick.player.name}
+                      <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {pot.name}
                       </div>
-                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{pick.player.nationality}</div>
+                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {pot.players.length} spillere · f.eks. {example.name}
+                      </div>
                     </div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>#{pick.player.pdcRanking}</span>
+                    <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: mult > 1 ? '#f59e0b' : 'rgba(255,255,255,0.35)', flexShrink: 0 }}>
+                      ×{mult}
+                    </span>
                   </div>
                 )
               })}
@@ -322,6 +301,37 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
           </div>
         )}
       </div>
+
+      {/* Manuell navigasjon */}
+      {phase < LAST_PHASE && (
+        <div style={{ display: 'flex', gap: 10 }}>
+          {phase > 0 && (
+            <button
+              onClick={() => goToPhase(phase - 1)}
+              style={{
+                flexShrink: 0, padding: '14px 18px', background: 'transparent',
+                color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: 14, fontFamily: SPORT, fontSize: 14, fontWeight: 800,
+                letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer',
+              }}
+            >
+              Tilbake
+            </button>
+          )}
+          <button
+            onClick={() => goToPhase(phase + 1)}
+            className="btn-hover"
+            style={{
+              flex: 1, padding: '14px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)',
+              color: '#fff', fontFamily: SPORT, fontSize: 15, fontWeight: 900,
+              letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 14,
+              border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(220,38,38,0.35)',
+            }}
+          >
+            Neste →
+          </button>
+        </div>
+      )}
 
       {/* CTA */}
       {phase === 3 &&
