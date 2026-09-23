@@ -767,7 +767,10 @@ const inputStyle: React.CSSProperties = {
             flex-item i kolonnen over, kollapset hele gridet til 0px bredde
             (auto-margin på tvers-aksen i en flex-kontekst overstyrer
             stretch-oppførselen som ellers ville gitt gridet reell bredde). */}
-        <div style={{ width: '100%', maxWidth: pickablePlayers.length * 128, margin: '0 auto' }}>
+        {/* 176px per kort (var 128): på desktop ble kortene små og "bortkomne" i
+            all luften rundt — mer presens uten å miste én-rad-garantien
+            (1fr-kolonnene krymper fortsatt fritt på smale skjermer). */}
+        <div style={{ width: '100%', maxWidth: pickablePlayers.length * 176, margin: '0 auto' }}>
         <div
           role="radiogroup"
           aria-label={`Velg spiller fra ${pot.name}`}
@@ -778,18 +781,20 @@ const inputStyle: React.CSSProperties = {
             // får plass"-logikk av og til brekker om til 2 rader avhengig
             // av skjermbredde og min/maks-kortstørrelsen.
             display: 'grid', gridTemplateColumns: `repeat(${pickablePlayers.length}, minmax(0, 1fr))`,
-            gap: 10, padding: '2px 2px 4px',
+            gap: 14, padding: '6px 6px 8px',
           }}
         >
-          {pickablePlayers.map((player) => (
+          {pickablePlayers.map((player, index) => (
             <PlayerCard
               key={player.name}
               player={player}
+              index={index}
               color={color}
               colorDark={colorDark}
               potName={pot.name}
               multiplier={multiplier}
               selected={selectedPlayer === player.name}
+              dimmed={selectedPlayer != null && selectedPlayer !== player.name}
               onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
             />
           ))}

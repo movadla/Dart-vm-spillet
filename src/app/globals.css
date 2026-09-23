@@ -361,21 +361,58 @@ body::after {
   margin: 0;
 }
 
-/* Spillerkort — hover-løft/glød + synlig fokusring for tastaturnavigasjon
-   (fantes ikke før, kun :active via filter-prop på selve elementet). */
+/* Spillerkort — tilstander (hvile / valgt / dempet / hover / fokus) samlet
+   her med ordentlige transitions. Pott-fargen kommer inn som --card-color
+   fra komponenten. */
 .player-card {
-  transition: transform 0.15s ease, filter 0.15s ease;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
+  transition: transform 0.22s ease, filter 0.22s ease, opacity 0.22s ease;
+  will-change: transform;
+}
+.player-card--selected {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 14px var(--card-color)) drop-shadow(0 0 3px #fff);
+}
+/* En annen spiller i potten er valgt — demp resten så valget leses straks */
+.player-card--dimmed {
+  opacity: 0.55;
+  filter: saturate(0.35) brightness(0.72) drop-shadow(0 6px 14px rgba(0,0,0,0.5));
 }
 @media (hover: hover) {
   .player-card:hover {
-    transform: translateY(-3px);
-    filter: brightness(1.06) drop-shadow(0 10px 18px rgba(0,0,0,0.55)) !important;
+    opacity: 1;
+    transform: translateY(-4px) scale(1.02);
+    filter: brightness(1.06) drop-shadow(0 12px 20px rgba(0,0,0,0.55));
+  }
+  .player-card--selected:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 16px var(--card-color)) drop-shadow(0 0 3px #fff);
   }
 }
 .player-card:focus-visible {
   outline: 2px solid #f3d576;
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+/* Forskjøvet inntoning når en pott lastes (animation-delay settes per kort) */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+.card-enter {
+  animation: card-enter 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Folie-glans sveiper over kortet på hover */
+@keyframes sheen-sweep {
+  from { background-position: 0% 0; }
+  to   { background-position: 100% 0; }
+}
+@media (hover: hover) {
+  .player-card:hover .card-sheen {
+    animation: sheen-sweep 0.9s ease-out;
+  }
 }
 
 /* Foto-kreditering skjult bak en liten "i"-knapp (details/summary — ingen
