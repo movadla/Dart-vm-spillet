@@ -360,3 +360,33 @@ body::after {
   border: none;
   margin: 0;
 }
+
+/* Spillerkort — hover-løft/glød + synlig fokusring for tastaturnavigasjon
+   (fantes ikke før, kun :active via filter-prop på selve elementet). */
+.player-card {
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+@media (hover: hover) {
+  .player-card:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.06) drop-shadow(0 10px 18px rgba(0,0,0,0.55)) !important;
+  }
+}
+.player-card:focus-visible {
+  outline: 2px solid #f3d576;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Foto-kreditering skjult bak en liten "i"-knapp (details/summary — ingen
+   JS-state nødvendig) i stedet for alltid synlig bildetekst under kortet. */
+.card-credit summary {
+  list-style: none;
+  cursor: pointer;
+}
+.card-credit summary::-webkit-details-marker {
+  display: none;
+}
+.card-credit summary::marker {
+  content: '';
+}
