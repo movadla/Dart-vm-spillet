@@ -8,7 +8,12 @@ import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const GOLD = '#f3d576'
 const LABEL_GOLD = 'rgba(243,213,118,0.75)'
-const TEMPLATE_SRC = '/cards/template-1.webp'
+// Én mal per pott (samme "is/krystall"-stil, kun hue-rotert til pottens
+// farge — se TODO.md for fremgangsmåten). Malen for pott 3 er den
+// opprinnelige blå originalen, uendret.
+function templateSrc(potNumber: number): string {
+  return `/cards/template-pot${potNumber}.webp`
+}
 
 // Delt skygge-verdi for ALL tekst/ikoner som kan ligge over spillerfotoet
 // (navn, RANK-blokken) — tidligere hadde disse hver sin litt ulike
@@ -69,7 +74,8 @@ function GlobeIcon({ size }: { size: string }) {
 }
 
 // "Tre piler" (form-/trend-ikon) for SNITT. Det opprinnelige globus-ikonet er
-// fjernet fra template-1.webp med Python/OpenCV-inpainting (bakgrunnen er en
+// fjernet med Python/OpenCV-inpainting fra originalmalen FØR den ble kopiert/
+// fargelagt til alle 6 pott-variantene (template-pot1..6.webp) — bakgrunnen er en
 // "is"-tekstur, ikke flat farge — se TODO.md hvis flere maler trenger samme
 // behandling). Fylte former, ikke tynne streker: strek-versjonen ble lest
 // som vimpler på kortstørrelse.
@@ -194,7 +200,7 @@ function StatCol({
 }
 
 export function PlayerCard({
-  player, color, colorDark, selected, dimmed = false, index = 0, onClick,
+  player, color, colorDark, selected, dimmed = false, index = 0, potNumber, onClick,
 }: {
   player: Player
   color: string
@@ -205,13 +211,17 @@ export function PlayerCard({
   dimmed?: boolean
   // brukes kun til forskjøvet inntonings-animasjon når potten lastes
   index?: number
-  potName: string
+  // Velger riktig pott-fargede mal (templateSrc under) — erstatter den
+  // tidligere "potName"-propen, som ble tatt imot men aldri faktisk brukt
+  // noe sted i komponenten.
+  potNumber: number
   multiplier: number
   onClick: () => void
 }) {
   const photo = PLAYER_PHOTOS[player.name]
   const { first, last } = splitName(player.name)
   const longSurname = last.length > 10
+  const template = templateSrc(potNumber)
 
   const buttonStyle = {
     position: 'relative', display: 'block', width: '100%',
@@ -221,7 +231,7 @@ export function PlayerCard({
     // kolonner.
     containerType: 'inline-size',
     border: 'none', padding: 0, cursor: 'pointer', background: 'transparent',
-    backgroundImage: `url(${TEMPLATE_SRC})`,
+    backgroundImage: `url(${template})`,
     backgroundSize: '100% 100%',
     // Pott-fargen eksponeres som CSS-variabel så valgt/hover/dempet-tilstandene
     // kan ligge i globals.css (.player-card--*) med ordentlige transitions.
@@ -380,7 +390,7 @@ export function PlayerCard({
           sveiper over på hover (.card-sheen i globals.css). */}
       <div aria-hidden="true" className="card-sheen" style={{
         position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2,
-        maskImage: `url(${TEMPLATE_SRC})`, maskSize: '100% 100%', maskRepeat: 'no-repeat',
+        maskImage: `url(${template})`, maskSize: '100% 100%', maskRepeat: 'no-repeat',
         background: 'linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.14) 47%, rgba(255,255,255,0.05) 52%, transparent 62%)',
         backgroundSize: '250% 100%', backgroundPosition: '70% 0',
       }} />

@@ -739,6 +739,13 @@ const inputStyle: React.CSSProperties = {
   const color = POT_COLORS[potIndex % POT_COLORS.length]
   const colorDark = POT_COLORS_DARK[potIndex % POT_COLORS_DARK.length]
   const pickablePlayers = getPickablePlayers(pot)
+  // Potter med 5 kandidater (pott 5/6) i én rad ble for trangt — split i to
+  // rader (3 øverst, 2 under) i stedet. Potter med ≤4 beholder én rad
+  // uendret. Generell formel (ceil av halvparten) i tilfelle et fremtidig
+  // pott-oppsett skulle gi enda flere kandidater.
+  const rowSize = pickablePlayers.length > 4 ? Math.ceil(pickablePlayers.length / 2) : pickablePlayers.length
+  const playerRows: (typeof pickablePlayers)[] = []
+  for (let i = 0; i < pickablePlayers.length; i += rowSize) playerRows.push(pickablePlayers.slice(i, i + rowSize))
 
   function goNext() {
     if (step < POT_COUNT) setStep(s => s + 1)
@@ -840,37 +847,41 @@ const inputStyle: React.CSSProperties = {
             stretch-oppførselen som ellers ville gitt gridet reell bredde). */}
         {/* 176px per kort (var 128): på desktop ble kortene små og "bortkomne" i
             all luften rundt — mer presens uten å miste én-rad-garantien
-            (1fr-kolonnene krymper fortsatt fritt på smale skjermer). */}
-        <div style={{ width: '100%', maxWidth: pickablePlayers.length * 176, margin: '0 auto' }}>
-        <div
-          role="radiogroup"
-          aria-label={`Velg spiller fra ${pot.name}`}
-          style={{
-            // Fast antall kolonner = antall valgbare spillere i denne potten
-            // (maks 5 etter trimmingen) — garanterer at alle alltid står i
-            // ÉN rad, i stedet for at auto-fill/auto-fit sin "så mange som
-            // får plass"-logikk av og til brekker om til 2 rader avhengig
-            // av skjermbredde og min/maks-kortstørrelsen.
-            display: 'grid', gridTemplateColumns: `repeat(${pickablePlayers.length}, minmax(0, 1fr))`,
-            gap: 14, padding: '6px 6px 8px',
-          }}
-        >
-          {pickablePlayers.map((player, index) => (
-            <PlayerCard
-              key={player.name}
-              player={player}
-              index={index}
-              color={color}
-              colorDark={colorDark}
-              potName={pot.name}
-              multiplier={multiplier}
-              selected={selectedPlayer === player.name}
-              dimmed={selectedPlayer != null && selectedPlayer !== player.name}
-              onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
-            />
-          ))}
-        </div>
-        </div>
+            (1fr-kolonnene krymper fortsatt fritt på smale skjermer). Potter
+            med 5 kandidater rendres nå som TO separate rad-grid (3 øverst,
+            2 under, se playerRows over) i stedet for én trang 5-kolonners
+            rad — hver rad er sin egen sentrerte grid, ikke én stor grid med
+            et ufullstendig siste rad-forsøk. */}
+        {playerRows.map((row, rowIndex) => (
+          <div key={rowIndex} style={{ width: '100%', maxWidth: row.length * 176, margin: '0 auto' }}>
+            <div
+              role="radiogroup"
+              aria-label={`Velg spiller fra ${pot.name}${playerRows.length > 1 ? `, rad ${rowIndex + 1}` : ''}`}
+              style={{
+                display: 'grid', gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
+                gap: 14, padding: rowIndex === 0 ? '6px 6px 8px' : '0 6px 8px',
+              }}
+            >
+              {row.map((player) => {
+                const index = pickablePlayers.indexOf(player)
+                return (
+                  <PlayerCard
+                    key={player.name}
+                    player={player}
+                    index={index}
+                    color={color}
+                    colorDark={colorDark}
+                    potNumber={pot.potNumber}
+                    multiplier={multiplier}
+                    selected={selectedPlayer === player.name}
+                    dimmed={selectedPlayer != null && selectedPlayer !== player.name}
+                    onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
+                  />
+                )
+              })}
+            </div>
+          </div>
+        ))}
 
         {/* Spillerinfo-panel — dukker opp under gridet når en spiller er
             valgt. Viste tidligere braketten direkte her; erstattet med

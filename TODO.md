@@ -17,13 +17,6 @@
 - [ ] Spillerinfo-panelet i tippe-flyten (vises når du velger en spiller) har tre nye felt i `Player`-typen (`src/data/pots.ts`): `titles` (antall PDC-titler), `bestResult2026` (beste resultat så langt i 2026, f.eks. "Kvartfinale i World Matchplay") og `form` (`'dårlig' | 'middels' | 'bra'`). INGEN spiller har noen av disse satt ennå — panelet viser "—"/"Ukjent" for alle. Gi meg tallene/tekstene (eller kilder jeg kan sjekke) så fyller jeg dem inn — ikke noe jeg finner på selv.
 - [ ] Fyll inn navn/foretak og adresse under «Behandlingsansvarlig» i `src/app/personvern/page.tsx` (påkrevd etter GDPR art. 13) — kan ikke gjette dette selv
 - [ ] Når PDC publiserer den faktiske trekningen (normalt medio november): følg steg-for-steg-oppskriften i `README.md` → «Trekning — oppdatere med ekte data»
-- [ ] Spillerkortet bruker nå én ekte bildemal (`public/cards/template-1.webp`, blå/is-stil
-      med 2 ikoner — mynt/ODDS og globus/RANKING) for ALLE 6 potter — du sa du ville ha
-      én mal PER pott (6 stk), så 5 gjenstår. Lag dem i samme stil/proporsjon
-      (1007×1562px, transparent bakgrunn utenfor skjoldformen, ingen tekst bakt inn,
-      samme plassering av gull-linjer/ikon-rad som malen du allerede har laget), i
-      pottenes farger (rød/gull/blå/grønn/oransje/lilla — se `src/config/potColors.ts`).
-      Gi meg filene så kobler jeg dem til riktig pott i `PlayerCard.tsx`.
 - [ ] Kun Luke Littler har et ekte spillerfoto på kortet sitt (`src/data/playerPhotos.ts`,
       bildefil i `public/players/`) — hentet fra Wikimedia Commons med verifisert
       CC BY-SA 4.0-lisens, kreditering, og AI-basert bakgrunnsfjerning (rembg). Vil du ha
@@ -35,8 +28,15 @@
 **Implementert 2026-09-23:** spillervalget vises som fullstørrelses showcase-kort
 i et sentrert grid, bygget på en ekte designet bildemal (ikke lenger CSS/SVG-tegnet
 skjoldform) — se `src/components/PlayerCard.tsx`. Ferdig for pott 1 (foto på
-Littler, resten uten foto ennå). Trenger 5 flere pott-fargede maler for full
-dekning, se punktet over.
+Littler, resten uten foto ennå).
+
+**Implementert 2026-09-23:** alle 6 potter har nå sin egen fargede kortmal
+(`public/cards/template-pot1..6.webp`) — pott 3 er den opprinnelige blå malen
+du laget, pott 1/2/4/5/6 er generert programmatisk ved å hue-rotere KUN
+is-teksturen (ikke gullkanten/mynt-ikonet) til pottens farge fra
+`src/config/potColors.ts`. Ikke håndtegnet kunst, men samme stil/proporsjon
+gjenbrukt konsekvent — si fra om du heller vil ha ekte håndlagde maler for
+noen/alle pottene senere.
 
 **Implementert 2026-09-23:** antall valgbare kandidater per pott er trimmet fra
 2/3/5/6/8/40 til 2/3/4/4/5/5 (topp-N etter PDC-ranking beholdt per pott) — se
