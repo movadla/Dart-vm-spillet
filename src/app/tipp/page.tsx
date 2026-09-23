@@ -377,9 +377,19 @@ const inputStyle: React.CSSProperties = {
   }
 
   if (loadingEdit) {
+    // Skjelett i stedet for ren "Laster..."-tekst — matcher formen på
+    // siden som straks vises (topplinje + pott-header + kortrad), samme
+    // .skeleton-mønster som resten av appen (forsiden, leaderboard/liga).
     return (
-      <div className="page-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>
-        Laster picks...
+      <div className="page-bg" style={{ minHeight: '100vh', padding: '24px 16px 20px', color: '#fff' }}>
+        <div className="skeleton" style={{ width: 140, height: 5, borderRadius: 3, margin: '0 auto 20px' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div className="skeleton" style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0 }} />
+          <div className="skeleton" style={{ flex: 1, height: 26, borderRadius: 8 }} />
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {[0, 1].map(i => <div key={i} className="skeleton" style={{ flex: 1, aspectRatio: 1007 / 1562, borderRadius: 12 }} />)}
+        </div>
       </div>
     )
   }
@@ -943,9 +953,22 @@ const inputStyle: React.CSSProperties = {
   )
 }
 
+// Generisk skjelett (vi vet ikke ennå om intro/plukker/registrering/oppsummering
+// skal vises) — samme .skeleton-mønster som resten av appen i stedet for ren
+// "Laster..."-tekst. Vises normalt svært kort (kun til useSearchParams er klar).
+function TippLoading() {
+  return (
+    <div className="page-bg" style={{ minHeight: '100vh', padding: '24px 16px 20px' }}>
+      <div className="skeleton" style={{ width: 140, height: 5, borderRadius: 3, margin: '0 auto 24px' }} />
+      <div className="skeleton" style={{ height: 46, borderRadius: 10, marginBottom: 16 }} />
+      <div className="skeleton" style={{ height: 200, borderRadius: 16 }} />
+    </div>
+  )
+}
+
 export default function TippPage() {
   return (
-    <Suspense fallback={<div className="page-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)' }}>Laster...</div>}>
+    <Suspense fallback={<TippLoading />}>
       <TippContent />
     </Suspense>
   )
