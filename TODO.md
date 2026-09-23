@@ -14,6 +14,7 @@
 - [ ] Sett opp Vercel-prosjekt og fyll inn alle miljøvariablene fra `.env.example` der
 - [ ] Når Vercel-prosjektet er satt opp: bytt lenken i `src/app/admin/page.tsx` («Trafikk»-kortet) fra den generelle `vercel.com/dashboard` til den direkte `/analytics`-lenken for RIKTIG prosjekt — den pekte tidligere feilaktig til det gamle fotball-VM-prosjektets dashbord
 - [ ] Nærmere desember: sjekk PDC sin offisielle seeding mot `src/data/pots.ts` (rangeringen der er et øyeblikksbilde fra september og vil ha glidd)
+- [ ] Spillerinfo-panelet i tippe-flyten (vises når du velger en spiller) har tre nye felt i `Player`-typen (`src/data/pots.ts`): `titles` (antall PDC-titler), `bestResult2026` (beste resultat så langt i 2026, f.eks. "Kvartfinale i World Matchplay") og `form` (`'dårlig' | 'middels' | 'bra'`). INGEN spiller har noen av disse satt ennå — panelet viser "—"/"Ukjent" for alle. Gi meg tallene/tekstene (eller kilder jeg kan sjekke) så fyller jeg dem inn — ikke noe jeg finner på selv.
 - [ ] Fyll inn navn/foretak og adresse under «Behandlingsansvarlig» i `src/app/personvern/page.tsx` (påkrevd etter GDPR art. 13) — kan ikke gjette dette selv
 - [ ] Når PDC publiserer den faktiske trekningen (normalt medio november): følg steg-for-steg-oppskriften i `README.md` → «Trekning — oppdatere med ekte data»
 - [ ] Spillerkortet bruker nå én ekte bildemal (`public/cards/template-1.webp`, blå/is-stil

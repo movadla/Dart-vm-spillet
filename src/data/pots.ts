@@ -16,6 +16,13 @@ export interface Player {
   // Må erstattes med ekte snitt-tall før spillet åpnes for ekte deltakere,
   // se TODO.md.
   avg2026?: number
+  // Spillerinfo-panelet i tipp/page.tsx (vises når en spiller velges).
+  // INGEN av disse tre er fylt ut for noen spiller ennå — vises som "—"/
+  // "Ukjent" inntil ekte data er lagt inn, samme prinsipp som avg2026 over.
+  // Se TODO.md.
+  titles?: number
+  bestResult2026?: string
+  form?: 'dårlig' | 'middels' | 'bra'
 }
 
 export interface Pot {

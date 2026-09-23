@@ -7,8 +7,6 @@ import SmartBackButton from '@/components/SmartBackButton'
 import { POTS, getPickablePlayers } from '@/data/pots'
 import Flag from '@/components/Flag'
 import { SCORING } from '@/config/scoring'
-import { getFirstMatchInfo, getSeedLabel } from '@/lib/bracketProjection'
-import { DrawBracket } from '@/components/DrawBracket'
 import { PlayerCard } from '@/components/PlayerCard'
 import StepSlideshow from '@/components/StepSlideshow'
 import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
@@ -17,6 +15,17 @@ import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const KICKOFF = new Date('2026-12-11T19:00:00Z')
+
+// Formvurdering i spillerinfo-panelet — fargekodet, men INGEN spiller har
+// noen form-verdi satt ennå (se Player.form i pots.ts), så "Ukjent" er det
+// eneste som faktisk vises i dag. Beholdt som eget oppslag (ikke inline)
+// slik at panelet nedenfor er enkelt å lese.
+const FORM_STYLES: Record<'dårlig' | 'middels' | 'bra', { label: string; color: string }> = {
+  dårlig: { label: 'Dårlig', color: '#ef4444' },
+  middels: { label: 'Middels', color: '#f59e0b' },
+  bra: { label: 'Bra', color: '#22c55e' },
+}
+const FORM_UNKNOWN = { label: 'Ukjent', color: 'rgba(255,255,255,0.35)' }
 
 const POT_COUNT = POTS.length
 const REGISTRATION_STEP = POT_COUNT + 1
@@ -53,7 +62,26 @@ function Confetti() {
   )
 }
 
-function ProgressDots({ step, onGuide, onStep }: { step: number; onGuide?: () => void; onStep?: (s: number) => void }) {
+function PlayerInfoStat({ label, value, color = '#fff' }: { label: string; value: string; color?: string }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: '6px 9px' }}>
+      <div style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>
+        {label}
+      </div>
+      <div style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color, lineHeight: 1 }}>
+        {value}
+      </div>
+    </div>
+  )
+}
+
+function ProgressDots({ step, onGuide, onStep, onTogglePoeng, poengActive }: {
+  step: number
+  onGuide?: () => void
+  onStep?: (s: number) => void
+  onTogglePoeng?: () => void
+  poengActive?: boolean
+}) {
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginBottom: 6 }}>
@@ -79,10 +107,22 @@ function ProgressDots({ step, onGuide, onStep }: { step: number; onGuide?: () =>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <SmartBackButton />
         <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.12em' }}>STEG {step} AV {POT_COUNT}</div>
-        {onGuide
-          ? <button onClick={onGuide} className="btn-hover" style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}>Guide</button>
-          : <div style={{ width: 40 }} />
-        }
+        {/* Guide og Poeng ved siden av hverandre oppe i høyre hjørne — Poeng
+            lå tidligere lenger ned i pott-headeren, atskilt fra Guide. */}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {onGuide && (
+            <button onClick={onGuide} className="btn-hover" style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}>Guide</button>
+          )}
+          {onTogglePoeng && (
+            <button
+              onClick={onTogglePoeng}
+              className="btn-hover"
+              style={{ fontSize: 11, fontWeight: 700, color: poengActive ? '#fff' : 'rgba(255,255,255,0.7)', background: poengActive ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.08)', border: `1px solid ${poengActive ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.2)'}`, borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}
+            >
+              Poeng
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -697,7 +737,13 @@ const inputStyle: React.CSSProperties = {
 
   return (
     <div className="page-bg" style={{ height: '100dvh', padding: '24px 16px 20px', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
-      <ProgressDots step={step} onGuide={() => { setStep(0); setSlideshowSlide(0) }} onStep={setStep} />
+      <ProgressDots
+        step={step}
+        onGuide={() => { setStep(0); setSlideshowSlide(0) }}
+        onStep={setStep}
+        onTogglePoeng={() => setShowScoreInfo(s => !s)}
+        poengActive={showScoreInfo}
+      />
 
       {/* Pot-header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: showScoreInfo ? 8 : 16 }}>
@@ -727,12 +773,6 @@ const inputStyle: React.CSSProperties = {
             <div style={{ marginTop: 4 }} />
           )}
         </div>
-        <button
-          onClick={() => setShowScoreInfo(s => !s)}
-          style={{ flexShrink: 0, padding: '6px 12px', background: showScoreInfo ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.1)', border: `1px solid ${showScoreInfo ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.22)'}`, borderRadius: 8, color: showScoreInfo ? '#fff' : 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: 700, cursor: 'pointer', letterSpacing: '0.06em' }}
-        >
-          Poeng
-        </button>
       </div>
       {showScoreInfo && (
         <div style={{ marginBottom: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px', fontSize: 12 }}>
@@ -822,29 +862,21 @@ const inputStyle: React.CSSProperties = {
         </div>
         </div>
 
-        {/* Utvidbar detalj-/bracket-seksjon — dukker opp under gridet når en
-            spiller er valgt. Enkel førsteversjon (kompakt spiller-oppsummering
-            + trekning) — skal videreutvikles. */}
+        {/* Spillerinfo-panel — dukker opp under gridet når en spiller er
+            valgt. Viste tidligere braketten direkte her; erstattet med
+            spiller-fakta (titler/beste 2026-resultat/form) etter ønske, med
+            kun en liten lenke til braketten i stedet for at den tar plassen. */}
         {selectedPlayer && (() => {
-          const info = getFirstMatchInfo(selectedPlayer)
           const selectedPlayerData = pot.players.find(p => p.name === selectedPlayer)
-          if (!info || !selectedPlayerData) return null
-
-          const pairA = {
-            a: { name: selectedPlayer, seedLabel: getSeedLabel(selectedPlayer), highlighted: true },
-            b: { name: info.opponent.name, seedLabel: getSeedLabel(info.opponent.name), faded: info.opponent.isFiller },
-          }
-          const pairB = {
-            a: { name: info.round2Pair[0].name, seedLabel: getSeedLabel(info.round2Pair[0].name), faded: info.round2Pair[0].isFiller },
-            b: { name: info.round2Pair[1].name, seedLabel: getSeedLabel(info.round2Pair[1].name), faded: info.round2Pair[1].isFiller },
-          }
+          if (!selectedPlayerData) return null
+          const form = selectedPlayerData.form ? FORM_STYLES[selectedPlayerData.form] : FORM_UNKNOWN
 
           return (
             <div style={{
-              marginTop: 8, padding: '8px 8px 7px', borderRadius: 10,
+              marginTop: 8, padding: '10px 10px 9px', borderRadius: 10,
               background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}33`,
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
                 <Flag iso2={selectedPlayerData.iso2} size={17} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontFamily: SPORT, fontSize: 12.5, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1.1 }}>
@@ -856,19 +888,25 @@ const inputStyle: React.CSSProperties = {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px', marginBottom: 2 }}>
-                <span style={{ fontSize: 7.5, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>1. RUNDE</span>
-                <span style={{ fontSize: 7.5, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>2. RUNDE</span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8 }}>
+                <PlayerInfoStat label="Titler" value={selectedPlayerData.titles != null ? String(selectedPlayerData.titles) : '—'} />
+                <PlayerInfoStat label="Form" value={form.label} color={form.color} />
               </div>
-
-              <DrawBracket pairA={pairA} pairB={pairB} compact color={color} />
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>
+                  Beste i 2026
+                </div>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
+                  {selectedPlayerData.bestResult2026 ?? '—'}
+                </div>
+              </div>
 
               <Link
                 href={`/vm-info?tab=trekning&spiller=${encodeURIComponent(selectedPlayer)}`}
                 target="_blank"
-                style={{ display: 'block', textAlign: 'center', fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 6, padding: '6px 4px', marginTop: 6 }}
+                style={{ display: 'block', textAlign: 'center', fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 6, padding: '6px 4px' }}
               >
-                Se hele bracketen
+                Se bracketen →
               </Link>
             </div>
           )
