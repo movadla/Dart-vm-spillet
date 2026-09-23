@@ -770,6 +770,8 @@ const inputStyle: React.CSSProperties = {
               player={player}
               color={color}
               colorDark={colorDark}
+              potName={pot.name}
+              multiplier={multiplier}
               selected={selectedPlayer === player.name}
               onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
             />
