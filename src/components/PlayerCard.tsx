@@ -177,28 +177,24 @@ export function PlayerCard({
              gullrammen øverst, siden en rettvinklet boks ikke automatisk
              respekterer den buede skjold-formen. I vanlig flyt dytter fotoet
              bare navnet naturlig nedover — kan ikke overlappe noe. */
-          <div style={{
-            position: 'relative', marginBottom: '8%', borderRadius: 12, overflow: 'hidden',
-            aspectRatio: '4 / 3',
-            boxShadow: `0 0 0 1px ${GOLD}66, 0 4px 14px rgba(0,0,0,0.5)`,
-          }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: '2%' }}>
+            <div style={{ textAlign: 'left', paddingBottom: 6, flexShrink: 0 }}>
+              <div style={{ fontFamily: SPORT, fontSize: 'clamp(26px, 10vw, 36px)', fontWeight: 900, color: GOLD, lineHeight: 1, textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
+                {topNumber}
+              </div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(243,213,118,0.85)', marginTop: 3 }}>{topLabel}</div>
+            </div>
+            <div style={{ flex: 1 }} />
             {/* eslint-disable-next-line @next/next/no-img-element -- ekstern fil i public/, next/image gir ingen gevinst her */}
             <img
               src={photo.src}
               alt=""
               aria-hidden="true"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 15%' }}
+              style={{
+                width: '56%', maxWidth: 150, height: 'auto', objectFit: 'contain',
+                filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.6))',
+              }}
             />
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(0deg, rgba(3,4,8,0.6) 0%, transparent 45%)',
-            }} />
-            <div style={{ position: 'absolute', top: 8, left: 10, textAlign: 'left' }}>
-              <div style={{ fontFamily: SPORT, fontSize: 'clamp(24px, 9vw, 34px)', fontWeight: 900, color: GOLD, lineHeight: 1, textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>
-                {topNumber}
-              </div>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(243,213,118,0.9)', marginTop: 3, textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>{topLabel}</div>
-            </div>
           </div>
         ) : (
           /* Ingen lisensiert foto for denne spilleren — sirkulær flagg-medaljong
