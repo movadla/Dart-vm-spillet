@@ -671,6 +671,7 @@ const inputStyle: React.CSSProperties = {
   const multiplier = SCORING.underdogMultiplier[pot.potNumber]
   const color = POT_COLORS[potIndex % POT_COLORS.length]
   const colorDark = POT_COLORS_DARK[potIndex % POT_COLORS_DARK.length]
+  const pickablePlayers = getPickablePlayers(pot)
 
   function goNext() {
     if (step < POT_COUNT) setStep(s => s + 1)
@@ -760,15 +761,27 @@ const inputStyle: React.CSSProperties = {
           som én enhet, så både gridet og detalj-seksjonen er tilgjengelig uten
           at Neste-knappen flytter seg. */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, marginBottom: 14, overflowY: 'auto' }}>
+        {/* Ytre wrapper (vanlig blokk-element, ikke selv en flex-item med
+            display:grid) håndterer maks-bredde + sentrering — å sette
+            maxWidth+margin:auto DIREKTE på selve grid-diven, som var en
+            flex-item i kolonnen over, kollapset hele gridet til 0px bredde
+            (auto-margin på tvers-aksen i en flex-kontekst overstyrer
+            stretch-oppførselen som ellers ville gitt gridet reell bredde). */}
+        <div style={{ width: '100%', maxWidth: pickablePlayers.length * 128, margin: '0 auto' }}>
         <div
           role="radiogroup"
           aria-label={`Velg spiller fra ${pot.name}`}
           style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(104px, 118px))',
-            justifyContent: 'center', gap: 10, padding: '2px 2px 4px',
+            // Fast antall kolonner = antall valgbare spillere i denne potten
+            // (maks 5 etter trimmingen) — garanterer at alle alltid står i
+            // ÉN rad, i stedet for at auto-fill/auto-fit sin "så mange som
+            // får plass"-logikk av og til brekker om til 2 rader avhengig
+            // av skjermbredde og min/maks-kortstørrelsen.
+            display: 'grid', gridTemplateColumns: `repeat(${pickablePlayers.length}, minmax(0, 1fr))`,
+            gap: 10, padding: '2px 2px 4px',
           }}
         >
-          {getPickablePlayers(pot).map((player) => (
+          {pickablePlayers.map((player) => (
             <PlayerCard
               key={player.name}
               player={player}
@@ -780,6 +793,7 @@ const inputStyle: React.CSSProperties = {
               onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
             />
           ))}
+        </div>
         </div>
 
         {/* Utvidbar detalj-/bracket-seksjon — dukker opp under gridet når en

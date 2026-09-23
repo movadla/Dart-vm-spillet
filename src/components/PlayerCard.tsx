@@ -19,8 +19,6 @@ const GOLD = '#f3d576'
 const TEMPLATE_ASPECT = 1007 / 1562
 
 const ZONES = {
-  topNumber: { left: '11.3%', width: '14.3%', bottom: '69.6%' }, // bunn = 100% - 30.9%
-  topLabel: { left: '11.3%', width: '14.3%', top: '31%', bottom: '62.9%' },
   photo: { left: '6%', right: '6%', top: '3%', bottom: '44.1%' }, // ned til navn-skillelinjen (55.9%)
   name: { left: '8%', right: '8%', bottom: '45.5%' },
   // v2 av malen (fra brukeren): kun 2 ikoner bakt inn (mynt/globus) i stedet
@@ -59,8 +57,6 @@ export function PlayerCard({
   multiplier: number
   onClick: () => void
 }) {
-  const topLabel = player.seedNumber ? 'SEED' : 'RANK'
-  const topNumber = player.seedNumber ?? player.pdcRanking
   const photo = PLAYER_PHOTOS[player.name]
 
   return (
@@ -115,21 +111,6 @@ export function PlayerCard({
         />
       )}
 
-      <div style={{
-        position: 'absolute', left: ZONES.topNumber.left, width: ZONES.topNumber.width, bottom: ZONES.topNumber.bottom,
-        textAlign: 'left',
-      }}>
-        <div style={{ fontFamily: SPORT, fontSize: 'clamp(15px, 20cqw, 26px)', fontWeight: 900, color: GOLD, lineHeight: 1, textShadow: '0 2px 6px rgba(0,0,0,0.7)' }}>
-          {topNumber}
-        </div>
-      </div>
-      <div style={{
-        position: 'absolute', left: ZONES.topLabel.left, width: ZONES.topLabel.width, top: ZONES.topLabel.top,
-        textAlign: 'left',
-      }}>
-        <div style={{ fontSize: 'clamp(6px, 6.5cqw, 9px)', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(243,213,118,0.9)', textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{topLabel}</div>
-      </div>
-
       {/* Svak mørk stripe rett bak navnet, kun når det ligger over et foto —
           uten den blir navnet vanskelig å lese der det krysser lyse/fargerike
           deler av spillerdrakten (f.eks. den gule glidelåsen på Littler). */}
@@ -155,16 +136,12 @@ export function PlayerCard({
         </div>
       </div>
 
-      {/* Statistikk — mynt-ikonet er ODDS (ekte data). Globus-ikonet er
-          naturligst RANKING (verden/globus ≈ verdensranking) — brukeren ba
-          opprinnelig om å droppe RANKING her siden den står øverst til
-          venstre også, men den nye malen har ikke noe trofé-ikon for
-          "TITLER", og et globus-ikon merket "titler" ville sett feil ut.
-          Litt overlapp med topp-tallet er et mindre problem enn et
-          ikon/etikett som ikke stemmer — si fra hvis du heller vil ha en
-          mal med et trofé-ikon i stedet. */}
+      {/* Statistikk — mynt-ikonet er ODDS, globus-ikonet er RANKING (ekte
+          data begge). Sete-tallet øverst til venstre er fjernet — det var
+          samme tall som RANKING her, bare duplisert. Uten "#" foran tallet
+          etter tilbakemelding. */}
       <StatCol zone={ZONES.statCols[0]} label="ODDS" value={player.odds} />
-      <StatCol zone={ZONES.statCols[1]} label="RANKING" value={`#${player.pdcRanking}`} />
+      <StatCol zone={ZONES.statCols[1]} label="RANKING" value={`${player.pdcRanking}`} />
     </button>
 
     {/* Kreditering som en vanlig bildetekst UNDER selve kortet, i stedet for
