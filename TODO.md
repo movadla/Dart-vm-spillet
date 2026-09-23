@@ -14,30 +14,36 @@
 - [ ] Sett opp Vercel-prosjekt og fyll inn alle miljøvariablene fra `.env.example` der
 - [ ] Nærmere desember: sjekk PDC sin offisielle seeding mot `src/data/pots.ts` (rangeringen der er et øyeblikksbilde fra september og vil ha glidd)
 - [ ] Når PDC publiserer den faktiske trekningen (normalt medio november): følg steg-for-steg-oppskriften i `README.md` → «Trekning — oppdatere med ekte data»
-- [ ] Spillerkortene (`src/components/PlayerCard.tsx`) viser nå «SNITT 2026» og «STØRSTE
-      HINDER» som «—» — vi har ikke ekte data for disse to for noen av de 64 spillerne.
-      Enten research/fyll inn dette selv (per spiller: three-dart average for 2026-sesongen,
-      og hvilken runde/motstander som historisk har vært vanskeligst), eller si fra om
-      feltene skal fjernes/erstattes hvis det blir for mye jobb å vedlikeholde per spiller.
+- [ ] Spillerkortet bruker nå én ekte bildemal (`public/cards/template-1.png`, blå/is-stil)
+      for ALLE 6 potter — du sa du ville ha én mal PER pott (6 stk), så 5 gjenstår.
+      Lag dem i samme stil/proporsjon (1007×1562px, transparent bakgrunn utenfor
+      skjoldformen, ingen tekst bakt inn, samme plassering av gull-linjer/ikon-rad
+      som malen du allerede har laget), i pottenes farger (rød/gull/blå/grønn/oransje/lilla
+      — se `src/config/potColors.ts`). Gi meg filene så kobler jeg dem til riktig pott
+      i `PlayerCard.tsx`.
+- [ ] Malen viser 4 stats: ODDS, RANKING (ekte data), TITLER og 9-DARTERS (ingen
+      ekte data for noen spiller — vises som «—»). Enten research/fyll inn dette selv,
+      eller si fra om ikonene/feltene skal byttes til noe vi faktisk har data for
+      (f.eks. pott-tilhørighet eller multiplikator).
 - [ ] Kun Luke Littler har et ekte spillerfoto på kortet sitt (`src/data/playerPhotos.ts`,
       bildefil i `public/players/`) — hentet fra Wikimedia Commons med verifisert
-      CC BY-SA 4.0-lisens og kreditering. Vil du ha foto på flere spillere: finn et
-      CC-lisensiert bilde på Wikimedia Commons (sjekk lisensfeltet på filsiden!), gi meg
-      lenken, så laster jeg det ned og legger det inn på samme måte. IKKE legg til bilder
-      fra andre kilder (Google-søk, pressebilder, sosiale medier) uten at jeg har
-      verifisert lisensen — se `PLAYER_PHOTOS`-kommentaren for hvorfor.
+      CC BY-SA 4.0-lisens, kreditering, og AI-basert bakgrunnsfjerning (rembg). Vil du ha
+      foto på flere spillere: finn et CC-lisensiert bilde på Wikimedia Commons (sjekk
+      lisensfeltet på filsiden!), gi meg lenken, så laster jeg det ned, fjerner bakgrunnen
+      og legger det inn på samme måte. IKKE legg til bilder fra andre kilder (Google-søk,
+      pressebilder, sosiale medier) uten at jeg har verifisert lisensen.
 
 ## Idéer til senere (produktvurderinger, ikke bestemt ennå)
 
 - [ ] Færre kandidater per pott (i dag: 2/3/5/6/8/mange i pott 6) — vurder et mer kuratert,
       strammere utvalg per nivå. Blir ekstra aktuelt nå som spillerkortene er store
-      «Ultimate Darts»-stil showcase-kort (se under) — pott 6 sine 40 kort gir mye scrolling.
+      showcase-kort — pott 6 sine 40 kort gir mye scrolling.
 
-**Implementert 2026-09-23:** spillervalget vises nå som fullstørrelses, «Ultimate
-Darts»-inspirerte kort (skjoldform, gullramme, pott-farget bakgrunn, stats) —
-se `src/components/PlayerCard.tsx`. Bygget og visuelt verifisert for pott 1 og 2;
-resten av pottene bruker samme komponent uendret, men er ikke separat visuelt
-gjennomgått ennå (jf. punktet over om usikkerhet rundt endelig kandidatantall).
+**Implementert 2026-09-23:** spillervalget vises som fullstørrelses showcase-kort
+bygget på en ekte designet bildemal (ikke lenger CSS/SVG-tegnet skjoldform) —
+se `src/components/PlayerCard.tsx`. Ferdig for pott 1 (foto på Littler, resten
+uten foto ennå). Trenger 5 flere pott-fargede maler for full dekning, se punktet
+over.
 
 ## Periodisk
 
