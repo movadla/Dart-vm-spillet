@@ -117,13 +117,23 @@ Enhetstester dekker poengberegningslogikken (`src/lib/scoring.test.ts`) og trekn
 | `rank_snapshot` | Daglig øyeblikksbilde av rangering, driver ▲/▼-pilene |
 | `admin_login_attempts` / `rate_limit_hits` | Rate-limiting (admin-login, `/api/finn`, `/api/tipp/update`) |
 
-**Nytt Supabase-prosjekt:** kjør `supabase/schema.sql` — hele filen, én gang.
-Den er selvstendig og dekker alt (tabeller, constraints, indekser, RLS); du
-trenger ikke kjøre noen andre filer i `supabase/` etterpå.
+Alle tabellene ligger i et eget Postgres-skjema, `dart_vm` — ikke `public`.
+Dette gjør det trygt å bruke SAMME Supabase-prosjekt som en annen app (f.eks.
+vm-tipping): skjemaer er fullstendig atskilte navnerom, så dart-vm-spillet
+kan aldri påvirke en annen apps tabeller/data i samme prosjekt.
 
-**Migrerer du i stedet en eksisterende `cl-spillet`/`vm-tipping`-database?**
-Bruk `supabase/migrate_to_darts.sql` og de øvrige `add_*.sql`-filene i
-mappen i stedet — de bygger videre på et eldre oppsett trinnvis. Ikke kjør
-`schema.sql` mot en database som allerede har data i seg (den oppretter
+**Nytt oppsett (eller gjenbruk av et eksisterende prosjekt):** kjør
+`supabase/schema.sql` — hele filen, én gang. Den oppretter `dart_vm`-skjemaet
+og alt appen trenger i det (tabeller, constraints, indekser, tilganger, RLS);
+du trenger ikke kjøre noen andre filer i `supabase/` etterpå. Deretter: gå
+til Project Settings → API → «Exposed schemas» i Supabase-dashbordet og legg
+til `dart_vm` i listen (kan ikke settes fra SQL) — uten dette avviser
+Supabase sitt REST-API alle spørringer mot skjemaet.
+
+**Migrerer du i stedet en eksisterende dart-vm-spillet-database fra FØR
+`dart_vm`-skjemaet ble innført** (dvs. tabeller direkte i `public`)? Bruk
+`supabase/migrate_to_darts.sql` og de øvrige `add_*.sql`-filene i mappen i
+stedet — de bygger videre på et eldre oppsett trinnvis. Ikke kjør
+`schema.sql` mot et skjema som allerede har data i seg (den oppretter
 tabeller uten `if not exists`, med vilje, for å ikke skjule feil på et
 ekte nytt oppsett).

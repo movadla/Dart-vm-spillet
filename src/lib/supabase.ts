@@ -6,9 +6,11 @@ import { createClient } from '@supabase/supabase-js'
 // faner som "Regler"/"Trekning" som ikke trenger noen database i det hele
 // tatt) selv om ingen faktisk spørring noensinne ble kjørt. Samme mønster
 // som getSupabaseAdmin() i supabaseAdmin.ts.
+// db.schema: "dart_vm" — se samme kommentar i supabaseAdmin.ts.
 export function getSupabaseClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { db: { schema: 'dart_vm' } }
   )
 }

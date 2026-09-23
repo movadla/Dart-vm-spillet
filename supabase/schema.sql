@@ -1,12 +1,25 @@
 -- Fullstendig databaseoppsett for dart-vm-spillet — kjør HELE denne filen ÉN
--- gang i Supabase Dashboard → SQL Editor for et FERSKT prosjekt. Dekker alt
--- appen trenger (tabeller, constraints, indekser, RLS) i riktig rekkefølge —
--- du trenger ikke kjøre noen av de andre filene i denne mappen etterpå.
+-- gang i Supabase Dashboard → SQL Editor. Dekker alt appen trenger (skjema,
+-- tabeller, constraints, indekser, tilganger, RLS) i riktig rekkefølge — du
+-- trenger ikke kjøre noen av de andre filene i denne mappen etterpå.
 --
--- Har du i stedet en EKSISTERENDE database fra et tidligere cl-spillet/
--- vm-tipping-oppsett? IKKE kjør denne filen — bruk migrate_to_darts.sql og
--- de øvrige add_*.sql-/drop_*.sql-filene i denne mappen i stedet (de er kun
--- for å bringe en gammel database à jour trinnvis), se README.md.
+-- Alt legges i et EGET Postgres-skjema ("dart_vm"), ikke i "public" — dette
+-- er ment å kunne kjøres i SAMME Supabase-prosjekt som en annen app (f.eks.
+-- vm-tipping) uten noen som helst risiko for å påvirke dens tabeller/data.
+-- Skjemaer er fullstendig atskilte navnerom i Postgres.
+--
+-- ÉN manuell dashbord-innstilling kreves i tillegg (kan ikke settes fra SQL):
+-- Project Settings → API → "Exposed schemas" → legg til «dart_vm» i listen
+-- (ved siden av «public» som står der fra før). Uten dette avviser Supabase
+-- sitt REST-API alle spørringer mot dart_vm, selv med riktige nøkler.
+--
+-- Har du i stedet en EKSISTERENDE dart-vm-spillet-database fra FØR dette
+-- skjema-oppsettet (dvs. tabeller direkte i "public")? Ikke kjør denne filen
+-- — bruk migrate_to_darts.sql og de øvrige add_*.sql-/drop_*.sql-filene i
+-- denne mappen i stedet, se README.md.
+
+create schema if not exists dart_vm;
+set search_path to dart_vm;
 
 create table participants (
   id uuid primary key default gen_random_uuid(),
@@ -100,6 +113,19 @@ create table rate_limit_hits (
   created_at timestamptz default now()
 );
 create index rate_limit_hits_lookup_idx on rate_limit_hits (bucket, key, created_at);
+
+-- === Tilganger ===
+-- Et NYTT skjema (i motsetning til "public") kommer ikke med noen
+-- forhåndskonfigurerte tilganger for Supabase sine roller — uten disse ville
+-- selv service_role-nøkkelen (som ellers går utenom RLS) blitt avvist av
+-- PostgREST på ren manglende GRANT. RLS under er den reelle sikkerhets-
+-- grensen for anon/authenticated; disse GRANT-ene tilsvarer bare det
+-- "public"-skjemaet allerede har fra Supabase sin side.
+grant usage on schema dart_vm to anon, authenticated, service_role;
+grant all on all tables in schema dart_vm to anon, authenticated, service_role;
+grant all on all sequences in schema dart_vm to anon, authenticated, service_role;
+alter default privileges in schema dart_vm grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema dart_vm grant all on sequences to anon, authenticated, service_role;
 
 -- === Row Level Security ===
 -- Kun match_results er lesbar for anon (offentlig kampdata, brukt av

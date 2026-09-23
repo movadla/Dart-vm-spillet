@@ -3,12 +3,20 @@
 ## Ting du (Morten) må gjøre selv — jeg kan ikke gjøre disse
 
 - [ ] `! gh auth login` — logg inn på GitHub, så kan jeg opprette repo og pushe
-- [ ] Opprett et Supabase-prosjekt (eller gi meg nøklene til et eksisterende) og fyll ut `.env.local`
+- [ ] Gi meg URL + anon key + service role key til VM-tipping sitt Supabase-
+      prosjekt (Project Settings → API), så fyller jeg ut `.env.local`.
+      Dart-vm-spillet lever i sitt eget Postgres-skjema (`dart_vm`) i dette
+      prosjektet — fullstendig atskilt fra VM-tipping sine tabeller/data,
+      ingenting overskrives eller berøres.
 - [ ] Kjør `supabase/schema.sql` (hele filen, ÉN gang, i Supabase Dashboard →
-      SQL Editor) mot det nye prosjektet — den er nå selvstendig og setter
-      opp absolutt alt appen trenger. Du trenger IKKE de andre filene i
+      SQL Editor) — den er selvstendig og setter opp `dart_vm`-skjemaet med
+      absolutt alt appen trenger. Du trenger IKKE de andre filene i
       `supabase/` (de er kun for å oppgradere en gammel, allerede
       eksisterende database trinnvis) — se `README.md` → «Database-tabeller»
+- [ ] Étt ekstra steg som MÅ gjøres i dashbordet (kan ikke settes fra SQL):
+      Project Settings → API → «Exposed schemas» → legg til `dart_vm` i
+      listen ved siden av `public`. Uten dette avviser Supabase sitt
+      REST-API alle spørringer mot dart_vm, selv med riktige nøkler.
 - [ ] Bytt ut placeholder-e-posten `kontakt@dart-vm-spillet.no` med din egen, i:
   - `src/app/page.tsx`
   - `src/app/personvern/page.tsx`

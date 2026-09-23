@@ -7,7 +7,8 @@ import type { ValidMatchInput } from './matchResultValidation'
  * enkelt-registrering og bulk-import slik at oppførselen er identisk.
  */
 export async function upsertMatchResult(
-  supabase: SupabaseClient,
+  // any, any, any: schema-agnostisk — getSupabaseAdmin() er nå typet mot "dart_vm", ikke default "public"
+  supabase: SupabaseClient<any, any, any>,
   match: ValidMatchInput,
 ): Promise<{ error: string | null }> {
   const { player1, player2, sets1, sets2, stage, winner } = match
