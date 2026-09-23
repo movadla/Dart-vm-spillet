@@ -14,16 +14,23 @@
 - [ ] Sett opp Vercel-prosjekt og fyll inn alle miljøvariablene fra `.env.example` der
 - [ ] Nærmere desember: sjekk PDC sin offisielle seeding mot `src/data/pots.ts` (rangeringen der er et øyeblikksbilde fra september og vil ha glidd)
 - [ ] Når PDC publiserer den faktiske trekningen (normalt medio november): følg steg-for-steg-oppskriften i `README.md` → «Trekning — oppdatere med ekte data»
+- [ ] Spillerkortene (`src/components/PlayerCard.tsx`) viser nå «SNITT 2026» og «STØRSTE
+      HINDER» som «—» — vi har ikke ekte data for disse to for noen av de 64 spillerne.
+      Enten research/fyll inn dette selv (per spiller: three-dart average for 2026-sesongen,
+      og hvilken runde/motstander som historisk har vært vanskeligst), eller si fra om
+      feltene skal fjernes/erstattes hvis det blir for mye jobb å vedlikeholde per spiller.
 
 ## Idéer til senere (produktvurderinger, ikke bestemt ennå)
 
 - [ ] Færre kandidater per pott (i dag: 2/3/5/6/8/mange i pott 6) — vurder et mer kuratert,
-      strammere utvalg per nivå
-- [ ] Til gjengjeld: vis flere detaljer per spiller når man utforsker/velger (i dag bare
-      navn, nasjonalitet, PDC-ranking, odds) — konkret forslag fra Morten (2026-09-23):
-      enkel oversikt med vinnerodds, PDC-ranking, snitt i 2026 (three-dart average),
-      og «største hinder på veien til VM-seier» (f.eks. hvem/hvilken runde som historisk
-      har vært vanskeligst — eks. Littler i runde 4)
+      strammere utvalg per nivå. Blir ekstra aktuelt nå som spillerkortene er store
+      «Ultimate Darts»-stil showcase-kort (se under) — pott 6 sine 40 kort gir mye scrolling.
+
+**Implementert 2026-09-23:** spillervalget vises nå som fullstørrelses, «Ultimate
+Darts»-inspirerte kort (skjoldform, gullramme, pott-farget bakgrunn, stats) —
+se `src/components/PlayerCard.tsx`. Bygget og visuelt verifisert for pott 1 og 2;
+resten av pottene bruker samme komponent uendret, men er ikke separat visuelt
+gjennomgått ennå (jf. punktet over om usikkerhet rundt endelig kandidatantall).
 
 ## Periodisk
 

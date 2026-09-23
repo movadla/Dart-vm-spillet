@@ -760,8 +760,8 @@ const inputStyle: React.CSSProperties = {
           role="radiogroup"
           aria-label={`Velg spiller fra ${pot.name}`}
           style={{
-            flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(84px, 1fr))',
-            alignItems: 'start', alignContent: 'safe center', gap: 8, minWidth: 0, overflowY: 'auto', padding: '2px 2px 4px',
+            flex: 1, display: 'flex', flexDirection: 'column',
+            justifyContent: 'safe center', gap: 14, minWidth: 0, overflowY: 'auto', padding: '2px 2px 4px',
           }}
         >
           {pot.players.map((player) => (
@@ -770,6 +770,7 @@ const inputStyle: React.CSSProperties = {
               player={player}
               color={color}
               colorDark={colorDark}
+              potName={pot.name}
               selected={selectedPlayer === player.name}
               onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
             />
