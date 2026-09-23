@@ -5,6 +5,10 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 const supabase = getSupabaseAdmin()
 
 const KICKOFF = new Date('2026-12-11T19:00:00Z')
+// Ingen grense fantes tidligere — én liga kunne i praksis vokse til å romme
+// hele deltakerfeltet, noe leaderboardet i en liga (samme RankList-komponent
+// som hovedleaderboardet) ikke er designet for å vise pent/ytelsesmessig.
+const MAX_LEAGUE_MEMBERS = 200
 
 export async function POST(req: NextRequest) {
   if (new Date() >= KICKOFF) {
@@ -28,6 +32,14 @@ export async function POST(req: NextRequest) {
   const { data: league } = await supabase
     .from('leagues').select('id, name').eq('invite_code', inviteCode.trim().toUpperCase()).maybeSingle()
   if (!league) return NextResponse.json({ error: 'Ugyldig ligakode' }, { status: 404 })
+
+  const { count: memberCount } = await supabase
+    .from('league_members').select('*', { count: 'exact', head: true }).eq('league_id', league.id)
+  const { count: alreadyMember } = await supabase
+    .from('league_members').select('*', { count: 'exact', head: true }).eq('league_id', league.id).eq('participant_id', participantId)
+  if ((memberCount ?? 0) >= MAX_LEAGUE_MEMBERS && !alreadyMember) {
+    return NextResponse.json({ error: 'Denne ligaen er full' }, { status: 409 })
+  }
 
   // Idempotent insert — ignore if already member
   await supabase

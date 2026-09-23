@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
+import { isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
 import { POTS } from '@/data/pots'
 
 const KICKOFF = new Date('2026-12-11T19:00:00Z')
+// Rate-limitet per deltaker (ikke IP) siden identiteten uansett er verifisert
+// på dette tidspunktet — romslig nok for legitim omvalg-fikling, stanser
+// scriptet misbruk av en kompromittert/lekket vm_auth-cookie.
+const UPDATE_LIMIT = 30
+const UPDATE_WINDOW_MS = 60 * 60 * 1000
 
 // Bygg et oppslag: potNumber → Set<playerName> for rask validering
 const VALID_PLAYERS: Record<number, Set<string>> = {}
@@ -29,6 +35,12 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getSupabaseAdmin()
+
+  if (await isRateLimited(supabase, 'tipp-update', participantId, UPDATE_LIMIT, UPDATE_WINDOW_MS)) {
+    return NextResponse.json({ error: 'For mange lagringer. Vent litt og prøv igjen.' }, { status: 429 })
+  }
+  await recordRateLimitHit(supabase, 'tipp-update', participantId)
+
   const { picks } = await req.json()
 
   if (!picks || typeof picks !== 'object' || Array.isArray(picks)) {
