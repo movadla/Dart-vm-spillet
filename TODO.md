@@ -44,6 +44,91 @@ dekning, se punktet over.
 med i selve 128-spiller-braketten (eksempel-trekningen viser fortsatt ekte navn),
 bare ikke valgbare som tips lenger.
 
+## Revisjonsfunn som gjenstår (2026-09-23)
+
+Fra en 5-delt gjennomgang av hele appen med sikte på internasjonal skala
+(tusenvis av deltakere). Det som var reelle, ferdig-fiksbare bugs er
+allerede rettet og committet i denne økten (kontoovertakelse-hullene,
+race condition i picks-lagring, manglende DB-indekser/constraints,
+rate-limiting, tie-breaker, dødt PIN-system som blokkerte all påmelding,
+manglende `leagues`/`league_members`-migrasjon, StepSlideshow-
+tilgjengelighet m.m.). Det som står igjen under er enten avhengig av
+ekte tilkoblinger (Supabase/Resend/Vercel/Sentry) jeg ikke har i denne
+økten, eller er større arkitektur-/produktbeslutninger som fortjener
+et bevisst valg fra deg fremfor at jeg griper inn på egen hånd.
+
+**Blokkerer for stor/internasjonal skala:**
+- [ ] Ingen flerspråklighet — hardkodet norsk tekst i rundt 40 filer,
+      `<html lang="no">` hardkodet i `src/app/layout.tsx`. Det klart
+      største gjenstående arbeidet; fortjener en egen beslutning om
+      bibliotek/locale-routing før noen begynner å kode på det.
+- [ ] Leaderboardets poengberegning kjører i Node ved hver sidevisning
+      (`src/lib/scoring.ts` + `src/app/leaderboard/page.tsx`) i stedet
+      for en DB-view/materialized view — ikke flyttet siden det ikke
+      er en ekte database å teste opp mot i denne økten.
+- [ ] Manuell resultatinnlegging (admin) skalerer ikke til tusenvis av
+      ventende deltakere — organisatorisk begrensning, ikke en kodefiks.
+- [ ] Delt admin-hemmelighet, ingen individuelle admin-kontoer, ingen
+      audit-trail for admin-handlinger (hvem endret hva er usporbart).
+- [ ] Synkron masseutsending av e-post uten kø (`broadcast/route.ts`,
+      `send-daily-email/route.ts`) — risiko for at sendingen stopper
+      midtveis ved mange mottakere, uten resume/retry.
+- [ ] Ingen 2FA på admin-innlogging.
+
+**Bør ha:**
+- [ ] `POTS`-spillerdata er en statisk kodefil (`src/data/pots.ts`) —
+      krever kodeendring + deploy for hver oppdatering. Bør inn i DB
+      ved stor skala.
+- [ ] Ingen bekreftet backup-rutine eller overvåkning for
+      `participants`/`picks` (uerstattelig data).
+- [ ] Sentry er satt opp i kode (`sentry.*.config.ts`) men ikke
+      aktivert — mangler `NEXT_PUBLIC_SENTRY_DSN`.
+- [ ] E-post faller tilbake til delt `resend.dev`-domene — dårlig
+      leveringsgrad i stor skala uten eget verifisert domene
+      (SPF/DKIM/DMARC i Resend).
+- [ ] Ingen skalerbar support-kanal utover én placeholder-e-post.
+- [ ] `admin_login_attempts`-tabellen vokser ubegrenset — ingen
+      opprydding/TTL.
+- [ ] `snapshot-ranks.yml` har ingen reell feilvarsling ved feil (kun
+      GitHubs standard-e-post til repo-eier).
+- [ ] `admin_session`-sammenligningen i `src/middleware.ts:10` bruker
+      `!==`, ikke konstant-tid. Lav praktisk risiko, men triviell å
+      bytte til `secureCompare()` (finnes allerede i
+      `src/lib/adminAuth.ts`, brukt i admin-login).
+- [ ] Tilgjengelighet er fortsatt tynt dekket i resten av appen (kun
+      `StepSlideshow.tsx` er gjennomgått denne runden) — få
+      `aria-label`, uverifisert tastaturnavigasjon andre steder.
+- [ ] Personvernerklæringen dokumenterer ikke cookie-bruk eksplisitt
+      (`admin_session`, `vm_auth` — trolig "strengt nødvendige" og
+      dermed unntatt samtykke, men bør stå der for et
+      internasjonalt/EU-publikum).
+- [ ] `vm_auth`-cookien er den rå, usignerte deltaker-UUID-en —
+      fungerer i praksis siden UUID-er er ugjettbare, men selve
+      identiteten ER sesjonshemmeligheten. Vurder en signert/kortlevd
+      sesjon i tillegg ved større skala.
+- [ ] `preview-email`/`send-status-email` er ikke sjekket for samme
+      batching/timeout-sårbarhet som `broadcast`/`send-daily-email`.
+- [ ] README mangler en "kamp-dag"-runbook for admin (steg-for-steg
+      per runde: hent resultater → legg inn → verifiser leaderboard →
+      send status-e-post).
+- [ ] `KickButton.tsx` sin synlighet ("er jeg liga-eier?") er kun en
+      `localStorage`-hint — kan vise/skjule knappen feil ved
+      utløpt/manglende økt. Selve kicket er trygt (backend håndhever
+      ekte identitet via `vm_auth`) — dette er ren UX-polish.
+
+**Kan vente:**
+- [ ] Ligasystemet har medlemstak og kick, men ingen "rapporter
+      misbruk"-mekanisme.
+- [ ] StepSlideshow: ingen auto-advance (bevisst utelatt — subjektiv
+      UX-avgjørelse, si fra om du vil ha det), og eksempelscenarioet
+      (Littler vs. samme motstander) er statisk/repeteres likt for
+      alle — kan roteres for et stort, gjentakende publikum.
+- [ ] Appnavnet "DART-VM-SPILLET" signaliserer norsk "Verdensmesterskap"
+      — henger sammen med i18n-/merkevare-arbeidet over.
+- [ ] `vm-info/page.tsx` har tidligere vært lappet for gamle
+      fotball-lenker — verdt å dobbeltsjekke at alle delte/eksterne
+      lenker faktisk peker riktig.
+
 ## Periodisk
 
 - [ ] Kjør en ny grundig gjennomgang av hele appen (som den 31-punkts-revisjonen 2026-09-22/23) — sikkerhet, feilhåndtering, testdekning, GDPR, tilgjengelighet, ytelse, admin-UX, leftover-referanser til gamle prosjekter. Gjør dette:
