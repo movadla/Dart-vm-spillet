@@ -14,17 +14,13 @@
 - [ ] Sett opp Vercel-prosjekt og fyll inn alle miljøvariablene fra `.env.example` der
 - [ ] Nærmere desember: sjekk PDC sin offisielle seeding mot `src/data/pots.ts` (rangeringen der er et øyeblikksbilde fra september og vil ha glidd)
 - [ ] Når PDC publiserer den faktiske trekningen (normalt medio november): følg steg-for-steg-oppskriften i `README.md` → «Trekning — oppdatere med ekte data»
-- [ ] Spillerkortet bruker nå én ekte bildemal (`public/cards/template-1.png`, blå/is-stil)
-      for ALLE 6 potter — du sa du ville ha én mal PER pott (6 stk), så 5 gjenstår.
-      Lag dem i samme stil/proporsjon (1007×1562px, transparent bakgrunn utenfor
-      skjoldformen, ingen tekst bakt inn, samme plassering av gull-linjer/ikon-rad
-      som malen du allerede har laget), i pottenes farger (rød/gull/blå/grønn/oransje/lilla
-      — se `src/config/potColors.ts`). Gi meg filene så kobler jeg dem til riktig pott
-      i `PlayerCard.tsx`.
-- [ ] Malen viser 4 stats: ODDS, RANKING (ekte data), TITLER og 9-DARTERS (ingen
-      ekte data for noen spiller — vises som «—»). Enten research/fyll inn dette selv,
-      eller si fra om ikonene/feltene skal byttes til noe vi faktisk har data for
-      (f.eks. pott-tilhørighet eller multiplikator).
+- [ ] Spillerkortet bruker nå én ekte bildemal (`public/cards/template-1.webp`, blå/is-stil
+      med 2 ikoner — mynt/ODDS og globus/RANKING) for ALLE 6 potter — du sa du ville ha
+      én mal PER pott (6 stk), så 5 gjenstår. Lag dem i samme stil/proporsjon
+      (1007×1562px, transparent bakgrunn utenfor skjoldformen, ingen tekst bakt inn,
+      samme plassering av gull-linjer/ikon-rad som malen du allerede har laget), i
+      pottenes farger (rød/gull/blå/grønn/oransje/lilla — se `src/config/potColors.ts`).
+      Gi meg filene så kobler jeg dem til riktig pott i `PlayerCard.tsx`.
 - [ ] Kun Luke Littler har et ekte spillerfoto på kortet sitt (`src/data/playerPhotos.ts`,
       bildefil i `public/players/`) — hentet fra Wikimedia Commons med verifisert
       CC BY-SA 4.0-lisens, kreditering, og AI-basert bakgrunnsfjerning (rembg). Vil du ha
@@ -33,17 +29,17 @@
       og legger det inn på samme måte. IKKE legg til bilder fra andre kilder (Google-søk,
       pressebilder, sosiale medier) uten at jeg har verifisert lisensen.
 
-## Idéer til senere (produktvurderinger, ikke bestemt ennå)
-
-- [ ] Færre kandidater per pott (i dag: 2/3/5/6/8/mange i pott 6) — vurder et mer kuratert,
-      strammere utvalg per nivå. Blir ekstra aktuelt nå som spillerkortene er store
-      showcase-kort — pott 6 sine 40 kort gir mye scrolling.
-
 **Implementert 2026-09-23:** spillervalget vises som fullstørrelses showcase-kort
-bygget på en ekte designet bildemal (ikke lenger CSS/SVG-tegnet skjoldform) —
-se `src/components/PlayerCard.tsx`. Ferdig for pott 1 (foto på Littler, resten
-uten foto ennå). Trenger 5 flere pott-fargede maler for full dekning, se punktet
-over.
+i et sentrert grid, bygget på en ekte designet bildemal (ikke lenger CSS/SVG-tegnet
+skjoldform) — se `src/components/PlayerCard.tsx`. Ferdig for pott 1 (foto på
+Littler, resten uten foto ennå). Trenger 5 flere pott-fargede maler for full
+dekning, se punktet over.
+
+**Implementert 2026-09-23:** antall valgbare kandidater per pott er trimmet fra
+2/3/5/6/8/40 til 2/3/4/4/5/5 (topp-N etter PDC-ranking beholdt per pott) — se
+`getPickablePlayers()` i `src/data/pots.ts`. De resterende spillerne er fortsatt
+med i selve 128-spiller-braketten (eksempel-trekningen viser fortsatt ekte navn),
+bare ikke valgbare som tips lenger.
 
 ## Periodisk
 
