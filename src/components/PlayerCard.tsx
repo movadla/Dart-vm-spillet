@@ -1,5 +1,6 @@
 'use client'
 
+import Flag from '@/components/Flag'
 import type { Player } from '@/data/pots'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 
@@ -20,6 +21,11 @@ const TEMPLATE_ASPECT = 1007 / 1562
 
 const ZONES = {
   photo: { left: '6%', right: '6%', top: '3%', bottom: '44.1%' }, // ned til navn-skillelinjen (55.9%)
+  // Samme to soner som satt-tallet/etiketten brukte tidligere (før det ble
+  // fjernet som duplikat av RANKING-statistikken), gjenbrukt til flagg +
+  // snitt 2026 etter ønske om at den tomme sonen skulle fylles med noe nyttig.
+  topFlag: { left: '11.3%', width: '14.3%', bottom: '69.6%' }, // ned til linje 1 (30.9%)
+  topAvg: { left: '11.3%', width: '14.3%', top: '31%', bottom: '62.9%' }, // mellom linje 1 og 2
   name: { left: '8%', right: '8%', bottom: '45.5%' },
   // v2 av malen (fra brukeren): kun 2 ikoner bakt inn (mynt/globus) i stedet
   // for 4 — løser CSS-maskerings-problemet fra forrige versjon helt (der
@@ -110,6 +116,34 @@ export function PlayerCard({
           }}
         />
       )}
+
+      {/* Flagg øverst til venstre + snitt 2026 under — ingen ekte snitt-data
+          for noen spiller ennå (vises som "—"), se TODO.md. */}
+      <div style={{
+        position: 'absolute', left: ZONES.topFlag.left, width: ZONES.topFlag.width, bottom: ZONES.topFlag.bottom,
+        display: 'flex', justifyContent: 'flex-start',
+      }}>
+        <Flag iso2={player.iso2} size={22} />
+      </div>
+      <div style={{
+        // Ingen "width" her — sonen (14.3 % av kortbredden) er for smal til
+        // å romme "SNITT —" uansett skriftstørrelse, så teksten får (som
+        // "SEED"-teksten gjorde før den ble fjernet) flyte fritt til høyre i
+        // stedet for å bli klippet av en ellipsis. Den ligger over fotoet
+        // (senere i DOM-rekkefølgen = tegnes oppå), med tekst-skygge for
+        // lesbarhet — ingen kollisjon siden navnet/andre elementer sitter
+        // lenger ned på kortet.
+        position: 'absolute', left: ZONES.topAvg.left, top: ZONES.topAvg.top,
+        textAlign: 'left', zIndex: 1,
+      }}>
+        <div style={{
+          fontFamily: SPORT, fontSize: 'clamp(7px, 8cqw, 11px)', fontWeight: 900, color: GOLD,
+          lineHeight: 1.1, whiteSpace: 'nowrap',
+          textShadow: '0 1px 4px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.85)',
+        }}>
+          SNITT —
+        </div>
+      </div>
 
       {/* Svak mørk stripe rett bak navnet, kun når det ligger over et foto —
           uten den blir navnet vanskelig å lese der det krysser lyse/fargerike
