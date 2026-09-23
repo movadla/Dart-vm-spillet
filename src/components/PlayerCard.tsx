@@ -27,13 +27,6 @@ function formatOdds(odds: string): string {
   return Number.isFinite(n) ? n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : odds
 }
 
-// Tre-bokstavs landskode ved siden av flagget (som nasjon/klubb-feltet på
-// FUT-kort). iso2-verdiene i pots.ts er flagcdn-koder, derfor egen mapping.
-const COUNTRY_CODE: Record<string, string> = {
-  'gb-eng': 'ENG', 'gb-wls': 'WAL', 'gb-sct': 'SCO', 'gb-nir': 'NIR',
-  nl: 'NED', de: 'GER', pl: 'POL', au: 'AUS', be: 'BEL', ie: 'IRL', lv: 'LAT', at: 'AUT', hr: 'CRO',
-}
-
 // Etternavn dominerer (som på referansekortene), fornavn lite over. Første
 // ord = fornavn, resten = etternavn, så "van Gerwen"/"De Decker"/"O'Connor"
 // holdes samlet.
@@ -139,13 +132,16 @@ const TEMPLATE_ASPECT = 1007 / 1562
 
 const ZONES = {
   photo: { left: '6%', right: '6%', top: '3%', bottom: '44.1%' }, // ned til navn-skillelinjen (55.9%)
-  topFlag: { left: '11.3%', bottom: '69.6%' }, // ned til linje 1 (30.9%)
-  // RANK-blokken har kun ~17 % av korthøyden (fra streken under flagget til
-  // navnet starter, målt live) — ikon+etikett på én rad mellom linje 1 og 2,
-  // selve tallet stort under linje 2 (hero-tall, som rating-tallet på FUT-kort).
-  topRank: {
-    left: '11.3%',
-    iconLabelRow: { top: '32%' },
+  // Venstre kolonne = nøyaktig utstrekningen til de to korte gullstrekene i
+  // malen (målt: x 11,6–25,6 %). Flagg, globus+RANK og tallet midtstilles
+  // alle i denne kolonnen, så de sitter symmetrisk på strekene og aldri
+  // stikker inn i foto-feltet til høyre. RANK-blokken har kun ~17 % av
+  // korthøyden (til navnet starter): ikon+etikett på én rad mellom linje 1
+  // (30,7 %) og 2 (37,0 %), hero-tallet under linje 2.
+  topCol: {
+    left: '11.6%', width: '14%',
+    flag: { bottom: '69.6%' }, // ned til linje 1
+    iconLabelRow: { top: '31.8%' },
     valueRow: { top: '37.6%' }, // bunn ≈ 45,9 % — under etternavnets topp (46,4 %) i alle potter, målt live
   },
   name: { left: '8%', right: '8%', bottom: '45.5%' },
@@ -298,37 +294,36 @@ export function PlayerCard({
         <PhotoPlaceholder name={player.name} />
       )}
 
-      {/* Identitetsblokk øverst til venstre: innrammet flagg + landskode, så
-          RANK-blokken under (globus + etikett mellom linje 1 og 2, stort tall
-          under linje 2). */}
+      {/* Venstre kolonne (midtstilt på gullstrekene): innrammet flagg over
+          linje 1, globus+RANK mellom linjene, hero-tall under linje 2.
+          Alle størrelser i cqw så blokken alltid holder seg innenfor
+          kolonnens 14 % — «RANK» brøt tidligere inn i foto-feltet. */}
       <div style={{
-        position: 'absolute', left: ZONES.topFlag.left, bottom: ZONES.topFlag.bottom, zIndex: 1,
-        display: 'flex', alignItems: 'flex-end', gap: 3, lineHeight: 0,
+        position: 'absolute', left: ZONES.topCol.left, width: ZONES.topCol.width, bottom: ZONES.topCol.flag.bottom, zIndex: 1,
+        display: 'flex', justifyContent: 'center', lineHeight: 0,
       }}>
-        <span style={{
-          display: 'inline-flex', lineHeight: 0, borderRadius: 3, overflow: 'hidden',
+        <span className="card-flag" style={{
+          display: 'inline-flex', width: '12cqw', lineHeight: 0, borderRadius: 3, overflow: 'hidden',
           border: '1px solid rgba(243,213,118,0.6)', boxShadow: '0 1px 3px rgba(0,0,0,0.6)',
         }}>
           <Flag iso2={player.iso2} size={22} />
         </span>
-        <span style={{
-          fontFamily: SPORT, fontWeight: 800, lineHeight: 1, paddingBottom: 1,
-          fontSize: 'clamp(5px, 5.5cqw, 9px)', letterSpacing: '0.08em', color: LABEL_GOLD,
-          textShadow: SHADOW_OVER_PHOTO,
-        }}>{COUNTRY_CODE[player.iso2] ?? player.iso2.toUpperCase()}</span>
       </div>
       <div style={{
-        position: 'absolute', left: ZONES.topRank.left, top: ZONES.topRank.iconLabelRow.top, zIndex: 1,
-        display: 'flex', alignItems: 'center', gap: 2,
+        position: 'absolute', left: ZONES.topCol.left, width: ZONES.topCol.width, top: ZONES.topCol.iconLabelRow.top, zIndex: 1,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8cqw',
       }}>
-        <GlobeIcon size="clamp(7px, 7cqw, 12px)" />
+        <GlobeIcon size="5cqw" />
         <span style={{
           fontFamily: SPORT, fontWeight: 700, whiteSpace: 'nowrap', lineHeight: 1,
-          fontSize: 'clamp(4.5px, 5cqw, 9px)', letterSpacing: '0.06em', color: LABEL_GOLD,
+          fontSize: '3.9cqw', letterSpacing: '0.03em', color: LABEL_GOLD,
           textShadow: SHADOW_OVER_PHOTO,
         }}>RANK</span>
       </div>
-      <div style={{ position: 'absolute', left: ZONES.topRank.left, top: ZONES.topRank.valueRow.top, lineHeight: 0, zIndex: 1 }}>
+      <div style={{
+        position: 'absolute', left: ZONES.topCol.left, width: ZONES.topCol.width, top: ZONES.topCol.valueRow.top, zIndex: 1,
+        lineHeight: 0, textAlign: 'center',
+      }}>
         <span style={{
           fontFamily: SPORT, fontWeight: 900, whiteSpace: 'nowrap', lineHeight: 0.95,
           fontSize: 'clamp(10px, 12.5cqw, 23px)', color: GOLD,

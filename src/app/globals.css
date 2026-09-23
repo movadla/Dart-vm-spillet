@@ -415,6 +415,15 @@ body::after {
   }
 }
 
+/* Flagget på spillerkortet skal skalere med kortet (cqw på wrapperen) —
+   Flag-komponenten setter faste px inline, derfor !important her. */
+.card-flag img {
+  width: 100% !important;
+  height: auto !important;
+  border-radius: 0 !important;
+  display: block !important;
+}
+
 /* Foto-kreditering skjult bak en liten "i"-knapp (details/summary — ingen
    JS-state nødvendig) i stedet for alltid synlig bildetekst under kortet. */
 .card-credit summary {
