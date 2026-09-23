@@ -13,6 +13,35 @@ function formatAvg(avg: number | undefined): string {
   return avg == null ? '—' : avg.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+// To små ikoner tegnet selv (ikke bakt inn i malen) — kan derfor plasseres/
+// byttes fritt uten å røre selve bildefilen.
+function GlobeIcon({ size }: { size: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={GOLD} strokeWidth={1.6} strokeLinecap="round">
+      <circle cx="12" cy="12" r="8.5" />
+      <line x1="3.5" y1="12" x2="20.5" y2="12" />
+      <path d="M12 3.5c2.8 3 2.8 14 0 17" />
+      <path d="M12 3.5c-2.8 3 -2.8 14 0 17" />
+    </svg>
+  )
+}
+
+// "Tre piler" (form-/trend-ikon) — erstatter globus-ikonet som lå bakt inn i
+// malen for SNITT-kolonnen. Selve globus-grafikken er fjernet fra
+// template-1.webp med Python/OpenCV-inpainting (bakgrunnen der er en
+// detaljert "is"-tekstur, ikke en flat farge, så en enkel fargeplugg hadde
+// vist igjen som et synlig lappet felt — se TODO.md for fremgangsmåten
+// hvis flere maler trenger samme behandling).
+function ArrowsIcon({ size }: { size: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={GOLD} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 17V8m0 0-2.6 3M5 8l2.6 3" />
+      <path d="M12 17V4m0 0-2.6 3M12 4l2.6 3" />
+      <path d="M19 17V10m0 0-2.6 3M19 10l2.6 3" />
+    </svg>
+  )
+}
+
 // Ekte bakgrunnsmal (PNG, transparent utenfor skjoldformen) laget av brukeren —
 // dette er nå selve kort-grafikken, ikke noe jeg tegner med CSS/SVG. Koordinatene
 // under er MÅLT direkte i denne konkrete filen (1007×1562px) med et Python-skript
@@ -44,6 +73,10 @@ const ZONES = {
   ],
   statLabel: { top: '71%' },
   statValue: { top: '76%' },
+  // Nøyaktig posisjon til det opprinnelige (nå fjernede) globus-ikonet i
+  // SNITT-kolonnen, målt med Python/numpy (gull-piksel-deteksjon +
+  // connected-components) i denne konkrete malfilen. ArrowsIcon legges her.
+  snittIcon: { left: '62.4%', top: '61.2%', width: '13.7%', height: '8.4%' },
 } as const
 
 function StatCol({ zone, label, value }: { zone: { left: string; width: string }; label: string; value: string }) {
@@ -130,8 +163,11 @@ export function PlayerCard({
         />
       )}
 
-      {/* Flagg øverst til venstre + world ranking under (byttet plass med
-          SNITT 2026-09-23, som nå ligger i nederste stat-rad i stedet). */}
+      {/* Flagg øverst til venstre. Under: globus-ikon / RANK-etikett / tall,
+          stablet likt ikon+etikett+verdi-mønsteret i stat-raden nederst —
+          globusen gjenbrukes her siden den er fjernet fra SNITT-kolonnen
+          (se ArrowsIcon/snittIcon-kommentaren). Ankeret (topRanking.top)
+          ligger rett under gull-streken som avslutter flagg-sonen. */}
       <div style={{
         position: 'absolute', left: ZONES.topFlag.left, width: ZONES.topFlag.width, bottom: ZONES.topFlag.bottom,
         display: 'flex', justifyContent: 'flex-start',
@@ -144,15 +180,19 @@ export function PlayerCard({
         // den ble fjernet) flyte fritt til høyre i stedet for å klippes.
         position: 'absolute', left: ZONES.topRanking.left, top: ZONES.topRanking.top,
         textAlign: 'left', zIndex: 1,
+        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1,
       }}>
-        <div style={{
-          display: 'flex', alignItems: 'baseline', gap: 3,
+        <GlobeIcon size="clamp(7px, 8cqw, 11px)" />
+        <span style={{
+          fontFamily: SPORT, fontWeight: 700, whiteSpace: 'nowrap',
+          fontSize: 'clamp(4.5px, 5cqw, 7px)', letterSpacing: '0.04em', color: 'rgba(243,213,118,0.75)',
+          textShadow: '0 1px 3px rgba(0,0,0,0.85)',
+        }}>RANK</span>
+        <span style={{
           fontFamily: SPORT, fontWeight: 900, whiteSpace: 'nowrap',
+          fontSize: 'clamp(7px, 8cqw, 11px)', color: GOLD,
           textShadow: '0 1px 4px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.85)',
-        }}>
-          <span style={{ fontSize: 'clamp(4.5px, 5cqw, 7px)', letterSpacing: '0.04em', color: 'rgba(243,213,118,0.75)' }}>RANK</span>
-          <span style={{ fontSize: 'clamp(7px, 8cqw, 11px)', color: GOLD }}>{player.pdcRanking}</span>
-        </div>
+        }}>{player.pdcRanking}</span>
       </div>
 
       {/* Svak mørk stripe rett bak navnet, kun når det ligger over et foto —
@@ -180,9 +220,17 @@ export function PlayerCard({
         </div>
       </div>
 
-      {/* Statistikk — mynt-ikonet er ODDS (ekte data), globus-ikonet er nå
-          SNITT (byttet plass med RANKING 2026-09-23, se avg2026 i pots.ts —
-          fiktive tall foreløpig for de fleste spillere). */}
+      {/* Statistikk — mynt-ikonet (bakt inn i malen) er ODDS (ekte data).
+          SNITT bruker nå ArrowsIcon (tegnet i kode, se over) i stedet for
+          det opprinnelige, nå fjernede globus-ikonet — fiktive tall
+          foreløpig for de fleste spillere, se avg2026 i pots.ts. */}
+      <div style={{
+        position: 'absolute', left: ZONES.snittIcon.left, top: ZONES.snittIcon.top,
+        width: ZONES.snittIcon.width, height: ZONES.snittIcon.height,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <ArrowsIcon size="clamp(10px, 9cqw, 16px)" />
+      </div>
       <StatCol zone={ZONES.statCols[0]} label="ODDS" value={player.odds} />
       <StatCol zone={ZONES.statCols[1]} label="SNITT" value={formatAvg(player.avg2026)} />
     </button>
