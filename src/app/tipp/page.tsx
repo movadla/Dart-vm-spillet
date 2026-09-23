@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
-import { POTS } from '@/data/pots'
+import { POTS, getPickablePlayers } from '@/data/pots'
 import Flag from '@/components/Flag'
 import { SCORING } from '@/config/scoring'
 import { getFirstMatchInfo, getSeedLabel } from '@/lib/bracketProjection'
@@ -768,7 +768,7 @@ const inputStyle: React.CSSProperties = {
             justifyContent: 'center', gap: 10, padding: '2px 2px 4px',
           }}
         >
-          {pot.players.map((player) => (
+          {getPickablePlayers(pot).map((player) => (
             <PlayerCard
               key={player.name}
               player={player}

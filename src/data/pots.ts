@@ -5,6 +5,12 @@ export interface Player {
   pdcRanking: number
   seedNumber: number | null
   odds: string
+  // false = spilleren finnes i det ekte 128-spiller-feltet (brukes fortsatt i
+  // brakett-projeksjonen og spilleroversikten), men er IKKE et valgbart
+  // pott-alternativ i tippe-stegene. Innført 2026-09-23 etter ønske om et
+  // strammere, mer kuratert utvalg per pott (2/3/4/4/5/5 i stedet for
+  // 2/3/5/6/8/40) — se getPickablePlayers() og TODO.md. Udefinert = true.
+  pickable?: boolean
 }
 
 export interface Pot {
@@ -12,6 +18,16 @@ export interface Pot {
   name: string
   emoji: string
   players: Player[]
+}
+
+/** Kandidatene som faktisk vises som valgbare i tippe-stegene for en pott —
+ * dvs. `pot.players` minus dem som er markert `pickable: false`. Bruk denne
+ * (ikke `pot.players` direkte) overalt hvor "hvilke spillere kan velges"
+ * vises — `pot.players` i seg selv skal fortsatt brukes uendret der HELE
+ * det kjente spillerfeltet trengs (brakett-projeksjon, spilleroversikten på
+ * vm-info-siden). */
+export function getPickablePlayers(pot: Pot): Player[] {
+  return pot.players.filter((p) => p.pickable !== false)
 }
 
 export const POT_NAMES = [
@@ -60,7 +76,7 @@ export const POTS: Pot[] = [
       { name: 'Michael van Gerwen',nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 7,  seedNumber: 7,  odds: '9.0' },
       { name: 'Josh Rock',         nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 8,  seedNumber: 8,  odds: '17.0' },
       { name: 'Stephen Bunting',   nationality: 'England',     iso2: 'gb-eng', pdcRanking: 9,  seedNumber: 9,  odds: '21.0' },
-      { name: 'Danny Noppert',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 10, seedNumber: 10, odds: '26.0' },
+      { name: 'Danny Noppert',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 10, seedNumber: 10, odds: '26.0', pickable: false },
     ],
   },
   {
@@ -72,8 +88,8 @@ export const POTS: Pot[] = [
       { name: 'Wessel Nijman',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 12, seedNumber: 12, odds: '26.0' },
       { name: 'Ryan Searle',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 13, seedNumber: 13, odds: '34.0' },
       { name: 'Ross Smith',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 14, seedNumber: 14, odds: '41.0' },
-      { name: 'Chris Dobey',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 15, seedNumber: 15, odds: '41.0' },
-      { name: 'Nathan Aspinall',   nationality: 'England',     iso2: 'gb-eng', pdcRanking: 16, seedNumber: 16, odds: '34.0' },
+      { name: 'Chris Dobey',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 15, seedNumber: 15, odds: '41.0', pickable: false },
+      { name: 'Nathan Aspinall',   nationality: 'England',     iso2: 'gb-eng', pdcRanking: 16, seedNumber: 16, odds: '34.0', pickable: false },
     ],
   },
   {
@@ -86,9 +102,9 @@ export const POTS: Pot[] = [
       { name: 'Martin Schindler',      nationality: 'Tyskland',       iso2: 'de',     pdcRanking: 19, seedNumber: 19, odds: '81.0' },
       { name: 'Krzysztof Ratajski',    nationality: 'Polen',          iso2: 'pl',     pdcRanking: 20, seedNumber: 20, odds: '101.0' },
       { name: 'Rob Cross',             nationality: 'England',        iso2: 'gb-eng', pdcRanking: 21, seedNumber: 21, odds: '51.0' },
-      { name: 'Damon Heta',            nationality: 'Australia',      iso2: 'au',     pdcRanking: 22, seedNumber: 22, odds: '101.0' },
-      { name: 'Dirk van Duijvenbode',  nationality: 'Nederland',      iso2: 'nl',     pdcRanking: 23, seedNumber: 23, odds: '101.0' },
-      { name: 'Mike De Decker',        nationality: 'Belgia',         iso2: 'be',     pdcRanking: 24, seedNumber: 24, odds: '101.0' },
+      { name: 'Damon Heta',            nationality: 'Australia',      iso2: 'au',     pdcRanking: 22, seedNumber: 22, odds: '101.0', pickable: false },
+      { name: 'Dirk van Duijvenbode',  nationality: 'Nederland',      iso2: 'nl',     pdcRanking: 23, seedNumber: 23, odds: '101.0', pickable: false },
+      { name: 'Mike De Decker',        nationality: 'Belgia',         iso2: 'be',     pdcRanking: 24, seedNumber: 24, odds: '101.0', pickable: false },
     ],
   },
   {
@@ -101,41 +117,41 @@ export const POTS: Pot[] = [
       { name: 'Andrew Gilding',        nationality: 'England',        iso2: 'gb-eng', pdcRanking: 27, seedNumber: 27, odds: '151.0' },
       { name: 'Kevin Doets',           nationality: 'Nederland',      iso2: 'nl',     pdcRanking: 28, seedNumber: 28, odds: '151.0' },
       { name: 'Daryl Gurney',          nationality: 'Nord-Irland',    iso2: 'gb-nir', pdcRanking: 29, seedNumber: 29, odds: '151.0' },
-      { name: 'Dave Chisnall',         nationality: 'England',        iso2: 'gb-eng', pdcRanking: 30, seedNumber: 30, odds: '201.0' },
-      { name: 'Joe Cullen',            nationality: 'England',        iso2: 'gb-eng', pdcRanking: 31, seedNumber: 31, odds: '151.0' },
-      { name: 'Ritchie Edhouse',       nationality: 'England',        iso2: 'gb-eng', pdcRanking: 32, seedNumber: 32, odds: '201.0' },
-      { name: 'Ryan Meikle',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 33, seedNumber: null, odds: '251.0' },
-      { name: 'Callan Rydz',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 34, seedNumber: null, odds: '251.0' },
-      { name: 'Ricardo Pietreczko', nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 35, seedNumber: null, odds: '251.0' },
-      { name: 'Niels Zonneveld',    nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 36, seedNumber: null, odds: '251.0' },
-      { name: 'Ian White',         nationality: 'England',     iso2: 'gb-eng', pdcRanking: 37, seedNumber: null, odds: '301.0' },
-      { name: 'Mensur Suljović',    nationality: 'Østerrike',   iso2: 'at',     pdcRanking: 38, seedNumber: null, odds: '301.0' },
-      { name: 'Vincent van der Voort', nationality: 'Nederland', iso2: 'nl',    pdcRanking: 39, seedNumber: null, odds: '301.0' },
-      { name: 'Kim Huybrechts',     nationality: 'Belgia',      iso2: 'be',     pdcRanking: 40, seedNumber: null, odds: '301.0' },
-      { name: 'Brendan Dolan',      nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 41, seedNumber: null, odds: '301.0' },
-      { name: 'Keane Barry',        nationality: 'Irland',      iso2: 'ie',     pdcRanking: 42, seedNumber: null, odds: '301.0' },
-      { name: 'Connor Scutt',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 43, seedNumber: null, odds: '351.0' },
-      { name: 'William Borland',    nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 44, seedNumber: null, odds: '351.0' },
-      { name: 'Alan Soutar',        nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 45, seedNumber: null, odds: '351.0' },
-      { name: 'Scott Williams',     nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 46, seedNumber: null, odds: '351.0' },
-      { name: 'Adam Hunt',          nationality: 'England',     iso2: 'gb-eng', pdcRanking: 47, seedNumber: null, odds: '351.0' },
-      { name: "William O'Connor",   nationality: 'Irland',      iso2: 'ie',     pdcRanking: 48, seedNumber: null, odds: '351.0' },
-      { name: 'Steve Beaton',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 49, seedNumber: null, odds: '501.0' },
-      { name: 'Jeffrey de Zwaan',  nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 50, seedNumber: null, odds: '501.0' },
-      { name: 'Madars Razma',      nationality: 'Latvia',      iso2: 'lv',     pdcRanking: 51, seedNumber: null, odds: '501.0' },
-      { name: 'Robert Owen',       nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 52, seedNumber: null, odds: '501.0' },
-      { name: 'Jim Williams',      nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 53, seedNumber: null, odds: '501.0' },
-      { name: 'Jason Lowe',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 54, seedNumber: null, odds: '501.0' },
-      { name: 'Ryan Murray',       nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 55, seedNumber: null, odds: '501.0' },
-      { name: 'Chris Landman',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 56, seedNumber: null, odds: '751.0' },
-      { name: 'Danny van Trijp',   nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 57, seedNumber: null, odds: '751.0' },
-      { name: 'Jamie Hughes',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 58, seedNumber: null, odds: '751.0' },
-      { name: 'Niko Springer',     nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 59, seedNumber: null, odds: '751.0' },
-      { name: 'Florian Hempel',    nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 60, seedNumber: null, odds: '751.0' },
-      { name: 'Boris Krčmar',      nationality: 'Kroatia',     iso2: 'hr',     pdcRanking: 61, seedNumber: null, odds: '1001.0' },
-      { name: 'Gabriel Clemens',   nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 62, seedNumber: null, odds: '751.0' },
-      { name: 'Owen Bates',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 63, seedNumber: null, odds: '1001.0' },
-      { name: 'Nathan Girvan',     nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 64, seedNumber: null, odds: '1001.0' },
+      { name: 'Dave Chisnall',         nationality: 'England',        iso2: 'gb-eng', pdcRanking: 30, seedNumber: 30, odds: '201.0', pickable: false },
+      { name: 'Joe Cullen',            nationality: 'England',        iso2: 'gb-eng', pdcRanking: 31, seedNumber: 31, odds: '151.0', pickable: false },
+      { name: 'Ritchie Edhouse',       nationality: 'England',        iso2: 'gb-eng', pdcRanking: 32, seedNumber: 32, odds: '201.0', pickable: false },
+      { name: 'Ryan Meikle',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 33, seedNumber: null, odds: '251.0', pickable: false },
+      { name: 'Callan Rydz',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 34, seedNumber: null, odds: '251.0', pickable: false },
+      { name: 'Ricardo Pietreczko', nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 35, seedNumber: null, odds: '251.0', pickable: false },
+      { name: 'Niels Zonneveld',    nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 36, seedNumber: null, odds: '251.0', pickable: false },
+      { name: 'Ian White',         nationality: 'England',     iso2: 'gb-eng', pdcRanking: 37, seedNumber: null, odds: '301.0', pickable: false },
+      { name: 'Mensur Suljović',    nationality: 'Østerrike',   iso2: 'at',     pdcRanking: 38, seedNumber: null, odds: '301.0', pickable: false },
+      { name: 'Vincent van der Voort', nationality: 'Nederland', iso2: 'nl',    pdcRanking: 39, seedNumber: null, odds: '301.0', pickable: false },
+      { name: 'Kim Huybrechts',     nationality: 'Belgia',      iso2: 'be',     pdcRanking: 40, seedNumber: null, odds: '301.0', pickable: false },
+      { name: 'Brendan Dolan',      nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 41, seedNumber: null, odds: '301.0', pickable: false },
+      { name: 'Keane Barry',        nationality: 'Irland',      iso2: 'ie',     pdcRanking: 42, seedNumber: null, odds: '301.0', pickable: false },
+      { name: 'Connor Scutt',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 43, seedNumber: null, odds: '351.0', pickable: false },
+      { name: 'William Borland',    nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 44, seedNumber: null, odds: '351.0', pickable: false },
+      { name: 'Alan Soutar',        nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 45, seedNumber: null, odds: '351.0', pickable: false },
+      { name: 'Scott Williams',     nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 46, seedNumber: null, odds: '351.0', pickable: false },
+      { name: 'Adam Hunt',          nationality: 'England',     iso2: 'gb-eng', pdcRanking: 47, seedNumber: null, odds: '351.0', pickable: false },
+      { name: "William O'Connor",   nationality: 'Irland',      iso2: 'ie',     pdcRanking: 48, seedNumber: null, odds: '351.0', pickable: false },
+      { name: 'Steve Beaton',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 49, seedNumber: null, odds: '501.0', pickable: false },
+      { name: 'Jeffrey de Zwaan',  nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 50, seedNumber: null, odds: '501.0', pickable: false },
+      { name: 'Madars Razma',      nationality: 'Latvia',      iso2: 'lv',     pdcRanking: 51, seedNumber: null, odds: '501.0', pickable: false },
+      { name: 'Robert Owen',       nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 52, seedNumber: null, odds: '501.0', pickable: false },
+      { name: 'Jim Williams',      nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 53, seedNumber: null, odds: '501.0', pickable: false },
+      { name: 'Jason Lowe',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 54, seedNumber: null, odds: '501.0', pickable: false },
+      { name: 'Ryan Murray',       nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 55, seedNumber: null, odds: '501.0', pickable: false },
+      { name: 'Chris Landman',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 56, seedNumber: null, odds: '751.0', pickable: false },
+      { name: 'Danny van Trijp',   nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 57, seedNumber: null, odds: '751.0', pickable: false },
+      { name: 'Jamie Hughes',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 58, seedNumber: null, odds: '751.0', pickable: false },
+      { name: 'Niko Springer',     nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 59, seedNumber: null, odds: '751.0', pickable: false },
+      { name: 'Florian Hempel',    nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 60, seedNumber: null, odds: '751.0', pickable: false },
+      { name: 'Boris Krčmar',      nationality: 'Kroatia',     iso2: 'hr',     pdcRanking: 61, seedNumber: null, odds: '1001.0', pickable: false },
+      { name: 'Gabriel Clemens',   nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 62, seedNumber: null, odds: '751.0', pickable: false },
+      { name: 'Owen Bates',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 63, seedNumber: null, odds: '1001.0', pickable: false },
+      { name: 'Nathan Girvan',     nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 64, seedNumber: null, odds: '1001.0', pickable: false },
     ],
   },
 ]

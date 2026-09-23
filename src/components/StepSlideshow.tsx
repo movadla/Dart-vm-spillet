@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Flag from '@/components/Flag'
-import { POTS } from '@/data/pots'
+import { POTS, getPickablePlayers } from '@/data/pots'
 import { SCORING, STAGE_LABELS, type Stage } from '@/config/scoring'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
@@ -166,7 +166,8 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
               {POTS.map((pot) => {
                 const color = POT_COLORS[(pot.potNumber - 1) % POT_COLORS.length]
                 const mult = SCORING.underdogMultiplier[pot.potNumber] ?? 1
-                const example = pot.players[0]
+                const pickable = getPickablePlayers(pot)
+                const example = pickable[0]
                 return (
                   <div
                     key={pot.potNumber}
@@ -195,7 +196,7 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
                         {pot.name}
                       </div>
                       <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {pot.players.length} spillere · f.eks. {example.name}
+                        {pickable.length} spillere · f.eks. {example.name}
                       </div>
                     </div>
                     <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: mult > 1 ? '#f59e0b' : 'rgba(255,255,255,0.35)', flexShrink: 0 }}>
