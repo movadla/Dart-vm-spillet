@@ -764,8 +764,8 @@ const inputStyle: React.CSSProperties = {
           role="radiogroup"
           aria-label={`Velg spiller fra ${pot.name}`}
           style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(84px, 96px))',
-            justifyContent: 'center', gap: 8, padding: '2px 2px 4px',
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(104px, 118px))',
+            justifyContent: 'center', gap: 10, padding: '2px 2px 4px',
           }}
         >
           {pot.players.map((player) => (
@@ -801,24 +801,24 @@ const inputStyle: React.CSSProperties = {
 
           return (
             <div style={{
-              marginTop: 10, padding: '10px 10px 8px', borderRadius: 12,
+              marginTop: 8, padding: '8px 8px 7px', borderRadius: 10,
               background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}33`,
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <Flag iso2={selectedPlayerData.iso2} size={20} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
+                <Flag iso2={selectedPlayerData.iso2} size={17} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1.1 }}>
+                  <div style={{ fontFamily: SPORT, fontSize: 12.5, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1.1 }}>
                     {selectedPlayerData.name}
                   </div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>
                     Odds {selectedPlayerData.odds} · PDC-ranking #{selectedPlayerData.pdcRanking}
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px', marginBottom: 3 }}>
-                <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>1. RUNDE</span>
-                <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>2. RUNDE</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px', marginBottom: 2 }}>
+                <span style={{ fontSize: 7.5, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>1. RUNDE</span>
+                <span style={{ fontSize: 7.5, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>2. RUNDE</span>
               </div>
 
               <DrawBracket pairA={pairA} pairB={pairB} compact />
@@ -826,7 +826,7 @@ const inputStyle: React.CSSProperties = {
               <Link
                 href={`/vm-info?tab=trekning&spiller=${encodeURIComponent(selectedPlayer)}`}
                 target="_blank"
-                style={{ display: 'block', textAlign: 'center', fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 7, padding: '7px 4px', marginTop: 8 }}
+                style={{ display: 'block', textAlign: 'center', fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 6, padding: '6px 4px', marginTop: 6 }}
               >
                 Se hele bracketen
               </Link>

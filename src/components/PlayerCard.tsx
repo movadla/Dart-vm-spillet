@@ -23,11 +23,20 @@ const ZONES = {
   topLabel: { left: '11.3%', width: '14.3%', top: '31%', bottom: '62.9%' },
   photo: { left: '6%', right: '6%', top: '3%', bottom: '44.1%' }, // ned til navn-skillelinjen (55.9%)
   name: { left: '8%', right: '8%', bottom: '45.5%' },
+  // Malen har 4 ikoner bakt inn (mynt/globus/trofé/piler), men kortet viser nå
+  // kun ODDS og TITLER — brukeren ba om å fjerne RANKING (vises allerede øverst
+  // til venstre på kortet) og 9-DARTERS (ingen data). Globus- og pil-ikonene
+  // dekkes derfor over (se iconMasks under) i stedet for å stå der uten tekst,
+  // og ODDS/TITLER får hver sin halvdel av bredden — mye mer luft enn de
+  // opprinnelige 20 %-brede kolonnene, som var årsaken til at teksten ble
+  // avkuttet ("RAN…", "TITL…") på smale kort.
   statCols: [
-    { left: '6%', width: '20.5%' },
-    { left: '26.5%', width: '23.5%' },
-    { left: '50%', width: '23.4%' },
-    { left: '73.4%', width: '20.6%' },
+    { left: '6%', width: '44%' },
+    { left: '50%', width: '44%' },
+  ],
+  iconMasks: [
+    { left: '30%', width: '20%' }, // globus (RANKING-ikonet)
+    { left: '70%', width: '24%' }, // piler (9-DARTERS-ikonet)
   ],
   statLabel: { top: '71%' },
   statValue: { top: '76%' },
@@ -152,14 +161,19 @@ export function PlayerCard({
         </div>
       </div>
 
-      {/* Statistikk under ikonene som allerede er bakt inn i malen (mynt/globus/
-          trofé/piler). ODDS og RANK er ekte data. TITLER og 9-DARTERS finnes
-          ikke som data for noen spiller ennå — vises som "—" i stedet for at
-          jeg finner på tall, se TODO.md. */}
+      {/* Globus- og pil-ikonene fra malen dekkes over — RANKING står allerede
+          øverst til venstre på kortet, og 9-DARTERS har ingen data. */}
+      {ZONES.iconMasks.map((m, i) => (
+        <div key={i} style={{
+          position: 'absolute', left: m.left, width: m.width, top: '62%', height: '10%',
+          background: 'radial-gradient(ellipse, rgba(6,10,20,0.92) 40%, rgba(6,10,20,0) 75%)',
+        }} />
+      ))}
+
+      {/* Statistikk — kun ODDS (ekte data) og TITLER (venter på reelt tall,
+          se TODO.md), hver over sin halvdel av raden. */}
       <StatCol zone={ZONES.statCols[0]} label="ODDS" value={player.odds} />
-      <StatCol zone={ZONES.statCols[1]} label="RANKING" value={`#${player.pdcRanking}`} />
-      <StatCol zone={ZONES.statCols[2]} label="TITLER 2026" value="—" />
-      <StatCol zone={ZONES.statCols[3]} label="9-DARTERS" value="—" />
+      <StatCol zone={ZONES.statCols[1]} label="TITLER 2026" value="—" />
 
       {photo && (
         <a
