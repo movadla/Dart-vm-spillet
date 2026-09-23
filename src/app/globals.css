@@ -22,6 +22,18 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Ingen animasjon/transition i appen respekterte prefers-reduced-motion
+   (0 treff i hele kodebasen før dette) — én global regel fremfor å endre
+   hver enkelt @keyframes/transition-deklarasjon separat. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   background: var(--bg);
   color: var(--text);

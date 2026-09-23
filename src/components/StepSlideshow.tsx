@@ -43,11 +43,16 @@ const LEADERBOARD_OF = 52
 const LAST_PHASE = 3
 
 /**
- * Manuelt styrt, fler-fase intro-sekvens for Dart-VM-spillet — bruker trykker seg
- * videre med «Neste»-knappen (ingen auto-advance).
- * Steg 1: de faktiske pottene → Steg 2: eksempel på poenggivende resultat →
- * Steg 3: eksempel på poengsum/leaderboard → Steg 4: CTA.
- * Brukes som intro på forsiden og gjenbrukt på vm-info-siden.
+ * Manuelt styrt, fler-fase intro-sekvens for Dart-VM-spillet — bruker trykker
+ * seg videre med «Neste»-knappen, sveiper, eller piltastene (ingen
+ * auto-advance). Fase 0: de faktiske pottene → fase 1: eksempel på
+ * poenggivende resultat → fase 2: eksempel på poengsum/leaderboard →
+ * fase 3: CTA.
+ * Brukes som intro på forsiden og gjenbrukt på vm-info-siden — og som ETT av
+ * de 6 stegene i selve tippe-flyten (tipp/page.tsx), som har sin egen
+ * «STEG 1 AV 6»-header utenfor denne komponenten. Derfor har PhaseHeading
+ * under bevisst IKKE «Steg N»-nummerering i eyebrow-tekstene — to parallelle
+ * tellesystemer på skjermen samtidig var forvirrende for en ny bruker.
  */
 export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = '/tipp', ctaLabel = 'VELG SPILLERE →' }: Props) {
   const [visible, setVisible] = useState(false)
@@ -60,6 +65,30 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
     onSlideRef.current = onSlide
     onCtaReadyRef.current = onCtaReady
   })
+
+  // Touch-sveip mellom fasene — fantes ikke før (kun «Neste»-knappen), uventet
+  // begrensning i en ellers mobil-først app. Nesten-vertikale bevegelser
+  // ignoreres med vilje, slik at vanlig sideskrolling ikke feiltolkes som sveip.
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  }
+  function handleTouchEnd(e: React.TouchEvent) {
+    const start = touchStart.current
+    touchStart.current = null
+    if (!start) return
+    const dx = e.changedTouches[0].clientX - start.x
+    const dy = e.changedTouches[0].clientY - start.y
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    if (dx < 0 && phase < LAST_PHASE) goToPhase(phase + 1)
+    else if (dx > 0 && phase > 0) goToPhase(phase - 1)
+  }
+
+  // Venstre/høyre piltast — fantes ingen tastaturnavigasjon i det hele tatt før.
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'ArrowRight' && phase < LAST_PHASE) { e.preventDefault(); goToPhase(phase + 1) }
+    else if (e.key === 'ArrowLeft' && phase > 0) { e.preventDefault(); goToPhase(phase - 1) }
+  }
 
   // Fade inn hele komponenten
   useEffect(() => {
@@ -82,7 +111,14 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
   // lazy useState-initializer.
   useEffect(() => {
     if (phase !== 2) return
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // prefers-reduced-motion respekteres ikke av setInterval-baserte
+    // JS-animasjoner (kun CSS, se den globale regelen i globals.css) — hopper
+    // rett til sluttverdien i stedet for å telle opp.
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCount(LEADERBOARD_TOTAL)
+      return
+    }
     setCount(0)
     const steps = 24
     const stepTime = 900 / steps
@@ -138,27 +174,55 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
         </div>
       </div>
 
-      {/* Faseprikker */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 20 }}>
+      {/* Faseprikker — var før rene dekorative <span>, ikke klikkbare og uten
+          noen ARIA-semantikk. Nå ekte tabs: klikkbare (hopp direkte til en
+          fase) og navigerbare med piltaster når en prikk har fokus. Den
+          aktive prikken bruker dot-fill-animasjonen (fantes ferdig i
+          globals.css, men var aldri koblet til noe). */}
+      <div role="tablist" aria-label="Steg i introduksjonen" style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 20 }}>
         {[0, 1, 2, 3].map((i) => (
-          <span
+          <button
             key={i}
+            role="tab"
+            type="button"
+            aria-selected={i === phase}
+            aria-controls="step-slideshow-panel"
+            tabIndex={i === phase ? 0 : -1}
+            onClick={() => goToPhase(i)}
+            onKeyDown={handleKeyDown}
             style={{
+              position: 'relative', overflow: 'hidden', padding: 0, border: 'none', cursor: 'pointer',
               width: i === phase ? 20 : 6,
               height: 6,
               borderRadius: 3,
               background: i <= phase ? '#dc2626' : 'rgba(255,255,255,0.15)',
               transition: 'width 0.35s cubic-bezier(0.22,1,0.36,1), background 0.35s ease',
             }}
-          />
+          >
+            {i === phase && (
+              <span key={phase} style={{ position: 'absolute', inset: 0, background: '#fff', opacity: 0.35, animation: 'dot-fill 0.35s ease-out both' }} />
+            )}
+          </button>
         ))}
       </div>
 
-      {/* Faseinnhold */}
-      <div style={{ minHeight: 268, marginBottom: 24 }}>
+      {/* Faseinnhold — aria-live så skjermlesere får med seg fasebytte, og
+          tabIndex+onKeyDown for pil-tastnavigasjon når selve panelet har
+          fokus (i tillegg til prikkene over). onTouchStart/End gir
+          touch-sveip, som ikke fantes i det hele tatt før. */}
+      <div
+        id="step-slideshow-panel"
+        role="tabpanel"
+        aria-live="polite"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{ minHeight: 268, marginBottom: 24 }}
+      >
         {phase === 0 && (
           <div>
-            <PhaseHeading eyebrow="Steg 1" title="De 6 pottene" />
+            <PhaseHeading eyebrow="Slik fungerer det" title="De 6 pottene" />
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
               Du velger én spiller fra hver pott — fra ren duell øverst til det store feltet nederst.
             </div>
@@ -211,7 +275,7 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
 
         {phase === 1 && (
           <div style={{ animation: 'slide-enter 0.5s cubic-bezier(0.22,1,0.36,1) both' }}>
-            <PhaseHeading eyebrow="Eksempel · steg 2" title="Følg dem gjennom dart-VM" />
+            <PhaseHeading eyebrow="Eksempel" title="Følg dem gjennom dart-VM" />
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
               1p per sett vunnet, 2p for kampseier — jo lenger de går, jo mer poeng.
             </div>
@@ -258,7 +322,7 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
 
         {phase === 2 && (
           <div style={{ animation: 'slide-enter 0.5s cubic-bezier(0.22,1,0.36,1) both' }}>
-            <PhaseHeading eyebrow="Eksempel · steg 3" title="Poeng for hver runde" />
+            <PhaseHeading eyebrow="Eksempel" title="Poeng for hver runde" />
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
               Du scorer poeng for hver runde spillerne dine vinner – jo lenger de går, jo mer poeng.
             </div>
@@ -305,6 +369,16 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
           </div>
         )}
       </div>
+
+      {/* Sveip-hint — kun på første fase, viser at man kan sveipe i tillegg
+          til å trykke Neste. bounce-arrow-right fantes ferdig i globals.css
+          men var aldri koblet til noe. */}
+      {phase === 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 10, fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
+          <span>Sveip for å bla</span>
+          <span className="bounce-arrow-right" aria-hidden="true">→</span>
+        </div>
+      )}
 
       {/* Manuell navigasjon */}
       {phase < LAST_PHASE && (
