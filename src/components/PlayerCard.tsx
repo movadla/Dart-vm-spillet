@@ -23,20 +23,13 @@ const ZONES = {
   topLabel: { left: '11.3%', width: '14.3%', top: '31%', bottom: '62.9%' },
   photo: { left: '6%', right: '6%', top: '3%', bottom: '44.1%' }, // ned til navn-skillelinjen (55.9%)
   name: { left: '8%', right: '8%', bottom: '45.5%' },
-  // Malen har 4 ikoner bakt inn (mynt/globus/trofé/piler), men kortet viser nå
-  // kun ODDS og TITLER — brukeren ba om å fjerne RANKING (vises allerede øverst
-  // til venstre på kortet) og 9-DARTERS (ingen data). Globus- og pil-ikonene
-  // dekkes derfor over (se iconMasks under) i stedet for å stå der uten tekst,
-  // og ODDS/TITLER får hver sin halvdel av bredden — mye mer luft enn de
-  // opprinnelige 20 %-brede kolonnene, som var årsaken til at teksten ble
-  // avkuttet ("RAN…", "TITL…") på smale kort.
+  // v2 av malen (fra brukeren): kun 2 ikoner bakt inn (mynt/globus) i stedet
+  // for 4 — løser CSS-maskerings-problemet fra forrige versjon helt (der
+  // gull-ikonene for RANKING/9-DARTERS fortsatt skinte gjennom masken).
+  // Samme grunnfil/koordinater ellers (målt på nytt for å være sikker).
   statCols: [
-    { left: '6%', width: '44%' },
-    { left: '50%', width: '44%' },
-  ],
-  iconMasks: [
-    { left: '30%', width: '20%' }, // globus (RANKING-ikonet)
-    { left: '70%', width: '24%' }, // piler (9-DARTERS-ikonet)
+    { left: '5%', width: '45%' },
+    { left: '50%', width: '45%' },
   ],
   statLabel: { top: '71%' },
   statValue: { top: '76%' },
@@ -71,6 +64,7 @@ export function PlayerCard({
   const photo = PLAYER_PHOTOS[player.name]
 
   return (
+    <div style={{ width: '100%' }}>
     <button
       role="radio"
       aria-checked={selected}
@@ -161,34 +155,35 @@ export function PlayerCard({
         </div>
       </div>
 
-      {/* Globus- og pil-ikonene fra malen dekkes over — RANKING står allerede
-          øverst til venstre på kortet, og 9-DARTERS har ingen data. */}
-      {ZONES.iconMasks.map((m, i) => (
-        <div key={i} style={{
-          position: 'absolute', left: m.left, width: m.width, top: '62%', height: '10%',
-          background: 'radial-gradient(ellipse, rgba(6,10,20,0.92) 40%, rgba(6,10,20,0) 75%)',
-        }} />
-      ))}
-
-      {/* Statistikk — kun ODDS (ekte data) og TITLER (venter på reelt tall,
-          se TODO.md), hver over sin halvdel av raden. */}
+      {/* Statistikk — mynt-ikonet er ODDS (ekte data). Globus-ikonet er
+          naturligst RANKING (verden/globus ≈ verdensranking) — brukeren ba
+          opprinnelig om å droppe RANKING her siden den står øverst til
+          venstre også, men den nye malen har ikke noe trofé-ikon for
+          "TITLER", og et globus-ikon merket "titler" ville sett feil ut.
+          Litt overlapp med topp-tallet er et mindre problem enn et
+          ikon/etikett som ikke stemmer — si fra hvis du heller vil ha en
+          mal med et trofé-ikon i stedet. */}
       <StatCol zone={ZONES.statCols[0]} label="ODDS" value={player.odds} />
-      <StatCol zone={ZONES.statCols[1]} label="TITLER 2026" value="—" />
-
-      {photo && (
-        <a
-          href={photo.creditUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: 'absolute', bottom: '1%', left: 0, right: 0, textAlign: 'center',
-            fontSize: 7, color: 'rgba(255,255,255,0.4)', textDecoration: 'none',
-          }}
-        >
-          📷 {photo.credit}
-        </a>
-      )}
+      <StatCol zone={ZONES.statCols[1]} label="RANKING" value={`#${player.pdcRanking}`} />
     </button>
+
+    {/* Kreditering som en vanlig bildetekst UNDER selve kortet, i stedet for
+        tekst lagt oppå kort-grafikken — ba brukeren om etter at den så ut
+        som rotete "bakgrunnstekst" oppå kortet. Fortsatt påkrevd av
+        CC-lisensen bildet er hentet under (se playerPhotos.ts), bare flyttet. */}
+    {photo && (
+      <a
+        href={photo.creditUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'block', textAlign: 'center', marginTop: 3,
+          fontSize: 8, color: 'rgba(255,255,255,0.35)', textDecoration: 'none',
+        }}
+      >
+        📷 {photo.credit}
+      </a>
+    )}
+    </div>
   )
 }
