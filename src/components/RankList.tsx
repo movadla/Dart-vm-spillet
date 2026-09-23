@@ -34,6 +34,13 @@ export interface RankEntry {
   rankDelta?: number // posisjonsendring siden i går: + = opp, − = ned, 0 = uendret
 }
 
+// Render kun de første PAGE_SIZE radene i DOM-en, med en "Vis flere"-knapp for
+// resten — uten dette ble ALLE deltakere (potensielt tusenvis) rendret til DOM
+// samtidig ved hver visning, tregt å scrolle/male på mobil. Egen persons rad
+// blir alltid inkludert selv om den ligger lenger ned enn synlig-grensen, slik
+// at scroll-til-meg (under) fortsatt fungerer uendret.
+const PAGE_SIZE = 50
+
 export default function RankList({ rows, vmStarted, kick, scrollToMe = true, backRef }: {
   rows: RankEntry[]
   vmStarted: boolean
@@ -42,6 +49,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
   backRef?: string
 }) {
   const [myId, setMyId] = useState<string | null>(null)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const myRowRef = useRef<HTMLAnchorElement>(null)
 
   // Leses etter mount (ikke lazy useState-init) med vilje — localStorage finnes ikke under SSR,
@@ -71,16 +79,24 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
     return () => clearTimeout(timer)
   }, [myId, rows, scrollToMe])
 
-  // Competition ranking: tied points → same rank number (1, 1, 3, 4 …)
+  // Competition ranking: tied points → same rank number (1, 1, 3, 4 …).
+  // Regnes over HELE rows-listen, uansett hvor mange som faktisk rendres — en
+  // deltakers rangnummer skal aldri avhenge av hvor langt ned siden er lastet.
   const displayRanks: number[] = []
   for (let i = 0; i < rows.length; i++) {
     if (i === 0) { displayRanks.push(1); continue }
     displayRanks.push(rows[i].points === rows[i - 1].points ? displayRanks[i - 1] : i + 1)
   }
 
+  const myIndex = myId ? rows.findIndex(r => r.id === myId) : -1
+  // Egen rad tas alltid med, selv om den ligger lenger ned enn PAGE_SIZE.
+  const effectiveVisibleCount = Math.max(visibleCount, myIndex >= 0 ? myIndex + 1 : 0)
+  const visibleRows = rows.slice(0, effectiveVisibleCount)
+  const remaining = rows.length - effectiveVisibleCount
+
   return (
     <div className="lb-rows">
-      {rows.map(({ id, name, flags, points, matchesPlayed, rankDelta }, index) => {
+      {visibleRows.map(({ id, name, flags, points, matchesPlayed, rankDelta }, index) => {
         const isMe = id === myId
         const rank = displayRanks[index]
         const styleIdx = Math.min(rank - 1, 2)
@@ -165,6 +181,21 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
           </Link>
         )
       })}
+
+      {remaining > 0 && (
+        <button
+          onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+          className="btn-hover"
+          style={{
+            display: 'block', width: '100%', padding: '13px', marginTop: 4,
+            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 12, color: 'rgba(255,255,255,0.55)', fontSize: 13, fontWeight: 700,
+            letterSpacing: '0.04em', cursor: 'pointer', fontFamily: SPORT, textTransform: 'uppercase',
+          }}
+        >
+          Vis flere ({Math.min(remaining, PAGE_SIZE)} av {remaining}) →
+        </button>
+      )}
     </div>
   )
 }
