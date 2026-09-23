@@ -11,6 +11,11 @@ export interface Player {
   // strammere, mer kuratert utvalg per pott (2/3/4/4/5/5 i stedet for
   // 2/3/5/6/8/40) — se getPickablePlayers() og TODO.md. Udefinert = true.
   pickable?: boolean
+  // FIKTIVE tall lagt inn 2026-09-23 etter eksplisitt ønske (kun for Littler
+  // og Humphries, resten viser "—") — IKKE ekte PDC three-dart-average-data.
+  // Må erstattes med ekte snitt-tall før spillet åpnes for ekte deltakere,
+  // se TODO.md.
+  avg2026?: number
 }
 
 export interface Pot {
@@ -53,8 +58,8 @@ export const POTS: Pot[] = [
     name: '👑 Duellen',
     emoji: '👑',
     players: [
-      { name: 'Luke Littler',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 1, seedNumber: 1, odds: '2.5' },
-      { name: 'Luke Humphries',    nationality: 'England',     iso2: 'gb-eng', pdcRanking: 2, seedNumber: 2, odds: '3.5' },
+      { name: 'Luke Littler',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 1, seedNumber: 1, odds: '2.5', avg2026: 101.23 },
+      { name: 'Luke Humphries',    nationality: 'England',     iso2: 'gb-eng', pdcRanking: 2, seedNumber: 2, odds: '3.5', avg2026: 100.88 },
     ],
   },
   {
