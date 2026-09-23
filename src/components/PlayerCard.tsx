@@ -2,6 +2,7 @@
 
 import Flag from '@/components/Flag'
 import type { Player } from '@/data/pots'
+import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const GOLD = '#f3d576'
@@ -126,6 +127,7 @@ export function PlayerCard({
   const topLabel = player.seedNumber ? 'SEED' : 'RANK'
   const topNumber = player.seedNumber ?? player.pdcRanking
   const gradientId = `pc-${player.name.replace(/[^a-z0-9]/gi, '')}`
+  const photo = PLAYER_PHOTOS[player.name]
 
   return (
     <button
@@ -166,24 +168,57 @@ export function PlayerCard({
           </div>
         )}
 
-        {/* "Foto"-felt: ingen lisensierte spillerbilder tilgjengelig ennå (og skal
-            ikke være det uten avklart bildebruksrett — se README/TODO). Sirkulær
-            flagg-medaljong i stedet for et tomt hjørne-vannmerke. */}
-        <div style={{ position: 'relative', textAlign: 'left', marginBottom: '8%' }}>
+        {photo ? (
+          /* Ekte spillerfoto, kun for spillere med en verifisert CC-lisens i
+             PLAYER_PHOTOS (se den filen for hvorfor/hvordan). Del av vanlig
+             flex-flyt (ikke absolutt posisjonert) med en fast aspect-ratio —
+             et tidligere forsøk med prosent-posisjonering og maske-uttoning
+             endte med at fotoet både overlappet navnet under OG stakk utenfor
+             gullrammen øverst, siden en rettvinklet boks ikke automatisk
+             respekterer den buede skjold-formen. I vanlig flyt dytter fotoet
+             bare navnet naturlig nedover — kan ikke overlappe noe. */
           <div style={{
-            position: 'absolute', right: 0, top: '-8%', width: '30%', aspectRatio: '1',
-            borderRadius: '50%', overflow: 'hidden',
-            background: `radial-gradient(circle, ${color}33 0%, transparent 70%)`,
-            border: `1px solid ${GOLD}55`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'relative', marginBottom: '8%', borderRadius: 12, overflow: 'hidden',
+            aspectRatio: '4 / 3',
+            boxShadow: `0 0 0 1px ${GOLD}66, 0 4px 14px rgba(0,0,0,0.5)`,
           }}>
-            <Flag iso2={player.iso2} size={44} />
+            {/* eslint-disable-next-line @next/next/no-img-element -- ekstern fil i public/, next/image gir ingen gevinst her */}
+            <img
+              src={photo.src}
+              alt=""
+              aria-hidden="true"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 15%' }}
+            />
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(0deg, rgba(3,4,8,0.6) 0%, transparent 45%)',
+            }} />
+            <div style={{ position: 'absolute', top: 8, left: 10, textAlign: 'left' }}>
+              <div style={{ fontFamily: SPORT, fontSize: 'clamp(24px, 9vw, 34px)', fontWeight: 900, color: GOLD, lineHeight: 1, textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>
+                {topNumber}
+              </div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(243,213,118,0.9)', marginTop: 3, textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>{topLabel}</div>
+            </div>
           </div>
-          <div style={{ fontFamily: SPORT, fontSize: 'clamp(28px, 11vw, 40px)', fontWeight: 900, color: GOLD, lineHeight: 1, textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
-            {topNumber}
+        ) : (
+          /* Ingen lisensiert foto for denne spilleren — sirkulær flagg-medaljong
+             i stedet for et tomt hjørne-vannmerke. */
+          <div style={{ position: 'relative', textAlign: 'left', marginBottom: '8%' }}>
+            <div style={{
+              position: 'absolute', right: 0, top: '-8%', width: '30%', aspectRatio: '1',
+              borderRadius: '50%', overflow: 'hidden',
+              background: `radial-gradient(circle, ${color}33 0%, transparent 70%)`,
+              border: `1px solid ${GOLD}55`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Flag iso2={player.iso2} size={44} />
+            </div>
+            <div style={{ fontFamily: SPORT, fontSize: 'clamp(28px, 11vw, 40px)', fontWeight: 900, color: GOLD, lineHeight: 1, textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
+              {topNumber}
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(243,213,118,0.85)', marginTop: 4 }}>{topLabel}</div>
           </div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(243,213,118,0.85)', marginTop: 4 }}>{topLabel}</div>
-        </div>
+        )}
 
         {/* Navn */}
         <div style={{
@@ -211,6 +246,23 @@ export function PlayerCard({
             <StatCell label="NASJON" value={player.nationality} />
           </div>
         </div>
+
+        {/* Kreditering — påkrevd vilkår for CC-lisensen bildet er hentet under,
+            ikke valgfritt pynt. Se src/data/playerPhotos.ts. */}
+        {photo && (
+          <a
+            href={photo.creditUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              marginTop: 8, fontSize: 7, color: 'rgba(255,255,255,0.35)',
+              textDecoration: 'none', alignSelf: 'center',
+            }}
+          >
+            📷 {photo.credit}
+          </a>
+        )}
       </div>
     </button>
   )

@@ -19,6 +19,13 @@
       Enten research/fyll inn dette selv (per spiller: three-dart average for 2026-sesongen,
       og hvilken runde/motstander som historisk har vært vanskeligst), eller si fra om
       feltene skal fjernes/erstattes hvis det blir for mye jobb å vedlikeholde per spiller.
+- [ ] Kun Luke Littler har et ekte spillerfoto på kortet sitt (`src/data/playerPhotos.ts`,
+      bildefil i `public/players/`) — hentet fra Wikimedia Commons med verifisert
+      CC BY-SA 4.0-lisens og kreditering. Vil du ha foto på flere spillere: finn et
+      CC-lisensiert bilde på Wikimedia Commons (sjekk lisensfeltet på filsiden!), gi meg
+      lenken, så laster jeg det ned og legger det inn på samme måte. IKKE legg til bilder
+      fra andre kilder (Google-søk, pressebilder, sosiale medier) uten at jeg har
+      verifisert lisensen — se `PLAYER_PHOTOS`-kommentaren for hvorfor.
 
 ## Idéer til senere (produktvurderinger, ikke bestemt ennå)
 
