@@ -1,8 +1,6 @@
 import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-
-const supabase = getSupabaseAdmin()
 import { POTS } from '@/data/pots'
 import { calcParticipantPoints, isPlayerEliminated, isPlayerChampion, furthestStageReached, MatchResult } from '@/lib/scoring'
 import { STAGE_ORDER } from '@/config/scoring'
@@ -22,6 +20,18 @@ interface Participant { id: string; name: string; created_at: string }
 interface Pick { participant_id: string; pot_number: number; player_name: string }
 
 async function getData() {
+  // Klienten lages her (ikke på modulnivå) og er pakket i try/catch — uten
+  // Supabase konfigurert (SUPABASE_URL/SERVICE_ROLE_KEY mangler) crashet HELE
+  // siden tidligere med en rå "supabaseUrl is required"-feil før noe som
+  // helst kunne rendres. Faller nå tilbake til samme tomme tilstand som
+  // "ingen deltakere ennå", som siden allerede håndterer pent.
+  let supabase: ReturnType<typeof getSupabaseAdmin>
+  try {
+    supabase = getSupabaseAdmin()
+  } catch {
+    return { rows: [], matchResults: [] as MatchResult[], baseline: {} as Record<string, number> }
+  }
+
   const [{ data: participants }, { data: matches }] = await Promise.all([
     supabase.from('participants').select('id, name, created_at').order('created_at'),
     supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner'),

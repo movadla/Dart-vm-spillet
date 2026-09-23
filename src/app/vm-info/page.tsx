@@ -5,7 +5,7 @@ import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
 import { POTS, getIso2 } from '@/data/pots'
 import Flag from '@/components/Flag'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseClient } from '@/lib/supabase'
 import { STAGE_ORDER, STAGE_LABELS, SCORING, CHAMPION_LABEL } from '@/config/scoring'
 import type { MatchResult } from '@/lib/scoring'
 import { getFirstMatchInfo, getBracketSection, getSeedLabel, R1_MATCHES } from '@/lib/bracketProjection'
@@ -68,7 +68,16 @@ export default function VmInfoPage() {
 
   useEffect(() => {
     if (activeTab !== 'kamper') return
-    supabase
+    // Klienten lages her (ikke på modulnivå) og feiler stille — uten Supabase
+    // konfigurert crashet hele siden tidligere (se getSupabaseClient()),
+    // også for faner som ikke trenger noen database.
+    let client: ReturnType<typeof getSupabaseClient>
+    try {
+      client = getSupabaseClient()
+    } catch {
+      return
+    }
+    client
       .from('match_results')
       .select('player1, player2, sets1, sets2, stage, winner')
       .order('played_at', { ascending: true })

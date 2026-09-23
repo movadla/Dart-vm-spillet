@@ -1,8 +1,6 @@
 import { notFound } from 'next/navigation'
 import SmartBackButton from '@/components/SmartBackButton'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-
-const supabase = getSupabaseAdmin()
 import { POTS } from '@/data/pots'
 import { calcParticipantPoints, isPlayerEliminated, isPlayerChampion, furthestStageReached, MatchResult } from '@/lib/scoring'
 import { STAGE_ORDER } from '@/config/scoring'
@@ -19,6 +17,16 @@ const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact
 interface Pick { participant_id: string; pot_number: number; player_name: string }
 
 async function getData(code: string) {
+  // Klienten lages her (ikke på modulnivå) og feiler til null → notFound()
+  // hos kalleren — uten Supabase konfigurert crashet siden tidligere med en
+  // rå feilmelding. Samme fiks som leaderboard/page.tsx og deltaker/[id].
+  let supabase: ReturnType<typeof getSupabaseAdmin>
+  try {
+    supabase = getSupabaseAdmin()
+  } catch {
+    return null
+  }
+
   const { data: league } = await supabase
     .from('leagues')
     .select('id, name, invite_code, created_by, hidden_until_kickoff')

@@ -1,7 +1,5 @@
 import Link from 'next/link'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-
-const supabase = getSupabaseAdmin()
 import { notFound } from 'next/navigation'
 import { calcParticipantPoints, type PickWithPot, type MatchResult } from '@/lib/scoring'
 import { STAGE_ORDER, STAGE_LABELS, type Stage } from '@/config/scoring'
@@ -33,6 +31,17 @@ export default async function DeltakerPage({ params, searchParams }: { params: P
     : from === 'leaderboard'
       ? { href: '/leaderboard', label: '← Leaderboard' }
       : { href: '/', label: '← Startside' }
+
+  // Klienten lages her (ikke på modulnivå) og feiler til notFound() — uten
+  // Supabase konfigurert crashet siden tidligere med en rå feilmelding før
+  // noe som helst kunne rendres, i stedet for et vanlig 404. Samme fiks som
+  // leaderboard/page.tsx og liga/[code]/page.tsx.
+  let supabase: ReturnType<typeof getSupabaseAdmin>
+  try {
+    supabase = getSupabaseAdmin()
+  } catch {
+    notFound()
+  }
 
   const [
     { data: participant },
