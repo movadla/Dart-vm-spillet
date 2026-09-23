@@ -37,10 +37,10 @@ function StatCol({ zone, label, value }: { zone: { left: string; width: string }
   return (
     <>
       <div style={{ position: 'absolute', left: zone.left, width: zone.width, top: ZONES.statLabel.top, textAlign: 'center' }}>
-        <div style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.06em', color: 'rgba(243,213,118,0.75)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
+        <div style={{ fontSize: 'clamp(5.5px, 6.5cqw, 8.5px)', fontWeight: 700, letterSpacing: '0.04em', color: 'rgba(243,213,118,0.75)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
       </div>
       <div style={{ position: 'absolute', left: zone.left, width: zone.width, top: ZONES.statValue.top, textAlign: 'center' }}>
-        <div style={{ fontFamily: SPORT, fontSize: 'clamp(13px, 4.2vw, 17px)', fontWeight: 900, color: GOLD, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</div>
+        <div style={{ fontFamily: SPORT, fontSize: 'clamp(9px, 11cqw, 15px)', fontWeight: 900, color: GOLD, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</div>
       </div>
     </>
   )
@@ -68,8 +68,13 @@ export function PlayerCard({
       aria-label={player.name}
       onClick={onClick}
       style={{
-        position: 'relative', display: 'block', width: 'min(300px, 100%)', margin: '0 auto',
+        position: 'relative', display: 'block', width: '100%',
         aspectRatio: `${TEMPLATE_ASPECT}`,
+        // containerType gjør at "cqw"-enhetene under skalerer mot KORTETS EGEN
+        // bredde, ikke skjermens (vw) — det var bugen som gjorde navneteksten
+        // for stor: 6vw regner ut fra viewport-bredden uansett hvor smalt
+        // kortet selv er i et grid med mange kolonner.
+        containerType: 'inline-size',
         border: 'none', padding: 0, cursor: 'pointer',
         backgroundImage: 'url(/cards/template-1.webp)',
         backgroundSize: '100% 100%',
@@ -111,7 +116,7 @@ export function PlayerCard({
         position: 'absolute', left: ZONES.topNumber.left, width: ZONES.topNumber.width, bottom: ZONES.topNumber.bottom,
         textAlign: 'left',
       }}>
-        <div style={{ fontFamily: SPORT, fontSize: 'clamp(22px, 8.5vw, 32px)', fontWeight: 900, color: GOLD, lineHeight: 1, textShadow: '0 2px 6px rgba(0,0,0,0.7)' }}>
+        <div style={{ fontFamily: SPORT, fontSize: 'clamp(15px, 20cqw, 26px)', fontWeight: 900, color: GOLD, lineHeight: 1, textShadow: '0 2px 6px rgba(0,0,0,0.7)' }}>
           {topNumber}
         </div>
       </div>
@@ -119,7 +124,7 @@ export function PlayerCard({
         position: 'absolute', left: ZONES.topLabel.left, width: ZONES.topLabel.width, top: ZONES.topLabel.top,
         textAlign: 'left',
       }}>
-        <div style={{ fontSize: 'clamp(8px, 2.4vw, 10px)', fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(243,213,118,0.9)', textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{topLabel}</div>
+        <div style={{ fontSize: 'clamp(6px, 6.5cqw, 9px)', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(243,213,118,0.9)', textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{topLabel}</div>
       </div>
 
       {/* Svak mørk stripe rett bak navnet, kun når det ligger over et foto —
@@ -138,9 +143,10 @@ export function PlayerCard({
         textAlign: 'center', zIndex: 1,
       }}>
         <div style={{
-          fontFamily: SPORT, fontSize: 'clamp(16px, 6vw, 24px)', fontWeight: 900, textTransform: 'uppercase',
+          fontFamily: SPORT, fontSize: 'clamp(8px, 9.5cqw, 13px)', fontWeight: 900, textTransform: 'uppercase',
           color: GOLD, lineHeight: 1.1, letterSpacing: '0.01em',
           textShadow: '0 2px 4px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.6)',
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
           {player.name}
         </div>
@@ -152,7 +158,7 @@ export function PlayerCard({
           jeg finner på tall, se TODO.md. */}
       <StatCol zone={ZONES.statCols[0]} label="ODDS" value={player.odds} />
       <StatCol zone={ZONES.statCols[1]} label="RANKING" value={`#${player.pdcRanking}`} />
-      <StatCol zone={ZONES.statCols[2]} label="TITLER" value="—" />
+      <StatCol zone={ZONES.statCols[2]} label="TITLER 2026" value="—" />
       <StatCol zone={ZONES.statCols[3]} label="9-DARTERS" value="—" />
 
       {photo && (
