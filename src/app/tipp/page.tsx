@@ -861,7 +861,7 @@ const inputStyle: React.CSSProperties = {
                 <span style={{ fontSize: 7.5, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>2. RUNDE</span>
               </div>
 
-              <DrawBracket pairA={pairA} pairB={pairB} compact />
+              <DrawBracket pairA={pairA} pairB={pairB} compact color={color} />
 
               <Link
                 href={`/vm-info?tab=trekning&spiller=${encodeURIComponent(selectedPlayer)}`}

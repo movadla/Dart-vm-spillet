@@ -15,9 +15,13 @@ export interface DrawSlot {
   faded?: boolean
 }
 
-interface RowProps { slot: DrawSlot; compact?: boolean }
+// Fallback når ingen pott-farge er gitt (vm-info-siden viser braketten
+// generelt, ikke bundet til én bestemt pott).
+const DEFAULT_COLOR = '#d97706'
 
-function Row({ slot, compact }: RowProps) {
+interface RowProps { slot: DrawSlot; compact?: boolean; color?: string }
+
+function Row({ slot, compact, color = DEFAULT_COLOR }: RowProps) {
   return (
     <div
       style={{
@@ -47,7 +51,7 @@ function Row({ slot, compact }: RowProps) {
       <span
         style={{
           width: compact ? 12 : 14, height: compact ? 12 : 14, borderRadius: '50%', flexShrink: 0,
-          background: '#d97706', opacity: slot.highlighted ? 1 : 0.55,
+          background: color, opacity: slot.highlighted ? 1 : 0.55,
         }}
       />
     </div>
@@ -55,20 +59,20 @@ function Row({ slot, compact }: RowProps) {
 }
 
 /** To spillere i samme kamp, stablet med en tynn skillelinje. Eksportert for gjenbruk (f.eks. i en full bracket-liste). */
-export function PairBox({ a, b, compact }: { a: DrawSlot; b: DrawSlot; compact?: boolean }) {
+export function PairBox({ a, b, compact, color }: { a: DrawSlot; b: DrawSlot; compact?: boolean; color?: string }) {
   return (
     <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-      <Row slot={a} compact={compact} />
+      <Row slot={a} compact={compact} color={color} />
       <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />
-      <Row slot={b} compact={compact} />
+      <Row slot={b} compact={compact} color={color} />
     </div>
   )
 }
 
-function WinnerSlot({ label, compact }: { label: string; compact?: boolean }) {
+function WinnerSlot({ label, compact, color = DEFAULT_COLOR }: { label: string; compact?: boolean; color?: string }) {
   return (
-    <div style={{ borderRadius: 8, border: '1px dashed rgba(217,119,6,0.4)', padding: compact ? '10px 8px' : '14px 10px', textAlign: 'center' }}>
-      <span style={{ fontSize: compact ? 9 : 11, fontWeight: 700, color: 'rgba(217,119,6,0.85)', letterSpacing: '0.02em' }}>{label}</span>
+    <div style={{ borderRadius: 8, border: `1px dashed ${color}66`, padding: compact ? '10px 8px' : '14px 10px', textAlign: 'center' }}>
+      <span style={{ fontSize: compact ? 9 : 11, fontWeight: 700, color, letterSpacing: '0.02em' }}>{label}</span>
     </div>
   )
 }
@@ -83,26 +87,31 @@ export function DrawBracket({
   pairB,
   compact,
   vertical,
+  color = DEFAULT_COLOR,
 }: {
   pairA: { a: DrawSlot; b: DrawSlot }
   pairB: { a: DrawSlot; b: DrawSlot }
   compact?: boolean
   /** Stables under hverandre i stedet for side om side — for trange kolonner. */
   vertical?: boolean
+  /** Pottens egen farge — matcher da resten av pott-temaet (kort, prikker,
+      multiplikator-badge). Uten denne brukte braketten alltid en hardkodet
+      oransje, uavhengig av hvilken pott den ble vist for. */
+  color?: string
 }) {
-  const connectorColor = '#d97706'
+  const connectorColor = color
 
   const col1 = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 6 : 10 }}>
-      <PairBox a={pairA.a} b={pairA.b} compact={compact} />
-      <PairBox a={pairB.a} b={pairB.b} compact={compact} />
+      <PairBox a={pairA.a} b={pairA.b} compact={compact} color={color} />
+      <PairBox a={pairB.a} b={pairB.b} compact={compact} color={color} />
     </div>
   )
 
   const col2 = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 6 : 10 }}>
-      <WinnerSlot label="Vinner kamp 1" compact={compact} />
-      <WinnerSlot label="Vinner kamp 2" compact={compact} />
+      <WinnerSlot label="Vinner kamp 1" compact={compact} color={color} />
+      <WinnerSlot label="Vinner kamp 2" compact={compact} color={color} />
     </div>
   )
 
