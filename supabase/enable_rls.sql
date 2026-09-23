@@ -11,10 +11,9 @@ ALTER TABLE IF EXISTS magic_links           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS leagues               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS league_members        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS newsletter_signups    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS pin_send_log          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS pin_attempts          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS rank_snapshot         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS admin_login_attempts  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS rate_limit_hits       ENABLE ROW LEVEL SECURITY;
 
 -- === Offentlige lesetilganger (anon-nøkkel fra browser) ===
 -- match_results: kampscore vises på vm-info sin Kamper-fane
@@ -23,6 +22,6 @@ CREATE POLICY "anon read" ON match_results FOR SELECT TO anon USING (true);
 
 -- === Alle andre tabeller: ingen anon-policy = blokkert ===
 -- (participants, picks, magic_links, leagues, league_members,
---  newsletter_signups, pin_send_log, pin_attempts, rank_snapshot,
---  admin_login_attempts er alle kun tilgjengelige via service role key
+--  newsletter_signups, rank_snapshot, admin_login_attempts,
+--  rate_limit_hits er alle kun tilgjengelige via service role key
 --  i Next.js API-routes og server-komponenter)

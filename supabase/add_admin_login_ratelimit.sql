@@ -1,4 +1,6 @@
--- Rate-limiting for /api/admin/login — samme mønster som pin_send_log.
+-- Rate-limiting for /api/admin/login — samme mønster som senere rate_limit_hits
+-- (add_rate_limits.sql), men eget dedikert per-IP-oppsett siden dette var
+-- det første av de to.
 create table if not exists admin_login_attempts (
   id uuid primary key default gen_random_uuid(),
   ip text not null,
