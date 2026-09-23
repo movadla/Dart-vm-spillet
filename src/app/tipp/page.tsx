@@ -754,14 +754,18 @@ const inputStyle: React.CSSProperties = {
         </div>
       )}
 
-      {/* Spillerliste + motstander-bracket side om side */}
-      <div style={{ flex: 1, display: 'flex', gap: 10, minHeight: 0, marginBottom: 14 }}>
+      {/* Spillerliste som grid — flere kort side om side, mindre hver — pluss en
+          utvidbar detalj-/bracket-seksjon under gridet når en spiller er valgt,
+          i stedet for et alltid-synlig sidepanel. Hele denne midtsonen scroller
+          som én enhet, så både gridet og detalj-seksjonen er tilgjengelig uten
+          at Neste-knappen flytter seg. */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, marginBottom: 14, overflowY: 'auto' }}>
         <div
           role="radiogroup"
           aria-label={`Velg spiller fra ${pot.name}`}
           style={{
-            flex: 1, display: 'flex', flexDirection: 'column',
-            justifyContent: 'safe center', gap: 14, minWidth: 0, overflowY: 'auto', padding: '2px 2px 4px',
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(108px, 1fr))',
+            gap: 10, padding: '2px 2px 4px',
           }}
         >
           {pot.players.map((player) => (
@@ -778,48 +782,60 @@ const inputStyle: React.CSSProperties = {
           ))}
         </div>
 
-        {/* Motstander-panel — dukker opp til høyre når en spiller er valgt */}
-        <div style={{ width: 132, flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'safe center', gap: 8, overflowY: 'auto' }}>
-          {selectedPlayer ? (() => {
-            const info = getFirstMatchInfo(selectedPlayer)
-            if (!info) return null
+        {/* Utvidbar detalj-/bracket-seksjon — dukker opp under gridet når en
+            spiller er valgt. Enkel førsteversjon (kompakt spiller-oppsummering
+            + trekning) — skal videreutvikles. */}
+        {selectedPlayer && (() => {
+          const info = getFirstMatchInfo(selectedPlayer)
+          const selectedPlayerData = pot.players.find(p => p.name === selectedPlayer)
+          if (!info || !selectedPlayerData) return null
 
-            const pairA = {
-              a: { name: selectedPlayer, seedLabel: getSeedLabel(selectedPlayer), highlighted: true },
-              b: { name: info.opponent.name, seedLabel: getSeedLabel(info.opponent.name), faded: info.opponent.isFiller },
-            }
-            const pairB = {
-              a: { name: info.round2Pair[0].name, seedLabel: getSeedLabel(info.round2Pair[0].name), faded: info.round2Pair[0].isFiller },
-              b: { name: info.round2Pair[1].name, seedLabel: getSeedLabel(info.round2Pair[1].name), faded: info.round2Pair[1].isFiller },
-            }
+          const pairA = {
+            a: { name: selectedPlayer, seedLabel: getSeedLabel(selectedPlayer), highlighted: true },
+            b: { name: info.opponent.name, seedLabel: getSeedLabel(info.opponent.name), faded: info.opponent.isFiller },
+          }
+          const pairB = {
+            a: { name: info.round2Pair[0].name, seedLabel: getSeedLabel(info.round2Pair[0].name), faded: info.round2Pair[0].isFiller },
+            b: { name: info.round2Pair[1].name, seedLabel: getSeedLabel(info.round2Pair[1].name), faded: info.round2Pair[1].isFiller },
+          }
 
-            return (
-              <>
-                <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
-                  Eksempel-trekning
+          return (
+            <div style={{
+              marginTop: 16, padding: '14px 14px 12px', borderRadius: 14,
+              background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}33`,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                <Flag iso2={selectedPlayerData.iso2} size={26} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: SPORT, fontSize: 17, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1.1 }}>
+                    {selectedPlayerData.name}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                    Odds {selectedPlayerData.odds} · PDC-ranking #{selectedPlayerData.pdcRanking}
+                  </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px' }}>
-                  <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>1. RUNDE</span>
-                  <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>2. RUNDE</span>
-                </div>
+              </div>
 
-                <DrawBracket pairA={pairA} pairB={pairB} compact vertical />
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 6 }}>
+                Eksempel-trekning
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px', marginBottom: 4 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>1. RUNDE</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>2. RUNDE</span>
+              </div>
 
-                <Link
-                  href={`/vm-info?tab=trekning&spiller=${encodeURIComponent(selectedPlayer)}`}
-                  target="_blank"
-                  style={{ display: 'block', textAlign: 'center', fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '7px 4px', marginTop: 2 }}
-                >
-                  Se hele bracketen
-                </Link>
-              </>
-            )
-          })() : (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.2)', padding: '0 4px' }}>
-              Velg en spiller for å se motstander
+              <DrawBracket pairA={pairA} pairB={pairB} />
+
+              <Link
+                href={`/vm-info?tab=trekning&spiller=${encodeURIComponent(selectedPlayer)}`}
+                target="_blank"
+                style={{ display: 'block', textAlign: 'center', fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 8, padding: '9px 4px', marginTop: 10 }}
+              >
+                Se hele bracketen
+              </Link>
             </div>
-          )}
-        </div>
+          )
+        })()}
       </div>
 
       {/* Neste-knapp */}

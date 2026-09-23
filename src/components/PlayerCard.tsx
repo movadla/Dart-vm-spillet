@@ -71,7 +71,7 @@ export function PlayerCard({
         position: 'relative', display: 'block', width: 'min(300px, 100%)', margin: '0 auto',
         aspectRatio: `${TEMPLATE_ASPECT}`,
         border: 'none', padding: 0, cursor: 'pointer',
-        backgroundImage: 'url(/cards/template-1.png)',
+        backgroundImage: 'url(/cards/template-1.webp)',
         backgroundSize: '100% 100%',
         filter: selected ? `drop-shadow(0 0 12px ${color}) drop-shadow(0 0 3px #fff)` : 'drop-shadow(0 6px 14px rgba(0,0,0,0.5))',
         transition: 'filter 0.15s',

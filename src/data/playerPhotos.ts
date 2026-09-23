@@ -8,7 +8,7 @@ export const PLAYER_PHOTOS: Record<string, { src: string; credit: string; credit
     // Bakgrunnen er fjernet fra originalfotoet (AI-basert utklipp, rembg/U2Net) slik
     // at spilleren sitter direkte på kortets egen bakgrunn i stedet for å ligge i en
     // synlig rektangel-boks med sin egen fotobakgrunn — se PlayerCard.tsx.
-    src: '/players/luke-littler-cutout.png',
+    src: '/players/luke-littler-cutout.webp',
     credit: 'Sandro Halank · CC BY-SA 4.0',
     creditUrl: 'https://commons.wikimedia.org/wiki/File:2026-03-26_Premier_League_Darts_%E2%80%93_Night_8_%E2%80%93_Berlin_2026_by_Sandro_Halank%E2%80%93168.jpg',
   },
