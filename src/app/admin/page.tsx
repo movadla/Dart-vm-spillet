@@ -65,18 +65,22 @@ function DeltakereTab({ participants, loading, error, headers, onRefresh }: {
   headers: Record<string, string>; onRefresh: () => void
 }) {
   const [deleting, setDeleting] = useState<string | null>(null)
+  // Erstatter alert() — lett å overse midt i en hektisk økt med mange
+  // handlinger, og blokkerer resten av siden til den avvises manuelt.
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   async function deleteParticipant(id: string, name: string) {
     if (!confirm(`Slett ${name}? Dette kan ikke angres.`)) return
     setDeleting(id)
+    setDeleteError(null)
     try {
       const res = await fetch('/api/admin/delete-participant', { method: 'DELETE', headers, body: JSON.stringify({ id }) })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        alert(`Feil: ${data.error ?? res.statusText}`)
+        setDeleteError(`Kunne ikke slette ${name}: ${data.error ?? res.statusText}`)
       }
     } catch {
-      alert('Nettverksfeil — prøv igjen')
+      setDeleteError(`Kunne ikke slette ${name}: nettverksfeil — prøv igjen`)
     } finally {
       setDeleting(null)
       onRefresh()
@@ -92,6 +96,12 @@ function DeltakereTab({ participants, loading, error, headers, onRefresh }: {
           <button style={btn()} onClick={onRefresh}>Oppdater</button>
         </div>
       </div>
+      {deleteError && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 18px', background: 'rgba(220,38,38,0.1)', borderBottom: '1px solid rgba(220,38,38,0.2)', color: '#ef4444', fontSize: 13 }}>
+          <span>{deleteError}</span>
+          <button onClick={() => setDeleteError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>✕</button>
+        </div>
+      )}
       {loading ? (
         <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>Laster...</div>
       ) : error ? (
@@ -128,6 +138,7 @@ function LigaerTab({ headers }: { headers: Record<string, string> }) {
   const [membersLoading, setMembersLoading] = useState<string | null>(null)
   const [toggling, setToggling] = useState<string | null>(null)
   const [deletingLeague, setDeletingLeague] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/admin/leagues', { headers })
@@ -153,9 +164,10 @@ function LigaerTab({ headers }: { headers: Record<string, string> }) {
   async function deleteLeague(id: string, name: string) {
     if (!confirm(`Slett ligaen «${name}»? Alle medlemmer fjernes. Dette kan ikke angres.`)) return
     setDeletingLeague(id)
+    setDeleteError(null)
     try {
       const res = await fetch(`/api/admin/leagues/${id}`, { method: 'DELETE', headers })
-      if (!res.ok) { alert('Feil ved sletting — prøv igjen'); return }
+      if (!res.ok) { setDeleteError(`Kunne ikke slette «${name}» — prøv igjen`); return }
       setLeagues((prev) => prev.filter((l) => l.id !== id))
       if (expandedId === id) setExpandedId(null)
     } finally {
@@ -180,6 +192,12 @@ function LigaerTab({ headers }: { headers: Record<string, string> }) {
   return (
     <div style={card}>
       <div style={cardHead}><span style={label}>Ligaer ({leagues.length})</span></div>
+      {deleteError && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 18px', background: 'rgba(220,38,38,0.1)', borderBottom: '1px solid rgba(220,38,38,0.2)', color: '#ef4444', fontSize: 13 }}>
+          <span>{deleteError}</span>
+          <button onClick={() => setDeleteError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>✕</button>
+        </div>
+      )}
       {loading ? (
         <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>Laster...</div>
       ) : leagues.length === 0 ? (
