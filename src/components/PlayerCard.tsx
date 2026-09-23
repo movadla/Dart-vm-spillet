@@ -21,23 +21,26 @@ const GOLD = '#f3d576'
 // helt bort. Ved å bare TEGNE formen og gi innholdet raus, fast padding innenfor
 // den — aldri klippe selve teksten — kan ikke den bug-klassen oppstå igjen, uansett
 // skrift/nettleser/skjermbredde.
+// v2, etter tilbakemelding om at omrisset fortsatt var for "butt/rundt" sammenlignet
+// med referansen: "ørene" (vinge-spissene ca. 55–65 % ned) er nå tegnet med RETTE
+// linjer inn/ut av spissen (L, ikke C) — det gir en skarp, kantet flarer-effekt i
+// stedet for en myk pukkel, som er nærmere referansens tydelig spisse sidepigger.
+// Bunn-spissen beholder en myk kurve, som i referansen.
 const SHIELD_PATH = `
   M 40 3
   C 44 3 47 8 50 8
   C 53 8 56 3 60 3
-  L 88 3
-  C 93 3 96 6 96 11
-  L 96 53
-  C 96 58 99 60 100 65
-  C 100 69 94 70 90 74
-  C 87 77 85 79 84 82
-  C 78 90 65 96 50 100
-  C 35 96 22 90 16 82
-  C 15 79 13 77 10 74
-  C 6 70 0 69 0 65
-  C 1 60 4 58 4 53
-  L 4 11
-  C 4 6 7 3 12 3
+  L 87 3
+  C 92 3 95 6 95 11
+  L 95 50
+  L 100 63
+  L 87 73
+  C 80 88 66 96 50 100
+  C 34 96 20 88 13 73
+  L 0 63
+  L 5 50
+  L 5 11
+  C 5 6 8 3 13 3
   Z
 `
 
@@ -61,19 +64,41 @@ function ShieldBackground({ color, gradientId }: { color: string; gradientId: st
           <stop offset="45%" stopColor="#0a0d18" />
           <stop offset="100%" stopColor="#030408" />
         </linearGradient>
-        <radialGradient id={`${gradientId}-accent`} cx="20%" cy="10%" r="75%">
-          <stop offset="0%" stopColor={color} stopOpacity="0.45" />
-          <stop offset="45%" stopColor={color} stopOpacity="0.08" />
+        <radialGradient id={`${gradientId}-accent`} cx="20%" cy="8%" r="80%">
+          <stop offset="0%" stopColor={color} stopOpacity="0.5" />
+          <stop offset="45%" stopColor={color} stopOpacity="0.1" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </radialGradient>
+        {/* Diagonal "lysstripe" over bakgrunnen, som den blå stripen i referansen */}
+        <linearGradient id={`${gradientId}-streak`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0" />
+          <stop offset="18%" stopColor="#fff" stopOpacity="0.16" />
+          <stop offset="30%" stopColor="#fff" stopOpacity="0" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        {/* Frost/marmor-korn — ekte prosedural støy (feTurbulence) i stedet for
+            noen få gjettede radial-gradient-flekker, for en tekstur som faktisk
+            ligner referansens is-/marmor-overflate på nært hold. */}
+        <filter id={`${gradientId}-grain`}>
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise" />
+          <feColorMatrix in="noise" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.05 0" />
+        </filter>
       </defs>
-      {/* Gull-ramme (litt større bane, ligger bak) */}
-      <path d={SHIELD_PATH} fill={`url(#${gradientId}-frame)`} transform="translate(50 50) scale(1.018) translate(-50 -50)" />
-      {/* Mørk pinstripe */}
-      <path d={SHIELD_PATH} fill="#0a0c14" transform="translate(50 50) scale(0.99) translate(-50 -50)" />
-      {/* Selve kort-bunnen */}
-      <path d={SHIELD_PATH} fill={`url(#${gradientId}-fill)`} transform="translate(50 50) scale(0.965) translate(-50 -50)" />
-      <path d={SHIELD_PATH} fill={`url(#${gradientId}-accent)`} transform="translate(50 50) scale(0.965) translate(-50 -50)" />
+
+      {/* Fler-lags gull/mørk-ramme — hver bane er litt mindre enn forrige og
+          dekker den bortsett fra en tynn kant, som gir referansens "flere
+          tynne ringer"-utseende i stedet for én tykk kant + én strek. */}
+      <path d={SHIELD_PATH} fill="#fff7d6" transform="translate(50 50) scale(1.025) translate(-50 -50)" />
+      <path d={SHIELD_PATH} fill={`url(#${gradientId}-frame)`} transform="translate(50 50) scale(1.0) translate(-50 -50)" />
+      <path d={SHIELD_PATH} fill="#0a0c14" transform="translate(50 50) scale(0.975) translate(-50 -50)" />
+      <path d={SHIELD_PATH} fill={`url(#${gradientId}-frame)`} transform="translate(50 50) scale(0.955) translate(-50 -50)" />
+      <path d={SHIELD_PATH} fill="#05070d" transform="translate(50 50) scale(0.935) translate(-50 -50)" />
+
+      {/* Selve kort-bunnen: fylling, korn-tekstur, fargeglød, lysstripe */}
+      <path d={SHIELD_PATH} fill={`url(#${gradientId}-fill)`} transform="translate(50 50) scale(0.92) translate(-50 -50)" />
+      <path d={SHIELD_PATH} fill="#fff" filter={`url(#${gradientId}-grain)`} opacity="0.6" transform="translate(50 50) scale(0.92) translate(-50 -50)" />
+      <path d={SHIELD_PATH} fill={`url(#${gradientId}-accent)`} transform="translate(50 50) scale(0.92) translate(-50 -50)" />
+      <path d={SHIELD_PATH} fill={`url(#${gradientId}-streak)`} transform="translate(50 50) scale(0.92) translate(-50 -50)" />
     </svg>
   )
 }
@@ -127,7 +152,7 @@ export function PlayerCard({
       <div style={{
         position: 'relative', zIndex: 1,
         display: 'flex', flexDirection: 'column',
-        padding: '13% 17% 16%',
+        padding: '16% 21% 19%',
         color: '#fff', textAlign: 'center',
       }}>
         {selected && (
