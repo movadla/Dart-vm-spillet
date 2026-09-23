@@ -120,6 +120,12 @@ export function PlayerCard({
             width: `calc(100% - ${ZONES.photo.left} - ${ZONES.photo.right})`,
             height: `calc(100% - ${ZONES.photo.top} - ${ZONES.photo.bottom})`,
             objectFit: 'contain', objectPosition: 'bottom',
+            // Bildets egen (rektangulære) kant er hard/synlig i venstre, høyre og
+            // nedre retning (utklippet er ikke rundt hele figuren) — myker opp med
+            // en maske som toner ut mot transparent på de tre sidene. Toppen er
+            // bevisst IKKE tonet (spilleren/hodet går naturlig ut i transparent der).
+            maskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%), linear-gradient(to top, transparent 0%, black 12%, black 100%)',
+            maskComposite: 'intersect',
           }}
         />
       )}
@@ -140,11 +146,12 @@ export function PlayerCard({
         textAlign: 'left', zIndex: 1,
       }}>
         <div style={{
-          fontFamily: SPORT, fontSize: 'clamp(7px, 8cqw, 11px)', fontWeight: 900, color: GOLD,
-          lineHeight: 1.1, whiteSpace: 'nowrap',
+          display: 'flex', alignItems: 'baseline', gap: 3,
+          fontFamily: SPORT, fontWeight: 900, whiteSpace: 'nowrap',
           textShadow: '0 1px 4px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.85)',
         }}>
-          {player.pdcRanking}
+          <span style={{ fontSize: 'clamp(4.5px, 5cqw, 7px)', letterSpacing: '0.04em', color: 'rgba(243,213,118,0.75)' }}>RANK</span>
+          <span style={{ fontSize: 'clamp(7px, 8cqw, 11px)', color: GOLD }}>{player.pdcRanking}</span>
         </div>
       </div>
 
