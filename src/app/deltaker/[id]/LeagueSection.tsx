@@ -79,7 +79,9 @@ const [leagues, setLeagues] = useState<League[]>([])
       const res = await fetch('/api/league/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: ligaNavn.trim(), participantId }),
+        // participantId sendes ikke lenger — /api/league/create henter identitet
+        // fra den verifiserte vm_auth-cookien (se route.ts).
+        body: JSON.stringify({ name: ligaNavn.trim() }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? 'Noe gikk galt'); return }
@@ -102,7 +104,8 @@ const [leagues, setLeagues] = useState<League[]>([])
       const res = await fetch('/api/league/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inviteCode: kode.trim().toUpperCase(), participantId }),
+        // participantId sendes ikke lenger — se tilsvarende kommentar i handleCreate.
+        body: JSON.stringify({ inviteCode: kode.trim().toUpperCase() }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? 'Noe gikk galt'); return }

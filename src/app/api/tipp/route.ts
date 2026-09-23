@@ -94,7 +94,20 @@ export async function POST(req: NextRequest) {
       baseUrl: BASE_URL,
     }).catch(e => console.error('Welcome email failed:', e))
 
-    return NextResponse.json({ success: true, participantId: participant.id })
+    const response = NextResponse.json({ success: true, participantId: participant.id })
+    // Samme vm_auth-cookie som magic-link/verify setter — brukeren skrev nettopp
+    // inn denne e-posten selv i DENNE sesjonen, så det er rimelig å regne dem som
+    // innlogget med det samme (uten en ekstra e-post-runde) for å kunne opprette/
+    // bli med i liga rett etter påmelding. Kortere levetid enn magic-link (2t) er
+    // ikke nødvendig — samme varighet, samme sikkerhetsmodell.
+    response.cookies.set('vm_auth', participant.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 2,
+      path: '/',
+    })
+    return response
   } catch (e) {
     console.error('Tipp route error:', e)
     return NextResponse.json({ error: 'Intern serverfeil' }, { status: 500 })

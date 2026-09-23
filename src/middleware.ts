@@ -13,27 +13,18 @@ export function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // Deltaker identity — claim-once: sett cookie kun hvis den ikke finnes fra før
-  if (pathname.startsWith('/deltaker/')) {
-    const existing = req.cookies.get('participant_id')?.value
-    if (!existing) {
-      const id = pathname.split('/')[2]
-      if (id) {
-        const res = NextResponse.next()
-        res.cookies.set('participant_id', id, {
-          httpOnly: true,
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 30,
-        })
-        return res
-      }
-    }
-  }
-
   return NextResponse.next()
 }
 
+// Fjernet 2026-09-23: en "claim-once" participant_id-cookie som ble satt til
+// hvem som helst som FØRST åpnet /deltaker/<id> — uten noen verifisering av at
+// besøkende faktisk eide den id-en. Denne cookien ble deretter brukt (i
+// league/create og league/join) til å opprette/bli med i liga "som" den
+// deltakeren. Siden /deltaker/<id>-lenker er ment å deles (resultatsiden din),
+// kunne den FØRSTE som åpnet en delt lenke på en annen enhet kapre identiteten
+// i 30 dager. All skriving går nå i stedet via den verifiserte vm_auth-cookien
+// (satt kun ved påmelding eller bekreftet magic link) — se
+// api/tipp/update, api/league/create, api/league/join.
 export const config = {
-  matcher: ['/admin/:path*', '/deltaker/:path*'],
+  matcher: ['/admin/:path*'],
 }

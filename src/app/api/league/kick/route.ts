@@ -2,8 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
 export async function POST(req: NextRequest) {
-  const { leagueId, kickId, adminId } = await req.json()
-  if (!leagueId || !kickId || !adminId) return NextResponse.json({ error: 'Mangler data' }, { status: 400 })
+  // Samme sårbarhet som ble funnet og fikset i league/create og league/join
+  // (ikke fanget opp av sikkerhetsgjennomgangen, men identisk mønster her):
+  // "adminId" kom tidligere rett fra request body, uverifisert — hvem som
+  // helst som kjente ligaens eier-id kunne kicke enhver deltaker fra enhver
+  // liga. Identitet nå KUN fra verifisert vm_auth-cookie.
+  const { leagueId, kickId } = await req.json()
+  const adminId = req.cookies.get('vm_auth')?.value
+  if (!adminId) return NextResponse.json({ error: 'Ikke innlogget — be om en ny innloggingslenke' }, { status: 401 })
+  if (!leagueId || !kickId) return NextResponse.json({ error: 'Mangler data' }, { status: 400 })
 
   const supabase = getSupabaseAdmin()
 

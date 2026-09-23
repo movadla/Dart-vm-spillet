@@ -16,10 +16,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'VM er i gang — picks er låst' }, { status: 403 })
   }
 
-  const supabase = getSupabaseAdmin()
-  const { participantId, picks } = await req.json()
+  // Identitet kommer KUN fra den verifiserte vm_auth-cookien (satt av
+  // /api/magic-link/verify), aldri fra request body. Før denne fiksen tok
+  // endepunktet imot participantId direkte i body — hvem som helst som
+  // kjente (eller fant via /api/finn) en annens deltaker-id kunne dermed
+  // overskrive picks for den deltakeren med et rått API-kall, helt uavhengig
+  // av at selve UI-flyten (tipp/page.tsx) riktig krevde en magic link først.
+  // Se participant-edit-data/route.ts for samme, allerede riktige mønster.
+  const participantId = req.cookies.get('vm_auth')?.value
+  if (!participantId) {
+    return NextResponse.json({ error: 'Ikke innlogget — be om en ny innloggingslenke' }, { status: 401 })
+  }
 
-  if (!participantId || !picks || typeof picks !== 'object' || Array.isArray(picks)) {
+  const supabase = getSupabaseAdmin()
+  const { picks } = await req.json()
+
+  if (!picks || typeof picks !== 'object' || Array.isArray(picks)) {
     return NextResponse.json({ error: 'Mangler data' }, { status: 400 })
   }
 

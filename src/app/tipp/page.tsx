@@ -188,10 +188,13 @@ const inputStyle: React.CSSProperties = {
     setDuplicateEmail(false)
     try {
       if (isEditMode && editId) {
+        // participantId sendes ikke lenger — /api/tipp/update henter identitet
+        // fra den verifiserte vm_auth-cookien (satt av magic-link/verify like
+        // over i denne flyten), aldri fra body.
         const res = await fetch('/api/tipp/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ participantId: editId, picks }),
+          body: JSON.stringify({ picks }),
         })
         if (!res.ok) {
           const data = await res.json()

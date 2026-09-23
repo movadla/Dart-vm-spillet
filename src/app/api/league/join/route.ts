@@ -11,11 +11,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Ligaer er låst etter at VM har startet.' }, { status: 403 })
   }
 
-  const { inviteCode, participantId: bodyId } = await req.json()
-  const cookieId = (await cookies()).get('participant_id')?.value
-  const participantId = bodyId ?? cookieId
+  // Identitet KUN fra verifisert vm_auth-cookie — se league/create/route.ts og
+  // tipp/update/route.ts for samme fiks og begrunnelse.
+  const { inviteCode } = await req.json()
+  const participantId = (await cookies()).get('vm_auth')?.value
 
-  if (!participantId) return NextResponse.json({ error: 'Ikke autentisert' }, { status: 401 })
+  if (!participantId) return NextResponse.json({ error: 'Ikke innlogget — be om en ny innloggingslenke' }, { status: 401 })
   if (!inviteCode?.trim()) {
     return NextResponse.json({ error: 'Mangler data' }, { status: 400 })
   }
