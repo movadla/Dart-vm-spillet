@@ -3,20 +3,42 @@
 ## Ting du (Morten) må gjøre selv — jeg kan ikke gjøre disse
 
 - [ ] `! gh auth login` — logg inn på GitHub, så kan jeg opprette repo og pushe
-- [ ] Gi meg URL + anon key + service role key til VM-tipping sitt Supabase-
-      prosjekt (Project Settings → API), så fyller jeg ut `.env.local`.
-      Dart-vm-spillet lever i sitt eget Postgres-skjema (`dart_vm`) i dette
-      prosjektet — fullstendig atskilt fra VM-tipping sine tabeller/data,
-      ingenting overskrives eller berøres.
-- [ ] Kjør `supabase/schema.sql` (hele filen, ÉN gang, i Supabase Dashboard →
-      SQL Editor) — den er selvstendig og setter opp `dart_vm`-skjemaet med
-      absolutt alt appen trenger. Du trenger IKKE de andre filene i
-      `supabase/` (de er kun for å oppgradere en gammel, allerede
-      eksisterende database trinnvis) — se `README.md` → «Database-tabeller»
-- [ ] Étt ekstra steg som MÅ gjøres i dashbordet (kan ikke settes fra SQL):
-      Project Settings → API → «Exposed schemas» → legg til `dart_vm` i
-      listen ved siden av `public`. Uten dette avviser Supabase sitt
-      REST-API alle spørringer mot dart_vm, selv med riktige nøkler.
+- [ ] **KOBLE TIL SUPABASE (VM-tipping-prosjektet gjenbrukes, egen atskilt
+      del) — gjør denne når du er ved PC, steg for steg:**
+
+      **1. Logg inn og finn prosjektet**
+      1. Gå til supabase.com/dashboard og logg inn.
+      2. Klikk på prosjektet som heter noe med «VM-tipping» (det gamle
+         fotball-VM-prosjektet).
+
+      **2. Hent de tre nøklene**
+      1. Venstre meny → tannhjulet **Project Settings** (nederst) → **API**.
+      2. Kopier ut, én om gangen:
+         - **Project URL** (`https://xxxxx.supabase.co`)
+         - **anon public** key (under «Project API keys»)
+         - **service_role** key (rett under anon — klikk «Reveal» for å vise)
+      3. La fanen stå åpen, du trenger den igjen i steg 4.
+
+      **3. Kjør databaseoppsettet**
+      1. Venstre meny → **SQL Editor** → **New query**.
+      2. Åpne `supabase/schema.sql` i prosjektmappen (i Notisblokk, VS Code
+         e.l.), merk alt (Ctrl+A) og kopier (Ctrl+C).
+      3. Lim inn i SQL Editor-vinduet (Ctrl+V) og klikk **Run**
+         (eller Ctrl+Enter).
+      4. Skal gi en grønn «Success»-melding. Feilmelding i stedet? Ikke
+         prøv å fikse den selv — lim hele feilteksten inn til meg.
+
+      **4. Eksponer det nye skjemaet (kan IKKE gjøres med SQL)**
+      1. Tilbake til **Project Settings → API** (samme sted som steg 2).
+      2. Finn seksjonen **Exposed schemas** (kan også hete «Data API» →
+         «Exposed schemas», avhengig av Supabase-versjon).
+      3. `public` (og kanskje `graphql_public`) står der fra før — legg til
+         `dart_vm` i samme liste, og lagre.
+
+      **5. Send meg nøklene**
+      Lim inn Project URL + anon key + service role key her i chatten (eller
+      opprett `.env.local` selv basert på `.env.example` og si fra), så
+      setter jeg opp resten og verifiserer at ekte påmelding fungerer.
 - [ ] Bytt ut placeholder-e-posten `kontakt@dart-vm-spillet.no` med din egen, i:
   - `src/app/page.tsx`
   - `src/app/personvern/page.tsx`
