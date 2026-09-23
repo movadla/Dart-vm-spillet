@@ -2,6 +2,10 @@
 -- Aktiverer Row Level Security på alle tabeller
 -- Kun match_results er lesbar for anon (offentlig kampdata, brukt av vm-info sin Kamper-fane)
 -- Alt annet går via service role (Next.js API-routes og server-komponenter)
+--
+-- Et FERSKT oppsett trenger IKKE denne filen — schema.sql aktiverer RLS på
+-- alt allerede. Denne er kun til å rette opp RLS på en database der det av
+-- en eller annen grunn har blitt slått av igjen.
 
 -- === Aktiver RLS ===
 ALTER TABLE IF EXISTS participants          ENABLE ROW LEVEL SECURITY;

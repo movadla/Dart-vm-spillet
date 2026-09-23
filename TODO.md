@@ -4,7 +4,11 @@
 
 - [ ] `! gh auth login` — logg inn på GitHub, så kan jeg opprette repo og pushe
 - [ ] Opprett et Supabase-prosjekt (eller gi meg nøklene til et eksisterende) og fyll ut `.env.local`
-- [ ] Kjør migrasjonene i `supabase/` mot den ekte databasen, i rekkefølge — se `README.md` → «Database-tabeller»
+- [ ] Kjør `supabase/schema.sql` (hele filen, ÉN gang, i Supabase Dashboard →
+      SQL Editor) mot det nye prosjektet — den er nå selvstendig og setter
+      opp absolutt alt appen trenger. Du trenger IKKE de andre filene i
+      `supabase/` (de er kun for å oppgradere en gammel, allerede
+      eksisterende database trinnvis) — se `README.md` → «Database-tabeller»
 - [ ] Bytt ut placeholder-e-posten `kontakt@dart-vm-spillet.no` med din egen, i:
   - `src/app/page.tsx`
   - `src/app/personvern/page.tsx`

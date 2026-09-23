@@ -111,7 +111,19 @@ Enhetstester dekker poengberegningslogikken (`src/lib/scoring.test.ts`) og trekn
 | `participants` | Påmeldte deltakere |
 | `picks` | Spillervalg per deltaker (6 rader per person) |
 | `match_results` | Manuelt registrerte kampresultater — eneste kilde til poeng og status |
-| `leagues` | Private ligaer |
-| `league_members` | Deltakere i ligaer |
+| `leagues` / `league_members` | Private ligaer og medlemskap |
+| `magic_links` | Engangslenker for å endre picks (deltaker-«innlogging») |
+| `newsletter_signups` | E-postliste (uavhengig av påmelding til spillet) |
+| `rank_snapshot` | Daglig øyeblikksbilde av rangering, driver ▲/▼-pilene |
+| `admin_login_attempts` / `rate_limit_hits` | Rate-limiting (admin-login, `/api/finn`, `/api/tipp/update`) |
 
-Se `supabase/schema.sql` for et nytt oppsett, eller `supabase/migrate_to_darts.sql` for å migrere en eksisterende `cl-spillet`/`vm-tipping`-database.
+**Nytt Supabase-prosjekt:** kjør `supabase/schema.sql` — hele filen, én gang.
+Den er selvstendig og dekker alt (tabeller, constraints, indekser, RLS); du
+trenger ikke kjøre noen andre filer i `supabase/` etterpå.
+
+**Migrerer du i stedet en eksisterende `cl-spillet`/`vm-tipping`-database?**
+Bruk `supabase/migrate_to_darts.sql` og de øvrige `add_*.sql`-filene i
+mappen i stedet — de bygger videre på et eldre oppsett trinnvis. Ikke kjør
+`schema.sql` mot en database som allerede har data i seg (den oppretter
+tabeller uten `if not exists`, med vilje, for å ikke skjule feil på et
+ekte nytt oppsett).
