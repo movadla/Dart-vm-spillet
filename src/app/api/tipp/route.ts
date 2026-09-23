@@ -45,8 +45,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Participant cap
-    const maxParticipants = parseInt(process.env.MAX_PARTICIPANTS ?? '2000')
+    // Participant cap — sikkerhetsventil, se .env.example for begrunnelse
+    // (default 10000 om variabelen mangler, ikke en ambisjonsgrense).
+    const maxParticipants = parseInt(process.env.MAX_PARTICIPANTS ?? '10000')
     const { count } = await supabase.from('participants').select('*', { count: 'exact', head: true })
     if ((count ?? 0) >= maxParticipants) {
       return NextResponse.json({ error: 'Påmeldingen er dessverre full' }, { status: 503 })

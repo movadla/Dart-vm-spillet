@@ -33,9 +33,8 @@ export default function PersonvernPage() {
       <div style={CARD}>
         <div style={H}>Hva vi lagrer</div>
         <p style={P}>
-          Når du melder deg på Dart-VM-spillet lagrer vi navnet ditt, e-postadressen din, en
-          firesifret PIN-kode (for å logge inn på siden din), eventuelt telefonnummer om du oppgir
-          det, og hvilke dartspillere du har valgt.
+          Når du melder deg på Dart-VM-spillet lagrer vi navnet ditt, e-postadressen din, eventuelt
+          telefonnummer om du oppgir det, og hvilke dartspillere du har valgt.
         </p>
       </div>
 
@@ -43,9 +42,9 @@ export default function PersonvernPage() {
         <div style={H}>Hva vi bruker det til</div>
         <p style={P}>
           E-postadressen brukes til å sende deg en velkomstmelding, daglige statusoppdateringer
-          under turneringen, og innloggingslenker/PIN-koder når du ber om det. Navnet ditt vises
-          på leaderboardet og i eventuelle private ligaer du er med i. Vi selger eller deler
-          aldri opplysningene dine med noen andre.
+          under turneringen, og en innloggingslenke (gyldig i 1 time) når du ber om å endre
+          valgene dine. Navnet ditt vises på leaderboardet og i eventuelle private ligaer du er
+          med i. Vi selger eller deler aldri opplysningene dine med noen andre.
         </p>
       </div>
 
@@ -54,6 +53,22 @@ export default function PersonvernPage() {
         <p style={P}>
           Opplysningene lagres så lenge spillet pågår og en rimelig periode etterpå, med mindre
           du ber om at de slettes tidligere.
+        </p>
+      </div>
+
+      <div style={CARD}>
+        <div style={H}>Behandlingsansvarlig</div>
+        <p style={P}>
+          {/* TODO (se TODO.md): fyll inn navn/foretaksnavn og adresse her før spillet
+              åpnes for ekte deltakere — påkrevd etter GDPR art. 13, og spesielt viktig
+              for et internasjonalt publikum utenfor Norge. */}
+          [Navn/foretak og adresse — fylles inn før lansering]
+        </p>
+        <p style={{ ...P, marginTop: 10 }}>
+          Du har rett til å klage til en personvern-tilsynsmyndighet hvis du mener
+          behandlingen av opplysningene dine er i strid med regelverket — i Norge til{' '}
+          <a href="https://www.datatilsynet.no" target="_blank" rel="noopener noreferrer" style={{ color: '#fff' }}>Datatilsynet</a>,
+          eller til tilsynsmyndigheten i landet du bor i om du er bosatt et annet sted i EU/EØS.
         </p>
       </div>
 

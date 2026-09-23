@@ -12,6 +12,7 @@ import { DrawBracket } from '@/components/DrawBracket'
 import { PlayerCard } from '@/components/PlayerCard'
 import StepSlideshow from '@/components/StepSlideshow'
 import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
+import ShareButton from '@/app/ShareButton'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
@@ -417,6 +418,19 @@ const inputStyle: React.CSSProperties = {
 
         <LeagueSection participantId={participantId} showHeader={true} />
 
+        {/* ShareButton fantes ferdig bygget men var aldri koblet på noe sted i
+            appen — viktig for organisk vekst mot et større, internasjonalt
+            deltakerfelt. Naturlig plassering: rett etter påmelding, mens
+            entusiasmen er størst. */}
+        <div style={{ marginBottom: 12 }}>
+          <ShareButton
+            url={typeof window !== 'undefined' ? `${window.location.origin}/` : ''}
+            text="Jeg er påmeldt Dart-VM-spillet — bli med du også!"
+            label="Inviter venner →"
+            variant="primary"
+          />
+        </div>
+
         <Link href={`/deltaker/${participantId}`} style={{ display: 'block', padding: '16px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontWeight: 800, fontSize: 15, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 12, textDecoration: 'none', fontFamily: SPORT, textAlign: 'center', boxShadow: '0 4px 20px rgba(220,38,38,0.35)', marginBottom: 12 }}>
           Se min side →
         </Link>
@@ -755,6 +769,10 @@ const inputStyle: React.CSSProperties = {
               )
             })
           })()}
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
+          <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, lineHeight: 1.5 }}>
+            Ved lik poengsum vinner den som meldte seg på tidligst.
+          </div>
         </div>
       )}
 

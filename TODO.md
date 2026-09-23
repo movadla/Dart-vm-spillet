@@ -12,7 +12,9 @@
 - [ ] Sett repo-secreten `APP_BASE_URL` i GitHub (Settings → Secrets and variables → Actions) når appen er deployet, så `snapshot-ranks.yml` fungerer
 - [ ] Fysisk mappenavn-bytte (`cl-spillet` → `dart-vm-spillet`) — kan ikke gjøres fra en økt som selv kjører i mappen. Gjør `Rename-Item` selv, eller be meg gjøre det i en ny økt som starter et annet sted
 - [ ] Sett opp Vercel-prosjekt og fyll inn alle miljøvariablene fra `.env.example` der
+- [ ] Når Vercel-prosjektet er satt opp: bytt lenken i `src/app/admin/page.tsx` («Trafikk»-kortet) fra den generelle `vercel.com/dashboard` til den direkte `/analytics`-lenken for RIKTIG prosjekt — den pekte tidligere feilaktig til det gamle fotball-VM-prosjektets dashbord
 - [ ] Nærmere desember: sjekk PDC sin offisielle seeding mot `src/data/pots.ts` (rangeringen der er et øyeblikksbilde fra september og vil ha glidd)
+- [ ] Fyll inn navn/foretak og adresse under «Behandlingsansvarlig» i `src/app/personvern/page.tsx` (påkrevd etter GDPR art. 13) — kan ikke gjette dette selv
 - [ ] Når PDC publiserer den faktiske trekningen (normalt medio november): følg steg-for-steg-oppskriften i `README.md` → «Trekning — oppdatere med ekte data»
 - [ ] Spillerkortet bruker nå én ekte bildemal (`public/cards/template-1.webp`, blå/is-stil
       med 2 ikoner — mynt/ODDS og globus/RANKING) for ALLE 6 potter — du sa du ville ha

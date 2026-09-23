@@ -283,7 +283,13 @@ function StatistikkTab({ participantCount: totalCount, headers }: { participantC
             Sidevisninger, besøkende, enheter og land vises i Vercel-dashbordet. Tracking er aktivt.
           </p>
           <a
-            href="https://vercel.com/movadla/vm-tipping/analytics"
+            // Pekte tidligere direkte til det GAMLE fotball-VM-prosjektet
+            // ("vm-tipping") sitt Vercel-dashbord — en rest fra kopieringen.
+            // Peker nå til den generelle dashbord-lenken siden dette
+            // dart-prosjektet ikke er deployet til Vercel ennå (se TODO.md);
+            // bytt til den direkte /analytics-lenken for RIKTIG prosjekt når
+            // det er satt opp.
+            href="https://vercel.com/dashboard"
             target="_blank"
             rel="noopener noreferrer"
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 700, textDecoration: 'none', width: 'fit-content' }}

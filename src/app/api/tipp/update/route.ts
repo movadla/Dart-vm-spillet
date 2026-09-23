@@ -61,27 +61,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Fant ikke deltaker' }, { status: 404 })
   }
 
-  // Slett gamle picks og sett inn nye
-  const { error: deleteError } = await supabase
-    .from('picks')
-    .delete()
-    .eq('participant_id', participantId)
-
-  if (deleteError) {
-    return NextResponse.json({ error: 'Kunne ikke slette gamle picks' }, { status: 500 })
-  }
-
   const rows = entries.map(([pot, player]) => ({
     participant_id: participantId,
     pot_number: parseInt(pot),
     player_name: player,
   }))
+  const keptPots = rows.map((r) => r.pot_number)
 
+  // Upsert i stedet for slett-så-sett-inn: det gamle mønsteret hadde et
+  // reelt vindu der ALLE picks for deltakeren var slettet før de nye var satt
+  // inn — to samtidige lagringer (dobbeltklikk, ustabilt nett) kunne dermed gi
+  // tapte picks. Krever den unike (participant_id, pot_number)-constrainten i
+  // supabase/add_picks_constraints.sql. Sletter kun de potter som IKKE er med
+  // i denne innsendingen (normalt ingen, siden UI alltid sender alle 6).
   if (rows.length > 0) {
-    const { error: insertError } = await supabase.from('picks').insert(rows)
-    if (insertError) {
+    const { error: upsertError } = await supabase
+      .from('picks')
+      .upsert(rows, { onConflict: 'participant_id,pot_number' })
+    if (upsertError) {
       return NextResponse.json({ error: 'Kunne ikke lagre picks' }, { status: 500 })
     }
+  }
+
+  let deleteQuery = supabase.from('picks').delete().eq('participant_id', participantId)
+  deleteQuery = keptPots.length > 0 ? deleteQuery.not('pot_number', 'in', `(${keptPots.join(',')})`) : deleteQuery
+  const { error: deleteError } = await deleteQuery
+  if (deleteError) {
+    return NextResponse.json({ error: 'Kunne ikke rydde opp gamle picks' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })

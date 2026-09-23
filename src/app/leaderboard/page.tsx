@@ -18,12 +18,12 @@ export const revalidate = 30
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
-interface Participant { id: string; name: string }
+interface Participant { id: string; name: string; created_at: string }
 interface Pick { participant_id: string; pot_number: number; player_name: string }
 
 async function getData() {
   const [{ data: participants }, { data: matches }] = await Promise.all([
-    supabase.from('participants').select('id, name').order('created_at'),
+    supabase.from('participants').select('id, name, created_at').order('created_at'),
     supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner'),
   ])
 
@@ -49,7 +49,13 @@ async function getData() {
       points,
       matchesPlayed,
     }
-  }).sort((a, b) => b.points - a.points)
+  })
+    // Tie-breaker: uten denne var rekkefølgen ved lik poengsum udefinert
+    // (avhengig av databasens interne radrekkefølge) — ved tusenvis av
+    // deltakere blir delt poengsum svært vanlig, og en vilkårlig rekkefølge
+    // oppleves som urettferdig. Regelen: den som meldte seg på først vinner
+    // uavgjort — enkel å forklare, og krever ingen ekstra data.
+    .sort((a, b) => b.points - a.points || a.participant.created_at.localeCompare(b.participant.created_at))
 
   // Rang-piler: baseline = siste lagrede rangering (overall)
   const baseline = await getRankBaseline('overall')

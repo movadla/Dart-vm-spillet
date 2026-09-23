@@ -10,6 +10,7 @@ import MinSideAccordions from './MinSideAccordions'
 import PicksClient from './PicksClient'
 import PointsDelta from './PointsDelta'
 import LogoutButton from './LogoutButton'
+import ShareButton from '@/app/ShareButton'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
@@ -194,6 +195,17 @@ export default async function DeltakerPage({ params, searchParams }: { params: P
       >
         VM-guide og Info →
       </Link>
+
+      {/* ShareButton fantes ferdig bygget men var aldri brukt noe sted —
+          «min side» (denne siden) er det mest naturlige stedet å dele fra:
+          folk viser gjerne frem plasseringen sin. */}
+      <div style={{ marginTop: 12 }}>
+        <ShareButton
+          url={`${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'}/deltaker/${p.id}`}
+          text={`Jeg er #${rank} av ${totalParticipants} i Dart-VM-spillet!`}
+          label="Del min plassering →"
+        />
+      </div>
 
       <LogoutButton />
 
