@@ -70,7 +70,7 @@ Konfigureres i `src/config/scoring.ts`. Enkel modell — alt avledes direkte fra
 
 Alt legges sammen fortløpende gjennom turneringen, og summen ganges med en underdogs-multiplikator per pott: pott 1–2 = ×1, pott 3–4 = ×2, pott 5 = ×3, pott 6 = ×4.
 
-Pott 1 er kun en duell mellom verdens to beste (#1 og #2), deretter utvides potten nedover: pott 2 (3 spillere), pott 3 (5), pott 4 (6), pott 5 (8), pott 6 (resten — useedede/kvalifiserte).
+Hver av de 6 pottene har akkurat 3 valgbare spillere (18 totalt), gruppert etter lavest odds først — pott 1 har de tre klare favorittene, pott 6 de tre med høyest odds blant de kuraterte kandidatene. Se `pickable`-feltet i `src/data/pots.ts` — midlertidig utvalg, oppdateres nærmere VM-trekningen (medio november).
 
 Validert med `scripts/simulate-scoring-suspense.ts` — 1000 simulerte turneringer med 50 tilfeldige deltakere for å sjekke at ledelsen ikke låses for tidlig.
 
