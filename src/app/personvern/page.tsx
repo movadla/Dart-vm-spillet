@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
+import BrandBanner from '@/components/BrandBanner'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
@@ -13,22 +14,24 @@ const CARD: React.CSSProperties = {
 }
 
 const H: React.CSSProperties = {
-  fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase',
-  color: 'rgba(255,255,255,0.38)', marginBottom: 10,
+  fontSize: 12, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase',
+  color: 'rgba(255,255,255,0.6)', marginBottom: 10,
 }
 
-const P: React.CSSProperties = { fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }
+const P: React.CSSProperties = { fontSize: 13, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }
 
 export default function PersonvernPage() {
   return (
-    <div className="page-bg" style={{ minHeight: '100vh', color: '#fff', padding: '32px 16px 56px', position: 'relative' }}>
-      <div style={{ marginBottom: 20 }}>
+    <div className="page-bg app-frame" style={{ minHeight: '100vh', color: '#fff', padding: '16px 20px 40px', position: 'relative' }}>
+      <BrandBanner compact />
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, margin: '6px 0 14px' }}>
         <SmartBackButton />
       </div>
 
-      <div style={{ fontFamily: SPORT, fontSize: 32, fontWeight: 900, textTransform: 'uppercase', marginBottom: 20 }}>
+      <h1 style={{ fontFamily: SPORT, fontSize: 28, fontWeight: 900, textTransform: 'uppercase', margin: '0 0 16px', lineHeight: 1 }}>
         Personvern
-      </div>
+      </h1>
 
       <div style={CARD}>
         <div style={H}>Hva vi lagrer</div>

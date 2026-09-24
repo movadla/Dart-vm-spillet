@@ -152,7 +152,11 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
         onTouchEnd={onTouchEnd}
         style={{
           width: '100%', maxWidth: 480, maxHeight: '90dvh', display: 'flex', flexDirection: 'column',
-          background: 'linear-gradient(180deg, #171c28 0%, #0f1219 100%)', border: `1px solid ${color}55`, borderBottom: 'none',
+          // Longhand-kanter (ikke `border` + `borderBottom`): React advarer når
+          // shorthand og longhand blandes og fargen endres mens arket er åpent
+          // («Neste spiller» på Min side bytter spiller uten å lukke arket).
+          background: 'linear-gradient(180deg, #171c28 0%, #0f1219 100%)',
+          borderTop: `1px solid ${color}55`, borderLeft: `1px solid ${color}55`, borderRight: `1px solid ${color}55`, borderBottom: 'none',
           borderRadius: '18px 18px 0 0', boxShadow: `0 -12px 40px rgba(0,0,0,0.5), 0 -1px 0 ${color}66`,
           animation: dragY ? 'none' : 'sheet-up 0.32s cubic-bezier(0.22,1,0.36,1) both',
           transform: `translateY(${dragY}px)`, transition: dragY ? 'none' : 'transform 0.25s cubic-bezier(0.22,1,0.36,1)',

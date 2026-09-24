@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
+import BrandBanner from '@/components/BrandBanner'
+import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { POTS, getIso2 } from '@/data/pots'
 import Flag from '@/components/Flag'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -34,13 +36,19 @@ const CARD: React.CSSProperties = {
 }
 
 const LABEL: React.CSSProperties = {
-  fontSize: 10,
-  fontWeight: 700,
-  letterSpacing: '0.22em',
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: '0.16em',
   textTransform: 'uppercase',
-  color: 'rgba(255,255,255,0.38)',
-  marginBottom: 14,
+  color: 'rgba(255,255,255,0.7)',
+  marginBottom: 12,
 }
+
+// Fotokreditering: påkrevd av CC-lisensene, samlet på ett sted uansett hvor
+// kortene/brikkene vises (se TODO.md → «Bildekreditering»).
+const PHOTO_CREDITS = Object.entries(PLAYER_PHOTOS)
+  .map(([name, p]) => ({ name, credit: p.credit, url: p.creditUrl }))
+  .sort((a, b) => a.name.localeCompare(b.name, 'nb'))
 
 export default function VmInfoPage() {
   // Etter kickoff: Kamper som standard. Før: Regler (forklarer spillet).
@@ -127,34 +135,27 @@ export default function VmInfoPage() {
   const champion = finalRows.find((m) => m.winner != null)?.winner ?? null
 
   return (
-    <div className="page-bg" style={{ minHeight: '100vh', color: '#fff', padding: '32px 16px 56px', position: 'relative' }}>
+    <div className="page-bg app-frame" style={{ minHeight: '100vh', color: '#fff', padding: '16px 20px 40px', position: 'relative' }}>
 
-      {/* Brand banner — nav + VM-SPILLET */}
-      <div style={{ position: 'relative', height: 150, overflow: 'hidden', marginBottom: 16, pointerEvents: 'none', zIndex: 1 }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'auto' }}>
-          <SmartBackButton />
-        </div>
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', gap: 4 }}>
-          <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
-            — PDC World Championship —
-          </div>
-          <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 52, letterSpacing: '-1px', lineHeight: 1 }}>
-            <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
-            <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
-          </div>
-        </div>
+      <BrandBanner compact />
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, margin: '6px 0 14px' }}>
+        <SmartBackButton />
+        <h1 style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1, margin: 0, letterSpacing: '0.02em', color: 'rgba(255,255,255,0.85)' }}>VM-guide</h1>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20, padding: '4px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }}>
+      <div role="tablist" aria-label="Innhold" style={{ display: 'flex', gap: 4, marginBottom: 16, padding: '4px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }}>
         {TABS.map((tab) => (
           <button
             key={tab.id}
+            role="tab"
+            aria-selected={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
             style={{
               flex: 1, padding: '9px 4px',
               background: activeTab === tab.id ? '#dc2626' : 'transparent',
-              color: activeTab === tab.id ? '#fff' : 'rgba(255,255,255,0.45)',
+              color: activeTab === tab.id ? '#fff' : 'rgba(255,255,255,0.65)',
               border: 'none', borderRadius: 10, fontSize: 12, fontWeight: 700,
               cursor: 'pointer', letterSpacing: '0.02em',
               boxShadow: activeTab === tab.id ? '0 2px 8px rgba(220,38,38,0.35)' : 'none',
@@ -182,14 +183,14 @@ export default function VmInfoPage() {
                     <Flag iso2={player.iso2} size={20} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</div>
-                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{player.nationality}</div>
+                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{player.nationality}</div>
                     </div>
                     {player.seedNumber != null && (
-                      <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.06)', borderRadius: 6, padding: '2px 6px', flexShrink: 0 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.06)', borderRadius: 6, padding: '2px 6px', flexShrink: 0 }}>
                         Seed {player.seedNumber}
                       </span>
                     )}
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', flexShrink: 0, width: 34, textAlign: 'right' }}>#{player.pdcRanking}</span>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', flexShrink: 0, width: 34, textAlign: 'right' }}>#{player.pdcRanking}</span>
                     <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: '#f59e0b', flexShrink: 0, width: 44, textAlign: 'right' }}>{player.odds}</span>
                   </div>
                 ))}
@@ -203,7 +204,7 @@ export default function VmInfoPage() {
       {activeTab === 'kamper' && (
         <div>
           {matches.length === 0 && (
-            <div style={{ ...CARD, textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 13, marginBottom: 16 }}>
+            <div style={{ ...CARD, textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 16 }}>
               Ingen kamper registrert ennå — sluttspilltreet fylles ut etter hvert som resultater legges inn.
             </div>
           )}
@@ -213,7 +214,7 @@ export default function VmInfoPage() {
 
               {bracketColumns.map(({ stage, rows }) => (
                 <div key={stage} style={{ width: 148, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', textAlign: 'center', padding: '0 2px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 10 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', textAlign: 'center', padding: '0 2px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 10 }}>
                     {STAGE_LABELS[stage]}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, justifyContent: 'center' }}>
@@ -228,7 +229,7 @@ export default function VmInfoPage() {
                               <span style={{ flex: 1, fontSize: 11, fontWeight: p1Wins ? 800 : 400, color: p1Wins ? '#fff' : 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {m.player1}
                               </span>
-                              <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: p1Wins ? '#fff' : 'rgba(255,255,255,0.35)', flexShrink: 0 }}>
+                              <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: p1Wins ? '#fff' : 'rgba(255,255,255,0.6)', flexShrink: 0 }}>
                                 {m.sets1}
                               </span>
                             </div>
@@ -238,7 +239,7 @@ export default function VmInfoPage() {
                               <span style={{ flex: 1, fontSize: 11, fontWeight: p2Wins ? 800 : 400, color: p2Wins ? '#fff' : 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {m.player2}
                               </span>
-                              <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: p2Wins ? '#fff' : 'rgba(255,255,255,0.35)', flexShrink: 0 }}>
+                              <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: p2Wins ? '#fff' : 'rgba(255,255,255,0.6)', flexShrink: 0 }}>
                                 {m.sets2}
                               </span>
                             </div>
@@ -246,7 +247,7 @@ export default function VmInfoPage() {
                         )
                       })
                     ) : (
-                      <div style={{ border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 10, padding: '14px 6px', textAlign: 'center', fontSize: 10, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+                      <div style={{ border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 10, padding: '14px 6px', textAlign: 'center', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>
                         Ikke spilt
                       </div>
                     )}
@@ -256,7 +257,7 @@ export default function VmInfoPage() {
 
               {/* VM-vinner */}
               <div style={{ width: 148, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#f59e0b', textAlign: 'center', padding: '0 2px 8px', borderBottom: '1px solid rgba(245,158,11,0.25)', marginBottom: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#f59e0b', textAlign: 'center', padding: '0 2px 8px', borderBottom: '1px solid rgba(245,158,11,0.25)', marginBottom: 10 }}>
                   {CHAMPION_LABEL}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center' }}>
@@ -269,7 +270,7 @@ export default function VmInfoPage() {
                       </span>
                     </div>
                   ) : (
-                    <div style={{ border: '1px dashed rgba(245,158,11,0.2)', borderRadius: 10, padding: '14px 6px', textAlign: 'center', fontSize: 10, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(245,158,11,0.3)' }}>
+                    <div style={{ border: '1px dashed rgba(245,158,11,0.2)', borderRadius: 10, padding: '14px 6px', textAlign: 'center', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(245,158,11,0.6)' }}>
                       Ikke avgjort
                     </div>
                   )}
@@ -324,8 +325,8 @@ export default function VmInfoPage() {
               <>
                 <div style={CARD}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px', marginBottom: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>1. runde</span>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>2. runde</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>1. runde</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>2. runde</span>
                   </div>
                   <DrawBracket pairA={pairA} pairB={pairB} />
                 </div>
@@ -341,7 +342,7 @@ export default function VmInfoPage() {
                         </div>
                       ))}
                     </div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 10 }}>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 10 }}>
                       Dette er spillere du potensielt kan møte senere i turneringen dersom begge går langt.
                     </div>
                   </div>
@@ -363,7 +364,7 @@ export default function VmInfoPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
                 {R1_MATCHES.map(([a, b], i) => (
                   <div key={i}>
-                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginBottom: 3 }}>Kamp {i + 1}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>Kamp {i + 1}</div>
                     <PairBox
                       a={{ name: a, seedLabel: getSeedLabel(a), faded: a.startsWith('Kvalifisert spiller'), highlighted: a === drawPlayer }}
                       b={{ name: b, seedLabel: getSeedLabel(b), faded: b.startsWith('Kvalifisert spiller'), highlighted: b === drawPlayer }}
@@ -409,7 +410,7 @@ export default function VmInfoPage() {
               <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>For å vinne hele turneringen</span>
               <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.tournamentWinner}p</span>
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 10, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 10, lineHeight: 1.5 }}>
               Alt legges sammen fortløpende gjennom turneringen, og summen ganges med pott-multiplikatoren.
             </div>
           </div>
@@ -428,14 +429,32 @@ export default function VmInfoPage() {
                   </div>
                 )
               })}
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 10, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 10, lineHeight: 1.5 }}>
               Poeng for spillere fra disse pottene ganges med faktoren — outsidere gir størst gevinst.
             </div>
           </div>
 
-          <Link href={ctaHref} className="cta-btn" style={{ display: 'block', padding: '15px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontFamily: SPORT, fontSize: 20, fontWeight: 900, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 14, textDecoration: 'none', textAlign: 'center', boxShadow: '0 4px 20px rgba(220,38,38,0.35)' }}>
+          <Link href={ctaHref} className="cta-btn" style={{ display: 'block', padding: '15px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontFamily: SPORT, fontSize: 20, fontWeight: 900, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 999, textDecoration: 'none', textAlign: 'center', boxShadow: '0 4px 20px rgba(220,38,38,0.35)' }}>
             {ctaLabel}
           </Link>
+
+          <details style={CARD}>
+            <summary style={{ ...LABEL, marginBottom: 0, cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Fotokreditering</span>
+              <span aria-hidden style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>▾</span>
+            </summary>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, margin: '10px 0 8px' }}>
+              Spillerfotoene er hentet fra Wikimedia Commons under Creative Commons-lisenser og beskåret/frilagt for kortene. Fotograf og lisens per bilde:
+            </p>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {PHOTO_CREDITS.map((c) => (
+                <li key={c.name} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 12, padding: '5px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ color: '#fff', fontWeight: 600, flexShrink: 0 }}>{c.name}</span>
+                  <a href={c.url} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.65)', textAlign: 'right', textDecoration: 'underline', textUnderlineOffset: 2 }}>{c.credit}</a>
+                </li>
+              ))}
+            </ul>
+          </details>
 
         </div>
       )}

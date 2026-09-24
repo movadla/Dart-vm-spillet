@@ -61,8 +61,8 @@ export default function KickButton({ leagueId, memberId, memberName, createdBy }
           background: 'rgba(220,38,38,0.08)',
           border: '1px solid rgba(220,38,38,0.2)',
           borderRadius: 6,
-          color: 'rgba(239,68,68,0.6)',
-          fontSize: 10,
+          color: '#f87171',
+          fontSize: 11,
           fontWeight: 700,
           cursor: 'pointer',
           letterSpacing: '0.04em',
@@ -77,7 +77,7 @@ export default function KickButton({ leagueId, memberId, memberName, createdBy }
           position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 5,
           width: 160, padding: '6px 9px', borderRadius: 6, textAlign: 'left',
           background: '#1a1015', border: '1px solid rgba(239,68,68,0.3)',
-          color: '#fca5a5', fontSize: 10, fontWeight: 600, lineHeight: 1.4,
+          color: '#fca5a5', fontSize: 11, fontWeight: 600, lineHeight: 1.4,
           textTransform: 'none', letterSpacing: 'normal',
         }}>
           {error}

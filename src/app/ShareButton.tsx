@@ -9,7 +9,8 @@ interface Props {
   title?: string
   text?: string
   label?: string
-  variant?: 'default' | 'primary' | 'compact'
+  /** pill = samme form som de andre pill-knappene på Min side */
+  variant?: 'default' | 'primary' | 'compact' | 'pill'
 }
 
 export default function ShareButton({
@@ -27,10 +28,10 @@ export default function ShareButton({
       try {
         await navigator.share({ title, text, url })
       } catch {
-        // User cancelled share — ignore
+        // Brukeren avbrøt delingen — ignorer
       }
     } else {
-      await navigator.clipboard.writeText(text ? `${text}\n${url}` : url)
+      try { await navigator.clipboard.writeText(text ? `${text}\n${url}` : url) } catch {}
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
@@ -38,33 +39,36 @@ export default function ShareButton({
 
   const isPrimary = variant === 'primary'
   const isCompact = variant === 'compact'
+  const isPill = variant === 'pill'
 
   return (
     <button
       onClick={handleShare}
+      className={isPill ? 'guide-btn' : undefined}
+      aria-live="polite"
       style={{
         display: isPrimary ? 'flex' : 'inline-flex',
         width: isPrimary ? '100%' : undefined,
-        justifyContent: isPrimary ? 'center' : undefined,
+        justifyContent: 'center',
         alignItems: 'center',
         gap: 7,
-        padding: isPrimary ? '14px 22px' : isCompact ? '4px 10px' : '12px 22px',
-        background: copied ? 'rgba(34,197,94,0.08)' : isPrimary ? '#dc2626' : 'rgba(255,255,255,0.06)',
-        border: `1px solid ${copied ? 'rgba(34,197,94,0.25)' : isPrimary ? 'rgba(220,38,38,0.5)' : 'rgba(255,255,255,0.1)'}`,
-        borderRadius: isCompact ? 6 : 12,
-        color: copied ? '#22c55e' : isPrimary ? '#fff' : 'rgba(255,255,255,0.55)',
-        fontSize: isCompact ? 10 : 14,
+        padding: isPrimary ? '14px 22px' : isCompact ? '4px 10px' : isPill ? '13px 20px' : '12px 22px',
+        background: copied ? 'rgba(34,197,94,0.1)' : isPrimary ? '#dc2626' : isPill ? 'linear-gradient(180deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.05) 100%)' : 'rgba(255,255,255,0.06)',
+        border: `1px solid ${copied ? 'rgba(34,197,94,0.3)' : isPrimary ? 'rgba(220,38,38,0.5)' : isPill ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.14)'}`,
+        borderRadius: isCompact ? 6 : isPill ? 999 : 12,
+        color: copied ? '#4ade80' : isPrimary ? '#fff' : isPill ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.75)',
+        fontSize: isCompact ? 11 : 14,
         fontWeight: 700,
         letterSpacing: '0.06em',
         textTransform: 'uppercase',
         cursor: 'pointer',
         fontFamily: SPORT,
         transition: 'background 0.15s, color 0.15s, border-color 0.15s',
-        boxShadow: isPrimary && !copied ? '0 4px 16px rgba(220,38,38,0.3)' : 'none',
+        boxShadow: isPrimary && !copied ? '0 4px 16px rgba(220,38,38,0.3)' : isPill ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 12px rgba(0,0,0,0.3)' : 'none',
         whiteSpace: 'nowrap',
       }}
     >
-      {copied ? '✓' : label}
+      {copied ? '✓ Kopiert' : label}
     </button>
   )
 }

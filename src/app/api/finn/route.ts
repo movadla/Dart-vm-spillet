@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { clientIp, isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
+import { DEMO_COOKIE, DEMO_EMAIL, DEMO_ID, DEMO_PARTICIPANTS } from '@/lib/demo'
 
 // Uten dette var endepunktet ubegrenset scriptbart for e-post-enumerering
 // (200 = e-posten finnes, 404 = den gjør ikke det) og for å finne enhver
@@ -11,18 +12,33 @@ const LIMIT = 20
 const WINDOW_MS = 60 * 60 * 1000
 
 export async function POST(req: NextRequest) {
-  const supabase = getSupabaseAdmin()
+  const { email } = await req.json()
+  if (!email || typeof email !== 'string' || !email.includes('@') || email.split('@')[1]?.length === 0) {
+    return NextResponse.json({ error: 'Ugyldig e-post' }, { status: 400 })
+  }
+
+  // Demo-deltakeren finnes ikke i databasen — «innloggingen» er bare id-en
+  // `demo` + demo-cookien (se src/lib/demo.ts). Sjekkes før Supabase så
+  // demoen fungerer også uten database.
+  if (email.trim().toLowerCase() === DEMO_EMAIL) {
+    const demo = DEMO_PARTICIPANTS.find((p) => p.id === DEMO_ID)!
+    const res = NextResponse.json({ id: demo.id, name: demo.name, demo: true })
+    res.cookies.set(DEMO_COOKIE, 'live', { path: '/', maxAge: 60 * 60 * 24 * 30, sameSite: 'lax' })
+    return res
+  }
+
+  let supabase: ReturnType<typeof getSupabaseAdmin>
+  try {
+    supabase = getSupabaseAdmin()
+  } catch {
+    return NextResponse.json({ error: 'Databasen er ikke satt opp ennå' }, { status: 503 })
+  }
   const ip = clientIp(req)
 
   if (await isRateLimited(supabase, 'finn', ip, LIMIT, WINDOW_MS)) {
     return NextResponse.json({ error: 'For mange forsøk. Vent en time og prøv igjen.' }, { status: 429 })
   }
   await recordRateLimitHit(supabase, 'finn', ip)
-
-  const { email } = await req.json()
-  if (!email || !email.includes('@') || email.split('@')[1]?.length === 0) {
-    return NextResponse.json({ error: 'Ugyldig e-post' }, { status: 400 })
-  }
 
   const { data, error } = await supabase
     .from('participants')
@@ -35,5 +51,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Fant ingen deltaker med den e-posten' }, { status: 404 })
   }
 
-  return NextResponse.json({ id: data[0].id, name: data[0].name })
+  // Ekte innlogging → demo-verdenen skal ikke henge igjen på leaderboardet.
+  const res = NextResponse.json({ id: data[0].id, name: data[0].name })
+  res.cookies.set(DEMO_COOKIE, '', { path: '/', maxAge: 0 })
+  return res
 }

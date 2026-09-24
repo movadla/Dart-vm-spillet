@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-
-const supabase = getSupabaseAdmin()
 import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
+import { isDemoId, parseDemoPhase, DEMO_COOKIE } from '@/lib/demo'
+import { getDemoLeaguesFor } from '@/lib/participantData'
 
 export async function GET(req: NextRequest) {
   const participantId = req.nextUrl.searchParams.get('participantId')
   if (!participantId) return NextResponse.json({ error: 'Mangler participantId' }, { status: 400 })
+
+  if (isDemoId(participantId)) {
+    const phase = parseDemoPhase(req.nextUrl.searchParams.get('fase')) ?? parseDemoPhase(req.cookies.get(DEMO_COOKIE)?.value) ?? 'live'
+    return NextResponse.json({ leagues: getDemoLeaguesFor(participantId, phase) })
+  }
+
+  // Klienten lages per kall (ikke på modulnivå) så en manglende Supabase-
+  // konfigurasjon gir et tomt svar i stedet for å crashe hele ruten ved import.
+  let supabase: ReturnType<typeof getSupabaseAdmin>
+  try { supabase = getSupabaseAdmin() } catch { return NextResponse.json({ leagues: [] }) }
 
   const { data, error } = await supabase
     .from('league_members')

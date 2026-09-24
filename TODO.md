@@ -7,6 +7,7 @@
 - [ ] **Bildekreditering:** «i»-knappen er fjernet fra kortene (2026-09-24); krediteringen (påkrevd av CC-lisensene) vises nå i spillerpanelet («Foto: …»). Lag i tillegg en samlet liste på info-siden (`/vm-info`) med alle spillerfoto + fotograf + lisens — trygt uansett hvor kortene vises (oppsummering, Min side, leaderboard).
 - [ ] **«% valgt»** (`/api/pick-share`) vises først fra 10 deltakere (`MIN_PARTICIPANTS_FOR_SHARE`). Bestem om du vil ha den synlig i det hele tatt før VM — tallet påvirker hva folk velger (flokkeffekt). Ved mange tusen deltakere bør endepunktet flyttes til en DB-view/RPC med `group by` i stedet for å hente alle picks-rader (cachet 60 s nå, så det holder lenge).
 
+- [ ] **Demo-deltakeren** (lagt inn 2026-09-24, se README → «Demo-deltaker»): `/finn` med `demo@dart-vm-spillet.no` → `/deltaker/demo`. Bestem før lansering om demoen skal være tilgjengelig i produksjon (den er harmløs og helt atskilt fra ekte data, men `/deltaker/demo` er en offentlig URL). Vil du fjerne den: slett demo-grenene i `src/lib/participantData.ts` og `src/app/api/finn/route.ts` (+ `league/mine`), så er `src/lib/demo.ts` død kode. Når `dart_vm`-skjemaet er eksponert kan jeg i tillegg legge inn en ekte testdeltaker i databasen.
 - [ ] `! gh auth login` — logg inn på GitHub, så kan jeg opprette repo og pushe
 - [ ] **KOBLE TIL SUPABASE (VM-tipping-prosjektet gjenbrukes, egen atskilt
       del) — gjør denne når du er ved PC, steg for steg:**

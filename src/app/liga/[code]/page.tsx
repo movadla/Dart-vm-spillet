@@ -1,153 +1,107 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import SmartBackButton from '@/components/SmartBackButton'
-import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { POTS } from '@/data/pots'
-import { calcParticipantPoints, isPlayerEliminated, isPlayerChampion, furthestStageReached, MatchResult } from '@/lib/scoring'
-import { STAGE_ORDER } from '@/config/scoring'
+import BrandBanner from '@/components/BrandBanner'
 import CopyCode from '@/components/CopyCode'
+import RankList from '@/components/RankList'
 import DeadlineCountdown from '@/app/deltaker/[id]/DeadlineCountdown'
-import RankList, { RankEntry } from '@/components/RankList'
-import { getRankBaseline, RANK_ARROW_LEAGUES } from '@/lib/rankSnapshot'
+import LastUpdated from '@/app/deltaker/[id]/LastUpdated'
+import ShareButton from '@/app/ShareButton'
+import { getLeagueData } from '@/lib/participantData'
 
 export const revalidate = 30
 
-const KICKOFF = new Date('2026-12-11T19:00:00Z')
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
-interface Pick { participant_id: string; pot_number: number; player_name: string }
-
-async function getData(code: string) {
-  // Klienten lages her (ikke på modulnivå) og feiler til null → notFound()
-  // hos kalleren — uten Supabase konfigurert crashet siden tidligere med en
-  // rå feilmelding. Samme fiks som leaderboard/page.tsx og deltaker/[id].
-  let supabase: ReturnType<typeof getSupabaseAdmin>
-  try {
-    supabase = getSupabaseAdmin()
-  } catch {
-    return null
-  }
-
-  const { data: league } = await supabase
-    .from('leagues')
-    .select('id, name, invite_code, created_by, hidden_until_kickoff')
-    .eq('invite_code', code.toUpperCase())
-    .maybeSingle()
-
-  if (!league) return null
-
-  const { data: members } = await supabase
-    .from('league_members')
-    .select('participant:participants(id, name)')
-    .eq('league_id', league.id)
-
-  if (!members?.length) return { league, rows: [], matchResults: [] }
-
-  const ids = members
-    .map((m) => (m.participant as unknown as { id: string; name: string } | null)?.id)
-    .filter(Boolean) as string[]
-
-  const [{ data: picks }, { data: matches }] = await Promise.all([
-    supabase.from('picks').select('participant_id, pot_number, player_name').in('participant_id', ids),
-    supabase.from('match_results').select('player1, player2, sets1, sets2, stage, winner'),
-  ])
-
-  const matchResults = (matches as MatchResult[]) ?? []
-
-  const rows = members
-    .map((m) => {
-      const p = m.participant as unknown as { id: string; name: string } | null
-      if (!p) return null
-      const playerPicks = ((picks as Pick[]) ?? []).filter((pk) => pk.participant_id === p.id)
-      const points = calcParticipantPoints(playerPicks, matchResults)
-      // Sum av hver spillers kamper (for underveis-visning av antall spilte kamper).
-      const matchesPlayed = playerPicks.reduce((sum, pk) =>
-        sum + matchResults.filter((mt) => mt.player1 === pk.player_name || mt.player2 === pk.player_name).length, 0)
-      return { id: p.id, name: p.name, points, matchesPlayed, picks: playerPicks.sort((a, b) => a.pot_number - b.pot_number) }
-    })
-    .filter((r): r is NonNullable<typeof r> => r !== null)
-    .sort((a, b) => b.points - a.points)
-
-  return { league, rows, matchResults }
+const CARD: React.CSSProperties = {
+  background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
+  borderRadius: 16,
+  border: '1px solid rgba(255,255,255,0.12)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)',
 }
 
-export default async function LigaPage({ params }: { params: Promise<{ code: string }> }) {
+export default async function LigaPage({ params, searchParams }: {
+  params: Promise<{ code: string }>
+  searchParams: Promise<{ fase?: string }>
+}) {
   const { code } = await params
-  const data = await getData(code)
+  const { fase } = await searchParams
+  const data = await getLeagueData(code, fase)
   if (!data) notFound()
 
-  const { league, rows, matchResults } = data
-  const vmStarted = new Date() >= KICKOFF
-
-  // Rang-piler kun for utvalgte ligaer (f.eks. Ståle Solbakken Fan Club)
-  const showArrows = RANK_ARROW_LEAGUES.includes(league.invite_code)
-  const baseline = showArrows ? await getRankBaseline(league.invite_code) : {}
+  const { league, rows, vmStarted, demo } = data
   const hidden = !vmStarted && !!league.hidden_until_kickoff
 
   return (
-    <div className="page-bg" style={{ minHeight: '100vh', color: '#fff', padding: '32px 16px 56px', position: 'relative' }}>
+    <div className="page-bg app-frame" style={{ minHeight: '100vh', color: '#fff', padding: '16px 20px 40px', position: 'relative' }}>
+      <BrandBanner compact />
 
-      {/* Brand banner */}
-      <div style={{ position: 'relative', height: 150, marginBottom: 16, pointerEvents: 'none', zIndex: 1 }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'auto' }}>
-          <SmartBackButton />
-        </div>
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-          <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
-            — PDC World Championship —
-          </div>
-          <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 52, letterSpacing: '-1px', lineHeight: 1 }}>
-            <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
-            <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: 20 }}>
-        {!vmStarted && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 8 }}>
-            <CopyCode code={league.invite_code} fontSize={14} color="rgba(255,255,255,0.5)" letterSpacing="0.18em" />
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, margin: '6px 0 14px' }}>
+        <SmartBackButton />
+        {demo && (
+          <Link href="/deltaker/demo" style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 999, padding: '5px 10px', textDecoration: 'none' }}>
+            Demo
+          </Link>
         )}
-        <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1.05, textAlign: 'center', letterSpacing: '0.06em' }}>
-          <span style={{ color: 'rgba(255,255,255,0.22)' }}>— </span>
-          <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{league.name}</span>
-          <span style={{ color: 'rgba(255,255,255,0.22)' }}> —</span>
+      </div>
+
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>Liga</div>
+        <h1 style={{ fontFamily: SPORT, fontSize: 28, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1, margin: 0, letterSpacing: '-0.01em', overflowWrap: 'anywhere' }}>{league.name}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, fontSize: 12, color: 'rgba(255,255,255,0.6)', flexWrap: 'wrap' }}>
+          <span>{rows.length} {rows.length === 1 ? 'deltaker' : 'deltakere'}</span>
+          {vmStarted && (
+            <>
+              <span aria-hidden style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>
+              <LastUpdated fetchedAt={new Date().toISOString()} />
+            </>
+          )}
         </div>
       </div>
+
+      {/* Før VM: invitasjonskode + deling, så ligaen kan fylles opp */}
+      {!vmStarted && (
+        <div style={{ ...CARD, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 12px 10px 14px', marginBottom: 12 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>Ligakode</div>
+            <CopyCode code={league.invite_code} fontSize={22} color="#fff" letterSpacing="0.14em" />
+          </div>
+          <ShareButton
+            url={`${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'}/liga/${league.invite_code}`}
+            title={`${league.name} – Dart-VM-spillet`}
+            text={`Bli med i ${league.name} i Dart-VM-spillet! Kode: ${league.invite_code}`}
+            label="Inviter →"
+            variant="pill"
+          />
+        </div>
+      )}
 
       {hidden ? (
-        <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', padding: '40px 20px', textAlign: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
-          <div style={{ fontSize: 22, marginBottom: 10 }}>🔒</div>
-          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Deltakerlisten er skjult</div>
+        <div style={{ ...CARD, padding: '32px 20px', textAlign: 'center' }}>
+          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Deltakerlisten er skjult til VM starter</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>Ligaeieren har valgt å holde lagene hemmelige frem til første kamp.</div>
           <DeadlineCountdown />
         </div>
       ) : rows.length === 0 ? (
-        <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', padding: '40px 20px', textAlign: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
-          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>Ingen deltakere ennå</div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>Del ligakoden med venner så de kan bli med</div>
+        <div style={{ ...CARD, padding: '32px 20px', textAlign: 'center' }}>
+          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Ingen deltakere ennå</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Del ligakoden <strong style={{ color: '#fff', letterSpacing: '0.1em' }}>{league.invite_code}</strong> med venner så de kan bli med.</div>
         </div>
       ) : (
-        <RankList
-          rows={rows.map(({ id, name, points, matchesPlayed, picks: playerPicks }, i): RankEntry => ({
-            id,
-            name,
-            points,
-            matchesPlayed,
-            rankDelta: vmStarted && baseline[id] != null ? baseline[id] - (i + 1) : undefined,
-            flags: playerPicks.map((pk) => {
-              const pot = POTS.find((p) => p.potNumber === pk.pot_number)
-              const iso2 = pot?.players.find((pl) => pl.name === pk.player_name)?.iso2 ?? ''
-              const stageReached = furthestStageReached(pk.player_name, matchResults, STAGE_ORDER)
-              const champion = isPlayerChampion(pk.player_name, matchResults)
-              const medal = champion ? 'gold' : stageReached === 'final' ? 'silver' : undefined
-              return { iso2, eliminated: isPlayerEliminated(pk.player_name, matchResults), medal }
-            }),
-          }))}
-          vmStarted={vmStarted}
-          kick={{ leagueId: league.id, createdBy: league.created_by }}
-          scrollToMe={false}
-          backRef={`liga-${league.invite_code}`}
-        />
+        <>
+          {!vmStarted && (
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginBottom: 10, lineHeight: 1.5 }}>
+              Poeng og plassering kommer når VM starter 11. desember.
+            </div>
+          )}
+          <RankList
+            rows={rows}
+            vmStarted={vmStarted}
+            kick={demo ? undefined : { leagueId: league.id, createdBy: league.created_by }}
+            scrollToMe={false}
+            backRef={`liga-${league.invite_code}`}
+          />
+        </>
       )}
     </div>
   )

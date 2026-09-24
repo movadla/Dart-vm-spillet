@@ -21,6 +21,20 @@ npm run dev
 
 Åpne [http://localhost:3000](http://localhost:3000).
 
+### Demo-deltaker (test uten database)
+
+Appen har en innebygd demo-verden (`src/lib/demo.ts`) som fungerer uten Supabase:
+én fiktiv deltaker («Ola Dartmann», e-post `demo@dart-vm-spillet.no`), elleve andre
+fiktive deltakere, to ligaer (`DEMO01`, `DEMO02`) og eksempel-kampresultater.
+Logg inn på `/finn` med demo-e-posten (lokalt finnes det også en snarvei-knapp), så
+havner du på `/deltaker/demo`. Banneret øverst bytter mellom tre faser — **Før VM**,
+**Underveis** og **Etter finalen** — og fasen huskes i cookien `vm_demo`, som også
+leaderboardet og liga-sidene leser. Demo-deltakeren kan ikke endre laget eller
+opprette ligaer (det krever e-postinnlogging), og demo-data blandes aldri med ekte
+deltakere: demo slår bare inn for id-ene `demo`/`demo-N`, kodene `DEMO01`/`DEMO02`
+og — for leaderboardet — når demo-cookien er satt. «Bytt bruker» nederst på Min
+side sletter cookien.
+
 ## Miljøvariabler
 
 Alle miljøvariabler settes i Vercel-dashboardet (Settings → Environment Variables). For lokal utvikling, lag en `.env.local`-fil.

@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { formatPoints } from '@/lib/format'
 
 interface DayRec { day: string; base: number; last: number }
 
+/** «+5 p siden i går»-chip. Baseline lagres lokalt per deltaker (se kommentar under). */
 export default function PointsDelta({ participantId, totalPoints }: { participantId: string; totalPoints: number }) {
   const [delta, setDelta] = useState<number | null>(null)
 
@@ -43,19 +43,19 @@ export default function PointsDelta({ participantId, totalPoints }: { participan
 
   return (
     <span style={{
-      fontFamily: SPORT,
-      fontSize: 9,
+      fontSize: 11,
       fontWeight: 700,
-      color: delta > 0 ? '#f59e0b' : 'rgba(255,255,255,0.3)',
+      color: delta > 0 ? '#f59e0b' : 'rgba(255,255,255,0.6)',
       background: delta > 0 ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.05)',
       border: `1px solid ${delta > 0 ? 'rgba(245,158,11,0.28)' : 'rgba(255,255,255,0.1)'}`,
-      borderRadius: 4,
-      padding: '2px 6px',
-      letterSpacing: '0.04em',
+      borderRadius: 6,
+      padding: '3px 7px',
+      letterSpacing: '0.02em',
       whiteSpace: 'nowrap',
       flexShrink: 0,
+      fontVariantNumeric: 'tabular-nums',
     }}>
-      {delta > 0 ? `+${delta}p` : `${delta}p`} siden i går
+      {delta > 0 ? `+${formatPoints(delta)}` : formatPoints(delta)} siden i går
     </span>
   )
 }

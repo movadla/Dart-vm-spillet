@@ -1,24 +1,18 @@
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-
 export default function LeaderboardLoading() {
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0a', padding: '32px 16px 56px' }}>
-
-      <div style={{ marginBottom: 24 }}>
-        <div className="skeleton" style={{ width: 56, height: 14, borderRadius: 6 }} />
+    <div className="page-bg app-frame" style={{ minHeight: '100vh', padding: '16px 20px 40px' }}>
+      <div style={{ height: 70, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <div className="skeleton" style={{ width: 150, height: 10, borderRadius: 4 }} />
+        <div className="skeleton" style={{ width: 210, height: 30, borderRadius: 8 }} />
       </div>
-
-      <div style={{ marginBottom: 28 }}>
-        <div className="skeleton" style={{ width: 160, height: 50, borderRadius: 10, marginBottom: 10 }} />
-        <div className="skeleton" style={{ width: 200, height: 13, borderRadius: 6 }} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', margin: '6px 0 14px' }}>
+        <div className="skeleton" style={{ width: 96, height: 30, borderRadius: 20 }} />
       </div>
-
-      {/* #1 featured card skeleton */}
-      <div className="skeleton" style={{ height: 136, borderRadius: 20, marginBottom: 8 }} />
-
-      {/* Row skeletons */}
-      {[0, 1, 2, 3, 4].map(i => (
-        <div key={i} className="skeleton" style={{ height: 70, borderRadius: 18, marginBottom: 8 }} />
+      <div className="skeleton" style={{ width: 230, height: 36, borderRadius: 8, marginBottom: 8 }} />
+      <div className="skeleton" style={{ width: 150, height: 12, borderRadius: 4, marginBottom: 16 }} />
+      <div className="skeleton" style={{ height: 44, borderRadius: 14, marginBottom: 12 }} />
+      {[0, 1, 2, 3, 4, 5].map(i => (
+        <div key={i} className="skeleton" style={{ height: 66, borderRadius: 16, marginBottom: 8 }} />
       ))}
     </div>
   )

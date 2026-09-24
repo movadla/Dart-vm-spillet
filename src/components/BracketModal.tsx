@@ -60,7 +60,8 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: 480, maxHeight: '90dvh', display: 'flex', flexDirection: 'column',
-          background: 'linear-gradient(180deg, #161b27 0%, #0f1219 100%)', border: '1px solid rgba(255,255,255,0.12)', borderBottom: 'none',
+          background: 'linear-gradient(180deg, #161b27 0%, #0f1219 100%)',
+          borderTop: '1px solid rgba(255,255,255,0.12)', borderLeft: '1px solid rgba(255,255,255,0.12)', borderRight: '1px solid rgba(255,255,255,0.12)', borderBottom: 'none',
           borderRadius: '18px 18px 0 0', boxShadow: '0 -12px 40px rgba(0,0,0,0.5)', animation: 'sheet-up 0.3s cubic-bezier(0.22,1,0.36,1) both',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
