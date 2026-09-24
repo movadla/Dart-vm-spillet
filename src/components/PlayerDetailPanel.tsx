@@ -4,9 +4,10 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import dynamic from 'next/dynamic'
 import Flag from '@/components/Flag'
 import type { Player } from '@/data/pots'
-import { PLAYER_STATS } from '@/data/playerStats'
-import { getPathToFinal, type PathStep } from '@/lib/bracketProjection'
 import { POTS } from '@/data/pots'
+import { PLAYER_STATS } from '@/data/playerStats'
+import { PLAYER_PHOTOS } from '@/data/playerPhotos'
+import { getPathToFinal, type PathStep } from '@/lib/bracketProjection'
 import { formatAvg, formatPercent } from '@/lib/format'
 import { lastName } from '@/components/TeamTile'
 
@@ -39,19 +40,42 @@ const ALL_PLAYERS = POTS.flatMap((p) => p.players)
 function iso2For(name: string): string {
   return ALL_PLAYERS.find((p) => p.name === name)?.iso2 ?? ''
 }
-
-function Label({ children }: { children: ReactNode }) {
-  return <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>{children}</div>
+function formatOdds(odds: string): string {
+  const n = Number.parseFloat(odds)
+  return Number.isFinite(n) ? n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : odds
 }
 
-const BIG: React.CSSProperties = { fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: '#fff', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }
+// ── Byggeklosser: to tydelig adskilte blokker, STATISTIKK (tall) og INFO (tekst) ──
+function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0 8px' }}>
+      <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)' }}>{children}</span>
+      <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+    </div>
+  )
+}
+function Stat({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '9px 10px', minWidth: 0 }}>
+      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 5 }}>{label}</div>
+      <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, color: '#fff', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{children}</div>
+    </div>
+  )
+}
+function InfoRow({ label, children, last = false }: { label: string; children: ReactNode; last?: boolean }) {
+  return (
+    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '9px 0', borderBottom: last ? 'none' : '1px solid rgba(255,255,255,0.08)' }}>
+      <span style={{ width: 132, flexShrink: 0, fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', paddingTop: 2 }}>{label}</span>
+      <div style={{ flex: 1, minWidth: 0, fontSize: 14, color: '#fff', lineHeight: 1.4, textAlign: 'right' }}>{children}</div>
+    </div>
+  )
+}
 
 /**
- * Spillerpanelet i tippe-flyten som bunnark: glir opp over kortene når en
- * spiller velges, alltid fullt synlig uansett skjermstørrelse, og lukkes med
- * sveip ned, klikk utenfor, Escape eller knappene nederst («Neste» går rett
- * videre). Innhold: ranking / snitt / % valgt, beste prestasjon, de tre
- * vanskeligste motstanderne på veien til finalen, og brakett-pop-up.
+ * Spillerpanelet i tippe-flyten som bunnark. Åpnes fra «Detaljer»-knappen
+ * (trykk på kort er kun valg). To blokker: STATISTIKK (2×2 store tall) og
+ * INFO (etikett/verdi-rader). Lukkes med sveip ned (arket følger fingeren),
+ * klikk utenfor, Escape eller knappene nederst; «Neste» går rett videre.
  */
 export default function PlayerDetailPanel({ player, color, open, onClose, onNext, nextLabel }: {
   player: Player
@@ -63,8 +87,9 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
 }) {
   const [share, setShare] = useState<PickShare | null>(null)
   const [bracketOpen, setBracketOpen] = useState(false)
-  const [showDataNote, setShowDataNote] = useState(false)
-  const touchStartY = useRef<number | null>(null)
+  const [dragY, setDragY] = useState(0)
+  const dragStart = useRef<number | null>(null)
+  const bodyRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -84,6 +109,7 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
   if (!open) return null
 
   const stats = PLAYER_STATS[player.name]
+  const photo = PLAYER_PHOTOS[player.name]
   const path = getPathToFinal(player.name)
     .filter((s) => s.stage !== 'final')
     .sort((a, b) => a.pdcRanking - b.pdcRanking)
@@ -94,7 +120,22 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
     ? formatPercent(((share.counts[player.name] ?? 0) / share.total) * 100)
     : '—'
 
-  const tile: React.CSSProperties = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 10px', minWidth: 0 }
+  // Sveip ned: arket følger fingeren når innholdet står øverst; slipp > 90 px lukker.
+  function onTouchStart(e: React.TouchEvent) {
+    if (bodyRef.current && bodyRef.current.scrollTop > 0) return
+    dragStart.current = e.touches[0].clientY
+  }
+  function onTouchMove(e: React.TouchEvent) {
+    if (dragStart.current == null) return
+    const dy = e.touches[0].clientY - dragStart.current
+    if (dy > 0) setDragY(dy)
+  }
+  function onTouchEnd() {
+    const dy = dragY
+    dragStart.current = null
+    setDragY(0)
+    if (dy > 90) onClose()
+  }
 
   return (
     <div
@@ -106,113 +147,97 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
         aria-modal="true"
         aria-label={`Om ${player.name}`}
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY }}
-        onTouchEnd={(e) => {
-          const start = touchStartY.current
-          touchStartY.current = null
-          if (start != null && e.changedTouches[0].clientY - start > 70) onClose()
-        }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
         style={{
-          width: '100%', maxWidth: 480, maxHeight: '88dvh', display: 'flex', flexDirection: 'column',
+          width: '100%', maxWidth: 480, maxHeight: '90dvh', display: 'flex', flexDirection: 'column',
           background: 'linear-gradient(180deg, #171c28 0%, #0f1219 100%)', border: `1px solid ${color}55`, borderBottom: 'none',
           borderRadius: '18px 18px 0 0', boxShadow: `0 -12px 40px rgba(0,0,0,0.5), 0 -1px 0 ${color}66`,
-          animation: 'sheet-up 0.32s cubic-bezier(0.22,1,0.36,1) both',
+          animation: dragY ? 'none' : 'sheet-up 0.32s cubic-bezier(0.22,1,0.36,1) both',
+          transform: `translateY(${dragY}px)`, transition: dragY ? 'none' : 'transform 0.25s cubic-bezier(0.22,1,0.36,1)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
         {/* Håndtak + header */}
-        <div style={{ padding: '8px 16px 0', flexShrink: 0 }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.25)', margin: '0 auto 10px' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Flag iso2={player.iso2} size={18} />
-            <div style={{ flex: 1, minWidth: 0, fontFamily: SPORT, fontSize: 20, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {player.name}
+        <div style={{ padding: '8px 16px 10px', flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.3)', margin: '0 auto 10px' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Flag iso2={player.iso2} size={20} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {player.name}
+              </div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 3 }}>
+                {player.nationality} · {player.seedNumber != null ? `Seed ${player.seedNumber}` : 'Useedet'}
+              </div>
             </div>
-            {stats && !stats.verified && (
-              <button
-                type="button"
-                onClick={() => setShowDataNote((v) => !v)}
-                aria-expanded={showDataNote}
-                style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.45)', borderRadius: 999, padding: '4px 8px', cursor: 'pointer', flexShrink: 0 }}
-              >
-                Eksempeldata
-              </button>
-            )}
             <button
               type="button"
               onClick={onClose}
               aria-label="Lukk"
-              style={{ width: 32, height: 32, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15, cursor: 'pointer', flexShrink: 0 }}
+              style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15, cursor: 'pointer', flexShrink: 0 }}
             >
               ✕
             </button>
           </div>
-          {showDataNote && (
-            <div style={{ marginTop: 8, fontSize: 12, lineHeight: 1.45, color: 'rgba(255,255,255,0.7)', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 8, padding: '8px 10px' }}>
-              Snitt og beste prestasjon er foreløpige eksempeltall som ikke er kontrollert mot PDC ennå.
-            </div>
-          )}
         </div>
 
         {/* Innhold — krysstoner når spilleren byttes mens arket er åpent */}
-        <div key={player.name} style={{ padding: '12px 16px 4px', overflowY: 'auto', animation: 'slide-enter 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
-            <div style={tile}>
-              <Label>Ranking</Label>
-              <div style={BIG}>#{player.pdcRanking}</div>
-            </div>
-            <div style={tile}>
-              <Label>Snitt</Label>
-              <div style={BIG}>{formatAvg(stats?.avg)}</div>
-            </div>
-            <div style={tile}>
-              <Label>% valgt</Label>
+        <div ref={bodyRef} key={player.name} style={{ padding: '2px 16px 6px', overflowY: 'auto', animation: 'slide-enter 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
+          <SectionTitle>Statistikk</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <Stat label="Verdensranking">#{player.pdcRanking}</Stat>
+            <Stat label="Snitt">{formatAvg(stats?.avg)}</Stat>
+            <Stat label="Odds">{formatOdds(player.odds)}</Stat>
+            <Stat label="% valgt">
               {share === null
-                ? <span className="skeleton" style={{ display: 'inline-block', width: 36, height: 16, borderRadius: 4 }} />
-                : <div style={BIG}>{shareText}</div>}
-            </div>
+                ? <span className="skeleton" style={{ display: 'inline-block', width: 40, height: 18, borderRadius: 4 }} />
+                : shareText}
+            </Stat>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
-            <Label>Beste prestasjon</Label>
-            <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: '#fff', textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {stats?.bestAchievement ?? '—'}
+          {stats && !stats.verified && (
+            <div style={{ fontSize: 12, color: '#f59e0b', marginTop: 8, lineHeight: 1.4 }}>
+              Eksempeldata – snitt og beste prestasjon er ikke kontrollert mot PDC ennå.
             </div>
-          </div>
+          )}
 
-          <Label>Vei til finalen</Label>
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.max(path.length, 1)}, 1fr)`, gap: 8, marginBottom: 6 }}>
-            {path.length ? path.map((s) => (
-              <div key={s.stage} style={{ ...tile, textAlign: 'center', borderColor: `${color}66`, background: `${color}18` }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
-                  <Flag iso2={iso2For(s.opponent)} size={13} />
-                  <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color: '#fff', lineHeight: 1.1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(s.opponent)}</span>
-                </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 3 }}>({SHORT_STAGE[s.stage]})</div>
+          <SectionTitle>Info</SectionTitle>
+          <InfoRow label="Beste prestasjon">{stats?.bestAchievement ?? '—'}</InfoRow>
+          <InfoRow label="Vei til finalen">
+            {path.length ? (
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 6 }}>
+                {path.map((s) => (
+                  <span key={s.stage} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 9px', borderRadius: 999, background: `${color}1f`, border: `1px solid ${color}66`, fontSize: 13, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>
+                    <Flag iso2={iso2For(s.opponent)} size={13} />
+                    {lastName(s.opponent)}
+                    <span style={{ fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>({SHORT_STAGE[s.stage]})</span>
+                  </span>
+                ))}
               </div>
-            )) : (
-              <div style={{ ...tile, fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Ingen rangerte motstandere før finalen</div>
-            )}
-          </div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginBottom: 12 }}>
-            Topp 16 du kan møte hvis favorittene vinner · eksempel-trekning
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setBracketOpen(true)}
-            style={{ display: 'block', width: '100%', textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#fff', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 10, padding: '10px 4px', cursor: 'pointer' }}
-          >
-            Se bracketen →
-          </button>
+            ) : <span style={{ color: 'rgba(255,255,255,0.6)' }}>Ingen topp 16 før finalen</span>}
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 5 }}>
+              Hvis favorittene vinner · eksempel-trekning ·{' '}
+              <button type="button" onClick={() => setBracketOpen(true)} style={{ background: 'none', border: 'none', padding: 0, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                Se hele trekningen →
+              </button>
+            </div>
+          </InfoRow>
+          {photo && (
+            <InfoRow label="Foto" last>
+              <a href={photo.creditUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                {photo.credit}
+              </a>
+            </InfoRow>
+          )}
         </div>
 
         {/* Bunn: lukk / gå videre */}
-        <div style={{ display: 'flex', gap: 10, padding: '12px 16px 14px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 10, padding: '12px 16px 14px', flexShrink: 0, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <button
             type="button"
             onClick={onClose}
-            style={{ flexShrink: 0, padding: '14px 18px', background: 'transparent', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 12, fontFamily: SPORT, fontSize: 14, fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer' }}
+            style={{ flexShrink: 0, padding: '14px 18px', background: 'transparent', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 12, fontFamily: SPORT, fontSize: 14, fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer' }}
           >
             Lukk
           </button>

@@ -135,7 +135,8 @@ function CountdownBar({ cd }: { cd: TimeLeft }) {
   return (
     <div style={{ marginBottom: 28, textAlign: 'center' }}>
       <div style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 0 }}>
-        {([{ v: cd.days, l: 'Dager' }, { v: cd.hours, l: 'Timer' }, { v: cd.minutes, l: 'Min' }, { v: cd.seconds, l: 'Sek' }] as const).map(({ v, l }, i) => (
+        {/* Uten sekunder: et felt som tikker hele tiden trakk blikket fra CTA-en */}
+        {([{ v: cd.days, l: 'Dager' }, { v: cd.hours, l: 'Timer' }, { v: cd.minutes, l: 'Min' }] as const).map(({ v, l }, i) => (
           <div key={l} style={{ display: 'flex', alignItems: 'flex-start' }}>
             {i > 0 && <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.12)', margin: '5px 8px 0', flexShrink: 0 }} />}
             <div style={{ textAlign: 'center', minWidth: 56 }}>
@@ -254,7 +255,7 @@ export default function HomePage() {
   /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
-    const t = setInterval(() => setCd(getTimeUntil(KICKOFF)), 1000)
+    const t = setInterval(() => setCd(getTimeUntil(KICKOFF)), 30000)
     return () => clearInterval(t)
   }, [])
 
@@ -300,7 +301,7 @@ export default function HomePage() {
             <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 15, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, marginBottom: 6, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
               — PDC World Championship —
             </div>
-            <div style={{ fontSize: 76, letterSpacing: '-2px', lineHeight: 1 }}>
+            <div style={{ fontSize: 'clamp(44px, 12.5vw, 76px)', letterSpacing: '-2px', lineHeight: 1, whiteSpace: 'nowrap' }}>
               <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
               <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
@@ -345,8 +346,8 @@ export default function HomePage() {
               >
                 Kom i gang →
               </Link>
-              <Link href="/finn" className="text-link" style={{ display: 'inline-block', fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none', marginBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.15)', paddingBottom: 1, letterSpacing: '0.01em' }}>
-                Allerede påmeldt? Trykk her
+              <Link href="/finn" className="btn-hover" style={{ display: 'inline-block', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)', textDecoration: 'none', marginBottom: 20, padding: '9px 16px', borderRadius: 999, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', letterSpacing: '0.01em' }}>
+                Allerede påmeldt? Finn siden din →
               </Link>
             </>
           )}
@@ -354,7 +355,7 @@ export default function HomePage() {
         </div>
 
         {/* Scroll-indikator */}
-        <div style={{ position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, opacity: 0.35, pointerEvents: 'none', userSelect: 'none' }}>
+        <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 16px', opacity: 0.65, pointerEvents: 'none', userSelect: 'none' }}>
           <svg className="bounce-arrow" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5 8l6 6 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>

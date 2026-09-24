@@ -133,23 +133,26 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
       {/* Merkevare-header — full på første slide, komprimert på de neste så
           innholdet får plass over folden */}
       <div style={{ textAlign: 'center', marginBottom: compactHeader ? 12 : 22, transition: 'margin 0.3s ease' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-inter), sans-serif',
-            fontSize: compactHeader ? 10 : 11,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.18em',
-            marginBottom: compactHeader ? 3 : 6,
-            background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)',
-          }}
-        >
-          — PDC World Championship —
-        </div>
+        {/* PDC-linjen kun på første slide — på slide 2–3 er logoen alene nok */}
+        {!compactHeader && (
+          <div
+            style={{
+              fontFamily: 'var(--font-inter), sans-serif',
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.18em',
+              marginBottom: 6,
+              background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)',
+            }}
+          >
+            — PDC World Championship —
+          </div>
+        )}
         <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: compactHeader ? 22 : 36, letterSpacing: '-1px', lineHeight: 1, transition: 'font-size 0.3s ease' }}>
           <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
           <span
@@ -293,13 +296,18 @@ const INTRO_STEPS = [0, 1300, 2700]
 
 function IntroPhase({ onFinished }: { onFinished: () => void }) {
   const step = useTimedSteps(INTRO_STEPS)
+  const [done, setDone] = useState(false)
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ ...H1, marginBottom: 10 }}>Slik fungerer det</div>
       <div style={reveal(step, 1, { ...SUB, marginBottom: 22 })}>
         Velg 6 spillere – én fra hvert nivå
       </div>
-      <TeamBuildAnimation startDelay={INTRO_STEPS[2]} onFinished={onFinished} />
+      <TeamBuildAnimation startDelay={INTRO_STEPS[2]} allowSkip onFinished={() => { setDone(true); onFinished() }} />
+      {/* Spol-hint for dem som har sett animasjonen før — forsvinner når den er ferdig */}
+      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 2, opacity: step >= 2 && !done ? 1 : 0, transition: 'opacity 0.4s ease' }}>
+        Trykk på laget for å spole fram
+      </div>
     </div>
   )
 }
@@ -328,8 +336,10 @@ function ExamplePhase() {
         Du får poeng for hver seier og hvert sett
       </div>
 
-      <div style={reveal(step, 2, { ...LABEL, color: '#f3d576', marginBottom: 10 })}>
-        {STAGE_LABELS.r1}
+      <div style={reveal(step, 2, { marginBottom: 10 })}>
+        {/* «Eksempel» over runden, så ingen tror det er en ekte kamp */}
+        <div style={{ ...LABEL, fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 2 }}>Eksempel</div>
+        <div style={{ ...LABEL, color: '#f3d576' }}>{STAGE_LABELS.r1}</div>
       </div>
 
       {/* Kampoppsett: Littler-kortet vs. en tilfeldig useeded — «VS» byttes
@@ -483,7 +493,7 @@ function ProgressPhase() {
               zIndex: row.you ? 2 : 1,
             }}
           >
-            <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, width: 18, textAlign: 'right', color: row.you ? '#fff' : i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.45)', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, width: 18, textAlign: 'right', color: i < 3 ? '#fbbf24' : row.you ? '#fff' : 'rgba(255,255,255,0.45)', fontVariantNumeric: 'tabular-nums' }}>
               {i + 1}
             </span>
             <span style={{ flex: 1, textAlign: 'left', fontSize: 12, fontWeight: row.you ? 800 : 500, color: row.you ? '#fff' : 'rgba(255,255,255,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

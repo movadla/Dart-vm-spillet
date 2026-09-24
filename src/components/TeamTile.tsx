@@ -91,7 +91,10 @@ export default function TeamTile({
             style={{
               fontSize: long ? 10 : 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: long ? '-0.02em' : '0.02em',
               color: filled ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.4)',
-              textAlign: 'center', lineHeight: 1.15, whiteSpace: 'nowrap', maxWidth: '130%',
+              // Bryt kun ved mellomrom («VAN GERWEN» → to linjer), aldri inne i
+              // et ord; fast minhøyde så poeng/etiketter under står på linje.
+              textAlign: 'center', lineHeight: 1.15, whiteSpace: 'normal', wordBreak: 'keep-all', overflowWrap: 'normal',
+              minHeight: '2.3em', width: '100%',
             }}
           >
             {text}

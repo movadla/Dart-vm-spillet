@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
+// Import fra "@sentry/nextjs/config" (ikke pakkeroten) — den gamle stien
+// fjernes i @sentry/nextjs v11. `disableLogger` er også avviklet (og virker
+// ikke med Turbopack), derfor er den fjernet.
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -9,5 +12,4 @@ const nextConfig: NextConfig = {
 
 export default withSentryConfig(nextConfig, {
   silent: true,
-  disableLogger: true,
 });

@@ -90,11 +90,13 @@ function buildSchedule(): Event[] {
  * gang per mount; venter til fanen er synlig; respekterer
  * prefers-reduced-motion ved å hoppe rett til ferdig sluttilstand.
  */
-export default function TeamBuildAnimation({ startOnView = false, startDelay = 0, onFinished }: {
+export default function TeamBuildAnimation({ startOnView = false, startDelay = 0, allowSkip = false, onFinished }: {
   /** true = vent til komponenten er skrollet inn i synsfeltet (forsiden). */
   startOnView?: boolean
   /** ms å vente etter mount før noe vises. Alt tar plass fra start, så layouten ikke hopper. */
   startDelay?: number
+  /** Trykk/Enter på animasjonen spoler rett til ferdig lag (for dem som har sett den før). */
+  allowSkip?: boolean
   onFinished?: () => void
 }) {
   const pageVisible = usePageVisible()
@@ -178,9 +180,27 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
   const activePhase = active?.phase ?? 'hidden'
   const flyDur = active && active.level < 2 ? FLY_DUR_SLOW : FLY_DUR_FAST
 
+  function skip() {
+    if (!allowSkip || !started || finished) return
+    timeoutsRef.current.forEach(clearTimeout)
+    setActive(null)
+    setFly(null)
+    setLandedCount(LEVELS.length)
+    setFinished(true)
+    onFinishedRef.current?.()
+  }
+
   return (
-    // inert (ikke bare aria-hidden): kortene under er ekte <button>-er, og
-    // aria-hidden alene lot dem være fokuserbare for tastatur/skjermleser.
+    // Ytre wrapper tar trykk/Enter for spoling — det indre treet er inert
+    // (kortene er ekte <button>-er som ikke skal være nåbare i demoen).
+    <div
+      role={allowSkip ? 'button' : undefined}
+      tabIndex={allowSkip && started && !finished ? 0 : -1}
+      aria-label={allowSkip ? 'Spol fram til ferdig lag' : undefined}
+      onClick={skip}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); skip() } }}
+      style={{ cursor: allowSkip && started && !finished ? 'pointer' : 'default', outline: 'none' }}
+    >
     <div ref={rootRef} className="card-mini" inert>
       {/* Laget — 6 plasser som fylles etter hvert som spillere landes */}
       <div
@@ -287,6 +307,7 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
           </div>
         )}
       </div>
+    </div>
     </div>
   )
 }

@@ -453,6 +453,19 @@ body::after {
   content: '';
 }
 
+/* Tippe-flyten på store skjermer: én mobilbred kolonne med ramme, så tre
+   kort ikke driver alene midt i en 1500 px bred flate */
+@media (min-width: 560px) {
+  .app-frame {
+    max-width: var(--app-width);
+    margin-left: auto;
+    margin-right: auto;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.55);
+  }
+}
+
 /* Intro-slider: innhold glir inn fra den siden man blar mot */
 @keyframes slide-enter-left {
   from { opacity: 0; transform: translateX(28px); }

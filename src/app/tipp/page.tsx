@@ -10,6 +10,8 @@ import { SCORING } from '@/config/scoring'
 import { PlayerCard } from '@/components/PlayerCard'
 import PlayerDetailPanel from '@/components/PlayerDetailPanel'
 import TeamTile from '@/components/TeamTile'
+import { PLAYER_STATS } from '@/data/playerStats'
+import { formatAvg } from '@/lib/format'
 import StepSlideshow, { INTRO_LAST_SLIDE } from '@/components/StepSlideshow'
 import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
 import ShareButton from '@/app/ShareButton'
@@ -53,10 +55,12 @@ function Confetti() {
   )
 }
 
-function ProgressDots({ step, multiplier = 1, onGuide, onStep, onTogglePoeng, poengActive }: {
+function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep, onTogglePoeng, poengActive }: {
   step: number
   /** Pottens multiplikator — vises i steg-linjen («Steg 3 av 6 · ×2») */
   multiplier?: number
+  /** Valgene så langt — fullførte steg viser flagget til spilleren du valgte */
+  picks?: Record<number, string>
   onGuide?: () => void
   onStep?: (s: number) => void
   onTogglePoeng?: () => void
@@ -64,23 +68,33 @@ function ProgressDots({ step, multiplier = 1, onGuide, onStep, onTogglePoeng, po
 }) {
   return (
     <div style={{ marginBottom: 20 }}>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginBottom: 6 }}>
-        {POT_COLORS.map((c, i) => {
+      {/* Fullførte steg viser flagget til spilleren du valgte (og er klikkbare
+          for å gå tilbake), aktivt steg er en farget strek, kommende er prikker.
+          Alle har 20 px trykkflate. */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 2, marginBottom: 4 }}>
+        {POTS.map((pot, i) => {
+          const c = POT_COLORS[i % POT_COLORS.length]
           const done = i < step - 1
           const active = i === step - 1
+          const pickedName = picks[pot.potNumber]
+          const picked = pickedName ? pot.players.find((p) => p.name === pickedName) : undefined
           return (
-            <div
+            <button
               key={i}
+              type="button"
               onClick={done ? () => onStep?.(i + 1) : undefined}
-              title={done ? `Gå til steg ${i + 1}` : undefined}
-              style={{
-                height: done ? 8 : 5, width: active ? 20 : done ? 8 : 5, borderRadius: 4,
-                background: done ? c : active ? c : 'rgba(255,255,255,0.1)',
-                transition: 'all 0.25s ease',
-                cursor: done ? 'pointer' : 'default',
-                opacity: done ? 0.85 : 1,
-              }}
-            />
+              disabled={!done}
+              aria-label={done ? `Gå til steg ${i + 1} (${pickedName})` : `Steg ${i + 1}`}
+              style={{ padding: '6px 4px', background: 'none', border: 'none', cursor: done ? 'pointer' : 'default', display: 'flex', alignItems: 'center' }}
+            >
+              {done && picked ? (
+                <span style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 0 2px ${c}`, background: '#000' }}>
+                  <Flag iso2={picked.iso2} size={18} />
+                </span>
+              ) : (
+                <span style={{ display: 'block', height: 8, width: active ? 22 : 8, borderRadius: 4, background: active ? c : 'rgba(255,255,255,0.2)', transition: 'width 0.25s ease, background 0.25s ease' }} />
+              )}
+            </button>
           )
         })}
       </div>
@@ -309,7 +323,7 @@ const inputStyle: React.CSSProperties = {
         {!linkSentTo ? (
           <>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 8 }}>Din e-postadresse</label>
+              <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>Din e-postadresse</label>
               <input
                 type="email"
                 value={linkEmail}
@@ -486,7 +500,7 @@ const inputStyle: React.CSSProperties = {
   // ── Steg 0: Slideshow-intro (kun nye deltakere) ──
   if (step === 0) {
     return (
-      <div className="page-bg" style={{ height: '100dvh', color: '#fff', display: 'flex', flexDirection: 'column' }}>
+      <div className="page-bg app-frame" style={{ height: '100dvh', color: '#fff', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <Link href="/" className="back-btn">← Hjem</Link>
           {slideshowSlide < INTRO_LAST_SLIDE && (
@@ -495,7 +509,7 @@ const inputStyle: React.CSSProperties = {
                 try { localStorage.setItem('vm_tipp_intro_seen', '1') } catch {}
                 setStep(1)
               }}
-              style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 4px', letterSpacing: '0.02em' }}
+              style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 999, cursor: 'pointer', padding: '7px 14px', letterSpacing: '0.02em' }}
             >
               Hopp over
             </button>
@@ -520,40 +534,52 @@ const inputStyle: React.CSSProperties = {
   if (step === REGISTRATION_STEP) {
     const valid = name.trim().length > 1 && email.includes('@')
     return (
-      <div className="page-bg" style={{ minHeight: '100vh', padding: '40px 20px 56px', color: '#fff', position: 'relative' }}>
-        {/* Brand banner */}
-        <div style={{ position: 'relative', height: 145, marginBottom: 20, pointerEvents: 'none', zIndex: 1 }}>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
+      <div className="page-bg app-frame" style={{ minHeight: '100vh', padding: '20px 20px 40px', color: '#fff', position: 'relative' }}>
+        {/* Samme kompakte banner og knapperad som oppsummeringen */}
+        <div style={{ position: 'relative', height: 70, marginBottom: 6, pointerEvents: 'none', zIndex: 1 }}>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
               — PDC World Championship —
             </div>
-            <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 52, letterSpacing: '-1px', lineHeight: 1 }}>
+            <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 34, letterSpacing: '-1px', lineHeight: 1 }}>
               <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
               <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
           </div>
         </div>
-        <div style={{ marginBottom: 24 }}>
-          <button onClick={() => setStep(SUMMARY_STEP)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 13, cursor: 'pointer', padding: 0 }}>← Tilbake</button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
+          <button onClick={() => setStep(SUMMARY_STEP)} className="back-btn" style={{ cursor: 'pointer' }}>← Tilbake</button>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>Siste steg</span>
         </div>
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Siste steg</div>
-          <div style={{ fontFamily: SPORT, fontSize: 46, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, marginBottom: 10 }}>
-            <div style={{ color: '#fff' }}>Registrer</div>
-            <div style={{ color: '#dc2626' }}>deg</div>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontFamily: SPORT, fontSize: 34, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.95, marginBottom: 8 }}>
+            <span style={{ color: '#fff' }}>Registrer </span>
+            <span style={{ color: '#dc2626' }}>deg</span>
           </div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', lineHeight: 1.5 }}>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
             E-posten brukes til å finne siden din igjen.
           </div>
         </div>
 
+        {/* Laget du melder på — så det er tydelig hva som registreres */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, padding: '10px 8px', marginBottom: 16, borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          {POTS.map((pot, i) => {
+            const player = pot.players.find((p) => p.name === picks[pot.potNumber])
+            return (
+              <div key={pot.potNumber} style={{ width: 48 }}>
+                <TeamTile player={player} potNumber={pot.potNumber} color={POT_COLORS[i % POT_COLORS.length]} colorDark={POT_COLORS_DARK[i % POT_COLORS_DARK.length]} />
+              </div>
+            )
+          })}
+        </div>
+
         <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', padding: '24px 20px', marginBottom: 16, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 8 }}>Navn</label>
+            <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>Navn</label>
             <input style={inputStyle} type="text" placeholder="Ola Nordmann" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 8 }}>E-post</label>
+            <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>E-post</label>
             <input style={inputStyle} type="email" placeholder="ola@example.com" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
         </div>
@@ -606,7 +632,7 @@ const inputStyle: React.CSSProperties = {
             boxShadow: valid && !submitting ? '0 4px 20px rgba(220,38,38,0.35)' : 'none',
           }}
         >
-          {submitting ? 'Lagrer...' : 'Meld meg på →'}
+          {submitting ? 'Lagrer…' : !valid ? 'Fyll inn navn og e-post' : 'Meld meg på →'}
         </button>
         <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 12 }}>
           Ved å melde deg på godtar du at vi lagrer navn og e-post for å drive spillet. Se{' '}
@@ -620,7 +646,7 @@ const inputStyle: React.CSSProperties = {
   if (step === SUMMARY_STEP) {
     const allPicked = Object.keys(picks).length === POT_COUNT
     return (
-      <div className="page-bg" style={{ minHeight: '100vh', padding: '20px 20px 40px', color: '#fff', position: 'relative' }}>
+      <div className="page-bg app-frame" style={{ minHeight: '100vh', padding: '20px 20px 40px', color: '#fff', position: 'relative' }}>
         {/* Brand banner — komprimert: dette er bare en oppsummering, alt
             skal helst være synlig uten skrolling */}
         <div style={{ position: 'relative', height: 70, marginBottom: 6, pointerEvents: 'none', zIndex: 1 }}>
@@ -747,10 +773,11 @@ const inputStyle: React.CSSProperties = {
   }
 
   return (
-    <div className="page-bg" style={{ height: '100dvh', padding: '24px 16px 20px', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+    <div className="page-bg app-frame" style={{ height: '100dvh', padding: '24px 16px 20px', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
       <ProgressDots
         step={step}
         multiplier={multiplier}
+        picks={picks}
         onGuide={() => { setStep(0); setSlideshowSlide(0) }}
         onStep={setStep}
         onTogglePoeng={() => setShowScoreInfo(s => !s)}
@@ -767,8 +794,10 @@ const inputStyle: React.CSSProperties = {
           <span style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, color: 'rgba(0,0,0,0.45)', lineHeight: 1 }}>{step}</span>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Pottens navn (uten emoji) som tittel — «Velg din spiller» gjentok
+              bare steg-linjen; nå får hvert steg sin egen identitet */}
           <div style={{ fontFamily: SPORT, fontSize: 26, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
-            Velg din spiller
+            {pot.name.replace(/^[^\p{L}]+/u, '')}
           </div>
           {/* Multiplikatoren står i steg-linjen over («Steg 3 av 6 · ×2»);
               her kun en rolig forklaring i vanlig tekst når den er > 1 */}
@@ -781,17 +810,17 @@ const inputStyle: React.CSSProperties = {
       </div>
       {showScoreInfo && (
         <div style={{ marginBottom: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px', fontSize: 12 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 6 }}>Poeng</div>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>Poeng</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Per vunnet sett</span>
+            <span style={{ color: 'rgba(255,255,255,0.7)' }}>Per vunnet sett</span>
             <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{SCORING.perSetWon}p</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Per kampseier (avansement)</span>
+            <span style={{ color: 'rgba(255,255,255,0.7)' }}>Per kampseier (avansement)</span>
             <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{SCORING.perAdvancement}p</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)' }}>For å vinne turneringen</span>
+            <span style={{ color: 'rgba(255,255,255,0.7)' }}>For å vinne turneringen</span>
             <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>+{SCORING.tournamentWinner}p</span>
           </div>
           <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
@@ -808,7 +837,7 @@ const inputStyle: React.CSSProperties = {
               const label = g.pots.length === 1 ? `Pott ${g.pots[0]}` : `Pott ${g.pots[0]}–${g.pots[g.pots.length - 1]}`
               return (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: i === groups.length - 1 ? 0 : 4 }}>
-                  <span style={{ color: 'rgba(255,255,255,0.45)' }}>{label} scorer ×{g.mult}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.7)' }}>{label} scorer ×{g.mult}</span>
                   <span style={{ fontFamily: SPORT, fontWeight: 600, color: g.mult >= 3 ? '#ef4444' : '#f59e0b' }}>×{g.mult}</span>
                 </div>
               )
@@ -827,6 +856,10 @@ const inputStyle: React.CSSProperties = {
           som én enhet, så både gridet og detalj-seksjonen er tilgjengelig uten
           at Neste-knappen flytter seg. */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, marginBottom: 14, overflowY: 'auto' }}>
+        {/* margin: auto 0 sentrerer kortene + hurtiginfoen vertikalt i sonen
+            mellom header og Neste-knappen (ellers ble det et stort tomrom
+            under kortene på høye skjermer) */}
+        <div style={{ margin: 'auto 0' }}>
         {/* Ytre wrapper (vanlig blokk-element, ikke selv en flex-item med
             display:grid) håndterer maks-bredde + sentrering — å sette
             maxWidth+margin:auto DIREKTE på selve grid-diven, som var en
@@ -862,7 +895,7 @@ const inputStyle: React.CSSProperties = {
                     potNumber={pot.potNumber}
                     selected={selectedPlayer === player.name}
                     dimmed={selectedPlayer != null && selectedPlayer !== player.name}
-                    onClick={() => { setPicks(prev => ({ ...prev, [pot.potNumber]: player.name })); setPanelOpen(true) }}
+                    onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
                   />
                 )
               })}
@@ -870,22 +903,47 @@ const inputStyle: React.CSSProperties = {
           </div>
         ))}
 
-        {/* Spillerpanel som bunnark — glir opp over kortene når en spiller
-            velges (ranking, snitt, % valgt, beste prestasjon, vei til
-            finalen, brakett-pop-up). Se PlayerDetailPanel.tsx. */}
+        {/* Hurtiginfo for valgt spiller + «Detaljer» som åpner bunnarket.
+            Trykk på kortet er KUN valg — arket er et frivillig dypdykk. */}
         {selectedPlayer && (() => {
           const selectedPlayerData = pot.players.find(p => p.name === selectedPlayer)
-          return selectedPlayerData ? (
-            <PlayerDetailPanel
-              player={selectedPlayerData}
-              color={color}
-              open={panelOpen}
-              onClose={() => setPanelOpen(false)}
-              onNext={() => { setPanelOpen(false); goNext() }}
-              nextLabel={step < POT_COUNT ? 'Neste →' : 'Se oppsummering →'}
-            />
-          ) : null
+          if (!selectedPlayerData) return null
+          const stats = PLAYER_STATS[selectedPlayerData.name]
+          return (
+            <>
+              <div key={selectedPlayer} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginTop: 12, padding: '0 6px', animation: 'slide-enter 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontVariantNumeric: 'tabular-nums', textAlign: 'center' }}>
+                  <span style={{ fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 15 }}>#{selectedPlayerData.pdcRanking}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.35)', margin: '0 7px' }}>·</span>
+                  Snitt <span style={{ fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 15 }}>{formatAvg(stats?.avg)}</span>
+                  {stats?.bestAchievement && (
+                    <>
+                      <span style={{ color: 'rgba(255,255,255,0.35)', margin: '0 7px' }}>·</span>
+                      {stats.bestAchievement}
+                    </>
+                  )}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPanelOpen(true)}
+                  className="btn-hover"
+                  style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', color: '#fff', background: 'rgba(255,255,255,0.08)', border: `1px solid ${color}88`, borderRadius: 999, padding: '7px 14px', cursor: 'pointer', flexShrink: 0 }}
+                >
+                  Detaljer →
+                </button>
+              </div>
+              <PlayerDetailPanel
+                player={selectedPlayerData}
+                color={color}
+                open={panelOpen}
+                onClose={() => setPanelOpen(false)}
+                onNext={() => { setPanelOpen(false); goNext() }}
+                nextLabel={step < POT_COUNT ? 'Neste →' : 'Se oppsummering →'}
+              />
+            </>
+          )
         })()}
+        </div>
       </div>
 
       {/* Neste-knapp */}
@@ -895,14 +953,17 @@ const inputStyle: React.CSSProperties = {
         className={selectedPlayer ? 'btn-hover' : undefined}
         style={{
           display: 'block', width: '100%', padding: '16px',
-          background: selectedPlayer ? 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)' : 'rgba(255,255,255,0.07)',
-          color: selectedPlayer ? '#fff' : 'rgba(255,255,255,0.25)',
-          border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800,
+          background: selectedPlayer ? 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)' : 'transparent',
+          color: selectedPlayer ? '#fff' : 'rgba(255,255,255,0.5)',
+          // Deaktivert = tydelig «tom» tilstand (stiplet ramme), ikke en mørk
+          // variant av den aktive knappen
+          border: selectedPlayer ? '1px solid transparent' : '1px dashed rgba(255,255,255,0.3)',
+          borderRadius: 12, fontSize: 15, fontWeight: 800,
           cursor: selectedPlayer ? 'pointer' : 'not-allowed',
           fontFamily: SPORT, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
           marginBottom: 10,
           boxShadow: selectedPlayer ? '0 4px 20px rgba(220,38,38,0.35)' : 'none',
-          transition: 'background 0.2s, box-shadow 0.2s, filter 0.12s',
+          transition: 'background 0.2s, box-shadow 0.2s, filter 0.12s, border-color 0.2s',
         }}
       >
         {!selectedPlayer ? 'Velg en spiller' : step < POT_COUNT ? 'Neste →' : 'Se oppsummering →'}

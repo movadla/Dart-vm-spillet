@@ -398,53 +398,13 @@ export function PlayerCard({
         backgroundSize: '250% 100%', backgroundPosition: '70% 0',
       }} />
 
-      {selected && (
-        // Posisjon verifisert med pikselsjekk mot malen: lå tidligere delvis
-        // UTENFOR skjold-grafikken (i det transparente hjørnet over den
-        // buede toppkanten).
-        // Øverst til VENSTRE — til høyre kolliderte den med krediterings-
-        // knappen («i») som ligger rett under.
-        <div style={{
-          position: 'absolute', top: '15%', left: '4%', zIndex: 3,
-          width: '7%', aspectRatio: '1', borderRadius: '50%', background: color,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          border: '2px solid #fff', boxShadow: '0 0 8px rgba(0,0,0,0.5)',
-        }}>
-          <span style={{ fontSize: '60%', fontWeight: 900, color: '#fff', lineHeight: 1 }}>✓</span>
-        </div>
-      )}
+      {/* Ingen hake: glød + skalering (.player-card--selected) og demping av de
+          andre kortene er tydelig nok, og haken traff aldri skjoldformen. */}
     </button>
 
-    {/* Foto-kreditering — påkrevd av CC-lisensen (se playerPhotos.ts), men
-        skjult bak en liten "i"-knapp (details/summary, ingen JS) i stedet
-        for alltid synlig bildetekst, etter ønske om at den skal være minst
-        mulig synlig i det daglige. */}
-    {photo && (
-      // Inne i skjoldet (høyre kant, under hakemerke-posisjonen) — nederst i
-      // wrapperen havnet den utenfor selve skjoldspissen.
-      <details className="card-credit" style={{ position: 'absolute', top: '24%', right: '6%', zIndex: 4 }}>
-        <summary style={{
-          width: 14, height: 14, borderRadius: '50%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.3)',
-          color: 'rgba(255,255,255,0.55)', fontSize: 9, fontWeight: 700, fontStyle: 'italic', fontFamily: 'Georgia, serif',
-        }} aria-label="Foto-kreditering">i</summary>
-        <a
-          href={photo.creditUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            // maxWidth (ikke nowrap) — en lang kreditering stakk tidligere langt
-            // utenfor kortets venstre kant og kunne overlappe nabokortet.
-            position: 'absolute', top: 18, right: 0, maxWidth: 108, width: 'max-content',
-            display: 'block', fontSize: 9, color: '#fff', textDecoration: 'none',
-            background: 'rgba(0,0,0,0.75)', padding: '3px 6px', borderRadius: 4,
-          }}
-        >
-          📷 {photo.credit}
-        </a>
-      </details>
-    )}
+    {/* Foto-krediteringen (påkrevd av CC-lisensen, se playerPhotos.ts) vises
+        i spillerpanelet («Foto: …») — «i»-knappen på kortet var det eneste
+        trykkbare som IKKE valgte spilleren, og folk bommet på den. */}
     </div>
   )
 }
