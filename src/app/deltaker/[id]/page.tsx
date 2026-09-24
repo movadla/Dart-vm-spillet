@@ -65,7 +65,6 @@ export default async function DeltakerPage({ params, searchParams }: {
   }
   const displayStage: Stage | 'winner' | null = finalWon ? 'winner' : maxIdx >= 0 ? STAGE_ORDER[maxIdx] : null
 
-  const joined = new Date(p.created_at).toLocaleDateString('nb-NO', { day: 'numeric', month: 'long' })
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'
 
   return (
@@ -83,7 +82,6 @@ export default async function DeltakerPage({ params, searchParams }: {
       <div style={{ marginBottom: 12 }}>
         <div style={{ ...LABEL, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.15em', marginBottom: 2 }}>Min side</div>
         <h1 style={{ fontFamily: SPORT, fontSize: 28, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1, margin: 0, letterSpacing: '-0.01em', overflowWrap: 'anywhere' }}>{p.name}</h1>
-        {!vmStarted && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 4 }}>Påmeldt {joined} · {totalParticipants} {totalParticipants === 1 ? 'deltaker' : 'deltakere'} så langt</div>}
       </div>
 
       {vmStarted ? (
@@ -121,12 +119,10 @@ export default async function DeltakerPage({ params, searchParams }: {
             <div style={{ ...LABEL, marginBottom: 6 }}>VM starter om</div>
             <DeadlineCountdown size={26} />
           </div>
-          {editable ? (
+          {editable && (
             <Link href={`/tipp?edit=${p.id}`} className="cta-btn" style={{ padding: '10px 18px', borderRadius: 999, background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontFamily: SPORT, fontSize: 14, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap', boxShadow: '0 4px 16px rgba(220,38,38,0.3)' }}>
               Endre laget →
             </Link>
-          ) : (
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', maxWidth: 170, lineHeight: 1.4 }}>Laget kan endres frem til 11. desember kl. 20:00.</div>
           )}
         </div>
       )}
@@ -134,11 +130,6 @@ export default async function DeltakerPage({ params, searchParams }: {
       {/* ── Laget ── */}
       <SectionTitle>Laget ditt</SectionTitle>
       <MyTeam picks={picks} matchResults={matchResults} vmStarted={vmStarted} />
-      {!vmStarted && (
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 8, lineHeight: 1.5 }}>
-          Poengene telles fra første kamp 11. desember. Trykk på en spiller for statistikk og vei til finalen.
-        </div>
-      )}
 
       {/* ── Ligaer ── */}
       <SectionTitle>Ligaer</SectionTitle>

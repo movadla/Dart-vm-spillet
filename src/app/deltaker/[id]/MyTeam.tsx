@@ -138,9 +138,11 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
                         </span>
                       )}
                     </span>
-                    <span style={{ display: 'block', fontSize: 12, marginTop: 2, color: status ? status.color : 'rgba(255,255,255,0.55)', fontWeight: status?.strong ? 800 : 600, letterSpacing: status?.strong ? '0.04em' : 0, textTransform: status?.strong ? 'uppercase' : 'none' }}>
-                      {status ? status.label : vmStarted ? 'Ikke spilt ennå' : `Nivå ${pick.pot_number}${player?.seedNumber ? ` · Seed ${player.seedNumber}` : ' · Useedet'}`}
-                    </span>
+                    {vmStarted && (
+                      <span style={{ display: 'block', fontSize: 12, marginTop: 2, color: status ? status.color : 'rgba(255,255,255,0.55)', fontWeight: status?.strong ? 800 : 600, letterSpacing: status?.strong ? '0.04em' : 0, textTransform: status?.strong ? 'uppercase' : 'none' }}>
+                        {status ? status.label : 'Ikke spilt ennå'}
+                      </span>
+                    )}
                   </span>
                 </span>
                 {vmStarted ? (

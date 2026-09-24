@@ -195,7 +195,6 @@ export default function LeagueSection({ participantId, showHeader = true, mode: 
             <Link href={`/liga/${l.invite_code}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 12px 11px 14px', textDecoration: 'none', gap: 10, minWidth: 0 }}>
               <span style={{ minWidth: 0 }}>
                 <span style={{ display: 'block', fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.name}</span>
-                {l.total != null && <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 2 }}>{l.total} {l.total === 1 ? 'deltaker' : 'deltakere'}</span>}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 {started && l.rank != null && l.total != null && <RankChip rank={l.rank} total={l.total} />}
@@ -246,11 +245,6 @@ export default function LeagueSection({ participantId, showHeader = true, mode: 
           >
             Opprett liga
           </button>
-        </div>
-      )}
-      {mode === 'idle' && demo && (
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
-          Opprett/bli med i liga krever en ekte påmelding — ikke tilgjengelig for demo-deltakeren.
         </div>
       )}
       {mode === 'idle' && started && !demo && (
