@@ -12,4 +12,111 @@ export const PLAYER_PHOTOS: Record<string, { src: string; credit: string; credit
     credit: 'Sandro Halank · CC BY-SA 4.0',
     creditUrl: 'https://commons.wikimedia.org/wiki/File:2026-03-26_Premier_League_Darts_%E2%80%93_Night_8_%E2%80%93_Berlin_2026_by_Sandro_Halank%E2%80%93168.jpg',
   },
+  // Resten lagt til 2026-09-24, samme rembg/U2Net-utklipp som Littler. Kilder
+  // se PLAYER_PHOTO_DATABANK.md. Jonny Clayton og Kevin Doets har MED VILJE
+  // ingen oppføring: eneste tilgjengelige Clayton-foto viser et privat
+  // kyssøyeblikk med partneren hans (upassende for et spillerkort), og
+  // Doets-fotoet fikk ikke ren utklipping (nær-hvit bakgrunn) og har et
+  // tydelig PDC-merket mikrofonflagg helt inntil ansiktet — begge faller
+  // tilbake til initial-plassholderen til bedre kildebilder er funnet.
+  'Luke Humphries': {
+    src: '/players/luke-humphries-cutout.webp',
+    credit: 'Darts Actueel · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Luke_Humphries_Darts_Actueel_2023.jpg',
+  },
+  'Gian van Veen': {
+    src: '/players/gian-van-veen-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Gian_van_Veen_2025.png',
+  },
+  'Gerwyn Price': {
+    src: '/players/gerwyn-price-cutout.webp',
+    credit: 'Sandro Halank · CC BY-SA 4.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:2025-04-03_Premier_League_Darts_Berlin_2025_by_Sandro_Halank%E2%80%93167.jpg',
+  },
+  'James Wade': {
+    src: '/players/james-wade-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:James_Wade_2025.png',
+  },
+  'Michael van Gerwen': {
+    src: '/players/michael-van-gerwen-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Michael_van_Gerwen_2025.png',
+  },
+  'Josh Rock': {
+    src: '/players/josh-rock-cutout.webp',
+    credit: 'Darts Actueel · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Josh_Rock_Darts_Actueel_2023.jpg',
+  },
+  'Stephen Bunting': {
+    src: '/players/stephen-bunting-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Stephen_Bunting_2024.png',
+  },
+  'Gary Anderson': {
+    src: '/players/gary-anderson-cutout.webp',
+    credit: 'Jakob Gottfried · CC BY-SA 4.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Gary_Anderson_(Exeter_2016)_(cropped).jpg',
+  },
+  'Wessel Nijman': {
+    src: '/players/wessel-nijman-cutout.webp',
+    credit: 'Darts Actueel · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Wessel_Nijman.png',
+  },
+  'Ryan Searle': {
+    src: '/players/ryan-searle-cutout.webp',
+    credit: 'Darts Actueel · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Ryan_Searle_Darts_Actueel_2023.jpg',
+  },
+  'Ross Smith': {
+    src: '/players/ross-smith-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Ross_Smith_2024_2.png',
+  },
+  'Jermaine Wattimena': {
+    src: '/players/jermaine-wattimena-cutout.webp',
+    credit: 'Darts Actueel · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Jermaine_Wattimena.png',
+  },
+  'Luke Woodhouse': {
+    src: '/players/luke-woodhouse-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Luke_Woodhouse_2024.png',
+  },
+  'Martin Schindler': {
+    src: '/players/martin-schindler-cutout.webp',
+    credit: 'Darts Actueel · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Martin_Schindler_Darts_Actueel_2023.jpg',
+  },
+  'Krzysztof Ratajski': {
+    src: '/players/krzysztof-ratajski-cutout.webp',
+    credit: 'Darts Actueel · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Ratajski_2021.png',
+  },
+  'Rob Cross': {
+    src: '/players/rob-cross-cutout.webp',
+    credit: 'Sven Mandel · CC BY-SA 4.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Rob_Cross_(darts_player),_2017_(cropped).jpg',
+  },
+  'Ryan Joyce': {
+    src: '/players/ryan-joyce-cutout.webp',
+    credit: 'Darts Actueel · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Ryan_Joyce_Darts_Actueel_2022.jpg',
+  },
+  'Cameron Menzies': {
+    src: '/players/cameron-menzies-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Cameron_Menzies_2024.png',
+  },
+  'Andrew Gilding': {
+    src: '/players/andrew-gilding-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Andrew_Gilding_2024.png',
+  },
+  'Daryl Gurney': {
+    src: '/players/daryl-gurney-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Team_NI_Darts_WC_2025_(Gurney_cropped).png',
+  },
 }
