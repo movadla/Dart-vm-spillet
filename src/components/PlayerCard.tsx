@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import Flag from '@/components/Flag'
 import type { Player } from '@/data/pots'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
+import { PLAYER_STATS } from '@/data/playerStats'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const GOLD = '#f3d576'
@@ -22,8 +23,8 @@ function templateSrc(potNumber: number): string {
 const SHADOW_OVER_PHOTO = '0 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6)'
 
 // Norsk komma-format ("101,23" / "2,50"), ikke punktum — samme tallformat på
-// begge stat-verdiene. Se avg2026-kommentaren i pots.ts for status på
-// snitt-tallene selv (fiktive foreløpig, kun to spillere).
+// begge stat-verdiene. Snittet kommer fra playerStats.ts (eksempeldata til
+// det er kontrollert, se TODO.md).
 function formatAvg(avg: number | undefined): string {
   return avg == null ? '—' : avg.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
@@ -215,7 +216,6 @@ export function PlayerCard({
   // tidligere "potName"-propen, som ble tatt imot men aldri faktisk brukt
   // noe sted i komponenten.
   potNumber: number
-  multiplier: number
   onClick: () => void
 }) {
   const photo = PLAYER_PHOTOS[player.name]
@@ -268,6 +268,8 @@ export function PlayerCard({
             src={photo.src}
             alt=""
             aria-hidden="true"
+            loading="lazy"
+            decoding="async"
             style={{
               position: 'absolute',
               left: ZONES.photo.left, right: ZONES.photo.right, top: ZONES.photo.top, bottom: ZONES.photo.bottom,
@@ -377,13 +379,14 @@ export function PlayerCard({
       </div>
 
       {/* Statistikk — mynt-ikonet (bakt inn i malen) er ODDS (ekte data).
-          SNITT bruker ArrowsIcon; fiktive snitt-tall foreløpig, se avg2026 i
-          pots.ts. Ingen tekst-skygge her (ren kort-bakgrunn, ikke foto). */}
+          SNITT bruker ArrowsIcon; snittet hentes fra playerStats.ts (samme
+          kilde som spillerpanelet). Ingen tekst-skygge her (ren kort-bakgrunn,
+          ikke foto). */}
       <IconBadge zone={ZONES.snittIcon}>
         <ArrowsIcon size="clamp(10px, 9cqw, 16px)" />
       </IconBadge>
       <StatCol zone={ZONES.statCols[0]} labelTop={ZONES.statLabel.top} valueTop={ZONES.statValue.top} label="ODDS" value={formatOdds(player.odds)} />
-      <StatCol zone={ZONES.statCols[1]} labelTop={ZONES.statLabel.top} valueTop={ZONES.statValue.top} label="SNITT" value={formatAvg(player.avg2026)} />
+      <StatCol zone={ZONES.statCols[1]} labelTop={ZONES.statLabel.top} valueTop={ZONES.statValue.top} label="SNITT" value={formatAvg(PLAYER_STATS[player.name]?.avg)} />
 
       {/* Folie-glans: en svak diagonal lysstripe over hele kortet, maskert med
           selve mal-bildet så den følger skjoldformen (ikke rektangelet), og
@@ -399,8 +402,10 @@ export function PlayerCard({
         // Posisjon verifisert med pikselsjekk mot malen: lå tidligere delvis
         // UTENFOR skjold-grafikken (i det transparente hjørnet over den
         // buede toppkanten).
+        // Øverst til VENSTRE — til høyre kolliderte den med krediterings-
+        // knappen («i») som ligger rett under.
         <div style={{
-          position: 'absolute', top: '15%', right: '4%', zIndex: 3,
+          position: 'absolute', top: '15%', left: '4%', zIndex: 3,
           width: '7%', aspectRatio: '1', borderRadius: '50%', background: color,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           border: '2px solid #fff', boxShadow: '0 0 8px rgba(0,0,0,0.5)',

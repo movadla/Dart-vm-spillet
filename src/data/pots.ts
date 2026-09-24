@@ -15,18 +15,8 @@ export interface Player {
   // PDC-seeding — midlertidig løsning til brukeren bestemmer det faktiske
   // utvalget nærmere VM-trekningen (medio november).
   pickable?: boolean
-  // FIKTIVE tall lagt inn 2026-09-23 etter eksplisitt ønske (kun for Littler
-  // og Humphries, resten viser "—") — IKKE ekte PDC three-dart-average-data.
-  // Må erstattes med ekte snitt-tall før spillet åpnes for ekte deltakere,
-  // se TODO.md.
-  avg2026?: number
-  // Spillerinfo-panelet i tipp/page.tsx (vises når en spiller velges).
-  // INGEN av disse tre er fylt ut for noen spiller ennå — vises som "—"/
-  // "Ukjent" inntil ekte data er lagt inn, samme prinsipp som avg2026 over.
-  // Se TODO.md.
-  titles?: number
-  bestResult2026?: string
-  form?: 'dårlig' | 'middels' | 'bra'
+  // Snitt og beste prestasjon ligger i src/data/playerStats.ts (én kilde for
+  // både kortene og spillerpanelet) — ikke her.
 }
 
 export interface Pot {
@@ -46,15 +36,6 @@ export function getPickablePlayers(pot: Pot): Player[] {
   return pot.players.filter((p) => p.pickable !== false)
 }
 
-export const POT_NAMES = [
-  '👑 Favorittene',
-  '⭐ Toppseedet',
-  '💪 Storfavoritter',
-  '🏆 Seedet outsidere',
-  '🔥 Kvalifiserte',
-  '🎲 Resten',
-]
-
 // Seed 1–32 hentet fra PDC Order of Merit (Wikipedia, snapshot 2026-09-13).
 // MERK: Order of Merit endres ukentlig gjennom sesongen — denne rangeringen vil trolig
 // IKKE stemme lenger med den faktiske seedingen i desember. Sjekk mot PDC sin offisielle
@@ -69,8 +50,8 @@ export const POTS: Pot[] = [
     name: '👑 Favorittene',
     emoji: '👑',
     players: [
-      { name: 'Luke Littler',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 1, seedNumber: 1, odds: '2.5', avg2026: 101.23 },
-      { name: 'Luke Humphries',    nationality: 'England',     iso2: 'gb-eng', pdcRanking: 2, seedNumber: 2, odds: '3.5', avg2026: 100.88 },
+      { name: 'Luke Littler',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 1, seedNumber: 1, odds: '2.5' },
+      { name: 'Luke Humphries',    nationality: 'England',     iso2: 'gb-eng', pdcRanking: 2, seedNumber: 2, odds: '3.5' },
       { name: 'Gian van Veen',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 3, seedNumber: 3, odds: '9.0' },
     ],
   },

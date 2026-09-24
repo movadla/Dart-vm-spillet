@@ -442,13 +442,39 @@ body::after {
   list-style: none;
   cursor: pointer;
 }
-/* Intro-demoen (TeamBuildAnimation) viser ekte spillerkort i miniatyr —
-   krediterings-knappen og hover-løft gir ingen mening der. */
-.team-demo .card-credit { display: none; }
-.team-demo .player-card { cursor: default; }
+/* Miniatyr-kort (intro-animasjonen, eksempelkampen): krediterings-knappen
+   og hover-løft gir ingen mening der. */
+.card-mini .card-credit { display: none; }
+.card-mini .player-card { cursor: default; }
 .card-credit summary::-webkit-details-marker {
   display: none;
 }
 .card-credit summary::marker {
   content: '';
+}
+
+/* Intro-slider: innhold glir inn fra den siden man blar mot */
+@keyframes slide-enter-left {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-enter-right {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* «Laget ditt»-finalen: rolig puls i gullrammen når sekvensen er ferdig */
+@keyframes team-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(243,213,118,0.4), 0 12px 40px rgba(243,213,118,0.18); }
+  50%      { box-shadow: 0 0 0 1px rgba(243,213,118,0.7), 0 12px 48px rgba(243,213,118,0.34); }
+}
+
+/* Bunnark (spillerpanelet i tippe-flyten) */
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }

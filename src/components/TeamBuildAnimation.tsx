@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Flag from '@/components/Flag'
 import { PlayerCard } from '@/components/PlayerCard'
+import TeamTile from '@/components/TeamTile'
 import { POTS, getPickablePlayers, type Player } from '@/data/pots'
-import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
+import { usePageVisible } from '@/lib/usePageVisible'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
@@ -15,17 +15,8 @@ const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact
 const EXAMPLE_PICKS = ['Luke Littler', 'Gerwyn Price', 'James Wade', 'Wessel Nijman', 'Ross Smith', 'Luke Woodhouse']
 
 const CARD_WIDTH = 104
-const SLOT_MAX_WIDTH = 54
-const SLOT_MAX_WIDTH_FINISHED = 66
-
-function lastName(name: string): string {
-  const i = name.indexOf(' ')
-  return i < 0 ? name : name.slice(i + 1)
-}
-function initials(name: string): string {
-  const parts = name.split(' ').filter(Boolean)
-  return ((parts[0]?.[0] ?? '') + (parts[parts.length - 1]?.[0] ?? '')).toUpperCase()
-}
+const SLOT_WIDTH = 54
+const SLOT_WIDTH_FINISHED = 66
 
 interface Level {
   potNumber: number
@@ -61,7 +52,7 @@ type Event = { t: number; kind: 'level'; level: number; phase: SubPhase } | { t:
 
 // De to første nivåene spilles rolig av med tydelige pauser mellom hvert
 // steg (nivåene → kandidatene → valget → flyr inn i laget), resten kjøres
-// raskt for å vise at mønsteret bare fortsetter. Alle tider i ms fra mount.
+// raskt for å vise at mønsteret bare fortsetter. Alle tider i ms fra start.
 const SLOT_STAGGER = 90
 const SLOT_START = 150
 const FLY_DUR_SLOW = 700
@@ -69,7 +60,6 @@ const FLY_DUR_FAST = 420
 
 function buildSchedule(): Event[] {
   const events: Event[] = []
-  // Nivåene popper inn først, så en pust før første kandidatrad.
   let t = SLOT_START + LEVELS.length * SLOT_STAGGER + 700
   const PACE = [
     { hold: 1700, pick: 1100, fly: FLY_DUR_SLOW, gap: 850 },
@@ -97,19 +87,18 @@ function buildSchedule(): Event[] {
  * spillerkortene i miniatyr — kandidatene tones inn, ett lyser opp (samme
  * valgt/dempet-stil som i selve tippe-flyten) og flyr målt inn i sin plass i
  * laget. Til slutt løftes laget fram med glød og «Laget ditt». Spilles av én
- * gang per mount (dvs. hver gang bruker lander på fase 0); respekterer
+ * gang per mount; venter til fanen er synlig; respekterer
  * prefers-reduced-motion ved å hoppe rett til ferdig sluttilstand.
  */
-export default function TeamBuildAnimation({ startOnView = false, startDelay = 0 }: {
-  // true = vent med å starte til komponenten faktisk er skrollet inn i
-  // synsfeltet (forsiden, der den ligger under hero-seksjonen).
+export default function TeamBuildAnimation({ startOnView = false, startDelay = 0, onFinished }: {
+  /** true = vent til komponenten er skrollet inn i synsfeltet (forsiden). */
   startOnView?: boolean
-  // ms å vente etter mount før noe som helst vises (intro-sliden lar
-  // overskrift og undertekst komme først). Før start er alt usynlig, men
-  // tar plass — så layouten ikke hopper når den setter i gang.
+  /** ms å vente etter mount før noe vises. Alt tar plass fra start, så layouten ikke hopper. */
   startDelay?: number
+  onFinished?: () => void
 }) {
-  const [started, setStarted] = useState(!startOnView && startDelay === 0)
+  const pageVisible = usePageVisible()
+  const [armed, setArmed] = useState(!startOnView && startDelay === 0)
   const [landedCount, setLandedCount] = useState(0)
   const [active, setActive] = useState<{ level: number; phase: SubPhase } | null>(null)
   const [finished, setFinished] = useState(false)
@@ -119,19 +108,23 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
   const slotRefs = useRef<(HTMLDivElement | null)[]>([])
   const chosenRef = useRef<HTMLDivElement | null>(null)
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
+  const onFinishedRef = useRef(onFinished)
+  useEffect(() => { onFinishedRef.current = onFinished })
+
+  const started = armed && pageVisible
 
   useEffect(() => {
-    if (started || startOnView || startDelay === 0) return
-    const t = setTimeout(() => setStarted(true), startDelay)
+    if (armed || startOnView || startDelay === 0) return
+    const t = setTimeout(() => setArmed(true), startDelay)
     return () => clearTimeout(t)
-  }, [started, startOnView, startDelay])
+  }, [armed, startOnView, startDelay])
 
   useEffect(() => {
-    if (started || !startOnView || !rootRef.current) return
+    if (armed || !startOnView || !rootRef.current) return
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
-          setStarted(true)
+          setArmed(true)
           observer.disconnect()
         }
       },
@@ -139,7 +132,7 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
     )
     observer.observe(rootRef.current)
     return () => observer.disconnect()
-  }, [started, startOnView])
+  }, [armed, startOnView])
 
   useEffect(() => {
     if (!started) return
@@ -147,11 +140,12 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLandedCount(LEVELS.length)
       setFinished(true)
+      onFinishedRef.current?.()
       return
     }
     timeoutsRef.current = buildSchedule().map((ev) =>
       setTimeout(() => {
-        if (ev.kind === 'finish') { setFinished(true); return }
+        if (ev.kind === 'finish') { setFinished(true); onFinishedRef.current?.(); return }
         if (ev.phase === 'hidden') {
           setLandedCount(ev.level + 1)
           setActive(null)
@@ -164,9 +158,8 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
     return () => { timeoutsRef.current.forEach(clearTimeout) }
   }, [started])
 
-  // Målt flytur: fra det valgte kortets senter til plassens senter, og
-  // skalert ned til plassens bredde — da lander kortet nøyaktig der det skal
-  // uansett skjermbredde, i stedet for en fast translateY.
+  // Målt flytur: fra det valgte kortets senter til plassens senter, skalert
+  // ned til plassens bredde — lander riktig uansett skjermbredde.
   useEffect(() => {
     if (active?.phase !== 'flying') return
     const card = chosenRef.current
@@ -186,7 +179,7 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
   const flyDur = active && active.level < 2 ? FLY_DUR_SLOW : FLY_DUR_FAST
 
   return (
-    <div ref={rootRef} className="team-demo" aria-hidden="true">
+    <div ref={rootRef} className="card-mini" aria-hidden="true">
       {/* Laget — 6 plasser som fylles etter hvert som spillere landes */}
       <div
         style={{
@@ -196,77 +189,39 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
           transform: finished ? 'scale(1.08)' : 'scale(1)',
           background: finished ? 'linear-gradient(180deg, rgba(243,213,118,0.10) 0%, rgba(243,213,118,0.03) 100%)' : 'transparent',
           boxShadow: finished ? '0 0 0 1px rgba(243,213,118,0.4), 0 12px 40px rgba(243,213,118,0.2)' : 'none',
+          animationName: finished ? 'team-glow-pulse' : 'none',
+          animationDuration: '2.8s',
+          animationTimingFunction: 'ease-in-out',
+          animationIterationCount: 'infinite',
+          animationDelay: '0.8s',
           transition: 'transform 0.7s cubic-bezier(0.22,1,0.36,1), box-shadow 0.7s ease, background 0.7s ease',
         }}
       >
         {LEVELS.map((lvl, i) => {
           const landed = i < landedCount
           const inProgress = !landed && active?.level === i
-          const picked = lvl.candidates[lvl.pickIndex]
-          const photo = PLAYER_PHOTOS[picked.name]
           return (
             <div
               key={lvl.potNumber}
               style={{
-                width: finished ? SLOT_MAX_WIDTH_FINISHED : SLOT_MAX_WIDTH, flexShrink: 1, minWidth: 0,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                width: finished ? SLOT_WIDTH_FINISHED : SLOT_WIDTH, flexShrink: 1, minWidth: 0,
                 transition: 'width 0.7s cubic-bezier(0.22,1,0.36,1)',
               }}
             >
-              <div
-                ref={(el) => { slotRefs.current[i] = el }}
+              {/* key-bytte ved landing → brikken popper på nytt */}
+              <TeamTile
                 key={landed ? 'landed' : 'empty'}
-                style={{
-                  width: '100%', aspectRatio: '4 / 5', borderRadius: 10, overflow: 'hidden', position: 'relative',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: `1.5px solid ${landed || inProgress ? lvl.color : 'rgba(255,255,255,0.14)'}`,
-                  background: landed
-                    ? `radial-gradient(ellipse 80% 70% at 50% 35%, ${lvl.color} 0%, ${lvl.colorDark} 100%)`
-                    : 'rgba(255,255,255,0.03)',
-                  boxShadow: inProgress
-                    ? `0 0 0 3px ${lvl.color}33`
-                    : finished && landed ? `0 0 12px ${lvl.color}80` : 'none',
-                  // Før start: usynlig, men tar plass. Ved start popper plassene
-                  // inn forskjøvet; en landet plass popper på nytt (key-bytte).
-                  opacity: started ? 1 : 0,
-                  // Kun longhand-egenskaper: React advarer (med rette) når
-                  // `animation`-shorthand og `animationDelay` byttes om hverandre
-                  // mellom render-runder.
-                  animationName: started ? 'flag-pop' : 'none',
-                  animationDuration: '0.45s',
-                  animationTimingFunction: 'cubic-bezier(0.34,1.56,0.64,1)',
-                  animationFillMode: 'both',
-                  animationDelay: landed ? '0ms' : `${SLOT_START + i * SLOT_STAGGER}ms`,
-                  transition: 'border-color 0.25s ease, box-shadow 0.4s ease',
-                }}
-              >
-                {landed ? (
-                  photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- statisk fil i public/
-                    <img src={photo.src} alt="" style={{ position: 'absolute', inset: '6% 4% 0', width: '92%', height: '94%', objectFit: 'contain', objectPosition: 'bottom', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.5))' }} />
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                      <Flag iso2={picked.iso2} size={16} />
-                      <span style={{ fontFamily: SPORT, fontWeight: 900, fontSize: 12, color: '#f3d576', lineHeight: 1 }}>{initials(picked.name)}</span>
-                    </div>
-                  )
-                ) : (
-                  <span style={{ fontFamily: SPORT, fontWeight: 900, fontSize: 14, color: inProgress ? lvl.color : 'rgba(255,255,255,0.28)', transition: 'color 0.25s ease' }}>
-                    {lvl.potNumber}
-                  </span>
-                )}
-              </div>
-              <span
-                style={{
-                  fontSize: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em',
-                  opacity: started ? 1 : 0, transition: 'opacity 0.4s ease',
-                  color: landed ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.25)',
-                  textAlign: 'center', lineHeight: 1.15, width: '100%',
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}
-              >
-                {landed ? lastName(picked.name) : `Nivå ${lvl.potNumber}`}
-              </span>
+                player={landed ? lvl.candidates[lvl.pickIndex] : undefined}
+                potNumber={lvl.potNumber}
+                color={lvl.color}
+                colorDark={lvl.colorDark}
+                inProgress={inProgress}
+                glow={finished}
+                pop={started}
+                popDelayMs={landed ? 0 : SLOT_START + i * SLOT_STAGGER}
+                hidden={!started}
+                tileRef={(el) => { slotRefs.current[i] = el }}
+              />
             </div>
           )
         })}
@@ -292,9 +247,8 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
                     opacity: fadingOut || (flying && fly) ? 0 : 1,
                     transform,
                     zIndex: isPick ? 3 : 1, position: 'relative',
-                    // Kortet holder seg fullt synlig nesten hele flyturen og
-                    // forsvinner først idet plassen popper inn — så øyet får
-                    // følge det helt fram.
+                    // Kortet holder seg synlig nesten hele flyturen og forsvinner
+                    // først idet plassen popper inn — så øyet får følge det fram.
                     transition: flying
                       ? `transform ${flyDur}ms cubic-bezier(0.4,0,0.2,1), opacity 160ms ease-in ${flyDur - 160}ms`
                       : 'opacity 0.3s ease',
@@ -308,7 +262,6 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
                     dimmed={!isPick && activePhase !== 'revealed'}
                     index={ci}
                     potNumber={activeLevel.potNumber}
-                    multiplier={1}
                     onClick={() => {}}
                   />
                 </div>
