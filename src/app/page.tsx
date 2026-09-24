@@ -3,6 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
+import TeamBuildAnimation from '@/components/TeamBuildAnimation'
 
 function getTimeUntil(target: Date) {
   const now = new Date()
@@ -269,11 +270,25 @@ export default function HomePage() {
 
       {/* ── FIRST SCREEN: countdown pill + hero fill 100svh ── */}
       <div style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-        {/* Bakgrunn dekker hele 100svh inkl. nedtelling */}
+        {/* Bakgrunn dekker hele 100svh inkl. nedtelling. Foto: PDC World Darts
+            Championship, semifinalescenen på Alexandra Palace 2016 —
+            © dom fellowes, CC BY 2.0 (se PLAYER_PHOTO_DATABANK.md). Farge-
+            laget over toner bildet i sidens blå/røde palett (mixBlendMode:
+            'color') i stedet for å ligge som separate fargeklatter oppå. */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 140% 90% at 10% 0%, #0a3fa8 0%, transparent 52%), radial-gradient(ellipse 140% 90% at 90% 0%, #c41230 0%, transparent 52%)' }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 200, background: 'linear-gradient(to bottom, transparent, #0a0a0a)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 42%, rgba(0,0,0,0.45) 0%, transparent 65%)' }} />
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'url(/hero/worldchamp-stage.webp)',
+            backgroundSize: 'cover', backgroundPosition: 'center 38%',
+            opacity: 0.5, filter: 'saturate(0.8) brightness(0.85)',
+          }} />
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'radial-gradient(ellipse 140% 90% at 10% 0%, #0a3fa8 0%, transparent 52%), radial-gradient(ellipse 140% 90% at 90% 0%, #c41230 0%, transparent 52%)',
+            mixBlendMode: 'color', opacity: 0.9,
+          }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 220, background: 'linear-gradient(to bottom, transparent, #0a0a0a)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 42%, rgba(0,0,0,0.55) 0%, transparent 65%)' }} />
         </div>
 
       {/* ── HERO ── */}
@@ -351,8 +366,20 @@ export default function HomePage() {
       {/* ── SLIK FUNGERER DET ── */}
       <div className="gradient-divider" />
       <div style={{ padding: '48px 20px 40px' }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', marginBottom: 32, textAlign: 'center' }}>
+        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', marginBottom: 8, textAlign: 'center' }}>
           Slik fungerer det
+        </div>
+        <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', color: '#fff', textAlign: 'center', lineHeight: 1 }}>
+          De 6 pottene
+        </div>
+        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', margin: '8px 0 24px', lineHeight: 1.5 }}>
+          Velg 6 spillere – én fra hvert nivå
+        </div>
+        {/* Selvspillende demo av valget (samme som intro-sliden i /tipp) —
+            starter først når den er skrollet inn i bildet, siden den ligger
+            under 100svh-heroen. */}
+        <div style={{ maxWidth: 420, margin: '0 auto 40px' }}>
+          <TeamBuildAnimation startOnView />
         </div>
         <div className="how-it-works-grid">
         {[

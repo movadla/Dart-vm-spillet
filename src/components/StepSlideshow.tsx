@@ -2,9 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { POTS, type Player } from '@/data/pots'
+import { SCORING, STAGE_LABELS } from '@/config/scoring'
+import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
+import { PlayerCard } from '@/components/PlayerCard'
 import Flag from '@/components/Flag'
-import { POTS, getPickablePlayers } from '@/data/pots'
-import { SCORING, STAGE_LABELS, type Stage } from '@/config/scoring'
+import { PLAYER_PHOTOS } from '@/data/playerPhotos'
+import TeamBuildAnimation, { EXAMPLE_TEAM } from '@/components/TeamBuildAnimation'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
@@ -17,8 +21,6 @@ interface Props {
 }
 
 // ── Eksempeldata til intro-sekvensen (illustrerer spillmekanikken, ikke ekte VM-resultater) ──
-const POT_COLORS = ['#dc2626', '#d97706', '#2563eb', '#16a34a', '#ea580c', '#7c3aed']
-
 function findPick(name: string) {
   const pot = POTS.find((p) => p.players.some((pl) => pl.name === name))
   const player = pot?.players.find((pl) => pl.name === name)
@@ -26,28 +28,37 @@ function findPick(name: string) {
   return { potNumber: pot.potNumber, player }
 }
 
-const RESULT_PLAYER = findPick('Luke Littler').player
-const RESULT_STAGE: Stage = 'qf'
-const RESULT_OPPONENT = 'Gerwyn Price'
-const RESULT_SETS_WON = 6
-const RESULT_SET_PTS = RESULT_SETS_WON * SCORING.perSetWon
-const RESULT_ADV_PTS = SCORING.perAdvancement
-const RESULT_POINTS = RESULT_SET_PTS + RESULT_ADV_PTS
+const EXAMPLE_PICK = findPick('Luke Littler')
+// Motstanderen i eksempelet trekkes tilfeldig blant de useedede (seedNumber
+// null) ved mount — de har ingen foto, så kortet viser initial-plassholderen,
+// som passer fint for «en tilfeldig useeded spiller».
+const UNSEEDED: Player[] = POTS.flatMap((p) => p.players).filter((p) => p.seedNumber == null)
+const EXAMPLE_SETS_WON = 3
+const EXAMPLE_SETS_LOST = 1
+const EXAMPLE_SET_PTS = EXAMPLE_SETS_WON * SCORING.perSetWon
+const EXAMPLE_WIN_PTS = SCORING.perAdvancement
+const EXAMPLE_TOTAL = EXAMPLE_SET_PTS + EXAMPLE_WIN_PTS
 
-const LEADERBOARD_TOTAL = 34
-const LEADERBOARD_RANK = 4
-// Bevisst IKKE 128 (antall spillere i braketten) — det ville lest ut som en
-// turneringsplassering. Dette er antall DELTAKERE i tippekonkurransen (ubegrenset i praksis).
-const LEADERBOARD_OF = 52
+const LAST_PHASE = 2
+/** Siste slide (0-indeksert) — tipp/page.tsx skjuler «Hopp over» der, siden
+ * CTA-en («Velg spillere») ligger på den sliden. */
+export const INTRO_LAST_SLIDE = LAST_PHASE
 
-const LAST_PHASE = 3
+const CTA_STYLE: React.CSSProperties = {
+  flex: 1, display: 'block', padding: '16px',
+  background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)',
+  color: '#fff', fontFamily: SPORT, fontSize: 18, fontWeight: 900,
+  letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 14,
+  border: 'none', cursor: 'pointer',
+  animation: 'slide-enter 0.5s cubic-bezier(0.22,1,0.36,1) both',
+}
 
 /**
  * Manuelt styrt, fler-fase intro-sekvens for Dart-VM-spillet — bruker trykker
  * seg videre med «Neste»-knappen, sveiper, eller piltastene (ingen
- * auto-advance). Fase 0: de faktiske pottene → fase 1: eksempel på
- * poenggivende resultat → fase 2: eksempel på poengsum/leaderboard →
- * fase 3: CTA.
+ * auto-advance). Fase 0: lagbygging-animasjonen → fase 1: eksempelkamp med
+ * poeng → fase 2: «Min side»/ligaer, med CTA («Velg spillere») nederst i
+ * stedet for «Neste» — det finnes ingen egen CTA-slide.
  * Brukes som intro på forsiden og gjenbrukt på vm-info-siden — og som ETT av
  * de 6 stegene i selve tippe-flyten (tipp/page.tsx), som har sin egen
  * «STEG 1 AV 6»-header utenfor denne komponenten. Derfor har PhaseHeading
@@ -57,7 +68,6 @@ const LAST_PHASE = 3
 export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = '/tipp', ctaLabel = 'VELG SPILLERE →' }: Props) {
   const [visible, setVisible] = useState(false)
   const [phase, setPhase] = useState(0)
-  const [count, setCount] = useState(0)
 
   const onSlideRef = useRef(onSlide)
   const onCtaReadyRef = useRef(onCtaReady)
@@ -105,32 +115,6 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
     onSlideRef.current?.(next)
     if (next === LAST_PHASE) onCtaReadyRef.current?.()
   }
-
-  // Tell opp poengsummen når leaderboard-fasen vises — nullstiller med vilje hver gang
-  // fasen endres, det er selve animasjons-triggeren, ikke noe som kan flyttes til en
-  // lazy useState-initializer.
-  useEffect(() => {
-    if (phase !== 2) return
-    // prefers-reduced-motion respekteres ikke av setInterval-baserte
-    // JS-animasjoner (kun CSS, se den globale regelen i globals.css) — hopper
-    // rett til sluttverdien i stedet for å telle opp.
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCount(LEADERBOARD_TOTAL)
-      return
-    }
-    setCount(0)
-    const steps = 24
-    const stepTime = 900 / steps
-    let i = 0
-    const interval = setInterval(() => {
-      i += 1
-      const eased = 1 - Math.pow(1 - i / steps, 3)
-      setCount(Math.round(eased * LEADERBOARD_TOTAL))
-      if (i >= steps) clearInterval(interval)
-    }, stepTime)
-    return () => clearInterval(interval)
-  }, [phase])
 
   return (
     <div
@@ -180,7 +164,7 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
           aktive prikken bruker dot-fill-animasjonen (fantes ferdig i
           globals.css, men var aldri koblet til noe). */}
       <div role="tablist" aria-label="Steg i introduksjonen" style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 20 }}>
-        {[0, 1, 2, 3].map((i) => (
+        {[0, 1, 2].map((i) => (
           <button
             key={i}
             role="tab"
@@ -220,182 +204,30 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
         onTouchEnd={handleTouchEnd}
         style={{ minHeight: 268, marginBottom: 24 }}
       >
-        {phase === 0 && (
-          <div>
-            <PhaseHeading eyebrow="Slik fungerer det" title="De 6 pottene" />
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
-              Du velger én spiller fra hver pott — fra ren duell øverst til det store feltet nederst.
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 300, overflowY: 'auto' }}>
-              {POTS.map((pot) => {
-                const color = POT_COLORS[(pot.potNumber - 1) % POT_COLORS.length]
-                const mult = SCORING.underdogMultiplier[pot.potNumber] ?? 1
-                const pickable = getPickablePlayers(pot)
-                const example = pickable[0]
-                return (
-                  <div
-                    key={pot.potNumber}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: 12,
-                      padding: '9px 12px',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 6px 16px rgba(0,0,0,0.2)',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: SPORT, fontSize: 12, fontWeight: 900, color: '#000', background: color,
-                        borderRadius: 7, width: 24, height: 24, display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', flexShrink: 0,
-                      }}
-                    >
-                      {pot.potNumber}
-                    </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {pot.name}
-                      </div>
-                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {pickable.length} spillere · f.eks. {example.name}
-                      </div>
-                    </div>
-                    <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: mult > 1 ? '#f59e0b' : 'rgba(255,255,255,0.35)', flexShrink: 0 }}>
-                      ×{mult}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
+        {phase === 0 && <IntroPhase />}
 
-        {phase === 1 && (
-          <div style={{ animation: 'slide-enter 0.5s cubic-bezier(0.22,1,0.36,1) both' }}>
-            <PhaseHeading eyebrow="Eksempel" title="Følg dem gjennom dart-VM" />
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
-              1p per sett vunnet, 2p for kampseier — jo lenger de går, jo mer poeng.
-            </div>
-            <div
-              style={{
-                background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 16,
-                padding: '18px 18px 16px',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 20px rgba(0,0,0,0.25)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                <Flag iso2={RESULT_PLAYER.iso2} size={20} />
-                <span style={{ flex: 1, fontSize: 13, fontWeight: 800, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {RESULT_PLAYER.name}
-                </span>
-                <span style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>{RESULT_SETS_WON}–2</span>
-                <span style={{ flex: 1, fontSize: 13, color: 'rgba(255,255,255,0.5)', textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {RESULT_OPPONENT}
-                </span>
-              </div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 10 }}>
-                {STAGE_LABELS[RESULT_STAGE]}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
-                <span>{RESULT_SETS_WON} sett × 1p = {RESULT_SET_PTS}p</span>
-                <span style={{ color: 'rgba(255,255,255,0.2)' }}>+</span>
-                <span>kampseier = {RESULT_ADV_PTS}p</span>
-                <span
-                  className="multiplier-badge"
-                  style={{
-                    marginLeft: 'auto', fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: '#f59e0b',
-                    background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)',
-                    borderRadius: 8, padding: '4px 10px', flexShrink: 0,
-                  }}
-                >
-                  +{RESULT_POINTS}p
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
+        {phase === 1 && <ExamplePhase />}
 
-        {phase === 2 && (
-          <div style={{ animation: 'slide-enter 0.5s cubic-bezier(0.22,1,0.36,1) both' }}>
-            <PhaseHeading eyebrow="Eksempel" title="Poeng for hver runde" />
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
-              Du scorer poeng for hver runde spillerne dine vinner – jo lenger de går, jo mer poeng.
-            </div>
-            <div
-              style={{
-                background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 16,
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 20px rgba(0,0,0,0.25)',
-                display: 'flex',
-                overflow: 'hidden',
-              }}
-            >
-              <div style={{ flex: 1, padding: '16px 18px 14px' }}>
-                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', marginBottom: 4 }}>
-                  Poeng
-                </div>
-                <div style={{ fontFamily: SPORT, fontSize: 40, fontWeight: 900, color: '#f59e0b', lineHeight: 1, letterSpacing: '-1.5px', fontVariantNumeric: 'tabular-nums' }}>
-                  {count}
-                </div>
-              </div>
-              <div style={{ width: 1, background: 'rgba(255,255,255,0.07)', alignSelf: 'stretch' }} />
-              <div style={{ padding: '16px 18px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(251,191,36,0.5)', marginBottom: 2 }}>
-                  Plassering
-                </div>
-                <div style={{ fontFamily: SPORT, fontSize: 40, fontWeight: 900, color: '#fbbf24', lineHeight: 1, letterSpacing: '-1.5px' }}>
-                  #{LEADERBOARD_RANK}
-                </div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', marginTop: 2 }}>av {LEADERBOARD_OF} deltakere</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {phase === 3 && (
-          <div style={{ textAlign: 'center', animation: 'slide-enter 0.5s cubic-bezier(0.22,1,0.36,1) both' }}>
-            <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', color: '#fff', marginBottom: 8 }}>
-              Klar til å sette laget?
-            </div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, marginBottom: 6 }}>
-              Velg dine 6 spillere og følg dem gjennom hele sluttspillet i PDC World Championship.
-            </div>
-          </div>
-        )}
+        {phase === 2 && <ProgressPhase />}
       </div>
 
-      {/* Sveip-hint — kun på første fase, viser at man kan sveipe i tillegg
-          til å trykke Neste. bounce-arrow-right fantes ferdig i globals.css
-          men var aldri koblet til noe. */}
-      {phase === 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 10, fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
-          <span>Sveip for å bla</span>
-          <span className="bounce-arrow-right" aria-hidden="true">→</span>
-        </div>
-      )}
-
-      {/* Manuell navigasjon */}
-      {phase < LAST_PHASE && (
-        <div style={{ display: 'flex', gap: 10 }}>
-          {phase > 0 && (
-            <button
-              onClick={() => goToPhase(phase - 1)}
-              style={{
-                flexShrink: 0, padding: '14px 18px', background: 'transparent',
-                color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.15)',
-                borderRadius: 14, fontFamily: SPORT, fontSize: 14, fontWeight: 800,
-                letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer',
-              }}
-            >
-              Tilbake
-            </button>
-          )}
+      {/* Manuell navigasjon — på siste fase erstattes «Neste» av selve CTA-en
+          («Velg spillere»), men den lille Tilbake-knappen beholdes. */}
+      <div style={{ display: 'flex', gap: 10 }}>
+        {phase > 0 && (
+          <button
+            onClick={() => goToPhase(phase - 1)}
+            style={{
+              flexShrink: 0, padding: '14px 18px', background: 'transparent',
+              color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: 14, fontFamily: SPORT, fontSize: 14, fontWeight: 800,
+              letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer',
+            }}
+          >
+            Tilbake
+          </button>
+        )}
+        {phase < LAST_PHASE ? (
           <button
             onClick={() => goToPhase(phase + 1)}
             className="btn-hover"
@@ -408,69 +240,293 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
           >
             Neste →
           </button>
-        </div>
-      )}
-
-      {/* CTA */}
-      {phase === 3 &&
-        (onStart ? (
-          <button
-            onClick={onStart}
-            className="cta-pulse"
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '16px',
-              background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)',
-              color: '#fff',
-              fontFamily: SPORT,
-              fontSize: 20,
-              fontWeight: 900,
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              borderRadius: 14,
-              border: 'none',
-              cursor: 'pointer',
-              animation: 'slide-enter 0.5s cubic-bezier(0.22,1,0.36,1) both',
-            }}
-          >
+        ) : onStart ? (
+          <button onClick={onStart} className="cta-pulse" style={CTA_STYLE}>
             {ctaLabel}
           </button>
         ) : (
-          <Link
-            href={ctaHref}
-            className="cta-btn cta-pulse"
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '16px',
-              background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)',
-              color: '#fff',
-              fontFamily: SPORT,
-              fontSize: 20,
-              fontWeight: 900,
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              borderRadius: 14,
-              textAlign: 'center',
-              textDecoration: 'none',
-              animation: 'slide-enter 0.5s cubic-bezier(0.22,1,0.36,1) both',
-            }}
-          >
+          <Link href={ctaHref} className="cta-btn cta-pulse" style={{ ...CTA_STYLE, textAlign: 'center', textDecoration: 'none' }}>
             {ctaLabel}
           </Link>
-        ))}
+        )}
+      </div>
     </div>
   )
 }
 
-function PhaseHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
+// Fase 0 i tre trinn, så folk rekker å lese: overskrift → undertekst →
+// selve animasjonen (som tar plass fra start, så ingenting hopper).
+// Egen komponent slik at trinnene starter på nytt hver gang bruker lander
+// på fase 0 igjen (den (re)monteres sammen med fasen).
+const INTRO_SUBTITLE_AT = 1300
+const INTRO_ANIMATION_AT = 2700
+
+function IntroPhase() {
+  const [subtitleVisible, setSubtitleVisible] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSubtitleVisible(true)
+      return
+    }
+    const t = setTimeout(() => setSubtitleVisible(true), INTRO_SUBTITLE_AT)
+    return () => clearTimeout(t)
+  }, [])
+
   return (
-    <div style={{ textAlign: 'center', marginBottom: 4 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>
-        {eyebrow}
+    <div>
+      <div style={{ textAlign: 'center', marginBottom: 10, animation: 'slide-enter 0.6s cubic-bezier(0.22,1,0.36,1) both' }}>
+        <div style={{ fontFamily: SPORT, fontSize: 24, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
+          Slik fungerer det
+        </div>
       </div>
-      <div style={{ fontFamily: SPORT, fontSize: 19, fontWeight: 900, textTransform: 'uppercase', color: '#fff' }}>{title}</div>
+      <div
+        style={{
+          fontSize: 14, color: 'rgba(255,255,255,0.6)', textAlign: 'center', marginBottom: 22, lineHeight: 1.5,
+          opacity: subtitleVisible ? 1 : 0,
+          transform: subtitleVisible ? 'translateY(0)' : 'translateY(6px)',
+          transition: 'opacity 0.5s ease, transform 0.5s cubic-bezier(0.22,1,0.36,1)',
+        }}
+      >
+        Velg 6 spillere – én fra hvert nivå
+      </div>
+      <TeamBuildAnimation startDelay={INTRO_ANIMATION_AT} />
+    </div>
+  )
+}
+
+// Fase 1 som en trinnvis fortelling (samme mønster som IntroPhase): tekst →
+// tekst → runde → kampoppsett med ekte kort → resultat → poengrader → sum.
+// Steg-nummer og tidspunkt (ms fra mount):
+const EXAMPLE_STEPS = [0, 1300, 2700, 3400, 5400, 6600, 7300, 8100] // steg 0..7
+const EXAMPLE_CARD_WIDTH = 92
+
+function ExamplePhase() {
+  const [step, setStep] = useState(0)
+  const [opponent, setOpponent] = useState<Player>(UNSEEDED[0])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOpponent(UNSEEDED[Math.floor(Math.random() * UNSEEDED.length)])
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setStep(EXAMPLE_STEPS.length - 1)
+      return
+    }
+    const timers = EXAMPLE_STEPS.slice(1).map((t, i) => setTimeout(() => setStep(i + 1), t))
+    return () => timers.forEach(clearTimeout)
+  }, [])
+
+  const reveal = (from: number, extra?: React.CSSProperties): React.CSSProperties => ({
+    opacity: step >= from ? 1 : 0,
+    transform: step >= from ? 'translateY(0)' : 'translateY(6px)',
+    transition: 'opacity 0.5s ease, transform 0.5s cubic-bezier(0.22,1,0.36,1)',
+    ...extra,
+  })
+
+  const opponentPot = POTS.find((p) => p.players.includes(opponent))?.potNumber ?? 6
+
+  return (
+    <div className="team-demo" style={{ textAlign: 'center' }}>
+      <div style={{ fontFamily: SPORT, fontSize: 24, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1, marginBottom: 10, animation: 'slide-enter 0.6s cubic-bezier(0.22,1,0.36,1) both' }}>
+        Følg spillerne dine gjennom VM
+      </div>
+      <div style={reveal(1, { fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, marginBottom: 18 })}>
+        Sank poeng basert på deres prestasjoner
+      </div>
+
+      <div style={reveal(2, { fontFamily: SPORT, fontSize: 13, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#f3d576', marginBottom: 10 })}>
+        {STAGE_LABELS.r1}
+      </div>
+
+      {/* Kampoppsett: Littler-kortet vs. en tilfeldig useeded — «VS» byttes
+          ut med resultatet når det kommer */}
+      <div style={reveal(3, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 14 })} aria-hidden="true">
+        <div style={{ width: EXAMPLE_CARD_WIDTH, flexShrink: 0, pointerEvents: 'none' }}>
+          <PlayerCard
+            player={EXAMPLE_PICK.player}
+            color={POT_COLORS[(EXAMPLE_PICK.potNumber - 1) % POT_COLORS.length]}
+            colorDark={POT_COLORS_DARK[(EXAMPLE_PICK.potNumber - 1) % POT_COLORS_DARK.length]}
+            selected={step >= 4}
+            index={0}
+            potNumber={EXAMPLE_PICK.potNumber}
+            multiplier={1}
+            onClick={() => {}}
+          />
+        </div>
+        <div style={{ width: 64, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          {step >= 4 ? (
+            <div key="score" style={{ fontFamily: SPORT, fontSize: 34, fontWeight: 900, color: '#fff', lineHeight: 1, letterSpacing: '-1px', fontVariantNumeric: 'tabular-nums', animation: 'flag-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+              {EXAMPLE_SETS_WON}–{EXAMPLE_SETS_LOST}
+            </div>
+          ) : (
+            <div key="vs" style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>VS</div>
+          )}
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', opacity: step >= 4 ? 1 : 0, transition: 'opacity 0.4s ease' }}>sett</div>
+        </div>
+        <div style={{ width: EXAMPLE_CARD_WIDTH, flexShrink: 0, pointerEvents: 'none' }}>
+          <PlayerCard
+            player={opponent}
+            color={POT_COLORS[(opponentPot - 1) % POT_COLORS.length]}
+            colorDark={POT_COLORS_DARK[(opponentPot - 1) % POT_COLORS_DARK.length]}
+            selected={false}
+            dimmed={step >= 4}
+            index={1}
+            potNumber={opponentPot}
+            multiplier={1}
+            onClick={() => {}}
+          />
+        </div>
+      </div>
+
+      {/* Poengrader — én og én, så summen */}
+      <div style={{ maxWidth: 260, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={reveal(5, { display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'rgba(255,255,255,0.7)', padding: '0 4px' })}>
+          <span>Seier</span>
+          <span style={{ fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 15 }}>{EXAMPLE_WIN_PTS}p</span>
+        </div>
+        <div style={reveal(6, { display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'rgba(255,255,255,0.7)', padding: '0 4px' })}>
+          <span>Sett vunnet</span>
+          <span style={{ fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 15 }}>{EXAMPLE_SET_PTS}p</span>
+        </div>
+        <div style={reveal(7, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(243,213,118,0.3)', paddingTop: 8, marginTop: 2, padding: '8px 4px 0' })}>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>Totalt</span>
+          <span
+            className={step >= 7 ? 'multiplier-badge' : undefined}
+            style={{
+              fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: '#f59e0b',
+              background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)',
+              borderRadius: 8, padding: '4px 12px',
+            }}
+          >
+            +{EXAMPLE_TOTAL}p
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Fase 2: «Min side» med laget og poeng → «egne ligaer» → en liga-tabell der
+// laget ditt klatrer fra 10. til 3. plass (poengene øker trinnvis, tabellen
+// re-sorteres og radene glir på plass via `top`-transition).
+const PROGRESS_STEPS = [0, 1300, 3300, 4600, 5700, 6500, 7300, 8100] // steg 0..7
+const LEAGUE_RIVALS = [
+  { name: 'Team 180', points: 41 },
+  { name: 'Bullseye-gjengen', points: 38 },
+  { name: 'Triple 20', points: 36 },
+  { name: 'Dartmestrene', points: 33 },
+  { name: 'Oche-banden', points: 31 },
+  { name: 'Nine-darter', points: 29 },
+  { name: 'Kasteskjeva', points: 27 },
+  { name: 'Tungvekterne', points: 25 },
+  { name: 'Bakerste bord', points: 22 },
+]
+// Laget ditt: 20p = 10. plass, så 26/30/34/37 → 8./6./4./3. plass.
+const YOUR_POINTS_BY_STEP = [20, 20, 20, 20, 26, 30, 34, 37]
+const LEAGUE_ROW_H = 26
+
+function ProgressPhase() {
+  const [step, setStep] = useState(0)
+  // «Tilfeldig poeng» per spiller — trekkes ved mount, så eksempelet varierer.
+  const [playerPoints, setPlayerPoints] = useState<number[]>(() => EXAMPLE_TEAM.map(() => 4))
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPlayerPoints(EXAMPLE_TEAM.map(() => 2 + Math.floor(Math.random() * 8)))
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setStep(PROGRESS_STEPS.length - 1)
+      return
+    }
+    const timers = PROGRESS_STEPS.slice(1).map((t, i) => setTimeout(() => setStep(i + 1), t))
+    return () => timers.forEach(clearTimeout)
+  }, [])
+
+  const reveal = (from: number, extra?: React.CSSProperties): React.CSSProperties => ({
+    opacity: step >= from ? 1 : 0,
+    transform: step >= from ? 'translateY(0)' : 'translateY(6px)',
+    transition: 'opacity 0.5s ease, transform 0.5s cubic-bezier(0.22,1,0.36,1)',
+    ...extra,
+  })
+
+  const yourPoints = YOUR_POINTS_BY_STEP[step]
+  const table = [...LEAGUE_RIVALS.map((r) => ({ ...r, you: false })), { name: 'Laget ditt', points: yourPoints, you: true }]
+    .sort((a, b) => b.points - a.points)
+  const yourRank = table.findIndex((r) => r.you) + 1
+
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ fontFamily: SPORT, fontSize: 24, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1, marginBottom: 14, animation: 'slide-enter 0.6s cubic-bezier(0.22,1,0.36,1) both' }}>
+        Følg utviklingen på «Min side»
+      </div>
+
+      {/* Laget med poeng per spiller */}
+      <div style={reveal(1, { display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 18 })} aria-hidden="true">
+        {EXAMPLE_TEAM.map((t, i) => {
+          const photo = PLAYER_PHOTOS[t.player.name]
+          return (
+            <div key={t.player.name} style={{ width: 52, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+              <div style={{
+                width: '100%', aspectRatio: '4 / 5', borderRadius: 10, overflow: 'hidden', position: 'relative',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: `1.5px solid ${t.color}`,
+                background: `radial-gradient(ellipse 80% 70% at 50% 35%, ${t.color} 0%, ${t.colorDark} 100%)`,
+                animationName: step >= 1 ? 'flag-pop' : 'none', animationDuration: '0.45s',
+                animationTimingFunction: 'cubic-bezier(0.34,1.56,0.64,1)', animationFillMode: 'both', animationDelay: `${i * 70}ms`,
+              }}>
+                {photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- statisk fil i public/
+                  <img src={photo.src} alt="" style={{ position: 'absolute', inset: '6% 4% 0', width: '92%', height: '94%', objectFit: 'contain', objectPosition: 'bottom', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.5))' }} />
+                ) : (
+                  <Flag iso2={t.player.iso2} size={16} />
+                )}
+              </div>
+              <span style={{ fontSize: 8, fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {t.player.name.slice(t.player.name.indexOf(' ') + 1)}
+              </span>
+              <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>{playerPoints[i]}p</span>
+            </div>
+          )
+        })}
+      </div>
+
+      <div style={reveal(2, { fontFamily: SPORT, fontSize: 20, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1.1, marginBottom: 12 })}>
+        Opprett eller delta i egne ligaer
+      </div>
+
+      {/* Liga-tabell: absolutt posisjonerte rader, så re-sortering glir */}
+      <div style={reveal(3, {
+        position: 'relative', height: table.length * LEAGUE_ROW_H, maxWidth: 300, margin: '0 auto',
+        background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 12, overflow: 'hidden', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 20px rgba(0,0,0,0.25)',
+      })}>
+        {table.map((row, i) => (
+          <div
+            key={row.name}
+            style={{
+              position: 'absolute', left: 0, right: 0, top: i * LEAGUE_ROW_H, height: LEAGUE_ROW_H,
+              display: 'flex', alignItems: 'center', gap: 8, padding: '0 10px',
+              background: row.you ? 'rgba(220,38,38,0.22)' : 'transparent',
+              boxShadow: row.you ? 'inset 0 0 0 1px rgba(220,38,38,0.6)' : 'none',
+              transition: 'top 0.7s cubic-bezier(0.22,1,0.36,1)',
+              zIndex: row.you ? 2 : 1,
+            }}
+          >
+            <span style={{ fontFamily: SPORT, fontSize: 12, fontWeight: 900, width: 18, textAlign: 'right', color: row.you ? '#fff' : i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.3)', fontVariantNumeric: 'tabular-nums' }}>
+              {i + 1}
+            </span>
+            <span style={{ flex: 1, textAlign: 'left', fontSize: 11, fontWeight: row.you ? 800 : 500, color: row.you ? '#fff' : 'rgba(255,255,255,0.6)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {row.name}
+            </span>
+            <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: row.you ? '#f59e0b' : 'rgba(255,255,255,0.5)', fontVariantNumeric: 'tabular-nums' }}>
+              {row.points}p
+            </span>
+          </div>
+        ))}
+      </div>
+      <div style={reveal(3, { fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginTop: 8 })}>
+        {yourRank}. plass
+      </div>
     </div>
   )
 }

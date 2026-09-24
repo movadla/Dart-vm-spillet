@@ -8,24 +8,14 @@ import { POTS, getPickablePlayers } from '@/data/pots'
 import Flag from '@/components/Flag'
 import { SCORING } from '@/config/scoring'
 import { PlayerCard } from '@/components/PlayerCard'
-import StepSlideshow from '@/components/StepSlideshow'
+import PlayerDetailPanel from '@/components/PlayerDetailPanel'
+import StepSlideshow, { INTRO_LAST_SLIDE } from '@/components/StepSlideshow'
 import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
 import ShareButton from '@/app/ShareButton'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const KICKOFF = new Date('2026-12-11T19:00:00Z')
-
-// Formvurdering i spillerinfo-panelet — fargekodet, men INGEN spiller har
-// noen form-verdi satt ennå (se Player.form i pots.ts), så "Ukjent" er det
-// eneste som faktisk vises i dag. Beholdt som eget oppslag (ikke inline)
-// slik at panelet nedenfor er enkelt å lese.
-const FORM_STYLES: Record<'dårlig' | 'middels' | 'bra', { label: string; color: string }> = {
-  dårlig: { label: 'Dårlig', color: '#ef4444' },
-  middels: { label: 'Middels', color: '#f59e0b' },
-  bra: { label: 'Bra', color: '#22c55e' },
-}
-const FORM_UNKNOWN = { label: 'Ukjent', color: 'rgba(255,255,255,0.35)' }
 
 const POT_COUNT = POTS.length
 const REGISTRATION_STEP = POT_COUNT + 1
@@ -58,19 +48,6 @@ function Confetti() {
           animation: `confetti-fall 3s ${p.delay}s ease-in both`,
         }} />
       ))}
-    </div>
-  )
-}
-
-function PlayerInfoStat({ label, value, color = '#fff' }: { label: string; value: string; color?: string }) {
-  return (
-    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: '6px 9px' }}>
-      <div style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>
-        {label}
-      </div>
-      <div style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color, lineHeight: 1 }}>
-        {value}
-      </div>
     </div>
   )
 }
@@ -497,7 +474,7 @@ const inputStyle: React.CSSProperties = {
       <div className="page-bg" style={{ height: '100dvh', color: '#fff', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <Link href="/" className="back-btn">← Hjem</Link>
-          {slideshowSlide < 3 && (
+          {slideshowSlide < INTRO_LAST_SLIDE && (
             <button
               onClick={() => {
                 try { localStorage.setItem('vm_tipp_intro_seen', '1') } catch {}
@@ -628,54 +605,62 @@ const inputStyle: React.CSSProperties = {
   if (step === SUMMARY_STEP) {
     const allPicked = Object.keys(picks).length === POT_COUNT
     return (
-      <div className="page-bg" style={{ minHeight: '100vh', padding: '40px 20px 56px', color: '#fff', position: 'relative' }}>
-        {/* Brand banner */}
-        <div style={{ position: 'relative', height: 145, marginBottom: 20, pointerEvents: 'none', zIndex: 1 }}>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
+      <div className="page-bg" style={{ minHeight: '100vh', padding: '20px 20px 40px', color: '#fff', position: 'relative' }}>
+        {/* Brand banner — komprimert: dette er bare en oppsummering, alt
+            skal helst være synlig uten skrolling */}
+        <div style={{ position: 'relative', height: 70, marginBottom: 6, pointerEvents: 'none', zIndex: 1 }}>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
               — PDC World Championship —
             </div>
-            <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 52, letterSpacing: '-1px', lineHeight: 1 }}>
+            <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 34, letterSpacing: '-1px', lineHeight: 1 }}>
               <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
               <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
           </div>
         </div>
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
           {isEditMode
             ? <Link href={`/deltaker/${editId}`} className="back-btn">← Min side</Link>
             : <Link href="/" className="back-btn">← Hjem</Link>
           }
+          <Link href="/vm-info?tab=regler" target="_blank" style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textDecoration: 'underline' }}>
+            Regler og poeng →
+          </Link>
         </div>
-        <div style={{ fontFamily: SPORT, fontSize: 44, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, marginBottom: 6 }}>
-          <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 20, letterSpacing: '0.15em', marginBottom: 4 }}>
+        <div style={{ fontFamily: SPORT, fontSize: 26, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.95, marginBottom: 10 }}>
+          <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 15, letterSpacing: '0.15em', marginBottom: 2 }}>
             {isEditMode ? 'Bekreft endringer' : 'Oppsummering'}
           </div>
           {name && <div style={{ color: '#fff' }}>{name}</div>}
         </div>
-        <p style={{ color: 'rgba(255,255,255,0.35)', marginBottom: 8, fontSize: 13 }}>{Object.keys(picks).length} av {POT_COUNT} spillere valgt</p>
-        <Link href="/vm-info?tab=regler" target="_blank" style={{ display: 'inline-block', marginBottom: 24, fontSize: 12, color: 'rgba(255,255,255,0.3)', textDecoration: 'underline' }}>
-          Se reglene og poengsystemet →
-        </Link>
-
-        <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', marginBottom: 20, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
+        {/* team-demo: gjenbruker CSS-regelen som skjuler krediterings-knappen på
+            miniatyr-kort (samme som i intro-animasjonen) */}
+        <div className="team-demo" style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', marginBottom: 20, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
           {POTS.map((pot) => {
             const playerName = picks[pot.potNumber]
             const player = pot.players.find((p) => p.name === playerName)
             const color = POT_COLORS[(pot.potNumber - 1) % POT_COLORS.length]
+            const colorDark = POT_COLORS_DARK[(pot.potNumber - 1) % POT_COLORS_DARK.length]
             const multiplier = SCORING.underdogMultiplier[pot.potNumber]
             return (
-              <div key={pot.potNumber} style={{ display: 'flex', borderBottom: pot.potNumber < POT_COUNT ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                <div style={{ width: 44, flexShrink: 0, background: `${color}18`, borderRight: `2px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color, lineHeight: 1 }}>{pot.potNumber}</span>
-                </div>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', minWidth: 0 }}>
-                  <Flag iso2={player?.iso2 ?? ''} size={26} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700 }}>{playerName ?? 'Ikke valgt'}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
-                      PDC-ranking #{player?.pdcRanking ?? '–'}
+              <div key={pot.potNumber} style={{ display: 'flex', alignItems: 'center', borderBottom: pot.potNumber < POT_COUNT ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                {/* Selve kortet i miniatyr i stedet for pott-nummeret */}
+                <div style={{ width: 50, flexShrink: 0, padding: '4px 0 4px 7px', background: `${color}12`, borderRight: `2px solid ${color}30`, alignSelf: 'stretch', display: 'flex', alignItems: 'center' }}>
+                  {player ? (
+                    <div style={{ width: 36, pointerEvents: 'none' }}>
+                      <PlayerCard player={player} color={color} colorDark={colorDark} selected={false} potNumber={pot.potNumber} multiplier={multiplier} onClick={() => {}} />
                     </div>
+                  ) : (
+                    <div style={{ width: 36, aspectRatio: '1007 / 1562', borderRadius: 6, border: `1.5px dashed ${color}66`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color, lineHeight: 1 }}>{pot.potNumber}</span>
+                    </div>
+                  )}
+                </div>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '4px 12px', minWidth: 0 }}>
+                  <Flag iso2={player?.iso2 ?? ''} size={20} />
+                  <div style={{ flex: 1, minWidth: 0, fontFamily: SPORT, fontSize: 15, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1.1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: player ? '#fff' : 'rgba(255,255,255,0.35)' }}>
+                    {playerName ?? 'Ikke valgt'}
                   </div>
                   {multiplier > 1 && (
                     <div style={{ padding: '3px 8px', background: multiplier === 2 ? 'rgba(245,158,11,0.12)' : 'rgba(220,38,38,0.12)', border: `1px solid ${multiplier === 2 ? 'rgba(245,158,11,0.28)' : 'rgba(220,38,38,0.28)'}`, borderRadius: 6, fontSize: 11, color: multiplier === 2 ? '#f59e0b' : '#ef4444', fontWeight: 700, flexShrink: 0 }}>
@@ -883,54 +868,12 @@ const inputStyle: React.CSSProperties = {
           </div>
         ))}
 
-        {/* Spillerinfo-panel — dukker opp under gridet når en spiller er
-            valgt. Viste tidligere braketten direkte her; erstattet med
-            spiller-fakta (titler/beste 2026-resultat/form) etter ønske, med
-            kun en liten lenke til braketten i stedet for at den tar plassen. */}
+        {/* Spillerinfo-panel — enkel faktaliste (ranking, snitt, % valgt,
+            meritter, vei til finalen) + brakett som pop-up. Se
+            PlayerDetailPanel.tsx. */}
         {selectedPlayer && (() => {
           const selectedPlayerData = pot.players.find(p => p.name === selectedPlayer)
-          if (!selectedPlayerData) return null
-          const form = selectedPlayerData.form ? FORM_STYLES[selectedPlayerData.form] : FORM_UNKNOWN
-
-          return (
-            <div style={{
-              marginTop: 8, padding: '10px 10px 9px', borderRadius: 10,
-              background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}33`,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-                <Flag iso2={selectedPlayerData.iso2} size={17} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: SPORT, fontSize: 12.5, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1.1 }}>
-                    {selectedPlayerData.name}
-                  </div>
-                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>
-                    Odds {selectedPlayerData.odds} · PDC-ranking #{selectedPlayerData.pdcRanking}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8 }}>
-                <PlayerInfoStat label="Titler" value={selectedPlayerData.titles != null ? String(selectedPlayerData.titles) : '—'} />
-                <PlayerInfoStat label="Form" value={form.label} color={form.color} />
-              </div>
-              <div style={{ marginBottom: 10 }}>
-                <div style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>
-                  Beste i 2026
-                </div>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
-                  {selectedPlayerData.bestResult2026 ?? '—'}
-                </div>
-              </div>
-
-              <Link
-                href={`/vm-info?tab=trekning&spiller=${encodeURIComponent(selectedPlayer)}`}
-                target="_blank"
-                style={{ display: 'block', textAlign: 'center', fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 6, padding: '6px 4px' }}
-              >
-                Se bracketen →
-              </Link>
-            </div>
-          )
+          return selectedPlayerData ? <PlayerDetailPanel player={selectedPlayerData} color={color} /> : null
         })()}
       </div>
 

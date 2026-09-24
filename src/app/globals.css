@@ -442,6 +442,10 @@ body::after {
   list-style: none;
   cursor: pointer;
 }
+/* Intro-demoen (TeamBuildAnimation) viser ekte spillerkort i miniatyr —
+   krediterings-knappen og hover-løft gir ingen mening der. */
+.team-demo .card-credit { display: none; }
+.team-demo .player-card { cursor: default; }
 .card-credit summary::-webkit-details-marker {
   display: none;
 }

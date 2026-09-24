@@ -96,3 +96,70 @@ export function getBracketSection(playerName: string): string[] {
     .map((s) => BRACKET_SLOTS[s])
     .filter((name) => getSeedLabel(name) != null)
 }
+
+const RANKING_BY_NAME = new Map(ALL_PLAYERS.map((p) => [p.name, p.pdcRanking]))
+// Runde k (1-basert) i en 128-brakett → stage-nøkkel i STAGE_ORDER.
+const ROUND_STAGES = ['r1', 'r2', 'r3', 'r4', 'qf', 'sf', 'final'] as const
+
+export interface PathStep {
+  stage: (typeof ROUND_STAGES)[number]
+  /** Best rangerte spiller som kan bli motstander i denne runden hvis alle favoritter vinner. */
+  opponent: string
+  pdcRanking: number
+}
+
+/**
+ * «Potensiell vei til finalen»: for hver runde, den best rangerte spilleren
+ * som kan dukke opp som motstander dersom alle favorittene vinner sine kamper —
+ * dvs. beste rangering i den motsatte halvdelen av spillerens brakett-blokk
+ * på det nivået. Runder der beste mulige motstander er en plasseringsspiller
+ * (uten rangering) utelates. Bygger på eksempel-trekningen inntil den ekte
+ * legges inn — merk det i UI.
+ */
+export function getPathToFinal(playerName: string): PathStep[] {
+  const slot = BRACKET_SLOTS.indexOf(playerName)
+  if (slot < 0) return []
+  const steps: PathStep[] = []
+  for (let k = 1; k <= ROUND_STAGES.length; k++) {
+    const blockSize = 2 ** k
+    const half = blockSize / 2
+    const blockStart = Math.floor(slot / blockSize) * blockSize
+    const inUpperHalf = slot < blockStart + half
+    const oppStart = inUpperHalf ? blockStart + half : blockStart
+    let best: PathStep | null = null
+    for (let s = oppStart; s < oppStart + half; s++) {
+      const name = BRACKET_SLOTS[s]
+      const ranking = RANKING_BY_NAME.get(name)
+      if (ranking == null) continue
+      if (!best || ranking < best.pdcRanking) best = { stage: ROUND_STAGES[k - 1], opponent: name, pdcRanking: ranking }
+    }
+    if (best) steps.push(best)
+  }
+  return steps
+}
+
+export interface DrawSection {
+  /** 1-basert seksjonsnummer (1–8), hver på 16 spillere / 8 runde 1-kamper. */
+  index: number
+  /** Beste seed i seksjonen — brukes som overskrift («Seksjon 1 · seed 1»). */
+  topSeed: string
+  matches: [string, string][]
+}
+
+/** Hele runde 1-trekningen delt i 8 seksjoner à 8 kamper, for brakett-pop-upen. */
+export function getDrawSections(): DrawSection[] {
+  return Array.from({ length: 8 }, (_, i) => {
+    const matches = R1_MATCHES.slice(i * 8, i * 8 + 8)
+    const names = matches.flat()
+    const topSeed = names.reduce((best, n) => {
+      const r = RANKING_BY_NAME.get(n)
+      const b = RANKING_BY_NAME.get(best)
+      return r != null && (b == null || r < b) ? n : best
+    }, names[0])
+    return { index: i + 1, topSeed, matches }
+  })
+}
+
+export function isFillerName(name: string): boolean {
+  return isFiller(name)
+}

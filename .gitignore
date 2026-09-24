@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+
+# lokale prosess-/arbeidsfiler (start-dev.ps1, Claude-artifact-utkast)
+*.pid
+.claude-artifact-scratch/
 !.env.example
 
 # vercel
