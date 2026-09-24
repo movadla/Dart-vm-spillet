@@ -42,8 +42,8 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>Trekningen</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 3 }}>
-              Eksempel-trekning — byttes ut når PDC publiserer den ekte (medio november)
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 3 }}>
+              Eksempel-trekning – byttes ut når PDC publiserer den ekte (medio november)
             </div>
           </div>
           <button
@@ -58,7 +58,7 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
 
         <div style={{ overflowY: 'auto', padding: '12px 16px 20px' }}>
           {/* Vei til finalen */}
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 6 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>
             Potensiell vei til finalen for {playerName}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 16 }}>
@@ -66,7 +66,7 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
               const top16 = s.pdcRanking <= 16
               return (
                 <div key={s.stage} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 8, background: top16 ? `${color}1f` : 'rgba(255,255,255,0.03)', border: `1px solid ${top16 ? `${color}55` : 'rgba(255,255,255,0.06)'}` }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', width: 84, flexShrink: 0 }}>{STAGE_LABELS[s.stage]}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', width: 88, flexShrink: 0 }}>{STAGE_LABELS[s.stage]}</span>
                   <span style={{ flex: 1, fontSize: 12, fontWeight: top16 ? 800 : 500, color: top16 ? '#fff' : 'rgba(255,255,255,0.6)' }}>{s.opponent}</span>
                   <span style={{ fontFamily: SPORT, fontSize: 12, fontWeight: 900, color: top16 ? '#f3d576' : 'rgba(255,255,255,0.3)' }}>#{s.pdcRanking}</span>
                 </div>
@@ -75,7 +75,7 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
           </div>
 
           {/* Hele runde 1 */}
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 6 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>
             Runde 1 — alle 64 kamper
           </div>
           {sections.map((sec) => (
@@ -87,14 +87,14 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
                 {sec.matches.map(([a, b], i) => {
                   const mine = a === playerName || b === playerName
                   const Name = ({ n }: { n: string }) => (
-                    <span style={{ flex: 1, minWidth: 0, fontSize: 11, fontWeight: n === playerName ? 800 : 500, color: n === playerName ? '#fff' : isFillerName(n) ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: n === playerName ? 800 : 500, color: n === playerName ? '#fff' : isFillerName(n) ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {getSeedLabel(n) && <span style={{ color: 'rgba(255,255,255,0.35)', marginRight: 4 }}>{getSeedLabel(n)}</span>}{n}
                     </span>
                   )
                   return (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', borderRadius: 6, background: mine ? `${color}26` : 'rgba(255,255,255,0.03)', boxShadow: mine ? `inset 0 0 0 1px ${color}66` : 'none' }}>
                       <Name n={a} />
-                      <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.25)', flexShrink: 0 }}>vs</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>vs</span>
                       <Name n={b} />
                     </div>
                   )

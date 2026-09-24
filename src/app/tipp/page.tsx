@@ -86,7 +86,7 @@ function ProgressDots({ step, multiplier = 1, onGuide, onStep, onTogglePoeng, po
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <SmartBackButton />
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.12em', fontVariantNumeric: 'tabular-nums' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.12em', fontVariantNumeric: 'tabular-nums' }}>
           STEG {step} AV {POT_COUNT}
           {multiplier > 1 && <span style={{ color: multiplier === 2 ? '#f59e0b' : '#ef4444', marginLeft: 6 }}>· ×{multiplier}</span>}
         </div>
@@ -683,7 +683,7 @@ const inputStyle: React.CSSProperties = {
                   <button
                     onClick={() => setStep(pot.potNumber)}
                     className="btn-hover"
-                    style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, cursor: 'pointer', padding: '6px 10px', flexShrink: 0, letterSpacing: '0.04em' }}
+                    style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.85)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, cursor: 'pointer', padding: '6px 10px', flexShrink: 0, letterSpacing: '0.04em' }}
                   >
                     Endre
                   </button>

@@ -17,7 +17,7 @@ const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact
 // Sport-skriften brukes kun til titler, navn og tall — aldri til setninger.
 const H1: React.CSSProperties = { fontFamily: SPORT, fontSize: 26, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }
 const SUB: React.CSSProperties = { fontSize: 14, color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }
-const LABEL: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }
+const LABEL: React.CSSProperties = { fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }
 const REDUCED_MOTION = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 interface Props {
@@ -334,7 +334,7 @@ function ExamplePhase() {
 
       {/* Kampoppsett: Littler-kortet vs. en tilfeldig useeded — «VS» byttes
           ut med resultatet når det kommer */}
-      <div style={reveal(step, 3, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 14 })} aria-hidden="true">
+      <div style={reveal(step, 3, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 14 })} inert>
         <div style={{ width: EXAMPLE_CARD_WIDTH, flexShrink: 0, pointerEvents: 'none' }}>
           <PlayerCard
             player={EXAMPLE_PICK.player}
@@ -453,7 +453,7 @@ function ProgressPhase() {
       <div style={{ ...H1, marginBottom: 14 }}>Følg utviklingen på «Min side»</div>
 
       {/* Laget med poeng per spiller */}
-      <div style={reveal(step, 1, { display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16 })} aria-hidden="true">
+      <div style={reveal(step, 1, { display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16 })} inert>
         {EXAMPLE_TEAM.map((t, i) => (
           <div key={t.player.name} style={{ width: 52 }}>
             <TeamTile player={t.player} potNumber={t.potNumber} color={t.color} colorDark={t.colorDark} points={playerPoints[i]} pop={step >= 1} popDelayMs={i * 70} />
@@ -483,13 +483,13 @@ function ProgressPhase() {
               zIndex: row.you ? 2 : 1,
             }}
           >
-            <span style={{ fontFamily: SPORT, fontSize: 12, fontWeight: 900, width: 18, textAlign: 'right', color: row.you ? '#fff' : i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.45)', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, width: 18, textAlign: 'right', color: row.you ? '#fff' : i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.45)', fontVariantNumeric: 'tabular-nums' }}>
               {i + 1}
             </span>
-            <span style={{ flex: 1, textAlign: 'left', fontSize: 11, fontWeight: row.you ? 800 : 500, color: row.you ? '#fff' : 'rgba(255,255,255,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ flex: 1, textAlign: 'left', fontSize: 12, fontWeight: row.you ? 800 : 500, color: row.you ? '#fff' : 'rgba(255,255,255,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {row.name}
             </span>
-            <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: row.you ? '#f59e0b' : 'rgba(255,255,255,0.6)', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: row.you ? '#f59e0b' : 'rgba(255,255,255,0.6)', fontVariantNumeric: 'tabular-nums' }}>
               {formatPoints(row.points)}
             </span>
           </div>

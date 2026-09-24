@@ -41,7 +41,7 @@ function iso2For(name: string): string {
 }
 
 function Label({ children }: { children: ReactNode }) {
-  return <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>{children}</div>
+  return <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>{children}</div>
 }
 
 const BIG: React.CSSProperties = { fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: '#fff', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }
@@ -188,20 +188,20 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
                   <Flag iso2={iso2For(s.opponent)} size={13} />
                   <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color: '#fff', lineHeight: 1.1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(s.opponent)}</span>
                 </div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 3 }}>({SHORT_STAGE[s.stage]})</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 3 }}>({SHORT_STAGE[s.stage]})</div>
               </div>
             )) : (
               <div style={{ ...tile, fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Ingen rangerte motstandere før finalen</div>
             )}
           </div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginBottom: 12 }}>
             Topp 16 du kan møte hvis favorittene vinner · eksempel-trekning
           </div>
 
           <button
             type="button"
             onClick={() => setBracketOpen(true)}
-            style={{ display: 'block', width: '100%', textAlign: 'center', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#fff', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 10, padding: '10px 4px', cursor: 'pointer' }}
+            style={{ display: 'block', width: '100%', textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#fff', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 10, padding: '10px 4px', cursor: 'pointer' }}
           >
             Se bracketen →
           </button>

@@ -89,7 +89,7 @@ export default function TeamTile({
         return (
           <span
             style={{
-              fontSize: long ? 9 : 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: long ? '-0.01em' : '0.02em',
+              fontSize: long ? 10 : 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: long ? '-0.02em' : '0.02em',
               color: filled ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.4)',
               textAlign: 'center', lineHeight: 1.15, whiteSpace: 'nowrap', maxWidth: '130%',
             }}

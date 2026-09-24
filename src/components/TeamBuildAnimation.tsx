@@ -179,7 +179,9 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
   const flyDur = active && active.level < 2 ? FLY_DUR_SLOW : FLY_DUR_FAST
 
   return (
-    <div ref={rootRef} className="card-mini" aria-hidden="true">
+    // inert (ikke bare aria-hidden): kortene under er ekte <button>-er, og
+    // aria-hidden alene lot dem være fokuserbare for tastatur/skjermleser.
+    <div ref={rootRef} className="card-mini" inert>
       {/* Laget — 6 plasser som fylles etter hvert som spillere landes */}
       <div
         style={{
