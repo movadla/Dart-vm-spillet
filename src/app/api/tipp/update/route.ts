@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
 import { POTS } from '@/data/pots'
+import { KICKOFF } from '@/config/tournament'
 
-const KICKOFF = new Date('2026-12-11T19:00:00Z')
 // Rate-limitet per deltaker (ikke IP) siden identiteten uansett er verifisert
 // på dette tidspunktet — romslig nok for legitim omvalg-fikling, stanser
 // scriptet misbruk av en kompromittert/lekket vm_auth-cookie.

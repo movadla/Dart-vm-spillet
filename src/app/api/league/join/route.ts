@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
+import { KICKOFF } from '@/config/tournament'
 
 const supabase = getSupabaseAdmin()
 
-const KICKOFF = new Date('2026-12-11T19:00:00Z')
 // Ingen grense fantes tidligere — én liga kunne i praksis vokse til å romme
 // hele deltakerfeltet, noe leaderboardet i en liga (samme RankList-komponent
 // som hovedleaderboardet) ikke er designet for å vise pent/ytelsesmessig.

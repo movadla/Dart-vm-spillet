@@ -16,9 +16,9 @@ import StepSlideshow, { INTRO_LAST_SLIDE } from '@/components/StepSlideshow'
 import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
 import ShareButton from '@/app/ShareButton'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
+import { KICKOFF } from '@/config/tournament'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
 const POT_COUNT = POTS.length
 const REGISTRATION_STEP = POT_COUNT + 1
@@ -480,7 +480,7 @@ const inputStyle: React.CSSProperties = {
             entusiasmen er størst. */}
         <div style={{ marginBottom: 12 }}>
           <ShareButton
-            url={typeof window !== 'undefined' ? `${window.location.origin}/` : ''}
+            url="/"
             text="Jeg er påmeldt Dart-VM-spillet — bli med du også!"
             label="Inviter venner →"
             variant="primary"
@@ -549,9 +549,10 @@ const inputStyle: React.CSSProperties = {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
           <button onClick={() => setStep(SUMMARY_STEP)} className="back-btn" style={{ cursor: 'pointer' }}>← Tilbake</button>
-          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>Siste steg</span>
         </div>
         <div style={{ marginBottom: 16 }}>
+          {/* Samme eyebrow-plass som «Min side»/«Liga» over tittelen */}
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>Siste steg</div>
           <div style={{ fontFamily: SPORT, fontSize: 34, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.95, marginBottom: 8 }}>
             <span style={{ color: '#fff' }}>Registrer </span>
             <span style={{ color: '#dc2626' }}>deg</span>
@@ -687,7 +688,8 @@ const inputStyle: React.CSSProperties = {
             const colorDark = POT_COLORS_DARK[(pot.potNumber - 1) % POT_COLORS_DARK.length]
             const multiplier = SCORING.underdogMultiplier[pot.potNumber]
             return (
-              <div key={pot.potNumber} style={{ display: 'flex', alignItems: 'center', borderBottom: pot.potNumber < POT_COUNT ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+              // Hele raden er trykkflate (ikke bare «Endre»-pillen) — går til pottens steg.
+              <button key={pot.potNumber} type="button" onClick={() => setStep(pot.potNumber)} className="pick-row" aria-label={`Endre valg for nivå ${pot.potNumber}`} style={{ display: 'flex', alignItems: 'center', width: '100%', padding: 0, background: 'none', border: 'none', color: 'inherit', textAlign: 'left', cursor: 'pointer', borderBottom: pot.potNumber < POT_COUNT ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
                 {/* Samme lag-brikke som i introen (foto på pott-farge) */}
                 <div style={{ width: 62, flexShrink: 0, padding: '6px 0 6px 10px', background: `${color}12`, borderRight: `2px solid ${color}30`, alignSelf: 'stretch', display: 'flex', alignItems: 'center' }}>
                   <div style={{ width: 44 }}>
@@ -699,22 +701,21 @@ const inputStyle: React.CSSProperties = {
                   <div style={{ flex: 1, minWidth: 0, fontFamily: SPORT, fontSize: 16, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1.1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: player ? '#fff' : 'rgba(255,255,255,0.45)' }}>
                     {playerName ?? 'Ikke valgt'}
                   </div>
-                  {/* Fast kolonne, så «Endre» står på samme sted i alle rader; ×1 vises dempet */}
+                  {/* Fast kolonne, så «Endre» står på samme sted i alle rader; ×1 vises ikke (tom plass) */}
                   <div style={{ width: 34, textAlign: 'center', flexShrink: 0, padding: '3px 0', borderRadius: 6, fontFamily: SPORT, fontSize: 13, fontWeight: 900, fontVariantNumeric: 'tabular-nums',
                     background: multiplier > 1 ? (multiplier === 2 ? 'rgba(245,158,11,0.12)' : 'rgba(220,38,38,0.12)') : 'transparent',
                     border: `1px solid ${multiplier > 1 ? (multiplier === 2 ? 'rgba(245,158,11,0.3)' : 'rgba(220,38,38,0.3)') : 'transparent'}`,
-                    color: multiplier > 1 ? (multiplier === 2 ? '#f59e0b' : '#ef4444') : 'rgba(255,255,255,0.35)' }}>
-                    ×{multiplier}
+                    color: multiplier === 2 ? '#f59e0b' : '#ef4444' }}>
+                    {multiplier > 1 ? `×${multiplier}` : ''}
                   </div>
-                  <button
-                    onClick={() => setStep(pot.potNumber)}
+                  <span
                     className="btn-hover"
-                    style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.85)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, cursor: 'pointer', padding: '6px 10px', flexShrink: 0, letterSpacing: '0.04em' }}
+                    style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.85)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '6px 10px', flexShrink: 0, letterSpacing: '0.04em' }}
                   >
                     Endre
-                  </button>
+                  </span>
                 </div>
-              </div>
+              </button>
             )
           })}
         </div>
@@ -905,13 +906,16 @@ const inputStyle: React.CSSProperties = {
 
         {/* Hurtiginfo for valgt spiller + «Detaljer» som åpner bunnarket.
             Trykk på kortet er KUN valg — arket er et frivillig dypdykk. */}
+        {/* Fast høyde: linjen finnes alltid, så kortene ikke hopper oppover
+            idet den fylles ved første valg. */}
+        <div style={{ minHeight: 48, marginTop: 12 }}>
         {selectedPlayer && (() => {
           const selectedPlayerData = pot.players.find(p => p.name === selectedPlayer)
           if (!selectedPlayerData) return null
           const stats = PLAYER_STATS[selectedPlayerData.name]
           return (
             <>
-              <div key={selectedPlayer} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginTop: 12, padding: '0 6px', animation: 'slide-enter 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
+              <div key={selectedPlayer} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap', padding: '0 6px', animation: 'slide-enter 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontVariantNumeric: 'tabular-nums', textAlign: 'center' }}>
                   <span style={{ fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 15 }}>#{selectedPlayerData.pdcRanking}</span>
                   <span style={{ color: 'rgba(255,255,255,0.35)', margin: '0 7px' }}>·</span>
@@ -943,6 +947,7 @@ const inputStyle: React.CSSProperties = {
             </>
           )
         })()}
+        </div>
         </div>
       </div>
 

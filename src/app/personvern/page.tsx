@@ -1,4 +1,7 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Personvern' }
 import SmartBackButton from '@/components/SmartBackButton'
 import BrandBanner from '@/components/BrandBanner'
 
@@ -90,12 +93,8 @@ export default function PersonvernPage() {
         </p>
       </div>
 
-      <Link
-        href="/"
-        className="back-btn"
-        style={{ display: 'inline-block', marginTop: 8, fontSize: 13, color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}
-      >
-        ← Tilbake til forsiden
+      <Link href="/" className="back-btn" style={{ marginTop: 8 }}>
+        ← Til forsiden
       </Link>
     </div>
   )

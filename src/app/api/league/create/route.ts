@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
+import { KICKOFF } from '@/config/tournament'
 
 const supabase = getSupabaseAdmin()
-
-const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
 function generateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'

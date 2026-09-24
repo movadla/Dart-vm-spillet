@@ -16,7 +16,9 @@ const condensed = Barlow_Condensed({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL ?? 'https://dartvmspillet.com'),
-  title: 'Dart-VM-spillet',
+  // Undersider setter eget navn («Leaderboard», deltakerens navn, liganavn) —
+  // malen legger på merkevaren, så fanen/historikken skiller sidene fra hverandre.
+  title: { default: 'Dart-VM-spillet', template: '%s – Dart-VM-spillet' },
   description: 'Velg 6 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
   manifest: '/manifest.json',
   icons: {

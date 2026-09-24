@@ -84,9 +84,10 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
               onClick={() => player && setSheetPlayer(player)}
               aria-label={`Spillerinfo: ${pick.player_name}`}
               className="btn-hover"
-              style={{ background: 'none', border: 'none', padding: 0, cursor: player ? 'pointer' : 'default', opacity: eliminated ? 0.45 : 1, filter: eliminated ? 'grayscale(0.8)' : 'none', transition: 'opacity 0.3s' }}
+              style={{ background: 'none', border: 'none', padding: 0, cursor: player ? 'pointer' : 'default' }}
             >
-              <TeamTile player={player} potNumber={pick.pot_number} color={POT_COLORS[i]} colorDark={POT_COLORS_DARK[i]} points={vmStarted ? total : undefined} glow={champion} />
+              {/* Slått ut: bare brikken dempes — poengene er reelle og står klart */}
+              <TeamTile player={player} potNumber={pick.pot_number} color={POT_COLORS[i]} colorDark={POT_COLORS_DARK[i]} points={vmStarted ? total : undefined} glow={champion} dimmed={eliminated} />
             </button>
           )
         })}

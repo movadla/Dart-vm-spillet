@@ -5,6 +5,7 @@ import { useState } from 'react'
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
 interface Props {
+  /** Absolutt URL eller relativ sti (løses mot window.location.origin) */
   url: string
   title?: string
   text?: string
@@ -24,14 +25,18 @@ export default function ShareButton({
 
   async function handleShare() {
     if (typeof navigator === 'undefined') return
+    // Relativ sti («/liga/ABC123») løses mot det domenet siden faktisk kjører
+    // på — så delingslenker er riktige lokalt, via tunnel og i produksjon uten
+    // å være avhengige av NEXT_PUBLIC_BASE_URL.
+    const abs = /^https?:\/\//.test(url) ? url : `${window.location.origin}${url.startsWith('/') ? '' : '/'}${url}`
     if (navigator.share) {
       try {
-        await navigator.share({ title, text, url })
+        await navigator.share({ title, text, url: abs })
       } catch {
         // Brukeren avbrøt delingen — ignorer
       }
     } else {
-      try { await navigator.clipboard.writeText(text ? `${text}\n${url}` : url) } catch {}
+      try { await navigator.clipboard.writeText(text ? `${text}\n${abs}` : abs) } catch {}
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }

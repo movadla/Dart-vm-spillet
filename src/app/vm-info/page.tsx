@@ -5,19 +5,20 @@ import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
 import BrandBanner from '@/components/BrandBanner'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
-import { POTS, getIso2 } from '@/data/pots'
+import { POTS, getIso2, getPickablePlayers, type Player } from '@/data/pots'
+import { POT_COLORS } from '@/config/potColors'
+import { formatOdds } from '@/lib/format'
 import Flag from '@/components/Flag'
-import { getSupabaseClient } from '@/lib/supabase'
 import { STAGE_ORDER, STAGE_LABELS, SCORING, CHAMPION_LABEL } from '@/config/scoring'
 import type { MatchResult } from '@/lib/scoring'
-import { getFirstMatchInfo, getBracketSection, getSeedLabel, R1_MATCHES } from '@/lib/bracketProjection'
+import { getFirstMatchInfo, getBracketSection, getSeedLabel, isFillerName, R1_MATCHES } from '@/lib/bracketProjection'
 import { DrawBracket, PairBox } from '@/components/DrawBracket'
+import { KICKOFF } from '@/config/tournament'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
-const KICKOFF = new Date('2026-12-11T19:00:00Z')
-
-const POT_COLORS = ['#dc2626', '#d97706', '#2563eb', '#16a34a', '#ea580c', '#7c3aed']
+// Plassholdere i eksempel-trekningen («Kvalifisert spiller 12») vises kort som «Kvalifisert».
+const displayName = (n: string) => (isFillerName(n) ? 'Kvalifisert' : n)
 
 type Tab = 'spillere' | 'kamper' | 'trekning' | 'regler'
 const TABS: { id: Tab; label: string }[] = [
@@ -50,6 +51,25 @@ const PHOTO_CREDITS = Object.entries(PLAYER_PHOTOS)
   .map(([name, p]) => ({ name, credit: p.credit, url: p.creditUrl }))
   .sort((a, b) => a.name.localeCompare(b.name, 'nb'))
 
+function PlayerRow({ player, last, muted = false }: { player: Player; last: boolean; muted?: boolean }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 40px 44px', alignItems: 'center', gap: 10, padding: '9px 16px', borderBottom: last ? 'none' : '1px solid rgba(255,255,255,0.05)', opacity: muted ? 0.7 : 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+        <Flag iso2={player.iso2} size={20} />
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.9)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>{player.nationality}</div>
+        </div>
+      </div>
+      <span style={{ fontSize: 11, fontWeight: 700, color: player.seedNumber != null ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.06)', borderRadius: 6, padding: '2px 6px', whiteSpace: 'nowrap' }}>
+        {player.seedNumber != null ? `Seed ${player.seedNumber}` : 'Useedet'}
+      </span>
+      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>#{player.pdcRanking}</span>
+      <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color: '#f59e0b', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{formatOdds(player.odds)}</span>
+    </div>
+  )
+}
+
 export default function VmInfoPage() {
   // Etter kickoff: Kamper som standard. Før: Regler (forklarer spillet).
   const [activeTab, setActiveTab] = useState<Tab>(() => (KICKOFF <= new Date() ? 'kamper' : 'regler'))
@@ -76,22 +96,14 @@ export default function VmInfoPage() {
 
   useEffect(() => {
     if (activeTab !== 'kamper') return
-    // Klienten lages her (ikke på modulnivå) og feiler stille — uten Supabase
-    // konfigurert crashet hele siden tidligere (se getSupabaseClient()),
-    // også for faner som ikke trenger noen database.
-    let client: ReturnType<typeof getSupabaseClient>
-    try {
-      client = getSupabaseClient()
-    } catch {
-      return
-    }
-    client
-      .from('match_results')
-      .select('player1, player2, sets1, sets2, stage, winner')
-      .order('played_at', { ascending: true })
-      .then(({ data }) => {
-        if (data) setMatches(data as MatchResult[])
-      })
+    // Samme datalag som Min side/leaderboardet (inkl. demo-verdenen), så
+    // braketten viser den turneringen brukeren faktisk følger.
+    let alive = true
+    fetch('/api/matches')
+      .then((r) => (r.ok ? r.json() : { matches: [] }))
+      .then((d) => { if (alive && Array.isArray(d.matches)) setMatches(d.matches as MatchResult[]) })
+      .catch(() => {})
+    return () => { alive = false }
   }, [activeTab])
 
   // Leser URL-parametre etter mount med vilje — window finnes ikke under SSR, en lazy
@@ -149,8 +161,10 @@ export default function VmInfoPage() {
         {TABS.map((tab) => (
           <button
             key={tab.id}
+            id={`tab-${tab.id}`}
             role="tab"
             aria-selected={activeTab === tab.id}
+            aria-controls={`panel-${tab.id}`}
             onClick={() => setActiveTab(tab.id)}
             style={{
               flex: 1, padding: '9px 4px',
@@ -169,31 +183,30 @@ export default function VmInfoPage() {
 
       {/* ── SPILLERE ── */}
       {activeTab === 'spillere' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div role="tabpanel" id="panel-spillere" aria-labelledby="tab-spillere" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 40px 44px', gap: 10, padding: '0 16px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>
+            <span>Spiller</span><span>Seed</span><span style={{ textAlign: 'right' }}>Rank</span><span style={{ textAlign: 'right' }}>Odds</span>
+          </div>
           {POTS.map((pot) => {
-            const color = POT_COLORS[pot.potNumber - 1]
+            const color = POT_COLORS[(pot.potNumber - 1) % POT_COLORS.length]
+            const pickable = getPickablePlayers(pot)
+            const rest = pot.players.filter((p) => !pickable.includes(p))
             return (
               <div key={pot.potNumber} style={{ borderRadius: 14, overflow: 'hidden', background: '#111', border: `1px solid ${color}30` }}>
                 <div style={{ background: color, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)' }}>
                   <span style={{ fontFamily: SPORT, fontSize: 32, fontWeight: 900, color: 'rgba(0,0,0,0.4)', lineHeight: 1 }}>{pot.potNumber}</span>
-                  <div style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(0,0,0,0.65)', textTransform: 'uppercase', lineHeight: 1 }}>{pot.name}</div>
+                  <div style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(0,0,0,0.65)', textTransform: 'uppercase', lineHeight: 1 }}>{pot.name.replace(/^[^\p{L}]+/u, '')}</div>
+                  <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'rgba(0,0,0,0.6)', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{pickable.length} valgbare</span>
                 </div>
-                {pot.players.map((player, i) => (
-                  <div key={player.name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: i < pot.players.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                    <Flag iso2={player.iso2} size={20} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</div>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{player.nationality}</div>
-                    </div>
-                    {player.seedNumber != null && (
-                      <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.06)', borderRadius: 6, padding: '2px 6px', flexShrink: 0 }}>
-                        Seed {player.seedNumber}
-                      </span>
-                    )}
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', flexShrink: 0, width: 34, textAlign: 'right' }}>#{player.pdcRanking}</span>
-                    <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: '#f59e0b', flexShrink: 0, width: 44, textAlign: 'right' }}>{player.odds}</span>
-                  </div>
-                ))}
+                {pickable.map((player, i) => <PlayerRow key={player.name} player={player} last={i === pickable.length - 1 && rest.length === 0} />)}
+                {rest.length > 0 && (
+                  <details>
+                    <summary style={{ listStyle: 'none', cursor: 'pointer', padding: '10px 16px', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.6)', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>+{rest.length} andre i feltet (ikke valgbare)</span><span aria-hidden>▾</span>
+                    </summary>
+                    {rest.map((player, i) => <PlayerRow key={player.name} player={player} last={i === rest.length - 1} muted />)}
+                  </details>
+                )}
               </div>
             )
           })}
@@ -202,7 +215,7 @@ export default function VmInfoPage() {
 
       {/* ── KAMPER (bracket) ── */}
       {activeTab === 'kamper' && (
-        <div>
+        <div role="tabpanel" id="panel-kamper" aria-labelledby="tab-kamper">
           {matches.length === 0 && (
             <div style={{ ...CARD, textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 16 }}>
               Ingen kamper registrert ennå — sluttspilltreet fylles ut etter hvert som resultater legges inn.
@@ -284,7 +297,7 @@ export default function VmInfoPage() {
 
       {/* ── TREKNING (projisert eksempel-trekning) ── */}
       {activeTab === 'trekning' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div role="tabpanel" id="panel-trekning" aria-labelledby="tab-trekning" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ ...CARD, textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 1.5 }}>
             Dette er en <strong style={{ color: '#fff' }}>eksempel-trekning</strong> — PDC har ikke publisert den faktiske
             trekningen ennå (kommer normalt medio november). Oppsettet under viser hvordan braketten kunne sett ut,
@@ -315,11 +328,11 @@ export default function VmInfoPage() {
             if (!info) return null
             const pairA = {
               a: { name: drawPlayer, seedLabel: getSeedLabel(drawPlayer), highlighted: true },
-              b: { name: info.opponent.name, seedLabel: getSeedLabel(info.opponent.name), faded: info.opponent.isFiller },
+              b: { name: displayName(info.opponent.name), seedLabel: getSeedLabel(info.opponent.name), faded: info.opponent.isFiller },
             }
             const pairB = {
-              a: { name: info.round2Pair[0].name, seedLabel: getSeedLabel(info.round2Pair[0].name), faded: info.round2Pair[0].isFiller },
-              b: { name: info.round2Pair[1].name, seedLabel: getSeedLabel(info.round2Pair[1].name), faded: info.round2Pair[1].isFiller },
+              a: { name: displayName(info.round2Pair[0].name), seedLabel: getSeedLabel(info.round2Pair[0].name), faded: info.round2Pair[0].isFiller },
+              b: { name: displayName(info.round2Pair[1].name), seedLabel: getSeedLabel(info.round2Pair[1].name), faded: info.round2Pair[1].isFiller },
             }
             return (
               <>
@@ -366,8 +379,8 @@ export default function VmInfoPage() {
                   <div key={i}>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>Kamp {i + 1}</div>
                     <PairBox
-                      a={{ name: a, seedLabel: getSeedLabel(a), faded: a.startsWith('Kvalifisert spiller'), highlighted: a === drawPlayer }}
-                      b={{ name: b, seedLabel: getSeedLabel(b), faded: b.startsWith('Kvalifisert spiller'), highlighted: b === drawPlayer }}
+                      a={{ name: displayName(a), seedLabel: getSeedLabel(a), faded: isFillerName(a), highlighted: a === drawPlayer }}
+                      b={{ name: displayName(b), seedLabel: getSeedLabel(b), faded: isFillerName(b), highlighted: b === drawPlayer }}
                       compact
                     />
                   </div>
@@ -380,7 +393,7 @@ export default function VmInfoPage() {
 
       {/* ── REGLER ── */}
       {activeTab === 'regler' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div role="tabpanel" id="panel-regler" aria-labelledby="tab-regler" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
           <div ref={rulesRef} style={CARD}>
             <div style={LABEL}>Kort fortalt</div>

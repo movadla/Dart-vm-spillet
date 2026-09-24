@@ -31,7 +31,6 @@ export interface RankEntry {
   name: string
   flags: FlagEntry[]
   points: number
-  matchesPlayed?: number
   rankDelta?: number // posisjonsendring siden i går: + = opp, − = ned, 0 = uendret
 }
 
@@ -97,7 +96,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
 
   return (
     <div className="lb-rows">
-      {visibleRows.map(({ id, name, flags, points, matchesPlayed, rankDelta }, index) => {
+      {visibleRows.map(({ id, name, flags, points, rankDelta }, index) => {
         const isMe = id === myId
         const rank = displayRanks[index]
         const styleIdx = Math.min(rank - 1, 2)
@@ -142,7 +141,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                   <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color: isTop3 ? RANK_COLORS[styleIdx] : isMe ? '#93c5fd' : 'rgba(255,255,255,0.7)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{vmStarted ? rank : '–'}</span>
                 </div>
                 {rankDelta != null && (
-                  <span aria-label={rankDelta > 0 ? `opp ${rankDelta}` : rankDelta < 0 ? `ned ${Math.abs(rankDelta)}` : 'uendret'} style={{ fontSize: 11, fontWeight: 800, lineHeight: 1, marginTop: 4, letterSpacing: '0.02em', fontVariantNumeric: 'tabular-nums', color: rankDelta > 0 ? '#4ade80' : rankDelta < 0 ? '#f87171' : 'rgba(255,255,255,0.45)' }}>
+                  <span aria-label={rankDelta > 0 ? `opp ${rankDelta}` : rankDelta < 0 ? `ned ${Math.abs(rankDelta)}` : 'uendret'} style={{ fontSize: 11, fontWeight: 800, lineHeight: 1, marginTop: 4, letterSpacing: '0.02em', fontVariantNumeric: 'tabular-nums', color: rankDelta > 0 ? '#4ade80' : rankDelta < 0 ? '#f87171' : isMe ? 'rgba(147,197,253,0.7)' : 'rgba(255,255,255,0.45)' }}>
                     {rankDelta > 0 ? `▲${rankDelta}` : rankDelta < 0 ? `▼${Math.abs(rankDelta)}` : '–'}
                   </span>
                 )}
@@ -178,7 +177,11 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                         )
                       })}
                     </div>
-                    {vmStarted && matchesPlayed != null && <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', whiteSpace: 'nowrap', flexShrink: 0 }}>· {matchesPlayed} {matchesPlayed === 1 ? 'kamp' : 'kamper'}</span>}
+                    {/* «4 av 6 igjen» sier mer om sjansene enn antall spilte kamper */}
+                    {vmStarted && flags.length > 0 && (() => {
+                      const left = flags.filter((f) => !f.eliminated).length
+                      return <span style={{ fontSize: 12, color: left === 0 ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap', flexShrink: 0 }}>· {left === 0 ? 'alle ute' : `${left} av ${flags.length} igjen`}</span>
+                    })()}
                   </div>
                   <span aria-hidden style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1, flexShrink: 0 }}>›</span>
                 </div>

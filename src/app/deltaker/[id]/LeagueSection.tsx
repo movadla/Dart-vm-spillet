@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import CopyCode from '@/components/CopyCode'
 import { isDemoId } from '@/lib/demo'
+import { KICKOFF } from '@/config/tournament'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-const KICKOFF = new Date('2026-12-11T19:00:00Z')
 
 const CARD: React.CSSProperties = {
   background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
@@ -39,7 +39,7 @@ function ShareLeagueButton({ name, code }: { name: string; code: string }) {
       borderRadius: 999, color: copied ? '#22c55e' : 'rgba(255,255,255,0.75)',
       fontSize: 11, fontWeight: 700, cursor: 'pointer', letterSpacing: '0.02em',
     }}>
-      {copied ? '✓ Kopiert' : 'Del'}
+      {copied ? '✓ Kopiert' : 'Inviter'}
     </button>
   )
 }
@@ -167,8 +167,10 @@ export default function LeagueSection({ participantId, showHeader = true, mode: 
   return (
     <div style={{ marginBottom: showHeader ? 20 : 0 }}>
       {showHeader && (
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>
-          Ligaer
+        // Samme seksjonstittel som «Laget ditt»/«Ligaer» på Min side
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 8px' }}>
+          <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)' }}>Ligaer</span>
+          <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
         </div>
       )}
 

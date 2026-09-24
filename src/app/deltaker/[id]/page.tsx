@@ -7,7 +7,8 @@ import { STAGE_ORDER, STAGE_LABELS, type Stage } from '@/config/scoring'
 import CountUp from './CountUp'
 import PointsDelta from './PointsDelta'
 import LogoutButton from './LogoutButton'
-import DeadlineCountdown from './DeadlineCountdown'
+import Countdown from '@/components/Countdown'
+import type { Metadata } from 'next'
 import DemoBanner from './DemoBanner'
 import MyTeam from './MyTeam'
 import LeagueSection from './LeagueSection'
@@ -34,6 +35,17 @@ function SectionTitle({ children, action }: { children: React.ReactNode; action?
 }
 
 export const revalidate = 30
+
+export async function generateMetadata({ params, searchParams }: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ fase?: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const { fase } = await searchParams
+  // cache() i datalaget gjør at siden ikke spør databasen én gang til.
+  const data = await getParticipantPageData(id, fase)
+  return { title: data ? data.participant.name : 'Min side' }
+}
 
 export default async function DeltakerPage({ params, searchParams }: {
   params: Promise<{ id: string }>
@@ -65,8 +77,6 @@ export default async function DeltakerPage({ params, searchParams }: {
   }
   const displayStage: Stage | 'winner' | null = finalWon ? 'winner' : maxIdx >= 0 ? STAGE_ORDER[maxIdx] : null
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'
-
   return (
     <div className="page-bg app-frame" style={{ minHeight: '100vh', color: '#fff', padding: '16px 20px 40px', position: 'relative' }}>
       {demo && <DemoBanner phase={demo} participantId={p.id} />}
@@ -75,7 +85,6 @@ export default async function DeltakerPage({ params, searchParams }: {
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, margin: '6px 0 14px' }}>
         <Link href={back.href} className="back-btn">{back.label}</Link>
-        <Link href="/vm-info?fra=minside" className="back-btn">Info →</Link>
       </div>
 
       {/* Navn */}
@@ -102,13 +111,13 @@ export default async function DeltakerPage({ params, searchParams }: {
           </div>
 
           {displayStage && (
-            <Link href="/vm-info?tab=kamper" className="text-link" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 4px 0', textDecoration: 'none', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+            <Link href="/vm-info?tab=kamper" className="guide-btn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 8, padding: '9px 14px', borderRadius: 999, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', textDecoration: 'none', fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
               <span>
                 {displayStage === 'winner'
                   ? <>VM er <span style={{ color: '#fff', fontWeight: 700 }}>avgjort</span></>
                   : <>VM er i <span style={{ color: '#fff', fontWeight: 700 }}>{STAGE_LABELS[displayStage].toLowerCase()}</span></>}
               </span>
-              <span style={{ fontWeight: 700 }}>Alle kamper →</span>
+              <span style={{ fontWeight: 700, color: '#fff' }}>Alle kamper →</span>
             </Link>
           )}
         </>
@@ -117,7 +126,7 @@ export default async function DeltakerPage({ params, searchParams }: {
         <div style={{ ...CARD, padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
           <div>
             <div style={{ ...LABEL, marginBottom: 6 }}>VM starter om</div>
-            <DeadlineCountdown size={26} />
+            <Countdown size={26} />
           </div>
           {editable && (
             <Link href={`/tipp?edit=${p.id}`} className="cta-btn" style={{ padding: '10px 18px', borderRadius: 999, background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontFamily: SPORT, fontSize: 14, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap', boxShadow: '0 4px 16px rgba(220,38,38,0.3)' }}>
@@ -141,7 +150,7 @@ export default async function DeltakerPage({ params, searchParams }: {
           VM-guide →
         </Link>
         <ShareButton
-          url={`${baseUrl}/deltaker/${p.id}`}
+          url={`/deltaker/${p.id}`}
           text={vmStarted ? `Jeg er #${rank} av ${totalParticipants} i Dart-VM-spillet!` : 'Bli med i Dart-VM-spillet – velg seks dartspillere og følg dem gjennom VM!'}
           label="Del →"
           variant="pill"

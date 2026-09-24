@@ -11,7 +11,7 @@ const supabase = getSupabaseAdmin()
 
 export const maxDuration = 60
 
-const VM_START = new Date('2026-12-11T19:00:00Z')
+import { KICKOFF as VM_START } from '@/config/tournament'
 
 function currentVmDay(now: Date): number {
   const day = Math.ceil((now.getTime() - VM_START.getTime()) / (1000 * 60 * 60 * 24))

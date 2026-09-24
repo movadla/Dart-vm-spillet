@@ -11,6 +11,12 @@ export function formatPercent(n: number): string {
   return `${Math.round(n).toLocaleString('nb-NO')}${NNBSP}%`
 }
 
+/** Odds «2.5» → «2,50» (to desimaler, komma). Ukjent format vises som det er. */
+export function formatOdds(odds: string): string {
+  const n = Number.parseFloat(odds)
+  return Number.isFinite(n) ? n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : odds
+}
+
 export function formatAvg(avg: number | undefined): string {
   return avg == null ? '—' : avg.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }

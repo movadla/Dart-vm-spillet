@@ -251,7 +251,9 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
 
       {/* Scenen — de tre ekte kortene for nivået som spilles av nå, eller
           «Laget ditt» når alt er på plass */}
-      <div style={{ position: 'relative', height: 186, zIndex: 2 }}>
+      {/* Scenen krymper når finalen vises — ellers står det igjen ~120 px tom
+          plass under «Laget ditt» (kortene som ikke lenger er der). */}
+      <div style={{ position: 'relative', height: finished ? 64 : 186, zIndex: 2, transition: 'height 0.5s cubic-bezier(0.22,1,0.36,1)' }}>
         {activeLevel && (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', gap: 10, justifyContent: 'center', alignItems: 'flex-start', paddingTop: 4 }}>
             {activeLevel.candidates.map((c, ci) => {

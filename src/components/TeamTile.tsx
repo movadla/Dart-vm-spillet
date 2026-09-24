@@ -22,12 +22,14 @@ export interface TeamTileProps {
   potNumber: number
   color: string
   colorDark: string
-  /** Etternavn under brikken (brytes på inntil to linjer i stedet for «WOODHO…») */
+  /** Etternavn under brikken */
   label?: boolean
   /** Poeng under navnet (Min side / intro) */
   points?: number
   inProgress?: boolean
   glow?: boolean
+  /** Slått ut: selve brikken dempes, men navn og poeng står klart */
+  dimmed?: boolean
   /** flag-pop ved (re)mount — gi ny key utenfra for å trigge på nytt */
   pop?: boolean
   popDelayMs?: number
@@ -38,11 +40,11 @@ export interface TeamTileProps {
 
 /**
  * «Laget ditt»-brikken: spillerfoto på pott-farget bakgrunn. Én komponent for
- * intro-animasjonen, «Min side»-sliden og oppsummeringen, så laget ser likt
- * ut gjennom hele appen.
+ * intro-animasjonen, «Min side»-sliden, oppsummeringen og registreringen, så
+ * laget ser likt ut gjennom hele appen.
  */
 export default function TeamTile({
-  player, potNumber, color, colorDark, label = true, points, inProgress = false, glow = false,
+  player, potNumber, color, colorDark, label = true, points, inProgress = false, glow = false, dimmed = false,
   pop = false, popDelayMs = 0, hidden = false, tileRef,
 }: TeamTileProps) {
   const photo = player ? PLAYER_PHOTOS[player.name] : undefined
@@ -57,12 +59,14 @@ export default function TeamTile({
           border: `1.5px solid ${filled || inProgress ? color : 'rgba(255,255,255,0.18)'}`,
           background: filled ? `radial-gradient(ellipse 80% 70% at 50% 35%, ${color} 0%, ${colorDark} 100%)` : 'rgba(255,255,255,0.03)',
           boxShadow: inProgress ? `0 0 0 3px ${color}33` : glow && filled ? `0 0 12px ${color}80` : 'none',
+          opacity: dimmed ? 0.45 : 1,
+          filter: dimmed ? 'grayscale(0.8)' : 'none',
           animationName: pop ? 'flag-pop' : 'none',
           animationDuration: '0.45s',
           animationTimingFunction: 'cubic-bezier(0.34,1.56,0.64,1)',
           animationFillMode: 'both',
           animationDelay: `${popDelayMs}ms`,
-          transition: 'border-color 0.25s ease, box-shadow 0.4s ease',
+          transition: 'border-color 0.25s ease, box-shadow 0.4s ease, opacity 0.3s ease',
         }}
       >
         {player ? (
@@ -83,21 +87,26 @@ export default function TeamTile({
       </div>
       {label && (() => {
         const text = player ? lastName(player.name) : `Nivå ${potNumber}`
-        // Lange etternavn («Woodhouse») får ett trinn mindre skrift og
-        // tettere sats i stedet for å brytes eller trunkeres.
+        // Lange ETT-ORDS etternavn («Woodhouse», «Humphries», «Wattimena») får
+        // aldri brytes eller renne inn i nabobrikken: de settes på én linje og
+        // kondenseres (scaleX) i stedet — som navnetrekk på en sportsgrafikk.
+        // Navn med mellomrom («Van Gerwen») brytes ved mellomrommet som før.
         const long = text.length > 7
+        const condensed = long && !text.includes(' ')
         return (
           <span
             style={{
+              display: 'flex', justifyContent: 'center', width: '100%', minHeight: '2.3em',
               fontSize: long ? 10 : 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: long ? '-0.02em' : '0.02em',
-              color: filled ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.4)',
-              // Bryt kun ved mellomrom («VAN GERWEN» → to linjer), aldri inne i
-              // et ord; fast minhøyde så poeng/etiketter under står på linje.
-              textAlign: 'center', lineHeight: 1.15, whiteSpace: 'normal', wordBreak: 'keep-all', overflowWrap: 'normal',
-              minHeight: '2.3em', width: '100%',
+              color: filled ? (dimmed ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.85)') : 'rgba(255,255,255,0.4)',
+              textAlign: 'center', lineHeight: 1.15,
             }}
           >
-            {text}
+            <span style={condensed
+              ? { whiteSpace: 'nowrap', transform: 'scaleX(0.82)', transformOrigin: '50% 50%', flexShrink: 0 }
+              : { whiteSpace: 'normal', wordBreak: 'keep-all', overflowWrap: 'normal' }}>
+              {text}
+            </span>
           </span>
         )
       })()}

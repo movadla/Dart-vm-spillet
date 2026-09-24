@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import SmartBackButton from '@/components/SmartBackButton'
 import BrandBanner from '@/components/BrandBanner'
 import { getLeaderboardData } from '@/lib/participantData'
@@ -8,6 +9,7 @@ import RankList from '@/components/RankList'
 import LastUpdated from '../deltaker/[id]/LastUpdated'
 
 export const revalidate = 30
+export const metadata: Metadata = { title: 'Leaderboard' }
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 

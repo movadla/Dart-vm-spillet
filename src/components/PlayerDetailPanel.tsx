@@ -8,7 +8,7 @@ import { POTS } from '@/data/pots'
 import { PLAYER_STATS } from '@/data/playerStats'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { getPathToFinal, type PathStep } from '@/lib/bracketProjection'
-import { formatAvg, formatPercent } from '@/lib/format'
+import { formatAvg, formatOdds, formatPercent } from '@/lib/format'
 import { lastName } from '@/components/TeamTile'
 
 // Braketten trengs sjelden — lastes først når noen åpner den.
@@ -39,10 +39,6 @@ function loadPickShare(): Promise<PickShare> {
 const ALL_PLAYERS = POTS.flatMap((p) => p.players)
 function iso2For(name: string): string {
   return ALL_PLAYERS.find((p) => p.name === name)?.iso2 ?? ''
-}
-function formatOdds(odds: string): string {
-  const n = Number.parseFloat(odds)
-  return Number.isFinite(n) ? n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : odds
 }
 
 // ── Byggeklosser: to tydelig adskilte blokker, STATISTIKK (tall) og INFO (tekst) ──

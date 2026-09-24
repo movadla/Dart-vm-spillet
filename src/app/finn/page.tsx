@@ -5,10 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import BrandBanner from '@/components/BrandBanner'
 import { DEMO_EMAIL } from '@/lib/demo'
+import { KICKOFF } from '@/config/tournament'
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
-const KICKOFF = new Date('2026-12-11T19:00:00Z')
 // Demo-snarveien vises kun lokalt — i produksjon er demo-e-posten fortsatt
 // gyldig, men ikke annonsert.
 const SHOW_DEMO_HINT = process.env.NODE_ENV !== 'production'
@@ -101,10 +101,10 @@ export default function FinnPage() {
               boxSizing: 'border-box' as const,
             }}
           />
-        </div>
 
+        {/* Feilen står rett under feltet den gjelder, inne i samme kort */}
         {error && (
-          <div id="finn-feil" role="alert" style={{ padding: '12px 14px', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 12, marginBottom: 10 }}>
+          <div id="finn-feil" role="alert" style={{ padding: '12px 14px', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 12, marginTop: 10 }}>
             <div style={{ fontSize: 13, color: '#f87171', fontWeight: 700, marginBottom: 3 }}>{notFound ? 'Fant ingen deltaker med denne e-posten' : error}</div>
             {notFound && (
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>
@@ -122,6 +122,7 @@ export default function FinnPage() {
             )}
           </div>
         )}
+        </div>
 
         <button
           type="submit"

@@ -4,6 +4,7 @@
 // Sidene selv trenger ikke vite hvilken kilde dataene kom fra; de får samme
 // form uansett, pluss et `demo`-felt (fasen) når det er demo.
 
+import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { POTS } from '@/data/pots'
@@ -15,8 +16,8 @@ import {
   DEMO_COOKIE, DEMO_LEAGUES, DEMO_PARTICIPANTS, type DemoPhase,
   getDemoLeague, getDemoMatches, getDemoParticipant, isDemoId, isDemoLeagueCode, parseDemoPhase,
 } from '@/lib/demo'
-
-export const KICKOFF = new Date('2026-12-11T19:00:00Z')
+import { KICKOFF } from '@/config/tournament'
+export { KICKOFF }
 
 export interface ParticipantRow { id: string; name: string; email: string; created_at: string }
 export interface PickRow extends PickWithPot { participant_id: string }
@@ -87,19 +88,16 @@ export function buildRankRows(
     .map((p) => {
       const playerPicks = (by.get(p.id) ?? []).slice().sort((a, b) => a.pot_number - b.pot_number)
       const points = calcParticipantPoints(playerPicks, matches)
-      const matchesPlayed = playerPicks.reduce((sum, pk) =>
-        sum + matches.filter((m) => m.player1 === pk.player_name || m.player2 === pk.player_name).length, 0)
-      return { p, playerPicks, points, matchesPlayed }
+      return { p, playerPicks, points }
     })
     // Tie-breaker: den som meldte seg på først vinner uavgjort — enkel å
     // forklare, krever ingen ekstra data.
     .sort((a, b) => b.points - a.points || a.p.created_at.localeCompare(b.p.created_at))
 
-  return scored.map(({ p, playerPicks, points, matchesPlayed }, i) => ({
+  return scored.map(({ p, playerPicks, points }, i) => ({
     id: p.id,
     name: p.name,
     points,
-    matchesPlayed,
     rankDelta: vmStarted && baseline[p.id] != null ? baseline[p.id] - (i + 1) : undefined,
     flags: playerPicks.map((pk) => {
       const pot = POTS.find((pt) => pt.potNumber === pk.pot_number)
@@ -133,9 +131,25 @@ function demoPickRows(ids?: string[]): PickRow[] {
     .flatMap((p) => p.picks.map((pk) => ({ ...pk, participant_id: p.id })))
 }
 
+// ── Alle kamper (VM-guiden) ────────────────────────────────────────────────
+
+export async function getMatches(phaseFromQuery?: string | null): Promise<MatchResult[]> {
+  const phase = await readDemoPhase(phaseFromQuery)
+  if (phase) return getDemoMatches(phase)
+  let supabase: ReturnType<typeof getSupabaseAdmin>
+  try { supabase = getSupabaseAdmin() } catch { return [] }
+  const { data } = await supabase
+    .from('match_results')
+    .select('player1, player2, sets1, sets2, stage, winner')
+    .order('played_at', { ascending: true })
+  return (data as MatchResult[]) ?? []
+}
+
 // ── Min side ───────────────────────────────────────────────────────────────
 
-export async function getParticipantPageData(id: string, phaseFromQuery?: string | null): Promise<ParticipantPageData | null> {
+// React cache(): siden OG generateMetadata() kaller denne med samme argumenter
+// i samme request — dedupes så databasen bare spørres én gang.
+export const getParticipantPageData = cache(async function getParticipantPageData(id: string, phaseFromQuery?: string | null): Promise<ParticipantPageData | null> {
   if (isDemoId(id)) {
     const p = getDemoParticipant(id)
     if (!p) return null
@@ -180,7 +194,7 @@ export async function getParticipantPageData(id: string, phaseFromQuery?: string
     vmStarted: new Date() >= KICKOFF,
     demo: null,
   }
-}
+})
 
 // ── Leaderboard ────────────────────────────────────────────────────────────
 
@@ -216,7 +230,7 @@ export async function getLeaderboardData(phaseFromQuery?: string | null): Promis
 
 // ── Liga ───────────────────────────────────────────────────────────────────
 
-export async function getLeagueData(code: string, phaseFromQuery?: string | null): Promise<LeagueData | null> {
+export const getLeagueData = cache(async function getLeagueData(code: string, phaseFromQuery?: string | null): Promise<LeagueData | null> {
   if (isDemoLeagueCode(code)) {
     const league = getDemoLeague(code)
     if (!league) return null
@@ -261,7 +275,7 @@ export async function getLeagueData(code: string, phaseFromQuery?: string | null
   const matchResults = (matches as MatchResult[]) ?? []
   const rows = buildRankRows(participants, (picks as PickRow[]) ?? [], matchResults, baseline, vmStarted)
   return { league, rows, matchResults, vmStarted, demo: null }
-}
+})
 
 // ── Ligaer for én deltaker (API: /api/league/mine) ─────────────────────────
 

@@ -4,12 +4,23 @@ import SmartBackButton from '@/components/SmartBackButton'
 import BrandBanner from '@/components/BrandBanner'
 import CopyCode from '@/components/CopyCode'
 import RankList from '@/components/RankList'
-import DeadlineCountdown from '@/app/deltaker/[id]/DeadlineCountdown'
+import Countdown from '@/components/Countdown'
+import type { Metadata } from 'next'
 import LastUpdated from '@/app/deltaker/[id]/LastUpdated'
 import ShareButton from '@/app/ShareButton'
 import { getLeagueData } from '@/lib/participantData'
 
 export const revalidate = 30
+
+export async function generateMetadata({ params, searchParams }: {
+  params: Promise<{ code: string }>
+  searchParams: Promise<{ fase?: string }>
+}): Promise<Metadata> {
+  const { code } = await params
+  const { fase } = await searchParams
+  const data = await getLeagueData(code, fase)
+  return { title: data ? `${data.league.name} – liga` : 'Liga' }
+}
 
 const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
@@ -67,7 +78,7 @@ export default async function LigaPage({ params, searchParams }: {
             <CopyCode code={league.invite_code} fontSize={22} color="#fff" letterSpacing="0.14em" />
           </div>
           <ShareButton
-            url={`${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'}/liga/${league.invite_code}`}
+            url={`/liga/${league.invite_code}`}
             title={`${league.name} – Dart-VM-spillet`}
             text={`Bli med i ${league.name} i Dart-VM-spillet! Kode: ${league.invite_code}`}
             label="Inviter →"
@@ -80,7 +91,7 @@ export default async function LigaPage({ params, searchParams }: {
         <div style={{ ...CARD, padding: '32px 20px', textAlign: 'center' }}>
           <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Deltakerlisten er skjult til VM starter</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>Ligaeieren har valgt å holde lagene hemmelige frem til første kamp.</div>
-          <DeadlineCountdown />
+          <Countdown align="center" label="VM starter om" />
         </div>
       ) : rows.length === 0 ? (
         <div style={{ ...CARD, padding: '32px 20px', textAlign: 'center' }}>
