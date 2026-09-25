@@ -62,7 +62,6 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const locale = await getLocale()
-  const dict = getDictionary(locale)
   return (
     <html lang={locale} className={`${inter.variable} ${condensed.variable}`}>
       <body style={{ margin: 0, minHeight: '100vh', background: '#0d1117', color: '#fff', fontFamily: 'var(--font-inter), -apple-system, sans-serif' }}>
@@ -71,7 +70,7 @@ export default async function RootLayout({
           background: 'radial-gradient(ellipse 80% 55% at 15% 0%, rgba(10,40,100,0.5) 0%, transparent 60%), radial-gradient(ellipse 80% 55% at 85% 0%, rgba(100,10,20,0.45) 0%, transparent 60%)',
         }} />
         <div className="app-container" style={{ maxWidth: 'var(--app-width)', margin: '0 auto', minHeight: '100vh', position: 'relative', zIndex: 1, boxShadow: '0 0 80px rgba(0,0,0,0.6)' }}>
-          <LocaleProvider initialLocale={locale} initialDict={dict}>
+          <LocaleProvider initialLocale={locale}>
             {children}
           </LocaleProvider>
         </div>

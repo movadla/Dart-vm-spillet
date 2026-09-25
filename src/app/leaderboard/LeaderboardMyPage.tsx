@@ -3,9 +3,11 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { SPORT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 /** Snarvei til egen side for innloggede — plassen holdes av under SSR så listen ikke hopper. */
 export default function LeaderboardMyPage() {
+  const { dict } = useLocale()
   const [id, setId] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
 
@@ -31,7 +33,7 @@ export default function LeaderboardMyPage() {
       borderRadius: 14, textDecoration: 'none',
     }}>
       <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-        Min side
+        {dict.common.nav.myPageShort}
       </span>
       <span aria-hidden style={{ fontSize: 14, color: 'rgba(147,197,253,0.7)' }}>→</span>
     </Link>

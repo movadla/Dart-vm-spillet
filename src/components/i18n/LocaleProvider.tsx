@@ -16,18 +16,23 @@ export const LocaleContext = createContext<LocaleContextValue | null>(null)
 /** Ett år — samme varighet som andre bevisste bruker-valg-cookies i appen. */
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
+/**
+ * Får kun `initialLocale` (en ren streng) fra RootLayout, ALDRI en ordbok som
+ * prop — ordbøkene inneholder funksjoner (pluralisering/maler), og React
+ * Server Components kan ikke serialisere funksjoner over server→klient-
+ * grensen. getDictionary() er ren, avhengighetsfri data-oppslag, så den kan
+ * trygt kjøres på nytt her i klienten fra den samme locale-strengen i stedet.
+ */
 export function LocaleProvider({
   initialLocale,
-  initialDict,
   children,
 }: {
   initialLocale: Locale
-  initialDict: Dictionary
   children: ReactNode
 }) {
   const router = useRouter()
   const [locale, setLocaleState] = useState(initialLocale)
-  const [dict, setDict] = useState(initialDict)
+  const [dict, setDict] = useState<Dictionary>(() => getDictionary(initialLocale))
 
   const setLocale = useCallback(
     (next: Locale) => {

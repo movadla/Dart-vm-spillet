@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { KICKOFF } from '@/config/tournament'
 import { usePageVisible } from '@/lib/usePageVisible'
 import { SPORT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 function getTimeLeft() {
   const diff = KICKOFF.getTime() - Date.now()
@@ -14,8 +15,6 @@ function getTimeLeft() {
     minutes: Math.floor((diff % 3600000) / 60000),
   }
 }
-
-const UNITS = ['dager', 'timer', 'min'] as const
 
 /**
  * Den ene nedtellingen til VM-start (dager/timer/min — sekunder er støy) som
@@ -34,6 +33,8 @@ export default function Countdown({ size = 22, label, boxed = false, align = 'le
 }) {
   const [t, setT] = useState(getTimeLeft)
   const visible = usePageVisible()
+  const { dict } = useLocale()
+  const UNITS = [dict.common.countdown.days, dict.common.countdown.hours, dict.common.countdown.minutes] as const
 
   useEffect(() => {
     if (!visible) return

@@ -6,6 +6,7 @@ import Flag from '@/components/Flag'
 import KickButton from '@/app/liga/[code]/KickButton'
 import { formatPoints } from '@/lib/format'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 // Grønn pall-kaskade (#22c55e). 1.plass gløder, 2/3 avtar.
 const RANK_COLORS = ['#4ade80', '#34d27a', '#2bb673']
@@ -48,6 +49,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
   scrollToMe?: boolean
   backRef?: string
 }) {
+  const { locale, dict } = useLocale()
   const [myId, setMyId] = useState<string | null>(null)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const myRowRef = useRef<HTMLAnchorElement>(null)
@@ -112,7 +114,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
 
         return (
           <Link key={id} ref={isMe ? myRowRef : undefined} href={`/deltaker/${id}${backRef ? `?from=${backRef}` : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}
-            aria-label={vmStarted ? `${rank}. ${name}, ${formatPoints(points)}${isMe ? ' (deg)' : ''}` : `${name}${isMe ? ' (deg)' : ''}`}
+            aria-label={vmStarted ? `${rank}. ${name}, ${formatPoints(points, locale)}${isMe ? ` (${dict.common.rankList.you})` : ''}` : `${name}${isMe ? ` (${dict.common.rankList.you})` : ''}`}
             onClick={() => { try { sessionStorage.setItem(`rl_scroll_${window.location.pathname}`, String(window.scrollY)) } catch {} }}
           >
             <div className="lb-card" style={{
@@ -141,7 +143,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                   <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color: isTop3 ? RANK_COLORS[styleIdx] : isMe ? '#93c5fd' : 'rgba(255,255,255,0.7)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{vmStarted ? rank : '–'}</span>
                 </div>
                 {rankDelta != null && (
-                  <span aria-label={rankDelta > 0 ? `opp ${rankDelta}` : rankDelta < 0 ? `ned ${Math.abs(rankDelta)}` : 'uendret'} style={{ fontSize: 11, fontWeight: 800, lineHeight: 1, marginTop: 4, letterSpacing: '0.02em', fontVariantNumeric: 'tabular-nums', color: rankDelta > 0 ? '#4ade80' : rankDelta < 0 ? '#f87171' : isMe ? 'rgba(147,197,253,0.7)' : 'rgba(255,255,255,0.45)' }}>
+                  <span aria-label={rankDelta > 0 ? dict.common.rankList.rankUp(rankDelta) : rankDelta < 0 ? dict.common.rankList.rankDown(Math.abs(rankDelta)) : dict.common.rankList.rankUnchanged} style={{ fontSize: 11, fontWeight: 800, lineHeight: 1, marginTop: 4, letterSpacing: '0.02em', fontVariantNumeric: 'tabular-nums', color: rankDelta > 0 ? '#4ade80' : rankDelta < 0 ? '#f87171' : isMe ? 'rgba(147,197,253,0.7)' : 'rgba(255,255,255,0.45)' }}>
                     {rankDelta > 0 ? `▲${rankDelta}` : rankDelta < 0 ? `▼${Math.abs(rankDelta)}` : '–'}
                   </span>
                 )}
@@ -150,12 +152,12 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
               <div style={{ flex: 1, padding: '8px 12px 7px', minWidth: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4, gap: 8 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: isMe ? '#93c5fd' : '#fff', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
-                    {name}{isMe && <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(147,197,253,0.8)', marginLeft: 6 }}>deg</span>}
+                    {name}{isMe && <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(147,197,253,0.8)', marginLeft: 6 }}>{dict.common.rankList.you}</span>}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                     {kick && <KickButton leagueId={kick.leagueId} memberId={id} memberName={name} createdBy={kick.createdBy} />}
                     <div style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, color: vmStarted ? '#f0f2f5' : 'rgba(255,255,255,0.4)', lineHeight: 1, letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums' }}>
-                      {vmStarted ? formatPoints(points) : '–'}
+                      {vmStarted ? formatPoints(points, locale) : '–'}
                     </div>
                   </div>
                 </div>
@@ -180,7 +182,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                     {/* «4 av 6 igjen» sier mer om sjansene enn antall spilte kamper */}
                     {vmStarted && flags.length > 0 && (() => {
                       const left = flags.filter((f) => !f.eliminated).length
-                      return <span style={{ fontSize: 12, color: left === 0 ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap', flexShrink: 0 }}>· {left === 0 ? 'alle ute' : `${left} av ${flags.length} igjen`}</span>
+                      return <span style={{ fontSize: 12, color: left === 0 ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap', flexShrink: 0 }}>· {left === 0 ? dict.common.rankList.allEliminated : dict.common.rankList.remaining(left, flags.length)}</span>
                     })()}
                   </div>
                   <span aria-hidden style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1, flexShrink: 0 }}>›</span>
@@ -202,7 +204,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
             letterSpacing: '0.04em', cursor: 'pointer', fontFamily: SPORT, textTransform: 'uppercase',
           }}
         >
-          Vis flere ({Math.min(remaining, PAGE_SIZE)} av {remaining}) →
+          {dict.common.rankList.showMore(Math.min(remaining, PAGE_SIZE), remaining)}
         </button>
       )}
     </div>

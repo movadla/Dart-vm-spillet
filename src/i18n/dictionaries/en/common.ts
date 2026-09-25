@@ -6,6 +6,7 @@ export const common = {
   nav: {
     home: '← Home',
     myPage: '← My page',
+    myPageShort: 'My page',
   },
   loading: 'Loading...',
   networkError: 'Network error — try again',
@@ -13,13 +14,21 @@ export const common = {
     switchToNo: 'Bytt til norsk',
     switchToEn: 'Switch to English',
   },
-  brandBanner: {
-    eyebrow: '— PDC World Championship —',
-  },
   countdown: {
     days: 'days',
     hours: 'hrs',
     minutes: 'min',
+    labelUntilStart: 'The Worlds starts in',
+    labelUntilFirstPoints: 'First points land in',
   },
   lastUpdated: 'Updated {time}',
+  rankList: {
+    you: 'you',
+    rankUp: (n) => `up ${n}`,
+    rankDown: (n) => `down ${n}`,
+    rankUnchanged: 'unchanged',
+    allEliminated: 'all out',
+    remaining: (left, total) => `${left} of ${total} left`,
+    showMore: (shown, total) => `Show more (${shown} of ${total}) →`,
+  },
 } satisfies CommonDict
