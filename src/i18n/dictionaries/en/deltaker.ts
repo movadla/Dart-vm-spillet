@@ -25,7 +25,6 @@ export const deltaker = {
     noPlayers: 'No players registered yet.',
     finalist: 'Finalist',
     outIn: (stage) => `Out in the ${stage}`,
-    onTo: (stage) => `Through to the ${stage}`,
     notPlayedYet: 'Not played yet',
     noMatchesYet: 'No matches played yet.',
     won: 'beat',

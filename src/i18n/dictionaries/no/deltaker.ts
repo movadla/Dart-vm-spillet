@@ -25,7 +25,6 @@ export interface DeltakerDict {
     noPlayers: string
     finalist: string
     outIn: (stage: string) => string
-    onTo: (stage: string) => string
     notPlayedYet: string
     noMatchesYet: string
     won: string
@@ -96,7 +95,6 @@ export const deltaker: DeltakerDict = {
     noPlayers: 'Ingen spillere registrert ennå.',
     finalist: 'Finalist',
     outIn: (stage) => `Ute i ${stage}`,
-    onTo: (stage) => `Videre til ${stage}`,
     notPlayedYet: 'Ikke spilt ennå',
     noMatchesYet: 'Ingen kamper spilt ennå.',
     won: 'over',

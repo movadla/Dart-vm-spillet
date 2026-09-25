@@ -42,8 +42,11 @@ function statusFor(name: string, matches: MatchResult[], dict: Dictionary): { la
     if (reached === 'final') return { label: dict.deltaker.myTeam.finalist, color: SILVER, strong: true }
     return { label: dict.deltaker.myTeam.outIn(dict.players.stages[reached].toLowerCase()), color: 'rgba(255,255,255,0.6)', strong: false }
   }
+  // Bare stadienavnet («Kvartfinale»/«4. runde») i stedet for en hel setning
+  // («Videre til kvartfinale») — grønnfargen alene skiller dette tydelig fra
+  // «Ute i …»-radene rett under, så prefikset var overflødig tekst.
   const next = STAGE_ORDER[STAGE_INDEX[reached] + 1]
-  return { label: next ? dict.deltaker.myTeam.onTo(dict.players.stages[next].toLowerCase()) : dict.players.stages[reached], color: '#4ade80', strong: false }
+  return { label: dict.players.stages[next ?? reached], color: '#4ade80', strong: false }
 }
 
 /**
@@ -108,19 +111,8 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
                 <span style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, opacity: eliminated ? 0.5 : 1 }}>
                   <Flag iso2={player?.iso2 ?? getIso2(pick.player_name)} size={22} />
                   <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: eliminated ? 'line-through' : 'none', textDecorationColor: 'rgba(255,255,255,0.5)' }}>
-                        {pick.player_name}
-                      </span>
-                      {multiplier > 1 && (
-                        // Multiplikatoren er en av de mest strategisk interessante
-                        // mekanikkene i spillet (outsider-bonus), men var tidligere
-                        // en liten, lett-oversett badge — mer størrelse/vekt/glød
-                        // gir den plassen den fortjener ved siden av navnet.
-                        <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, flexShrink: 0, color: multiplier >= 3 ? '#ff6b6b' : '#fbbf24', background: multiplier >= 3 ? 'rgba(220,38,38,0.18)' : 'rgba(245,158,11,0.18)', border: `1px solid ${multiplier >= 3 ? 'rgba(239,68,68,0.55)' : 'rgba(245,158,11,0.55)'}`, borderRadius: 5, padding: '2px 8px', lineHeight: 1.4, boxShadow: `0 0 10px ${multiplier >= 3 ? 'rgba(239,68,68,0.3)' : 'rgba(245,158,11,0.3)'}` }}>
-                          ×{multiplier}
-                        </span>
-                      )}
+                    <span style={{ display: 'block', fontSize: 15, fontWeight: 700, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: eliminated ? 'line-through' : 'none', textDecorationColor: 'rgba(255,255,255,0.5)' }}>
+                      {pick.player_name}
                     </span>
                     {vmStarted && (
                       <span style={{ display: 'block', fontSize: 12, marginTop: 2, color: status ? status.color : 'rgba(255,255,255,0.55)', fontWeight: status?.strong ? 800 : 600, letterSpacing: status?.strong ? '0.04em' : 0, textTransform: status?.strong ? 'uppercase' : 'none' }}>
@@ -128,6 +120,17 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
                       </span>
                     )}
                   </span>
+                  {multiplier > 1 && (
+                    // Flyttet ut av navnets egen flex-rad og inn som en fast
+                    // kolonne helt til høyre for navnet (før poeng-kolonnen) —
+                    // lå tidligere RETT ETTER navnet, som ga en annen
+                    // horisontal posisjon per rad avhengig av navnelengde
+                    // («James Wade ×2» vs. «Wessel Nijman ×2»). Nå står alle
+                    // badgene i samme kolonne uansett navnelengde.
+                    <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, flexShrink: 0, color: multiplier >= 3 ? '#ff6b6b' : '#fbbf24', background: multiplier >= 3 ? 'rgba(220,38,38,0.18)' : 'rgba(245,158,11,0.18)', border: `1px solid ${multiplier >= 3 ? 'rgba(239,68,68,0.55)' : 'rgba(245,158,11,0.55)'}`, borderRadius: 5, padding: '2px 8px', lineHeight: 1.4, boxShadow: `0 0 10px ${multiplier >= 3 ? 'rgba(239,68,68,0.3)' : 'rgba(245,158,11,0.3)'}` }}>
+                      ×{multiplier}
+                    </span>
+                  )}
                 </span>
                 {vmStarted ? (
                   <span style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, lineHeight: 1, flexShrink: 0, minWidth: 48, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: total > 0 ? '#4ade80' : 'rgba(255,255,255,0.35)' }}>
