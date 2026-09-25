@@ -8,7 +8,7 @@ import TeamTile, { lastName } from '@/components/TeamTile'
 import { POTS, getIso2, type Player } from '@/data/pots'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 import { STAGE_ORDER, STAGE_LABELS, CHAMPION_LABEL, type Stage } from '@/config/scoring'
-import { calcPlayerPoints, isPlayerEliminated, isPlayerChampion, furthestStageReached, type PickWithPot, type MatchResult } from '@/lib/scoring'
+import { calcPlayerPoints, getPlayerMatches, isPlayerEliminated, isPlayerChampion, furthestStageReached, type PickWithPot, type MatchResult } from '@/lib/scoring'
 import { formatPoints } from '@/lib/format'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 
@@ -83,9 +83,7 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
           const eliminated = vmStarted && isPlayerEliminated(pick.player_name, matchResults)
           const champion = vmStarted && isPlayerChampion(pick.player_name, matchResults)
           const status = vmStarted ? statusFor(pick.player_name, matchResults) : null
-          const myMatches = matchResults
-            .filter((m) => m.player1 === pick.player_name || m.player2 === pick.player_name)
-            .sort((a, b) => (STAGE_INDEX[a.stage ?? 'r1'] ?? 0) - (STAGE_INDEX[b.stage ?? 'r1'] ?? 0))
+          const myMatches = getPlayerMatches(pick.player_name, matchResults)
 
           return (
             <div key={pick.pot_number}>

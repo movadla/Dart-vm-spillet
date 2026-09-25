@@ -1,4 +1,6 @@
-import { SCORING } from '@/config/scoring'
+import { SCORING, STAGE_ORDER } from '@/config/scoring'
+
+const STAGE_INDEX: Record<string, number> = Object.fromEntries(STAGE_ORDER.map((s, i) => [s, i]))
 
 export interface MatchResult {
   player1: string
@@ -54,6 +56,17 @@ export function isPlayerEliminated(playerName: string, matches: MatchResult[]): 
 /** Vant finalen. */
 export function isPlayerChampion(playerName: string, matches: MatchResult[]): boolean {
   return matches.some((m) => m.stage === 'final' && m.winner === playerName)
+}
+
+/**
+ * Alle kamper spilleren har deltatt i, sortert kronologisk (tidligste runde
+ * først) — samme filter+sortering trengtes uavhengig tre steder (Min sides
+ * «Mitt lag», «Tidligere kamper» i spillerpanelet); én kilde her i stedet.
+ */
+export function getPlayerMatches(playerName: string, matches: MatchResult[]): MatchResult[] {
+  return matches
+    .filter((m) => m.player1 === playerName || m.player2 === playerName)
+    .sort((a, b) => STAGE_INDEX[a.stage ?? 'r1'] - STAGE_INDEX[b.stage ?? 'r1'])
 }
 
 /** Siste (høyeste) runde spilleren har deltatt i, basert på registrerte kamper — eller null om ingen ennå. */

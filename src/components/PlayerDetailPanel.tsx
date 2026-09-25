@@ -8,7 +8,7 @@ import { POTS } from '@/data/pots'
 import { PLAYER_STATS } from '@/data/playerStats'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { getPathToFinal, getNextMatch, type PathStep } from '@/lib/bracketProjection'
-import { calcPlayerPoints, isPlayerChampion, isPlayerEliminated, type MatchResult } from '@/lib/scoring'
+import { calcPlayerPoints, getPlayerMatches, isPlayerChampion, isPlayerEliminated, type MatchResult } from '@/lib/scoring'
 import { STAGE_LABELS, CHAMPION_LABEL, type Stage } from '@/config/scoring'
 import { getScheduleLabel } from '@/config/schedule'
 import { formatAvg, formatPoints } from '@/lib/format'
@@ -122,9 +122,7 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
   const eliminated = !champion && isPlayerEliminated(player.name, matchResults)
   const next = !champion && !eliminated ? getNextMatch(player.name, matchResults) : null
   const nextSchedule = next ? getScheduleLabel(next.stage as Stage) : null
-  const myMatches = matchResults
-    .filter((m) => m.player1 === player.name || m.player2 === player.name)
-    .sort((a, b) => STAGE_INDEX[a.stage ?? 'r1'] - STAGE_INDEX[b.stage ?? 'r1'])
+  const myMatches = getPlayerMatches(player.name, matchResults)
 
   // Sveip ned: arket følger fingeren når innholdet står øverst; slipp > 90 px lukker.
   function onTouchStart(e: React.TouchEvent) {
