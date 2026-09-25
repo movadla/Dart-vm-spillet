@@ -2,9 +2,11 @@
 
 import { useRouter } from 'next/navigation'
 import { DEMO_COOKIE } from '@/lib/demo'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 export default function LogoutButton() {
   const router = useRouter()
+  const { dict } = useLocale()
 
   function handleLogout() {
     try {
@@ -33,7 +35,7 @@ export default function LogoutButton() {
         letterSpacing: '0.04em',
       }}
     >
-      Bytt bruker
+      {dict.home.hero.switchUser}
     </button>
   )
 }

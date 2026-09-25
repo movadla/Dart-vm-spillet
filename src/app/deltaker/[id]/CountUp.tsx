@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { formatPoints } from '@/lib/format'
 import { SPORT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 /** Teller opp til `value` (900 ms, ease-out) — grønn gradient som resten av poengene. */
 export default function CountUp({ value, size = 56 }: { value: number; size?: number }) {
+  const { locale } = useLocale()
   const [displayed, setDisplayed] = useState(0)
   const rafRef = useRef<number | null>(null)
 
@@ -36,6 +38,6 @@ export default function CountUp({ value, size = 56 }: { value: number; size?: nu
       background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)',
       WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
       textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)',
-    }}>{formatPoints(displayed)}</span>
+    }}>{formatPoints(displayed, locale)}</span>
   )
 }

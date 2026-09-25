@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 import { DEMO_COOKIE, DEMO_ID, DEMO_PHASES, type DemoPhase } from '@/lib/demo'
 import { SPORT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 /**
  * Banner øverst på demo-deltakerens Min side: viser at dette er en demo, og
@@ -12,6 +13,7 @@ import { SPORT } from '@/config/theme'
  * demo-verden — og som slettes ved «Bytt bruker» og ved ekte innlogging.
  */
 export default function DemoBanner({ phase, participantId }: { phase: DemoPhase; participantId: string }) {
+  const { dict } = useLocale()
   useEffect(() => {
     try {
       document.cookie = `${DEMO_COOKIE}=${phase}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`
@@ -25,8 +27,8 @@ export default function DemoBanner({ phase, participantId }: { phase: DemoPhase;
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 6px 6px 12px', marginBottom: 12, borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)' }}>
-      <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#f59e0b', flexShrink: 0 }}>Demo</span>
-      <div role="tablist" aria-label="Demo-fase" style={{ display: 'flex', gap: 3, marginLeft: 'auto', padding: 2, borderRadius: 9, background: 'rgba(0,0,0,0.25)' }}>
+      <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#f59e0b', flexShrink: 0 }}>{dict.deltaker.demoBanner.badge}</span>
+      <div role="tablist" aria-label={dict.deltaker.demoBanner.tabsAriaLabel} style={{ display: 'flex', gap: 3, marginLeft: 'auto', padding: 2, borderRadius: 9, background: 'rgba(0,0,0,0.25)' }}>
         {DEMO_PHASES.map((p) => {
           const active = p.id === phase
           return (
@@ -41,7 +43,7 @@ export default function DemoBanner({ phase, participantId }: { phase: DemoPhase;
                 transition: 'background 0.15s, color 0.15s',
               }}
             >
-              {p.label}
+              {dict.deltaker.demoBanner.phases[p.id]}
             </Link>
           )
         })}

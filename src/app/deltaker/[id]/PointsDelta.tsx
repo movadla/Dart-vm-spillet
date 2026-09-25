@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { formatPoints } from '@/lib/format'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 interface DayRec { day: string; base: number; last: number }
 
 /** «+5 p siden i går»-chip. Baseline lagres lokalt per deltaker (se kommentar under). */
 export default function PointsDelta({ participantId, totalPoints }: { participantId: string; totalPoints: number }) {
+  const { locale, dict } = useLocale()
   const [delta, setDelta] = useState<number | null>(null)
 
   // localStorage finnes ikke under SSR — leses/skrives med vilje etter mount for å unngå
@@ -55,7 +57,7 @@ export default function PointsDelta({ participantId, totalPoints }: { participan
       flexShrink: 0,
       fontVariantNumeric: 'tabular-nums',
     }}>
-      {delta > 0 ? `+${formatPoints(delta)}` : formatPoints(delta)} siden i går
+      {delta > 0 ? `+${formatPoints(delta, locale)}` : formatPoints(delta, locale)} {dict.deltaker.pointsDelta.sinceYesterday}
     </span>
   )
 }

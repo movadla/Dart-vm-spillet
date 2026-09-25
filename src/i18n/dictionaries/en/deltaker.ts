@@ -1,6 +1,52 @@
 import type { DeltakerDict } from '../no/deltaker'
 
 export const deltaker = {
+  page: {
+    backLeague: '← League',
+    backLeaderboard: '← Leaderboard',
+    myPage: 'My page',
+    totalPoints: 'Total points',
+    rank: 'Rank',
+    startsIn: 'The Worlds starts in',
+    editTeam: 'Edit team →',
+    myTeamHeader: 'My team',
+    vmDecidedPrefix: 'The Worlds is',
+    vmDecided: 'decided',
+    vmInStagePrefix: 'The Worlds is in the',
+    allMatches: 'All matches →',
+    nextMatchesHeader: 'Next matches',
+    leaguesHeader: 'Leagues',
+    vmGuide: 'World Championship guide →',
+    shareText: (rank, total) => `I'm #${rank} of ${total} in Dart-VM-spillet!`,
+    shareTextClosed: 'Join Dart-VM-spillet – pick six dart players and follow them through the Worlds!',
+    shareLabel: 'Share →',
+  },
+  myTeam: {
+    noPlayers: 'No players registered yet.',
+    finalist: 'Finalist',
+    outIn: (stage) => `Out in the ${stage}`,
+    onTo: (stage) => `Through to the ${stage}`,
+    notPlayedYet: 'Not played yet',
+    noMatchesYet: 'No matches played yet.',
+    won: 'beat',
+    lost: 'lost to',
+    matchSummary: (sets, wins, wonTournament, multiplier) =>
+      `${sets} sets · ${wins} ${wins === 1 ? 'win' : 'wins'}${wonTournament ? ' · tournament win' : ''}${multiplier > 1 ? ` · ×${multiplier}` : ''}`,
+    playerInfo: 'Player info →',
+    allMatches: 'All matches →',
+    nextPlayer: 'Next player →',
+  },
+  nextMatches: {
+    none: 'No upcoming matches for your team.',
+  },
+  demoBanner: {
+    badge: 'Demo',
+    tabsAriaLabel: 'Demo phase',
+    phases: { for: 'Before Worlds', live: 'In progress', ferdig: 'After final' },
+  },
+  pointsDelta: {
+    sinceYesterday: 'since yesterday',
+  },
   playerDetailPanel: {
     dialogAriaLabel: (name) => `About ${name}`,
     close: 'Close',
