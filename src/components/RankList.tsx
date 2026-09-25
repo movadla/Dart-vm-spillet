@@ -7,6 +7,8 @@ import KickButton from '@/app/liga/[code]/KickButton'
 import { formatPoints } from '@/lib/format'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
+import { PLAYER_PHOTOS } from '@/data/playerPhotos'
+import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 
 // Gull/sølv/bronse-pall (samme farger som MEDAL_COLORS under) — IKKE grønt.
 // Grønt er reservert for rankDelta-pilene («▲ flyttet opp»), et helt annet
@@ -23,7 +25,7 @@ const RANK_GLOW = [
   '',
 ]
 
-export interface FlagEntry { iso2: string; eliminated: boolean; medal?: 'bronze' | 'silver' | 'gold' }
+export interface FlagEntry { iso2: string; eliminated: boolean; medal?: 'bronze' | 'silver' | 'gold'; playerName: string; potNumber: number }
 
 // Samme medaljefarger som på Min side — gull/sølv (PDC har ingen bronsefinale).
 const MEDAL_COLORS: Record<'bronze' | 'silver' | 'gold', string> = {
@@ -169,21 +171,32 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 8 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                     <div style={{ display: 'flex', gap: 3, flexWrap: 'nowrap' }}>
-                      {flags.map(({ iso2, eliminated, medal }, i) => {
+                      {flags.map(({ iso2, eliminated, medal, playerName, potNumber }, i) => {
                         const medalColor = medal ? MEDAL_COLORS[medal] : null
+                        const photo = PLAYER_PHOTOS[playerName]
+                        const potColor = POT_COLORS[(potNumber - 1) % POT_COLORS.length]
+                        const potColorDark = POT_COLORS_DARK[(potNumber - 1) % POT_COLORS_DARK.length]
+                        const dimmed = vmStarted && eliminated
                         return (
                           <span key={i} style={{
-                            // Samme demping som TeamTile («dimmed»-tilstanden på Min side) —
-                            // var tidligere grayscale(1) + 0.25 opacity, som gjorde et flagg
-                            // med fin detaljering (f.eks. Englands kors) nesten uleselig og
-                            // så ut som et ødelagt bilde i stedet for en tydelig «ute»-markering.
-                            display: 'inline-flex', opacity: vmStarted && eliminated ? 0.45 : 1, filter: vmStarted && eliminated ? 'grayscale(0.8)' : 'none',
-                            border: medalColor ? `2px solid ${medalColor}` : '2px solid transparent',
-                            background: medalColor ? `${medalColor}33` : 'none',
+                            // Bittesmå versjoner av lagbrikkene (foto på pott-farge) i
+                            // stedet for flagg — flagget forteller ingenting om HVEM man
+                            // har valgt, bare nasjonalitet. Samme demping som TeamTile
+                            // («dimmed» på Min side) for utslåtte spillere.
+                            display: 'inline-flex', alignItems: 'flex-end', justifyContent: 'center',
+                            width: 18, height: 22, position: 'relative', overflow: 'hidden',
+                            opacity: dimmed ? 0.45 : 1, filter: dimmed ? 'grayscale(0.8)' : 'none',
+                            border: medalColor ? `2px solid ${medalColor}` : '1px solid rgba(255,255,255,0.18)',
+                            background: `radial-gradient(ellipse 80% 70% at 50% 35%, ${potColor} 0%, ${potColorDark} 100%)`,
                             boxShadow: medalColor ? `0 0 6px ${medalColor}99` : 'none',
-                            borderRadius: 5, padding: 1,
+                            borderRadius: 5,
                           }}>
-                            <Flag iso2={iso2} size={16} />
+                            {photo ? (
+                              // eslint-disable-next-line @next/next/no-img-element -- statisk fil i public/, bittesmå og mange på én gang
+                              <img src={photo.src} alt="" loading="lazy" decoding="async" style={{ position: 'absolute', inset: '4% 2% 0', width: '96%', height: '96%', objectFit: 'contain', objectPosition: 'bottom' }} />
+                            ) : (
+                              <Flag iso2={iso2} size={12} />
+                            )}
                           </span>
                         )
                       })}

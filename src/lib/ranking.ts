@@ -56,7 +56,7 @@ export function buildRankRows(
       const stageReached = furthestStageReached(pk.player_name, matches, STAGE_ORDER)
       const champion = isPlayerChampion(pk.player_name, matches)
       const medal = champion ? 'gold' : stageReached === 'final' ? 'silver' : undefined
-      return { iso2, eliminated: isPlayerEliminated(pk.player_name, matches), medal }
+      return { iso2, eliminated: isPlayerEliminated(pk.player_name, matches), medal, playerName: pk.player_name, potNumber: pk.pot_number }
     }),
   }))
 }
