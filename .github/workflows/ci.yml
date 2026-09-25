@@ -24,5 +24,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Kun kritiske sårbarheter feiler bygget — moderate/høy dukker ofte opp
+      # i store transitive tre uten en reell fiks tilgjengelig ennå, og ville
+      # gjort CI upålitelig hvis den blokkerte på dem.
+      - run: npm audit --audit-level=critical
       - run: npm run check
       - run: npm run build
