@@ -47,21 +47,24 @@ export default async function NextMatches({ picks, matchResults }: { picks: Pick
         const schedule = getScheduleLabel(next.stage as Stage, locale)
         return (
           <div key={pick.pot_number} style={{ padding: '10px 14px', borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: '0 1 auto' }}>
-                <Flag iso2={iso2For(pick.player_name)} size={20} />
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(pick.player_name)}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto', minWidth: 0 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                  {players.stages[next.stage as Stage]}
-                </span>
-                <span aria-hidden style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }}>·</span>
+            {/* Ditt eget spillernavn her (i tillegg til motstanderens) tvang to
+                fulle navn inn i samme rad ved siden av runde-label — på en
+                smal skjerm/lange navn (engelsk «QUARTER-FINAL», «Humphries»,
+                «van Veen») ble begge kuttet til uleselige forkortelser.
+                Flagget alene holder raden knyttet til riktig spiller (laget
+                står uansett rett over i «Mitt lag»); motstanderens navn får nå
+                all plassen den trenger. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Flag iso2={iso2For(pick.player_name)} size={18} />
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                {players.stages[next.stage as Stage]}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto', minWidth: 0 }}>
                 {next.opponent && !next.isFiller ? (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                    <Flag iso2={iso2For(next.opponent)} size={16} />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(next.opponent)}</span>
-                  </span>
+                  <>
+                    <Flag iso2={iso2For(next.opponent)} size={18} />
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(next.opponent)}</span>
+                  </>
                 ) : (
                   <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
                     {next.isFiller ? common.qualifiedFillerLabel : deltaker.playerDetailPanel.notDecided}
