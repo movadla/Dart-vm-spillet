@@ -33,7 +33,6 @@ export const liga = {
     newLeagueViewCta: 'View league →',
     newLeagueCreatedCta: 'Created · View league for code →',
     codeLabel: 'Code:',
-    noLeaguesYet: 'Play against friends: start a league and share the code, or join one you have a code for.',
     wholeLeaderboard: 'Full leaderboard',
     joinBtn: 'Join a league',
     createBtn: 'Start a league',

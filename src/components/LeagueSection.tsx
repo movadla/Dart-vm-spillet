@@ -222,11 +222,6 @@ export default function LeagueSection({ participantId, showHeader = true, showIn
             )}
           </div>
         ))}
-        {!loading && otherLeagues.length === 0 && !newLeague && (
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, padding: '2px 2px 6px' }}>
-            {dict.liga.section.noLeaguesYet}
-          </div>
-        )}
         {overallRank !== undefined && (
           <Link href="/leaderboard" className="lb-card" style={{ ...CARD, border: '1px solid rgba(251,191,36,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 12px 11px 14px', textDecoration: 'none', gap: 10, minWidth: 0 }}>
             <span style={{ minWidth: 0 }}>

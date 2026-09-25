@@ -24,7 +24,6 @@ export interface LigaDict {
     newLeagueViewCta: string
     newLeagueCreatedCta: string
     codeLabel: string
-    noLeaguesYet: string
     wholeLeaderboard: string
     joinBtn: string
     createBtn: string
@@ -68,7 +67,6 @@ export const liga: LigaDict = {
     newLeagueViewCta: 'Se ligaen →',
     newLeagueCreatedCta: 'Opprettet · Se ligaen for kode →',
     codeLabel: 'Kode:',
-    noLeaguesYet: 'Spill mot venner: lag en liga og del koden, eller bli med i en du har fått kode til.',
     wholeLeaderboard: 'Hele leaderboardet',
     joinBtn: 'Bli med i liga',
     createBtn: 'Opprett liga',
