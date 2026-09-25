@@ -1,5 +1,7 @@
 'use client'
 
+import { useLocale } from '@/lib/i18n/useLocale'
+
 // Kompakt trekningsvisning i klassisk dart-brakett-stil: rader med spillernavn og
 // seed-nummer i parentes, koblet med en strek inn til neste rundes rute — samme
 // mønster som PDC selv bruker på sine trekningsgrafikker.
@@ -99,6 +101,7 @@ export function DrawBracket({
       oransje, uavhengig av hvilken pott den ble vist for. */
   color?: string
 }) {
+  const { dict } = useLocale()
   const connectorColor = color
 
   const col1 = (
@@ -110,8 +113,8 @@ export function DrawBracket({
 
   const col2 = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 6 : 10 }}>
-      <WinnerSlot label="Vinner kamp 1" compact={compact} color={color} />
-      <WinnerSlot label="Vinner kamp 2" compact={compact} color={color} />
+      <WinnerSlot label={dict.vmInfo.drawTab.winnerMatch1} compact={compact} color={color} />
+      <WinnerSlot label={dict.vmInfo.drawTab.winnerMatch2} compact={compact} color={color} />
     </div>
   )
 

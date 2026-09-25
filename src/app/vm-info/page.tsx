@@ -9,23 +9,17 @@ import { POTS, getIso2, getPickablePlayers, type Player } from '@/data/pots'
 import { POT_COLORS } from '@/config/potColors'
 import { formatOdds } from '@/lib/format'
 import Flag from '@/components/Flag'
-import { STAGE_ORDER, STAGE_LABELS, SCORING, CHAMPION_LABEL } from '@/config/scoring'
+import { STAGE_ORDER, SCORING } from '@/config/scoring'
 import type { MatchResult } from '@/lib/scoring'
 import { getFirstMatchInfo, getBracketSection, getSeedLabel, isFillerName, R1_MATCHES } from '@/lib/bracketProjection'
 import { DrawBracket, PairBox } from '@/components/DrawBracket'
 import { KICKOFF } from '@/config/tournament'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
-
-// Plassholdere i eksempel-trekningen («Kvalifisert spiller 12») vises kort som «Kvalifisert».
-const displayName = (n: string) => (isFillerName(n) ? 'Kvalifisert' : n)
+import { useLocale } from '@/lib/i18n/useLocale'
+import { translateNationality, translatePotName } from '@/lib/i18n/translatePlayer'
+import LocaleSwitch from '@/components/LocaleSwitch'
 
 type Tab = 'spillere' | 'kamper' | 'trekning' | 'regler'
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'spillere', label: 'Spillere' },
-  { id: 'kamper',   label: 'Kamper'   },
-  { id: 'trekning', label: 'Trekning' },
-  { id: 'regler',   label: 'Regler'   },
-]
 
 const CARD: React.CSSProperties = {
   background: CARD_GRADIENT,
@@ -51,25 +45,35 @@ const PHOTO_CREDITS = Object.entries(PLAYER_PHOTOS)
   .sort((a, b) => a.name.localeCompare(b.name, 'nb'))
 
 function PlayerRow({ player, last, muted = false }: { player: Player; last: boolean; muted?: boolean }) {
+  const { locale, dict } = useLocale()
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 40px 44px', alignItems: 'center', gap: 10, padding: '9px 16px', borderBottom: last ? 'none' : '1px solid rgba(255,255,255,0.05)', opacity: muted ? 0.7 : 1 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
         <Flag iso2={player.iso2} size={20} />
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.9)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>{player.nationality}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>{translateNationality(dict.players, player.nationality)}</div>
         </div>
       </div>
       <span style={{ fontSize: 11, fontWeight: 700, color: player.seedNumber != null ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.06)', borderRadius: 6, padding: '2px 6px', whiteSpace: 'nowrap' }}>
-        {player.seedNumber != null ? `Seed ${player.seedNumber}` : 'Useedet'}
+        {player.seedNumber != null ? dict.vmInfo.playersTab.seedLabel(player.seedNumber) : dict.vmInfo.playersTab.unseeded}
       </span>
       <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>#{player.pdcRanking}</span>
-      <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color: '#f59e0b', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{formatOdds(player.odds)}</span>
+      <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color: '#f59e0b', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{formatOdds(player.odds, locale)}</span>
     </div>
   )
 }
 
 export default function VmInfoPage() {
+  const { locale, dict } = useLocale()
+  const TABS: { id: Tab; label: string }[] = [
+    { id: 'spillere', label: dict.vmInfo.tabs.players },
+    { id: 'kamper', label: dict.vmInfo.tabs.matches },
+    { id: 'trekning', label: dict.vmInfo.tabs.draw },
+    { id: 'regler', label: dict.vmInfo.tabs.rules },
+  ]
+  const displayName = (n: string) => (isFillerName(n) ? dict.common.qualifiedFillerLabel : n)
+
   // Etter kickoff: Kamper som standard. Før: Regler (forklarer spillet).
   const [activeTab, setActiveTab] = useState<Tab>(() => (KICKOFF <= new Date() ? 'kamper' : 'regler'))
   const [participantId, setParticipantId] = useState<string | null>(null)
@@ -81,7 +85,7 @@ export default function VmInfoPage() {
   // Påmelding stenger ved kickoff — CTA-lenker peker til Min side i stedet for stengt /tipp.
   const isLive = KICKOFF <= new Date()
   const ctaHref = participantId ? `/deltaker/${participantId}` : isLive ? '/finn' : '/tipp'
-  const ctaLabel = participantId ? 'Din side →' : isLive ? 'Min side →' : 'Velg spillere →'
+  const ctaLabel = participantId ? dict.vmInfo.ctaLabel.yourPage : isLive ? dict.vmInfo.ctaLabel.myPage : dict.vmInfo.ctaLabel.pickPlayers
 
   // localStorage finnes ikke under SSR — sjekkes med vilje etter mount.
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -152,11 +156,12 @@ export default function VmInfoPage() {
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, margin: '6px 0 14px' }}>
         <SmartBackButton />
-        <h1 style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1, margin: 0, letterSpacing: '0.02em', color: 'rgba(255,255,255,0.85)' }}>VM-guide</h1>
+        <h1 style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1, margin: 0, letterSpacing: '0.02em', color: 'rgba(255,255,255,0.85)' }}>{dict.vmInfo.title}</h1>
+        <LocaleSwitch />
       </div>
 
       {/* Tabs */}
-      <div role="tablist" aria-label="Innhold" style={{ display: 'flex', gap: 4, marginBottom: 16, padding: '4px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }}>
+      <div role="tablist" aria-label={dict.vmInfo.tabsAriaLabel} style={{ display: 'flex', gap: 4, marginBottom: 16, padding: '4px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }}>
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -184,24 +189,25 @@ export default function VmInfoPage() {
       {activeTab === 'spillere' && (
         <div role="tabpanel" id="panel-spillere" aria-labelledby="tab-spillere" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 40px 44px', gap: 10, padding: '0 16px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>
-            <span>Spiller</span><span>Seed</span><span style={{ textAlign: 'right' }}>Rank</span><span style={{ textAlign: 'right' }}>Odds</span>
+            <span>{dict.vmInfo.playersTab.columnHeaders.player}</span><span>{dict.vmInfo.playersTab.columnHeaders.seed}</span><span style={{ textAlign: 'right' }}>{dict.vmInfo.playersTab.columnHeaders.rank}</span><span style={{ textAlign: 'right' }}>{dict.vmInfo.playersTab.columnHeaders.odds}</span>
           </div>
           {POTS.map((pot) => {
             const color = POT_COLORS[(pot.potNumber - 1) % POT_COLORS.length]
             const pickable = getPickablePlayers(pot)
             const rest = pot.players.filter((p) => !pickable.includes(p))
+            const potName = translatePotName(dict.players, pot.potNumber, pot.name)
             return (
               <div key={pot.potNumber} style={{ borderRadius: 14, overflow: 'hidden', background: '#111', border: `1px solid ${color}30` }}>
                 <div style={{ background: color, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)' }}>
                   <span style={{ fontFamily: SPORT, fontSize: 32, fontWeight: 900, color: 'rgba(0,0,0,0.4)', lineHeight: 1 }}>{pot.potNumber}</span>
-                  <div style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(0,0,0,0.65)', textTransform: 'uppercase', lineHeight: 1 }}>{pot.name.replace(/^[^\p{L}]+/u, '')}</div>
-                  <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'rgba(0,0,0,0.6)', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{pickable.length} valgbare</span>
+                  <div style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(0,0,0,0.65)', textTransform: 'uppercase', lineHeight: 1 }}>{potName.replace(/^[^\p{L}]+/u, '')}</div>
+                  <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'rgba(0,0,0,0.6)', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{dict.vmInfo.playersTab.pickableCount(pickable.length)}</span>
                 </div>
                 {pickable.map((player, i) => <PlayerRow key={player.name} player={player} last={i === pickable.length - 1 && rest.length === 0} />)}
                 {rest.length > 0 && (
                   <details>
                     <summary style={{ listStyle: 'none', cursor: 'pointer', padding: '10px 16px', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.6)', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>+{rest.length} andre i feltet (ikke valgbare)</span><span aria-hidden>▾</span>
+                      <span>{dict.vmInfo.playersTab.others(rest.length)}</span><span aria-hidden>▾</span>
                     </summary>
                     {rest.map((player, i) => <PlayerRow key={player.name} player={player} last={i === rest.length - 1} muted />)}
                   </details>
@@ -217,7 +223,7 @@ export default function VmInfoPage() {
         <div role="tabpanel" id="panel-kamper" aria-labelledby="tab-kamper">
           {matches.length === 0 && (
             <div style={{ ...CARD, textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 16 }}>
-              Ingen kamper registrert ennå — sluttspilltreet fylles ut etter hvert som resultater legges inn.
+              {dict.vmInfo.matchesTab.empty}
             </div>
           )}
 
@@ -227,7 +233,7 @@ export default function VmInfoPage() {
               {bracketColumns.map(({ stage, rows }) => (
                 <div key={stage} style={{ width: 148, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', textAlign: 'center', padding: '0 2px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 10 }}>
-                    {STAGE_LABELS[stage]}
+                    {dict.players.stages[stage]}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, justifyContent: 'center' }}>
                     {rows.length > 0 ? (
@@ -260,7 +266,7 @@ export default function VmInfoPage() {
                       })
                     ) : (
                       <div style={{ border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 10, padding: '14px 6px', textAlign: 'center', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>
-                        Ikke spilt
+                        {dict.vmInfo.matchesTab.notPlayed}
                       </div>
                     )}
                   </div>
@@ -270,7 +276,7 @@ export default function VmInfoPage() {
               {/* VM-vinner */}
               <div style={{ width: 148, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#f59e0b', textAlign: 'center', padding: '0 2px 8px', borderBottom: '1px solid rgba(245,158,11,0.25)', marginBottom: 10 }}>
-                  {CHAMPION_LABEL}
+                  {dict.players.champion}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center' }}>
                   {champion ? (
@@ -283,7 +289,7 @@ export default function VmInfoPage() {
                     </div>
                   ) : (
                     <div style={{ border: '1px dashed rgba(245,158,11,0.2)', borderRadius: 10, padding: '14px 6px', textAlign: 'center', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(245,158,11,0.6)' }}>
-                      Ikke avgjort
+                      {dict.vmInfo.matchesTab.notDecided}
                     </div>
                   )}
                 </div>
@@ -298,21 +304,19 @@ export default function VmInfoPage() {
       {activeTab === 'trekning' && (
         <div role="tabpanel" id="panel-trekning" aria-labelledby="tab-trekning" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ ...CARD, textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 1.5 }}>
-            Dette er en <strong style={{ color: '#fff' }}>eksempel-trekning</strong> — PDC har ikke publisert den faktiske
-            trekningen ennå (kommer normalt medio november). Oppsettet under viser hvordan braketten kunne sett ut,
-            og oppdateres når det ekte oppsettet er kjent.
+            {dict.vmInfo.drawTab.disclaimer.before}<strong style={{ color: '#fff' }}>{dict.vmInfo.drawTab.disclaimer.example}</strong>{dict.vmInfo.drawTab.disclaimer.after}
           </div>
 
           <div style={CARD}>
-            <div style={LABEL}>Velg en spiller</div>
+            <div style={LABEL}>{dict.vmInfo.drawTab.selectPlayer}</div>
             <select
               value={drawPlayer}
               onChange={(e) => setDrawPlayer(e.target.value)}
               style={{ width: '100%', padding: '11px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, color: '#fff', fontSize: 14 }}
             >
-              <option value="">— Velg spiller —</option>
+              <option value="">{dict.vmInfo.drawTab.selectPlaceholder}</option>
               {POTS.map((pot) => (
-                <optgroup key={pot.potNumber} label={pot.name}>
+                <optgroup key={pot.potNumber} label={translatePotName(dict.players, pot.potNumber, pot.name)}>
                   {pot.players.map((p) => (
                     <option key={p.name} value={p.name}>{p.name}</option>
                   ))}
@@ -337,15 +341,15 @@ export default function VmInfoPage() {
               <>
                 <div style={CARD}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px', marginBottom: 8 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>1. runde</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>2. runde</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{dict.vmInfo.drawTab.round1}</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{dict.vmInfo.drawTab.round2}</span>
                   </div>
                   <DrawBracket pairA={pairA} pairB={pairB} />
                 </div>
 
                 {section.length > 0 && (
                   <div style={CARD}>
-                    <div style={LABEL}>Andre seedede spillere i samme del av braketten</div>
+                    <div style={LABEL}>{dict.vmInfo.drawTab.otherSeeded}</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {section.map((name) => (
                         <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
@@ -355,7 +359,7 @@ export default function VmInfoPage() {
                       ))}
                     </div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 10 }}>
-                      Dette er spillere du potensielt kan møte senere i turneringen dersom begge går langt.
+                      {dict.vmInfo.drawTab.otherSeededHint}
                     </div>
                   </div>
                 )}
@@ -367,16 +371,16 @@ export default function VmInfoPage() {
             onClick={() => setShowFullBracket((s) => !s)}
             style={{ padding: '12px', background: showFullBracket ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, color: '#fff', fontSize: 13, fontWeight: 700, letterSpacing: '0.03em', cursor: 'pointer' }}
           >
-            {showFullBracket ? 'Skjul hele bracketen' : 'Vis hele bracketen →'}
+            {showFullBracket ? dict.vmInfo.drawTab.hideFullBracket : dict.vmInfo.drawTab.showFullBracket}
           </button>
 
           {showFullBracket && (
             <div style={CARD}>
-              <div style={LABEL}>Runde 1 — hele feltet ({R1_MATCHES.length} kamper, 128 spillere)</div>
+              <div style={LABEL}>{dict.vmInfo.drawTab.fullBracketLabel(R1_MATCHES.length, 128)}</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
                 {R1_MATCHES.map(([a, b], i) => (
                   <div key={i}>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>Kamp {i + 1}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>{dict.vmInfo.drawTab.matchLabel(i + 1)}</div>
                     <PairBox
                       a={{ name: displayName(a), seedLabel: getSeedLabel(a), faded: isFillerName(a), highlighted: a === drawPlayer }}
                       b={{ name: displayName(b), seedLabel: getSeedLabel(b), faded: isFillerName(b), highlighted: b === drawPlayer }}
@@ -395,13 +399,8 @@ export default function VmInfoPage() {
         <div role="tabpanel" id="panel-regler" aria-labelledby="tab-regler" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
           <div ref={rulesRef} style={CARD}>
-            <div style={LABEL}>Kort fortalt</div>
-            {([
-              'Du velger én spiller fra hver av 6 potter',
-              'Pottene er basert på PDC-ranking og vinnerodds',
-              'Valgene kan endres frem til VM starter',
-              'Du får poeng for hvert sett spilleren din vinner og for hver kampseier — pluss bonus om han vinner hele turneringen',
-            ] as string[]).map((t, i) => (
+            <div style={LABEL}>{dict.vmInfo.rulesTab.inShort}</div>
+            {dict.vmInfo.rulesTab.bullets.map((t, i) => (
               <div key={t} style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', padding: '9px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
                 {t}
               </div>
@@ -409,26 +408,26 @@ export default function VmInfoPage() {
           </div>
 
           <div style={CARD}>
-            <div style={LABEL}>Poengoversikt</div>
+            <div style={LABEL}>{dict.vmInfo.rulesTab.pointsOverview}</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0' }}>
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>Per vunnet sett</span>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.vmInfo.rulesTab.perSet}</span>
               <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.perSetWon}p</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>Per kampseier (avansement)</span>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.vmInfo.rulesTab.perAdvancement}</span>
               <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.perAdvancement}p</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>For å vinne hele turneringen</span>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.vmInfo.rulesTab.forWinning}</span>
               <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.tournamentWinner}p</span>
             </div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 10, lineHeight: 1.5 }}>
-              Alt legges sammen fortløpende gjennom turneringen, og summen ganges med pott-multiplikatoren.
+              {dict.vmInfo.rulesTab.pointsNote}
             </div>
           </div>
 
           <div style={CARD}>
-            <div style={LABEL}>Multiplikator</div>
+            <div style={LABEL}>{dict.vmInfo.rulesTab.multiplier}</div>
             {POTS
               .filter((pot) => (SCORING.underdogMultiplier[pot.potNumber] ?? 1) > 1)
               .map((pot, i) => {
@@ -436,13 +435,13 @@ export default function VmInfoPage() {
                 const col = mult >= 3 ? '#ef4444' : '#f59e0b'
                 return (
                   <div key={pot.potNumber} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{pot.name}</span>
+                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{translatePotName(dict.players, pot.potNumber, pot.name)}</span>
                     <span style={{ fontSize: 20, color: col, fontWeight: 900, fontFamily: SPORT }}>×{mult}</span>
                   </div>
                 )
               })}
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 10, lineHeight: 1.5 }}>
-              Poeng for spillere fra disse pottene ganges med faktoren — outsidere gir størst gevinst.
+              {dict.vmInfo.rulesTab.multiplierNote}
             </div>
           </div>
 
@@ -452,11 +451,11 @@ export default function VmInfoPage() {
 
           <details style={CARD}>
             <summary style={{ ...LABEL, marginBottom: 0, cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>Fotokreditering</span>
+              <span>{dict.vmInfo.rulesTab.photoCredit.summary}</span>
               <span aria-hidden style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>▾</span>
             </summary>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, margin: '10px 0 8px' }}>
-              Spillerfotoene er hentet fra Wikimedia Commons under Creative Commons-lisenser og beskåret/frilagt for kortene. Fotograf og lisens per bilde:
+              {dict.vmInfo.rulesTab.photoCredit.intro}
             </p>
             <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
               {PHOTO_CREDITS.map((c) => (

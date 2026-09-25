@@ -40,6 +40,7 @@ export const common = {
   },
   yourTeam: 'Your team',
   skipToFinishedTeam: 'Skip ahead to the finished team',
+  qualifiedFillerLabel: 'Qualifier',
   rankList: {
     you: 'you',
     rankUp: (n) => `up ${n}`,

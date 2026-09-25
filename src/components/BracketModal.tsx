@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
-import { STAGE_LABELS } from '@/config/scoring'
 import { getDrawSections, getPathToFinal, getSeedLabel, isFillerName } from '@/lib/bracketProjection'
 import { SPORT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 /**
  * Pop-up med spillerens potensielle vei til finalen og hele runde 1-
@@ -12,6 +12,7 @@ import { SPORT } from '@/config/theme'
  * Lukkes med ✕, Escape eller klikk utenfor.
  */
 export default function BracketModal({ playerName, color, onClose }: { playerName: string; color: string; onClose: () => void }) {
+  const { dict } = useLocale()
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); onClose() } }
     window.addEventListener('keydown', onKey, true)
@@ -23,7 +24,7 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
   const ownIndex = sections.findIndex((s) => s.matches.some(([a, b]) => a === playerName || b === playerName))
   const ordered = ownIndex >= 0 ? [sections[ownIndex], ...sections.filter((_, i) => i !== ownIndex)] : sections
 
-  const displayName = (n: string) => (isFillerName(n) ? 'Kvalifisert' : n)
+  const displayName = (n: string) => (isFillerName(n) ? dict.common.qualifiedFillerLabel : n)
 
   const Match = ({ a, b }: { a: string; b: string }) => {
     const mine = a === playerName || b === playerName
@@ -35,7 +36,7 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 6, background: mine ? `${color}26` : 'rgba(255,255,255,0.03)', boxShadow: mine ? `inset 0 0 0 1px ${color}66` : 'none' }}>
         <Name n={a} />
-        <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>vs</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>{dict.vmInfo.bracketModal.vs}</span>
         <Name n={b} />
       </div>
     )
@@ -43,7 +44,7 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
 
   const sectionTitle = (sec: (typeof sections)[number]) => (
     <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,0.8)' }}>
-      Seksjon {sec.index} <span style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 700 }}>· {sec.topSeed} {getSeedLabel(sec.topSeed) ?? ''}</span>
+      {dict.vmInfo.bracketModal.section(sec.index)} <span style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 700 }}>· {sec.topSeed} {getSeedLabel(sec.topSeed) ?? ''}</span>
     </span>
   )
 
@@ -55,7 +56,7 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Trekning for ${playerName}`}
+        aria-label={dict.vmInfo.bracketModal.dialogAriaLabel(playerName)}
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: 480, maxHeight: '90dvh', display: 'flex', flexDirection: 'column',
@@ -67,15 +68,15 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>Trekningen</div>
+            <div style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>{dict.vmInfo.bracketModal.title}</div>
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 3 }}>
-              Eksempel-trekning – byttes ut når PDC publiserer den ekte (medio november)
+              {dict.vmInfo.bracketModal.subtitle}
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Lukk"
+            aria-label={dict.vmInfo.bracketModal.close}
             style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15, cursor: 'pointer', flexShrink: 0 }}
           >
             ✕
@@ -85,14 +86,14 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
         <div style={{ overflowY: 'auto', padding: '12px 16px 20px' }}>
           {/* Vei til finalen — alle runder, topp 16 uthevet */}
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>
-            Potensiell vei til finalen for {playerName}
+            {dict.vmInfo.bracketModal.pathToFinal(playerName)}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 18 }}>
             {path.map((s) => {
               const top16 = s.pdcRanking <= 16
               return (
                 <div key={s.stage} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 8, background: top16 ? `${color}1f` : 'rgba(255,255,255,0.03)', border: `1px solid ${top16 ? `${color}55` : 'rgba(255,255,255,0.06)'}` }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', width: 88, flexShrink: 0 }}>{STAGE_LABELS[s.stage]}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', width: 88, flexShrink: 0 }}>{dict.players.stages[s.stage]}</span>
                   <span style={{ flex: 1, fontSize: 13, fontWeight: top16 ? 800 : 500, color: top16 ? '#fff' : 'rgba(255,255,255,0.65)' }}>{s.opponent}</span>
                   <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: top16 ? '#f3d576' : 'rgba(255,255,255,0.4)', fontVariantNumeric: 'tabular-nums' }}>#{s.pdcRanking}</span>
                 </div>
@@ -101,7 +102,7 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
           </div>
 
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>
-            Runde 1 – din seksjon
+            {dict.vmInfo.bracketModal.round1Section}
           </div>
           {ordered.map((sec, i) =>
             i === 0 ? (

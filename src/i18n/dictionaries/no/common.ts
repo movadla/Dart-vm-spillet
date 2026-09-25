@@ -38,6 +38,7 @@ export interface CommonDict {
   }
   yourTeam: string
   skipToFinishedTeam: string
+  qualifiedFillerLabel: string
   rankList: {
     you: string
     rankUp: (n: number) => string
@@ -89,6 +90,7 @@ export const common: CommonDict = {
   },
   yourTeam: 'Laget ditt',
   skipToFinishedTeam: 'Spol fram til ferdig lag',
+  qualifiedFillerLabel: 'Kvalifisert',
   rankList: {
     you: 'deg',
     rankUp: (n) => `opp ${n}`,
