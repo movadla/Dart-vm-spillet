@@ -69,31 +69,8 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
 
   return (
     <>
-      {/* Brikkene */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${sorted.length}, minmax(0, 1fr))`, gap: 6, marginBottom: 10 }}>
-        {sorted.map((pick) => {
-          const player = findPlayer(pick.player_name)
-          const i = (pick.pot_number - 1) % POT_COLORS.length
-          const eliminated = vmStarted && isPlayerEliminated(pick.player_name, matchResults)
-          const champion = vmStarted && isPlayerChampion(pick.player_name, matchResults)
-          const { total } = calcPlayerPoints(pick, matchResults)
-          return (
-            <button
-              key={pick.pot_number}
-              type="button"
-              onClick={() => player && setSheetPlayer(player)}
-              aria-label={`Spillerinfo: ${pick.player_name}`}
-              className="btn-hover"
-              style={{ background: 'none', border: 'none', padding: 0, cursor: player ? 'pointer' : 'default' }}
-            >
-              {/* Slått ut: bare brikken dempes — poengene er reelle og står klart */}
-              <TeamTile player={player} potNumber={pick.pot_number} color={POT_COLORS[i]} colorDark={POT_COLORS_DARK[i]} points={vmStarted ? total : undefined} glow={champion} dimmed={eliminated} />
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Radene */}
+      {/* Radene — spillerfoto ved siden av navnet i stedet for en tallmerket
+          brikke-rekke, så laget leses som én vertikal liste. */}
       <div style={{ background: CARD_GRADIENT, borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', boxShadow: CARD_SHADOW }}>
         {sorted.map((pick, idx) => {
           const player = findPlayer(pick.player_name)
@@ -104,6 +81,7 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
           const { setPts, advPts, winnerBonus, multiplier, total } = calcPlayerPoints(pick, matchResults)
           const wins = advPts / 2
           const eliminated = vmStarted && isPlayerEliminated(pick.player_name, matchResults)
+          const champion = vmStarted && isPlayerChampion(pick.player_name, matchResults)
           const status = vmStarted ? statusFor(pick.player_name, matchResults) : null
           const myMatches = matchResults
             .filter((m) => m.player1 === pick.player_name || m.player2 === pick.player_name)
@@ -117,15 +95,15 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
                 onClick={() => (vmStarted ? setOpenRow(isOpen ? null : pick.player_name) : player && setSheetPlayer(player))}
                 aria-expanded={vmStarted ? isOpen : undefined}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left',
-                  padding: '10px 14px 10px 0', background: 'none', border: 'none', color: '#fff', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left',
+                  padding: '9px 14px', background: 'none', border: 'none', color: '#fff', cursor: 'pointer',
                   borderBottom: !isLast || isOpen ? '1px solid rgba(255,255,255,0.06)' : 'none',
                 }}
               >
-                {/* Pott-stripe + nummer */}
-                <span style={{ width: 34, alignSelf: 'stretch', display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: `3px solid ${color}`, fontFamily: SPORT, fontSize: 14, fontWeight: 900, color, flexShrink: 0 }}>
-                  {pick.pot_number}
-                </span>
+                {/* Foto på pott-farget bakgrunn — slått ut dempes fotoet, poengene til høyre står klart */}
+                <div style={{ width: 42, flexShrink: 0 }}>
+                  <TeamTile player={player} potNumber={pick.pot_number} color={color} colorDark={POT_COLORS_DARK[i]} label={false} glow={champion} dimmed={eliminated} />
+                </div>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, opacity: eliminated ? 0.5 : 1 }}>
                   <Flag iso2={player?.iso2 ?? getIso2(pick.player_name)} size={22} />
                   <span style={{ flex: 1, minWidth: 0 }}>

@@ -223,7 +223,6 @@ export default function LeagueSection({ participantId, showHeader = true, showIn
           <Link href="/leaderboard" className="lb-card" style={{ ...CARD, border: '1px solid rgba(251,191,36,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 12px 11px 14px', textDecoration: 'none', gap: 10, minWidth: 0 }}>
             <span style={{ minWidth: 0 }}>
               <span style={{ display: 'block', fontSize: 14, fontWeight: 700, color: '#fff' }}>Hele leaderboardet</span>
-              {overallTotal != null && <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 2 }}>{overallTotal} {overallTotal === 1 ? 'deltaker' : 'deltakere'}</span>}
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
               {started && overallTotal != null && <RankChip rank={overallRank} total={overallTotal} />}
