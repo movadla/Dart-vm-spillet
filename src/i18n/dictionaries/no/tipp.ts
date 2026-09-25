@@ -15,6 +15,7 @@ export interface TippDict {
     intro: string
     tokenErrorSuffix: string
     emailLabel: string
+    emailPlaceholder: string
     submitIdle: string
     submitSending: string
     sent: { title: string; checkInboxBefore: string; checkInboxAfter: string; validFor: string }
@@ -141,6 +142,7 @@ export const tipp: TippDict = {
     intro: 'Vi sender en innloggingslenke til e-posten din. Klikk lenken for å endre valgene dine.',
     tokenErrorSuffix: '— Send en ny lenke under.',
     emailLabel: 'Din e-postadresse',
+    emailPlaceholder: 'din@epost.no',
     submitIdle: 'Send innloggingslenke →',
     submitSending: 'Sender…',
     sent: {

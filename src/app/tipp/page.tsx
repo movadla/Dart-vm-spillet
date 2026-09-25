@@ -242,7 +242,7 @@ const inputStyle: React.CSSProperties = {
                 type="email"
                 value={linkEmail}
                 onChange={e => setLinkEmail(e.target.value)}
-                placeholder="din@epost.no"
+                placeholder={dict.tipp.loginLink.emailPlaceholder}
                 autoComplete="email"
                 style={{ width: '100%', padding: '13px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', fontSize: 16, boxSizing: 'border-box' as const }}
               />

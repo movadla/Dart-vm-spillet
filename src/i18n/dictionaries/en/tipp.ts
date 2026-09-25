@@ -17,6 +17,7 @@ export const tipp = {
     intro: 'We’ll send a sign-in link to your email. Click the link to change your picks.',
     tokenErrorSuffix: '— Send a new link below.',
     emailLabel: 'Your email address',
+    emailPlaceholder: 'you@example.com',
     submitIdle: 'Send sign-in link →',
     submitSending: 'Sending…',
     sent: {
