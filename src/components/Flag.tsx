@@ -22,7 +22,15 @@ export default function Flag({ iso2, size = 20 }: { iso2: string; size?: number 
       height={h}
       alt=""
       aria-hidden="true"
-      style={{ display: 'inline-block', verticalAlign: 'middle', borderRadius: 2, flexShrink: 0, width: size, height: h }}
+      style={{
+        display: 'inline-block', verticalAlign: 'middle', borderRadius: 2, flexShrink: 0, width: size, height: h,
+        // flagcdn leverer hvert flagg i landets EGET forhold (mange 3:2, noen 4:3,
+        // noen andre) — en fast 4:3-boks (over) holder alle flagg samme høyde i
+        // lister/rader, men uten object-fit ville avvikende flagg (f.eks.
+        // Nederland, England) blitt synlig klemt/strukket. cover beskjærer i
+        // stedet for å forvrenge.
+        objectFit: 'cover', objectPosition: 'center',
+      }}
     />
   )
 }

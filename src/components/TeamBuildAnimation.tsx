@@ -200,7 +200,11 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); skip() } }}
       style={{ cursor: allowSkip && started && !finished ? 'pointer' : 'default', outline: 'none' }}
     >
-    <div ref={rootRef} className="card-mini" inert>
+    {/* aria-hidden i tillegg til inert: uten den leser noen skjermlesere/
+        talestyring likevel opp tekstinnholdet her som en del av wrapperens
+        tilgjengelige navn (Lighthouse: label-content-name-mismatch), på tvers
+        av den eksplisitte aria-label-en over. */}
+    <div ref={rootRef} className="card-mini" inert aria-hidden="true">
       {/* Laget — 6 plasser som fylles etter hvert som spillere landes */}
       <div
         style={{

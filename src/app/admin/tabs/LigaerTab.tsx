@@ -76,7 +76,7 @@ export function LigaerTab({ headers }: { headers: Record<string, string> }) {
       {deleteError && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 18px', background: 'rgba(220,38,38,0.1)', borderBottom: '1px solid rgba(220,38,38,0.2)', color: '#ef4444', fontSize: 13 }}>
           <span>{deleteError}</span>
-          <button onClick={() => setDeleteError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>✕</button>
+          <button onClick={() => setDeleteError(null)} aria-label="Lukk feilmelding" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>✕</button>
         </div>
       )}
       {loading ? (
