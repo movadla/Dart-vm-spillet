@@ -222,9 +222,9 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
                   )}
                   {!next.confirmed && <span style={{ marginLeft: 'auto' }}><ExampleTag /></span>}
                 </div>
-                {nextSchedule && (
+                {nextSchedule?.dateKnown && (
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
-                    {nextSchedule.dateKnown ? `${nextSchedule.dateLabel} · ${nextSchedule.timeLabel}` : nextSchedule.dateLabel}
+                    {nextSchedule.dateLabel} · {nextSchedule.timeLabel}
                   </div>
                 )}
               </>

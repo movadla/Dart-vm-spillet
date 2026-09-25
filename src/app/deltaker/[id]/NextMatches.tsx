@@ -74,9 +74,11 @@ export default async function NextMatches({ picks, matchResults }: { picks: Pick
                 )}
               </div>
             </div>
-            <div style={{ textAlign: 'right', fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>
-              {schedule.dateKnown ? `${schedule.dateLabel} · ${schedule.timeLabel}` : schedule.dateLabel}
-            </div>
+            {schedule.dateKnown && (
+              <div style={{ textAlign: 'right', fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>
+                {schedule.dateLabel} · {schedule.timeLabel}
+              </div>
+            )}
           </div>
         )
       })}
