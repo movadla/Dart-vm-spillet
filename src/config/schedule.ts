@@ -1,4 +1,5 @@
 import type { Stage } from './scoring'
+import type { Locale } from './i18n'
 
 // Kampplan per runde. PDC har IKKE publisert den offisielle kampplanen ennå
 // (ventes medio november sammen med selve trekningen — se README →
@@ -35,13 +36,15 @@ export interface ScheduleLabel {
   timeKnown: boolean
 }
 
-const NOT_SET = 'Ikke satt'
+const NOT_SET: Record<Locale, string> = { no: 'Ikke satt', en: 'Not set' }
+const INTL_LOCALE: Record<Locale, string> = { no: 'nb-NO', en: 'en-US' }
 
 /** Dato/klokkeslett-tekst for en runde, med riktig «ikke satt»-fallback i alle tre tilstander. */
-export function getScheduleLabel(stage: Stage): ScheduleLabel {
+export function getScheduleLabel(stage: Stage, locale: Locale = 'no'): ScheduleLabel {
   const s = STAGE_SCHEDULE[stage]
-  if (!s.date) return { dateLabel: NOT_SET, timeLabel: NOT_SET, dateKnown: false, timeKnown: false }
+  const notSet = NOT_SET[locale]
+  if (!s.date) return { dateLabel: notSet, timeLabel: notSet, dateKnown: false, timeKnown: false }
   const d = new Date(`${s.date}T00:00:00Z`)
-  const dateLabel = d.toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', timeZone: 'UTC' })
-  return { dateLabel, timeLabel: s.time ?? NOT_SET, dateKnown: true, timeKnown: !!s.time }
+  const dateLabel = d.toLocaleDateString(INTL_LOCALE[locale], { day: 'numeric', month: 'long', timeZone: 'UTC' })
+  return { dateLabel, timeLabel: s.time ?? notSet, dateKnown: true, timeKnown: !!s.time }
 }
