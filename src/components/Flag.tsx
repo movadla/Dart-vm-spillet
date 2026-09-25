@@ -1,3 +1,7 @@
+'use client'
+
+import { useState } from 'react'
+
 // Rendrer landflagg som bilde fra flagcdn.com – fungerer på alle plattformer inkl. Windows
 // som ikke støtter flagg-emoji nativt.
 // Henter alltid et bilde på ca. 3× visningsstørrelsen (og skalerer ned med CSS) for at
@@ -9,7 +13,12 @@
 const SOURCE_WIDTHS = [20, 40, 80, 160, 320, 640, 1280, 2560]
 
 export default function Flag({ iso2, size = 20 }: { iso2: string; size?: number }) {
-  if (!iso2) return null
+  // Ekstern CDN vi ikke kontrollerer — et nettverksglipp, en ad-blocker eller en
+  // ugyldig/ukjent iso2-kode skal aldri vise nettleserens rå "ødelagt bilde"-ikon
+  // i en liste med ellers rene flagg. Kollapser i stedet stille til ingenting,
+  // samme fallback som når iso2 mangler helt.
+  const [failed, setFailed] = useState(false)
+  if (!iso2 || failed) return null
   const h = Math.round(size * 0.75)
   const srcW = SOURCE_WIDTHS.find((w) => w >= size * 3) ?? SOURCE_WIDTHS[SOURCE_WIDTHS.length - 1]
   return (
@@ -22,6 +31,7 @@ export default function Flag({ iso2, size = 20 }: { iso2: string; size?: number 
       height={h}
       alt=""
       aria-hidden="true"
+      onError={() => setFailed(true)}
       style={{
         display: 'inline-block', verticalAlign: 'middle', borderRadius: 2, flexShrink: 0, width: size, height: h,
         // flagcdn leverer hvert flagg i landets EGET forhold (mange 3:2, noen 4:3,
