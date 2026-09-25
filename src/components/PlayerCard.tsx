@@ -260,7 +260,13 @@ export function PlayerCard({
             src={photo.src}
             alt=""
             aria-hidden="true"
-            loading="lazy"
+            // Kortene her er alltid umiddelbart synlige (3-6 om gangen, aldri
+            // lenger nede i en scrollbar liste) — «lazy» ga ingen gevinst og
+            // kunne forsinke selve lastingen siden nettleseren må gjøre en
+            // egen vurdering før den henter bildet, spesielt når kortet settes
+            // inn via klient-JS (steg-bytte/animasjon) i stedet for å ligge i
+            // HTML-en fra start.
+            fetchPriority="high"
             decoding="async"
             style={{
               position: 'absolute',

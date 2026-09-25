@@ -67,8 +67,12 @@ export default function TeamTile({
       >
         {player ? (
           photo ? (
+            // Brikkene her er alltid umiddelbart synlige (laget ditt, aldri
+            // lenger nede i en scrollbar liste) — «lazy» ga bare en unødvendig
+            // forsinkelse siden nettleseren må gjøre en egen vurdering før den
+            // henter bildet.
             // eslint-disable-next-line @next/next/no-img-element -- statisk fil i public/
-            <img src={photo.src} alt="" loading="lazy" decoding="async" style={{ position: 'absolute', inset: '6% 4% 0', width: '92%', height: '94%', objectFit: 'contain', objectPosition: 'bottom', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.5))' }} />
+            <img src={photo.src} alt="" fetchPriority="high" decoding="async" style={{ position: 'absolute', inset: '6% 4% 0', width: '92%', height: '94%', objectFit: 'contain', objectPosition: 'bottom', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.5))' }} />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
               <Flag iso2={player.iso2} size={16} />
