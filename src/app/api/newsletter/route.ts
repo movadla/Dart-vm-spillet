@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { clientIp, isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
+import { getLocale } from '@/lib/i18n/getLocale'
+import { getDictionary } from '@/i18n/dictionaries'
 
 // Åpent endepunkt → begrenses per IP så det ikke kan brukes til å fylle
 // tabellen med søppel-adresser.
@@ -8,17 +10,18 @@ const LIMIT = 10
 const WINDOW_MS = 60 * 60 * 1000
 
 export async function POST(req: NextRequest) {
+  const { newsletter: dict } = getDictionary(await getLocale()).errors
   const { email } = await req.json()
   if (!email || typeof email !== 'string' || !email.includes('@') || email.length > 254) {
-    return NextResponse.json({ error: 'Ugyldig e-post' }, { status: 400 })
+    return NextResponse.json({ error: dict.invalidEmail }, { status: 400 })
   }
 
   let supabase: ReturnType<typeof getSupabaseAdmin>
-  try { supabase = getSupabaseAdmin() } catch { return NextResponse.json({ error: 'Databasen er ikke satt opp ennå' }, { status: 503 }) }
+  try { supabase = getSupabaseAdmin() } catch { return NextResponse.json({ error: dict.dbNotSetUp }, { status: 503 }) }
 
   const ip = clientIp(req)
   if (await isRateLimited(supabase, 'newsletter', ip, LIMIT, WINDOW_MS)) {
-    return NextResponse.json({ error: 'For mange forsøk. Prøv igjen senere.' }, { status: 429 })
+    return NextResponse.json({ error: dict.tooManyAttempts }, { status: 429 })
   }
   await recordRateLimitHit(supabase, 'newsletter', ip)
 

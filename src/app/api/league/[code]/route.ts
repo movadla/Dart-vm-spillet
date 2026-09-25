@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
+import { getLocale } from '@/lib/i18n/getLocale'
+import { getDictionary } from '@/i18n/dictionaries'
 
 import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
 
@@ -17,7 +19,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ cod
     .eq('invite_code', code.toUpperCase())
     .maybeSingle()
 
-  if (!league) return NextResponse.json({ error: 'Liga ikke funnet' }, { status: 404 })
+  if (!league) {
+    const { leagueByCode: dict } = getDictionary(await getLocale()).errors
+    return NextResponse.json({ error: dict.notFound }, { status: 404 })
+  }
 
   const { data: members } = await supabase
     .from('league_members')

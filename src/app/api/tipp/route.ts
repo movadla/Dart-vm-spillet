@@ -5,14 +5,17 @@ import { POTS } from '@/data/pots'
 import { Resend } from 'resend'
 import { buildWelcomeHtml, buildWelcomeText, iso2For } from '@/lib/email-welcome'
 import { KICKOFF } from '@/config/tournament'
+import { getLocale } from '@/lib/i18n/getLocale'
+import { getDictionary } from '@/i18n/dictionaries'
 
 const VALID_PICKS: Record<number, Set<string>> = Object.fromEntries(
   POTS.map(p => [p.potNumber, new Set(p.players.map(pl => pl.name))])
 )
 
 export async function POST(req: NextRequest) {
+  const { tipp: dict } = getDictionary(await getLocale()).errors
   if (new Date() > KICKOFF) {
-    return NextResponse.json({ error: 'Påmelding er stengt' }, { status: 403 })
+    return NextResponse.json({ error: dict.closed }, { status: 403 })
   }
 
   const supabase = getSupabaseAdmin()
@@ -21,7 +24,7 @@ export async function POST(req: NextRequest) {
   // nett, men stanser skriptet masse-registrering.
   const ip = clientIp(req)
   if (await isRateLimited(supabase, 'tipp', ip, 10, 60 * 60 * 1000)) {
-    return NextResponse.json({ error: 'For mange påmeldinger fra dette nettet. Prøv igjen om en time.' }, { status: 429 })
+    return NextResponse.json({ error: dict.tooManyAttempts }, { status: 429 })
   }
 
   try {
@@ -30,25 +33,25 @@ export async function POST(req: NextRequest) {
 
     // Validate
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
-      return NextResponse.json({ error: 'Ugyldig navn' }, { status: 400 })
+      return NextResponse.json({ error: dict.invalidName }, { status: 400 })
     }
     if (!email || typeof email !== 'string' || !email.includes('@')) {
-      return NextResponse.json({ error: 'Ugyldig e-post' }, { status: 400 })
+      return NextResponse.json({ error: dict.invalidEmail }, { status: 400 })
     }
     if (!picks || typeof picks !== 'object') {
-      return NextResponse.json({ error: 'Mangler picks' }, { status: 400 })
+      return NextResponse.json({ error: dict.missingPicks }, { status: 400 })
     }
 
     const pickEntries = Object.entries(picks as Record<string, string>)
     if (pickEntries.length !== POTS.length) {
-      return NextResponse.json({ error: `Du må velge én spiller fra alle ${POTS.length} potter` }, { status: 400 })
+      return NextResponse.json({ error: dict.mustPickAll(POTS.length) }, { status: 400 })
     }
     for (let pot = 1; pot <= POTS.length; pot++) {
       if (!picks[pot] || typeof picks[pot] !== 'string') {
-        return NextResponse.json({ error: `Mangler valg fra pot ${pot}` }, { status: 400 })
+        return NextResponse.json({ error: dict.missingPickForPot(pot) }, { status: 400 })
       }
       if (!VALID_PICKS[pot]?.has(picks[pot])) {
-        return NextResponse.json({ error: `Ugyldig spiller i pot ${pot}` }, { status: 400 })
+        return NextResponse.json({ error: dict.invalidPlayerForPot(pot) }, { status: 400 })
       }
     }
 
@@ -57,7 +60,7 @@ export async function POST(req: NextRequest) {
     const maxParticipants = parseInt(process.env.MAX_PARTICIPANTS ?? '10000')
     const { count } = await supabase.from('participants').select('*', { count: 'exact', head: true })
     if ((count ?? 0) >= maxParticipants) {
-      return NextResponse.json({ error: 'Påmeldingen er dessverre full' }, { status: 503 })
+      return NextResponse.json({ error: dict.full }, { status: 503 })
     }
 
     // Insert participant
@@ -73,9 +76,9 @@ export async function POST(req: NextRequest) {
     if (participantError || !participant) {
       console.error('Participant insert error:', participantError)
       if (participantError?.code === '23505') {
-        return NextResponse.json({ error: 'E-postadressen er allerede registrert', duplicate: true }, { status: 409 })
+        return NextResponse.json({ error: dict.duplicateEmail, duplicate: true }, { status: 409 })
       }
-      return NextResponse.json({ error: 'Kunne ikke lagre deltaker' }, { status: 500 })
+      return NextResponse.json({ error: dict.couldNotSaveParticipant }, { status: 500 })
     }
 
     // Insert picks
@@ -93,7 +96,7 @@ export async function POST(req: NextRequest) {
       console.error('Picks insert error:', picksError)
       // Clean up participant if picks failed
       await supabase.from('participants').delete().eq('id', participant.id)
-      return NextResponse.json({ error: 'Kunne ikke lagre picks' }, { status: 500 })
+      return NextResponse.json({ error: dict.couldNotSavePicks }, { status: 500 })
     }
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'
@@ -121,7 +124,7 @@ export async function POST(req: NextRequest) {
     return response
   } catch (e) {
     console.error('Tipp route error:', e)
-    return NextResponse.json({ error: 'Intern serverfeil' }, { status: 500 })
+    return NextResponse.json({ error: dict.internalError }, { status: 500 })
   }
 }
 

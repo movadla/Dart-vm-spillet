@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { KICKOFF } from '@/config/tournament'
+import { getLocale } from '@/lib/i18n/getLocale'
+import { getDictionary } from '@/i18n/dictionaries'
 
 function generateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -12,8 +14,9 @@ export async function POST(req: NextRequest) {
   // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
   // forståelig svar fra handleren, ikke crash ved import av ruten.
   const supabase = getSupabaseAdmin()
+  const { leagueCreate: dict } = getDictionary(await getLocale()).errors
   if (new Date() >= KICKOFF) {
-    return NextResponse.json({ error: 'Ligaer er låst etter at VM har startet.' }, { status: 403 })
+    return NextResponse.json({ error: dict.locked }, { status: 403 })
   }
 
   // Identitet KUN fra verifisert vm_auth-cookie — tidligere godtok endepunktet
@@ -23,14 +26,14 @@ export async function POST(req: NextRequest) {
   const { name } = await req.json()
   const participantId = (await cookies()).get('vm_auth')?.value
 
-  if (!participantId) return NextResponse.json({ error: 'Ikke innlogget — be om en ny innloggingslenke' }, { status: 401 })
+  if (!participantId) return NextResponse.json({ error: dict.notLoggedIn }, { status: 401 })
   if (!name?.trim()) {
-    return NextResponse.json({ error: 'Mangler data' }, { status: 400 })
+    return NextResponse.json({ error: dict.missingData }, { status: 400 })
   }
 
   const { data: participant } = await supabase
     .from('participants').select('id').eq('id', participantId).maybeSingle()
-  if (!participant) return NextResponse.json({ error: 'Fant ikke deltaker' }, { status: 404 })
+  if (!participant) return NextResponse.json({ error: dict.participantNotFound }, { status: 404 })
 
   // Generate unique invite code
   let inviteCode = generateCode()
@@ -47,7 +50,7 @@ export async function POST(req: NextRequest) {
     .select('id, invite_code')
     .single()
 
-  if (error || !league) return NextResponse.json({ error: 'Kunne ikke opprette liga' }, { status: 500 })
+  if (error || !league) return NextResponse.json({ error: dict.couldNotCreate }, { status: 500 })
 
   await supabase.from('league_members').insert({ league_id: league.id, participant_id: participantId })
 

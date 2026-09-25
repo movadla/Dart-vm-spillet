@@ -3,6 +3,8 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
 import { POTS } from '@/data/pots'
 import { KICKOFF } from '@/config/tournament'
+import { getLocale } from '@/lib/i18n/getLocale'
+import { getDictionary } from '@/i18n/dictionaries'
 
 // Rate-limitet per deltaker (ikke IP) siden identiteten uansett er verifisert
 // på dette tidspunktet — romslig nok for legitim omvalg-fikling, stanser
@@ -17,9 +19,10 @@ for (const pot of POTS) {
 }
 
 export async function POST(req: NextRequest) {
+  const { tippUpdate: dict } = getDictionary(await getLocale()).errors
   // VM i gang — picks er låst
   if (new Date() >= KICKOFF) {
-    return NextResponse.json({ error: 'VM er i gang — picks er låst' }, { status: 403 })
+    return NextResponse.json({ error: dict.locked }, { status: 403 })
   }
 
   // Identitet kommer KUN fra den verifiserte vm_auth-cookien (satt av
@@ -31,34 +34,34 @@ export async function POST(req: NextRequest) {
   // Se participant-edit-data/route.ts for samme, allerede riktige mønster.
   const participantId = req.cookies.get('vm_auth')?.value
   if (!participantId) {
-    return NextResponse.json({ error: 'Ikke innlogget — be om en ny innloggingslenke' }, { status: 401 })
+    return NextResponse.json({ error: dict.notLoggedIn }, { status: 401 })
   }
 
   const supabase = getSupabaseAdmin()
 
   if (await isRateLimited(supabase, 'tipp-update', participantId, UPDATE_LIMIT, UPDATE_WINDOW_MS)) {
-    return NextResponse.json({ error: 'For mange lagringer. Vent litt og prøv igjen.' }, { status: 429 })
+    return NextResponse.json({ error: dict.tooManyAttempts }, { status: 429 })
   }
   await recordRateLimitHit(supabase, 'tipp-update', participantId)
 
   const { picks } = await req.json()
 
   if (!picks || typeof picks !== 'object' || Array.isArray(picks)) {
-    return NextResponse.json({ error: 'Mangler data' }, { status: 400 })
+    return NextResponse.json({ error: dict.missingData }, { status: 400 })
   }
 
   // Valider picks: maks POTS.length, gyldige potnummer og spillernavn
   const entries = Object.entries(picks as Record<string, string>)
   if (entries.length > POTS.length) {
-    return NextResponse.json({ error: 'For mange picks' }, { status: 400 })
+    return NextResponse.json({ error: dict.tooManyPicks }, { status: 400 })
   }
   for (const [potStr, player] of entries) {
     const potNum = parseInt(potStr)
     if (!Number.isInteger(potNum) || potNum < 1 || potNum > POTS.length) {
-      return NextResponse.json({ error: `Ugyldig pot: ${potStr}` }, { status: 400 })
+      return NextResponse.json({ error: dict.invalidPot(potStr) }, { status: 400 })
     }
     if (!VALID_PLAYERS[potNum]?.has(player)) {
-      return NextResponse.json({ error: `Ugyldig spiller for pot ${potNum}: ${player}` }, { status: 400 })
+      return NextResponse.json({ error: dict.invalidPlayerForPot(potNum, player) }, { status: 400 })
     }
   }
 
@@ -70,7 +73,7 @@ export async function POST(req: NextRequest) {
     .maybeSingle()
 
   if (!participant) {
-    return NextResponse.json({ error: 'Fant ikke deltaker' }, { status: 404 })
+    return NextResponse.json({ error: dict.participantNotFound }, { status: 404 })
   }
 
   const rows = entries.map(([pot, player]) => ({
@@ -91,7 +94,7 @@ export async function POST(req: NextRequest) {
       .from('picks')
       .upsert(rows, { onConflict: 'participant_id,pot_number' })
     if (upsertError) {
-      return NextResponse.json({ error: 'Kunne ikke lagre picks' }, { status: 500 })
+      return NextResponse.json({ error: dict.couldNotSavePicks }, { status: 500 })
     }
   }
 
@@ -99,7 +102,7 @@ export async function POST(req: NextRequest) {
   deleteQuery = keptPots.length > 0 ? deleteQuery.not('pot_number', 'in', `(${keptPots.join(',')})`) : deleteQuery
   const { error: deleteError } = await deleteQuery
   if (deleteError) {
-    return NextResponse.json({ error: 'Kunne ikke rydde opp gamle picks' }, { status: 500 })
+    return NextResponse.json({ error: dict.couldNotCleanupPicks }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })

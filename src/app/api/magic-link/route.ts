@@ -3,6 +3,8 @@ import { Resend } from 'resend'
 import { randomBytes } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { clientIp, isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
+import { getLocale } from '@/lib/i18n/getLocale'
+import { getDictionary } from '@/i18n/dictionaries'
 
 function maskEmail(email: string): string {
   const [local, domain] = email.split('@')
@@ -10,8 +12,9 @@ function maskEmail(email: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  const { magicLink: dict } = getDictionary(await getLocale()).errors
   const { participantId, email } = await req.json()
-  if (!participantId) return NextResponse.json({ error: 'Mangler participantId' }, { status: 400 })
+  if (!participantId) return NextResponse.json({ error: dict.missingParticipantId }, { status: 400 })
 
   const supabase = getSupabaseAdmin()
 
@@ -19,7 +22,7 @@ export async function POST(req: NextRequest) {
   // sender lenker til mange deltakere på rad.
   const ip = clientIp(req)
   if (await isRateLimited(supabase, 'magic-link', ip, 10, 60 * 60 * 1000)) {
-    return NextResponse.json({ error: 'For mange forsøk. Vent en time og prøv igjen.' }, { status: 429 })
+    return NextResponse.json({ error: dict.tooManyAttempts }, { status: 429 })
   }
   await recordRateLimitHit(supabase, 'magic-link', ip)
 
@@ -29,14 +32,14 @@ export async function POST(req: NextRequest) {
     .eq('id', participantId)
     .maybeSingle()
 
-  if (!participant) return NextResponse.json({ error: 'Deltaker ikke funnet' }, { status: 404 })
+  if (!participant) return NextResponse.json({ error: dict.participantNotFound }, { status: 404 })
 
   if (email && email.trim().toLowerCase() !== participant.email.toLowerCase()) {
-    return NextResponse.json({ error: 'E-postadressen stemmer ikke' }, { status: 403 })
+    return NextResponse.json({ error: dict.emailMismatch }, { status: 403 })
   }
 
   if (!process.env.RESEND_API_KEY) {
-    return NextResponse.json({ error: 'E-postutsending er ikke konfigurert' }, { status: 503 })
+    return NextResponse.json({ error: dict.emailNotConfigured }, { status: 503 })
   }
 
   // Maks 3 lenker per time
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
     .gte('expires_at', windowStart)
 
   if ((count ?? 0) >= 3) {
-    return NextResponse.json({ error: 'For mange forsøk. Vent en time og prøv igjen.' }, { status: 429 })
+    return NextResponse.json({ error: dict.tooManyAttempts }, { status: 429 })
   }
 
   const token = randomBytes(32).toString('hex')
@@ -82,7 +85,7 @@ export async function POST(req: NextRequest) {
     `,
   })
 
-  if (sendError) return NextResponse.json({ error: 'Kunne ikke sende e-post. Prøv igjen.' }, { status: 500 })
+  if (sendError) return NextResponse.json({ error: dict.couldNotSend }, { status: 500 })
 
   return NextResponse.json({ maskedEmail: maskEmail(participant.email) })
 }
