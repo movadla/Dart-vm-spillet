@@ -92,17 +92,20 @@ export function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep
           {dict.tipp.progressDots.stepOf(step, POT_COUNT)}
           {multiplier > 1 && <span style={{ color: multiplier === 2 ? '#f59e0b' : '#ef4444', marginLeft: 6 }}>· ×{multiplier}</span>}
         </div>
-        {/* Guide og Poeng ved siden av hverandre oppe i høyre hjørne — Poeng
-            lå tidligere lenger ned i pott-headeren, atskilt fra Guide. */}
-        <div style={{ display: 'flex', gap: 6 }}>
+        {/* Guide og Poeng samlet i én liten, sammensatt pille i stedet for to
+            separate knapper — mindre visuell konkurranse med «STEG X AV 6»,
+            som er det viktigste å lese i denne raden. */}
+        <div style={{ display: 'flex', alignItems: 'stretch', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, overflow: 'hidden' }}>
           {onGuide && (
-            <button onClick={onGuide} className="btn-hover" style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}>{dict.tipp.progressDots.guide}</button>
+            <button onClick={onGuide} className="btn-hover" aria-label={dict.tipp.progressDots.guide} style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.7)', background: 'none', border: 'none', cursor: 'pointer', padding: '5px 8px', letterSpacing: '0.04em' }}>{dict.tipp.progressDots.guide}</button>
           )}
+          {onGuide && onTogglePoeng && <div style={{ width: 1, background: 'rgba(255,255,255,0.15)' }} />}
           {onTogglePoeng && (
             <button
               onClick={onTogglePoeng}
               className="btn-hover"
-              style={{ fontSize: 11, fontWeight: 700, color: poengActive ? '#fff' : 'rgba(255,255,255,0.7)', background: poengActive ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.08)', border: `1px solid ${poengActive ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.2)'}`, borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}
+              aria-pressed={poengActive}
+              style={{ fontSize: 10, fontWeight: 700, color: poengActive ? '#fff' : 'rgba(255,255,255,0.7)', background: poengActive ? 'rgba(255,255,255,0.18)' : 'none', border: 'none', cursor: 'pointer', padding: '5px 8px', letterSpacing: '0.04em' }}
             >
               {dict.tipp.progressDots.points}
             </button>
