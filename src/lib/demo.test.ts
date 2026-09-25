@@ -59,7 +59,7 @@ describe('demo-verdenen', () => {
     const done = calcParticipantPoints(me.picks, getDemoMatches('ferdig'))
     expect(live).toBeGreaterThan(0)
     expect(done).toBeGreaterThan(live)
-    expect(isPlayerChampion('Luke Littler', getDemoMatches('ferdig'))).toBe(true)
+    expect(isPlayerChampion('Josh Rock', getDemoMatches('ferdig'))).toBe(true)
     expect(isPlayerEliminated('Luke Woodhouse', getDemoMatches('live'))).toBe(true)
   })
 })
