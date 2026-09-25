@@ -89,10 +89,29 @@ ekte tilkoblinger (Supabase/Resend/Vercel/Sentry) jeg ikke har i denne
 et bevisst valg fra deg fremfor at jeg griper inn på egen hånd.
 
 **Blokkerer for stor/internasjonal skala:**
-- [ ] Ingen flerspråklighet — hardkodet norsk tekst i rundt 40 filer,
-      `<html lang="no">` hardkodet i `src/app/layout.tsx`. Det klart
-      største gjenstående arbeidet; fortjener en egen beslutning om
-      bibliotek/locale-routing før noen begynner å kode på det.
+- [x] **Løst 2026-09-25:** Norsk/engelsk tospråklighet for hele deltaker-
+      flaten (forsiden, /finn, /tipp inkl. hele intro-slideshowet, Min side,
+      leaderboard, liga, vm-info-guiden, personvern, feilsider, alle 12
+      ikke-admin API-rutenes feilmeldinger). Ingen URL-prefiks — én cookie
+      (`vm_locale`) styrer språket, auto-detektert fra nettleserens
+      Accept-Language ved første besøk (`src/proxy.ts`), med en synlig
+      NO/EN-bryter brukeren selv kan overstyre den med. Hånd-rullet
+      ordbok-arkitektur i `src/i18n/dictionaries/{no,en}/*.ts` — ikke et
+      bibliotek som next-intl, se `src/app/layout.tsx` og
+      `src/lib/i18n/getLocale.ts`/`useLocale.ts` for hvordan det henger
+      sammen. Admin-panelet forblir bevisst norsk (kun du bruker det).
+      **Uttrykkelig utenfor denne runden** (egen beslutning senere):
+      - E-postmalene (`email-welcome.ts`/`email-daily.ts`/`email-broadcast.ts`)
+        sendes asynkront (cron/påmelding) uten en request å lese språk-
+        cookien fra — krever en lagret `participants.language`-kolonne for
+        å vite hvilket språk en gitt e-post skal sendes på.
+      - `src/app/api/unsubscribe/route.ts` sin frittstående HTML-side
+        (rendres direkte fra ruten, ikke via React/dictionaries-laget).
+      - `/`, `/finn`, `/personvern`, `/tipp` og `/vm-info` gikk fra statisk
+        til dynamisk rendret (`next build` viser `ƒ` i stedet for `○`) siden
+        de nå leser språk-cookien server-side — ubetydelig kostnad gitt
+        appens skala, men verdt å vite om trafikken en dag blir stor nok
+        til at det merkes.
 - [ ] Leaderboardets poengberegning kjører i Node ved hver sidevisning
       (`src/lib/scoring.ts` + `src/app/leaderboard/page.tsx`) i stedet
       for en DB-view/materialized view — ikke flyttet siden det ikke
