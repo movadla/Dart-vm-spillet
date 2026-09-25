@@ -13,12 +13,20 @@ export const PLAYER_PHOTOS: Record<string, { src: string; credit: string; credit
     creditUrl: 'https://commons.wikimedia.org/wiki/File:2026-03-26_Premier_League_Darts_%E2%80%93_Night_8_%E2%80%93_Berlin_2026_by_Sandro_Halank%E2%80%93168.jpg',
   },
   // Resten lagt til 2026-09-24, samme rembg/U2Net-utklipp som Littler. Kilder
-  // se PLAYER_PHOTO_DATABANK.md. Jonny Clayton og Kevin Doets har MED VILJE
-  // ingen oppføring: eneste tilgjengelige Clayton-foto viser et privat
-  // kyssøyeblikk med partneren hans (upassende for et spillerkort), og
-  // Doets-fotoet fikk ikke ren utklipping (nær-hvit bakgrunn) og har et
-  // tydelig PDC-merket mikrofonflagg helt inntil ansiktet — begge faller
-  // tilbake til initial-plassholderen til bedre kildebilder er funnet.
+  // se PLAYER_PHOTO_DATABANK.md. Kevin Doets har MED VILJE ingen oppføring:
+  // eneste tilgjengelige Doets-foto fikk ikke ren utklipping (nær-hvit
+  // bakgrunn) og har et tydelig PDC-merket mikrofonflagg helt inntil ansiktet
+  // — faller tilbake til initial-plassholderen til et bedre kildebilde er
+  // funnet.
+  'Jonny Clayton': {
+    // Det først vurderte Clayton-bildet i databanken (samme fotosesjon, Sven
+    // Mandel) viste et privat kyssøyeblikk med partneren hans — upassende og
+    // ansiktet knapt synlig selv beskåret. Dette bildet, fra samme kamp/
+    // fotograf, er et rent solo-utklipp med ansiktet tydelig synlig.
+    src: '/players/jonny-clayton-cutout.webp',
+    credit: 'Sven Mandel · CC BY-SA 4.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Jonny_Clayton_-_2022337185714_2022-12-03_1.Mannheim_Darts_Gala_-_Sven_-_1D_X_MK_II_-_0878_-_B70I1771.jpg',
+  },
   'Luke Humphries': {
     src: '/players/luke-humphries-cutout.webp',
     credit: 'Darts Actueel · CC BY 3.0',

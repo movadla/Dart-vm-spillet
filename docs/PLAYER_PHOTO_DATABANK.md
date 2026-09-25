@@ -45,7 +45,8 @@ tatt med.
 - ★ (alt.): [Mannheim_Darts_Gala…Sven_Mandel-bildet](https://commons.wikimedia.org/wiki/File:Gerwyn_Price_-_2022337222336_2022-12-03_1.Mannheim_Darts_Gala_-_Sven_-_1D_X_MK_II_-_0573_-_AK8I7197.jpg_(cropped_2).jpg) — CC BY-SA 4.0, © Sven Mandel.
 
 **Jonny Clayton**
-- ★ [Mannheim_Darts_Gala…Clayton-bildet](https://commons.wikimedia.org/wiki/File:Jonny_Clayton_-_2022337180154_2022-12-03_1.Mannheim_Darts_Gala_-_Sven_-_1D_X_MK_II_-_0076_-_B70I0969.jpg) — CC BY-SA 4.0, © Sven Mandel. Sidevinkel, ansikt tydelig.
+- ~~★ [Mannheim_Darts_Gala…-0076-B70I0969.jpg](https://commons.wikimedia.org/wiki/File:Jonny_Clayton_-_2022337180154_2022-12-03_1.Mannheim_Darts_Gala_-_Sven_-_1D_X_MK_II_-_0076_-_B70I0969.jpg)~~ — vurdert og forkastet: viser et privat kyssøyeblikk med partneren hans, ansiktet knapt synlig selv beskåret.
+- ✅ **I bruk:** [Mannheim_Darts_Gala…-0878-B70I1771.jpg](https://commons.wikimedia.org/wiki/File:Jonny_Clayton_-_2022337185714_2022-12-03_1.Mannheim_Darts_Gala_-_Sven_-_1D_X_MK_II_-_0878_-_B70I1771.jpg) — CC BY-SA 4.0, © Sven Mandel. Samme kamp/fotograf, rent solo-utklipp, ansikt tydelig synlig (funnet 2026-09-25 via kategorien [Jonny_Clayton_-_1.Mannheim_Darts_Gala_2022](https://commons.wikimedia.org/wiki/Category:Jonny_Clayton_-_1.Mannheim_Darts_Gala_2022)).
 
 ## Pott 3 — Storfavoritter
 
