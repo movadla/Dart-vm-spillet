@@ -102,10 +102,11 @@ export default async function DeltakerPage({ params, searchParams }: {
               <div style={{ marginTop: 6, minHeight: 22 }}><PointsDelta participantId={p.id} totalPoints={totalPoints} /></div>
             </div>
             <div style={{ width: 1, background: 'rgba(255,255,255,0.08)', margin: '10px 0' }} />
-            <Link href="/leaderboard" className="pick-row" style={{ flex: '0 0 auto', padding: '12px 14px', textAlign: 'right', textDecoration: 'none', color: 'inherit', minWidth: 118 }}>
+            <Link href="/leaderboard" className="pick-row" style={{ flex: '0 0 auto', padding: '12px 18px', textAlign: 'center', textDecoration: 'none', color: 'inherit', minWidth: 96 }}>
               <div style={{ ...LABEL, marginBottom: 6 }}>Plassering</div>
-              <div style={{ fontFamily: SPORT, fontSize: 46, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums', color: rank === 1 ? '#4ade80' : '#fff' }}>#{rank}</div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 6 }}>av {totalParticipants} deltakere ›</div>
+              <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums', color: rank === 1 ? '#4ade80' : '#fff' }}>
+                {rank} <span aria-hidden style={{ fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>›</span>
+              </div>
             </Link>
           </div>
 

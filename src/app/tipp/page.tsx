@@ -853,6 +853,7 @@ const inputStyle: React.CSSProperties = {
                 onClose={() => setPanelOpen(false)}
                 onNext={() => { setPanelOpen(false); goNext() }}
                 nextLabel={step < POT_COUNT ? 'Neste →' : 'Se oppsummering →'}
+                potNumber={pot.potNumber}
               />
             </>
           )

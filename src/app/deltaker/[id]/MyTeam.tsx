@@ -196,6 +196,8 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
           onClose={() => setSheetPlayer(null)}
           onNext={() => { const p = nextPick && findPlayer(nextPick.player_name); if (p) setSheetPlayer(p) }}
           nextLabel="Neste spiller →"
+          matchResults={matchResults}
+          potNumber={sorted[sheetIndex]?.pot_number}
         />
       )}
     </>
