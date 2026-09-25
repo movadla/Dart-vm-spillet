@@ -19,10 +19,12 @@ import { tipp as noTipp } from './no/tipp'
 import { tipp as enTipp } from './en/tipp'
 import { deltaker as noDeltaker } from './no/deltaker'
 import { deltaker as enDeltaker } from './en/deltaker'
+import { legal as noLegal } from './no/legal'
+import { legal as enLegal } from './en/legal'
 
 const dictionaries = {
-  no: { common: noCommon, players: noPlayers, leaderboard: noLeaderboard, liga: noLiga, errors: noErrors, finn: noFinn, home: noHome, vmInfo: noVmInfo, tipp: noTipp, deltaker: noDeltaker },
-  en: { common: enCommon, players: enPlayers, leaderboard: enLeaderboard, liga: enLiga, errors: enErrors, finn: enFinn, home: enHome, vmInfo: enVmInfo, tipp: enTipp, deltaker: enDeltaker },
+  no: { common: noCommon, players: noPlayers, leaderboard: noLeaderboard, liga: noLiga, errors: noErrors, finn: noFinn, home: noHome, vmInfo: noVmInfo, tipp: noTipp, deltaker: noDeltaker, legal: noLegal },
+  en: { common: enCommon, players: enPlayers, leaderboard: enLeaderboard, liga: enLiga, errors: enErrors, finn: enFinn, home: enHome, vmInfo: enVmInfo, tipp: enTipp, deltaker: enDeltaker, legal: enLegal },
 } as const
 
 export type Dictionary = (typeof dictionaries)['no']

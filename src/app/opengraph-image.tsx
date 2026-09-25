@@ -1,9 +1,12 @@
 import { ImageResponse } from 'next/og'
+import { getLocale } from '@/lib/i18n/getLocale'
+import { getDictionary } from '@/i18n/dictionaries'
 
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-export default function Image() {
+export default async function Image() {
+  const { legal } = getDictionary(await getLocale())
   return new ImageResponse(
     (
       <div
@@ -46,7 +49,7 @@ export default function Image() {
         {/* Main text */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 16, display: 'flex' }}>
-            DART-VM 2026
+            {legal.ogImage.brandLine}
           </div>
           <div style={{ fontSize: 160, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.85, letterSpacing: '-4px', color: '#ffffff', display: 'flex' }}>
             DART-VM-
@@ -65,7 +68,7 @@ export default function Image() {
           letterSpacing: '0.02em',
           display: 'flex',
         }}>
-          Velg 6 dartspillere. Følg dart-VM. Spill mot venner.
+          {legal.ogImage.tagline}
         </div>
       </div>
     ),
