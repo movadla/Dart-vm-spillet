@@ -10,51 +10,49 @@ import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { getPathToFinal, getNextMatch, type PathStep } from '@/lib/bracketProjection'
 import { calcPlayerPoints, isPlayerChampion, isPlayerEliminated, type MatchResult } from '@/lib/scoring'
 import { STAGE_LABELS, CHAMPION_LABEL, type Stage } from '@/config/scoring'
-import { formatAvg, formatOdds, formatPercent, formatPoints } from '@/lib/format'
+import { getScheduleLabel } from '@/config/schedule'
+import { formatAvg, formatPoints } from '@/lib/format'
 import { lastName } from '@/components/TeamTile'
 import { SPORT } from '@/config/theme'
 
 // Braketten trengs sjelden — lastes først når noen åpner den.
 const BracketModal = dynamic(() => import('@/components/BracketModal'), { ssr: false })
 
-// «% valgt» vises først når det er nok deltakere til at tallet betyr noe —
-// 3 av 5 = 60 % ville lest som en sterk anbefaling. Under grensen vises «—».
-const MIN_PARTICIPANTS_FOR_SHARE = 10
-
 const SHORT_STAGE: Record<PathStep['stage'], string> = {
   r1: '1. runde', r2: '2. runde', r3: '3. runde', r4: '4. runde', qf: 'kvart', sf: 'semi', final: 'finale',
 }
 const STAGE_INDEX: Record<string, number> = { r1: 0, r2: 1, r3: 2, r4: 3, qf: 4, sf: 5, final: 6 }
-
-interface PickShare { total: number; counts: Record<string, number> }
-let pickSharePromise: Promise<PickShare> | null = null
-function loadPickShare(): Promise<PickShare> {
-  if (!pickSharePromise) {
-    pickSharePromise = fetch('/api/pick-share')
-      .then((r) => (r.ok ? r.json() : { total: 0, counts: {} }))
-      .catch(() => ({ total: 0, counts: {} }))
-  }
-  return pickSharePromise
-}
 
 const ALL_PLAYERS = POTS.flatMap((p) => p.players)
 function iso2For(name: string): string {
   return ALL_PLAYERS.find((p) => p.name === name)?.iso2 ?? ''
 }
 
-// ── Byggeklosser: to tydelig adskilte blokker, STATISTIKK (tall) og INFO (tekst) ──
-function SectionTitle({ children }: { children: ReactNode }) {
+// ── Byggeklosser — bevisst stort sprang mellom SectionTitle (seksjon) og
+// FieldLabel (felt), så de aldri leses som samme nivå (se AGENTS.md). ──
+function SectionTitle({ children, tag }: { children: ReactNode; tag?: ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0 8px' }}>
-      <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)' }}>{children}</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '18px 0 8px' }}>
+      <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, letterSpacing: '0.03em', textTransform: 'uppercase', color: '#fff' }}>{children}</span>
+      {tag}
       <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
     </div>
+  )
+}
+function FieldLabel({ children }: { children: ReactNode }) {
+  return <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>{children}</span>
+}
+function ExampleTag() {
+  return (
+    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 4, padding: '2px 5px', whiteSpace: 'nowrap' }}>
+      eksempel
+    </span>
   )
 }
 function Stat({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '9px 10px', minWidth: 0 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 5 }}>{label}</div>
+      <div style={{ marginBottom: 5 }}><FieldLabel>{label}</FieldLabel></div>
       <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, color: '#fff', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{children}</div>
     </div>
   )
@@ -62,8 +60,7 @@ function Stat({ label, children }: { label: string; children: ReactNode }) {
 function InfoRow({ label, children, last = false }: { label: string; children: ReactNode; last?: boolean }) {
   return (
     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '9px 0', borderBottom: last ? 'none' : '1px solid rgba(255,255,255,0.08)' }}>
-      {/* 150px: bredt nok til at «Beste prestasjon» aldri brytes i to linjer */}
-      <span style={{ width: 150, flexShrink: 0, fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', paddingTop: 2, whiteSpace: 'nowrap' }}>{label}</span>
+      <span style={{ width: 140, flexShrink: 0, paddingTop: 2, whiteSpace: 'nowrap' }}><FieldLabel>{label}</FieldLabel></span>
       <div style={{ flex: 1, minWidth: 0, fontSize: 14, color: '#fff', lineHeight: 1.4, textAlign: 'right' }}>{children}</div>
     </div>
   )
@@ -71,10 +68,10 @@ function InfoRow({ label, children, last = false }: { label: string; children: R
 
 /**
  * Spillerpanelet — bunnark åpnet fra «Detaljer» (tippe-flyten) eller ved å
- * trykke en spiller på Min side. Kamper (neste + tidligere, med poeng) står
- * øverst — det man vil vite først — så STATISTIKK (2×2 store tall) og INFO
- * (etikett/verdi-rader). Lukkes med sveip ned (arket følger fingeren), klikk
- * utenfor, Escape eller knappene nederst; «Neste» går rett videre.
+ * trykke en spiller på Min side. Bevisst nøkternt: kun det som faktisk
+ * trengs for en rask, oversiktlig lesning. Kamper (neste + tidligere, med
+ * poeng) står øverst, så STATISTIKK og INFO. Lukkes med sveip ned (arket
+ * følger fingeren), klikk utenfor, Escape eller knappene nederst.
  */
 export default function PlayerDetailPanel({ player, color, open, onClose, onNext, nextLabel, matchResults = [], potNumber = 1 }: {
   player: Player
@@ -88,17 +85,10 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
   /** Potten spilleren er valgt fra — avgjør multiplikatoren for poeng per kamp. */
   potNumber?: number
 }) {
-  const [share, setShare] = useState<PickShare | null>(null)
   const [bracketOpen, setBracketOpen] = useState(false)
   const [dragY, setDragY] = useState(0)
   const dragStart = useRef<number | null>(null)
   const bodyRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    let alive = true
-    loadPickShare().then((s) => { if (alive) setShare(s) })
-    return () => { alive = false }
-  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -118,17 +108,20 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
     .sort((a, b) => a.pdcRanking - b.pdcRanking)
     .slice(0, 3)
     .sort((a, b) => STAGE_INDEX[a.stage] - STAGE_INDEX[b.stage])
-
-  const shareText = share && share.total >= MIN_PARTICIPANTS_FOR_SHARE
-    ? formatPercent(((share.counts[player.name] ?? 0) / share.total) * 100)
-    : '—'
+  const eksempeldataTag = stats && !stats.verified ? (
+    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 4, padding: '2px 5px', whiteSpace: 'nowrap' }}>
+      eksempeldata
+    </span>
+  ) : undefined
 
   // Kamper — det første som vises: neste kamp (ekte og avgjort, eller samme
-  // favoritt-eksempel som «vei til finalen» inntil runden er spilt) og en
-  // liste over spilte kamper med poengene spilleren faktisk fikk i hver av dem.
+  // favoritt-eksempel som «vei til finalen» inntil runden er spilt), med
+  // dato/klokkeslett når PDC har kunngjort det, og en liste over spilte
+  // kamper med poengene spilleren faktisk fikk i hver av dem.
   const champion = isPlayerChampion(player.name, matchResults)
   const eliminated = !champion && isPlayerEliminated(player.name, matchResults)
   const next = !champion && !eliminated ? getNextMatch(player.name, matchResults) : null
+  const nextSchedule = next ? getScheduleLabel(next.stage as Stage) : null
   const myMatches = matchResults
     .filter((m) => m.player1 === player.name || m.player2 === player.name)
     .sort((a, b) => STAGE_INDEX[a.stage ?? 'r1'] - STAGE_INDEX[b.stage ?? 'r1'])
@@ -206,33 +199,36 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
 
           {/* Neste kamp — alltid først: dette er det man vil vite */}
           <div style={{ background: `${color}14`, border: `1px solid ${color}44`, borderRadius: 12, padding: '9px 12px', marginBottom: 8 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 5 }}>Neste kamp</div>
+            <div style={{ marginBottom: 5 }}><FieldLabel>Neste kamp</FieldLabel></div>
             {champion ? (
               <span style={{ fontSize: 14, fontWeight: 800, color: '#fbbf24', letterSpacing: '0.02em' }}>{CHAMPION_LABEL} 🏆</span>
             ) : eliminated ? (
               <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.6)' }}>Ute av turneringen</span>
             ) : next ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                  {STAGE_LABELS[next.stage as Stage]}
-                </span>
-                <span aria-hidden style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>·</span>
-                {next.opponent && !next.isFiller ? (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                    <Flag iso2={iso2For(next.opponent)} size={15} />
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(next.opponent)}</span>
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                    {STAGE_LABELS[next.stage as Stage]}
                   </span>
-                ) : (
-                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
-                    {next.isFiller ? 'Kvalifisert' : 'Ikke avgjort'}
-                  </span>
+                  <span aria-hidden style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>·</span>
+                  {next.opponent && !next.isFiller ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                      <Flag iso2={iso2For(next.opponent)} size={15} />
+                      <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(next.opponent)}</span>
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
+                      {next.isFiller ? 'Kvalifisert' : 'Ikke avgjort'}
+                    </span>
+                  )}
+                  {!next.confirmed && <span style={{ marginLeft: 'auto' }}><ExampleTag /></span>}
+                </div>
+                {nextSchedule && (
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
+                    {nextSchedule.dateKnown ? `${nextSchedule.dateLabel} · ${nextSchedule.timeLabel}` : nextSchedule.dateLabel}
+                  </div>
                 )}
-                {!next.confirmed && (
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 4, padding: '2px 5px', flexShrink: 0, whiteSpace: 'nowrap', marginLeft: 'auto' }}>
-                    eksempel
-                  </span>
-                )}
-              </div>
+              </>
             ) : (
               <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>—</span>
             )}
@@ -241,7 +237,7 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
           {/* Tidligere kamper — poengene spilleren faktisk fikk i hver av dem */}
           {myMatches.length > 0 && (
             <div style={{ marginBottom: 6 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', margin: '2px 0 4px' }}>Tidligere kamper</div>
+              <div style={{ margin: '2px 0 4px' }}><FieldLabel>Tidligere kamper</FieldLabel></div>
               {myMatches.map((m, k) => {
                 const isP1 = m.player1 === player.name
                 const mySets = isP1 ? m.sets1 : m.sets2
@@ -268,32 +264,22 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
             </div>
           )}
 
-          <SectionTitle>Statistikk</SectionTitle>
+          <SectionTitle tag={eksempeldataTag}>Statistikk</SectionTitle>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <Stat label="Verdensranking">#{player.pdcRanking}</Stat>
+            <Stat label="Verdensranking">{player.pdcRanking}</Stat>
             <Stat label="Snitt">{formatAvg(stats?.avg)}</Stat>
-            <Stat label="Odds">{formatOdds(player.odds)}</Stat>
-            <Stat label="% valgt">
-              {share === null
-                ? <span className="skeleton" style={{ display: 'inline-block', width: 40, height: 18, borderRadius: 4 }} />
-                : shareText}
-            </Stat>
           </div>
-          {stats && !stats.verified && (
-            <div style={{ fontSize: 12, color: '#f59e0b', marginTop: 8, lineHeight: 1.4 }}>
-              Eksempeldata – snitt og beste prestasjon er ikke kontrollert mot PDC ennå.
-            </div>
-          )}
 
-          <SectionTitle>Info</SectionTitle>
+          <SectionTitle tag={eksempeldataTag}>Info</SectionTitle>
           <InfoRow label="Beste prestasjon">{stats?.bestAchievement ?? '—'}</InfoRow>
 
           {/* Vei til finalen — alltid nøyaktig 3 kolonner på én rad, aldri
               tekst i to linjer: egen (ikke InfoRow-etikett-kolonnen, som gir
               for lite bredde til tre bokser side ved side). */}
           <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 8 }}>
-              Vei til finalen
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <FieldLabel>Vei til finalen</FieldLabel>
+              <ExampleTag />
             </div>
             {path.length ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
@@ -310,12 +296,9 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
                 ))}
               </div>
             ) : <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Ingen topp 16 før finalen</div>}
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 8 }}>
-              Hvis favorittene vinner · eksempel-trekning ·{' '}
-              <button type="button" onClick={() => setBracketOpen(true)} style={{ background: 'none', border: 'none', padding: 0, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}>
-                Se hele trekningen →
-              </button>
-            </div>
+            <button type="button" onClick={() => setBracketOpen(true)} style={{ display: 'block', marginTop: 8, background: 'none', border: 'none', padding: 0, color: 'rgba(255,255,255,0.65)', fontSize: 12, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+              Se hele trekningen →
+            </button>
           </div>
 
           {photo && (

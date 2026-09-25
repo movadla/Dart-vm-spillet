@@ -93,34 +93,21 @@ export default async function DeltakerPage({ params, searchParams }: {
       </div>
 
       {vmStarted ? (
-        <>
-          {/* ── Poeng og plassering ── */}
-          <div style={{ ...CARD, display: 'flex', alignItems: 'stretch' }}>
-            <div style={{ flex: 1, padding: '12px 14px', minWidth: 0 }}>
-              <div style={{ ...LABEL, marginBottom: 6 }}>Totalpoeng</div>
-              <CountUp value={totalPoints} size={46} />
-              <div style={{ marginTop: 6, minHeight: 22 }}><PointsDelta participantId={p.id} totalPoints={totalPoints} /></div>
-            </div>
-            <div style={{ width: 1, background: 'rgba(255,255,255,0.08)', margin: '10px 0' }} />
-            <Link href="/leaderboard" className="pick-row" style={{ flex: '0 0 auto', padding: '12px 18px', textAlign: 'center', textDecoration: 'none', color: 'inherit', minWidth: 96 }}>
-              <div style={{ ...LABEL, marginBottom: 6 }}>Plassering</div>
-              <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums', color: rank === 1 ? '#4ade80' : '#fff' }}>
-                {rank} <span aria-hidden style={{ fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>›</span>
-              </div>
-            </Link>
+        /* ── Poeng og plassering — kompakt, dette er en oppslagsboks, ikke en hovedvisning ── */
+        <div style={{ ...CARD, display: 'flex', alignItems: 'stretch' }}>
+          <div style={{ flex: 1, padding: '10px 14px', minWidth: 0 }}>
+            <div style={{ ...LABEL, marginBottom: 4 }}>Totalpoeng</div>
+            <CountUp value={totalPoints} size={34} />
+            <div style={{ marginTop: 4, minHeight: 20 }}><PointsDelta participantId={p.id} totalPoints={totalPoints} /></div>
           </div>
-
-          {displayStage && (
-            <Link href="/vm-info?tab=kamper" className="guide-btn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 8, padding: '9px 14px', borderRadius: 999, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', textDecoration: 'none', fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
-              <span>
-                {displayStage === 'winner'
-                  ? <>VM er <span style={{ color: '#fff', fontWeight: 700 }}>avgjort</span></>
-                  : <>VM er i <span style={{ color: '#fff', fontWeight: 700 }}>{STAGE_LABELS[displayStage].toLowerCase()}</span></>}
-              </span>
-              <span style={{ fontWeight: 700, color: '#fff' }}>Alle kamper →</span>
-            </Link>
-          )}
-        </>
+          <div style={{ width: 1, background: 'rgba(255,255,255,0.08)', margin: '8px 0' }} />
+          <Link href="/leaderboard" className="pick-row" style={{ flex: '0 0 auto', padding: '10px 16px', textAlign: 'center', textDecoration: 'none', color: 'inherit', minWidth: 88 }}>
+            <div style={{ ...LABEL, marginBottom: 4 }}>Plassering</div>
+            <div style={{ fontSize: 20, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums', color: rank === 1 ? '#4ade80' : '#fff' }}>
+              {rank} <span aria-hidden style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>›</span>
+            </div>
+          </Link>
+        </div>
       ) : (
         /* ── Før VM: nedtelling + endre laget ── */
         <div style={{ ...CARD, padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
@@ -139,6 +126,17 @@ export default async function DeltakerPage({ params, searchParams }: {
       {/* ── Mitt lag ── */}
       <SectionHeader icon={<IconTarget />} color={TEAM_COLOR} title="Mitt lag" />
       <MyTeam picks={picks} matchResults={matchResults} vmStarted={vmStarted} />
+
+      {vmStarted && displayStage && (
+        <Link href="/vm-info?tab=kamper" className="guide-btn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 10, padding: '9px 14px', borderRadius: 999, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', textDecoration: 'none', fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
+          <span>
+            {displayStage === 'winner'
+              ? <>VM er <span style={{ color: '#fff', fontWeight: 700 }}>avgjort</span></>
+              : <>VM er i <span style={{ color: '#fff', fontWeight: 700 }}>{STAGE_LABELS[displayStage].toLowerCase()}</span></>}
+          </span>
+          <span style={{ fontWeight: 700, color: '#fff' }}>Alle kamper →</span>
+        </Link>
+      )}
 
       {/* ── Neste kamper ── */}
       <SectionHeader icon={<IconNextMatch />} color={MATCH_COLOR} title="Neste kamper" />

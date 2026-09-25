@@ -46,9 +46,13 @@ function ShareLeagueButton({ name, code }: { name: string; code: string }) {
 function RankChip({ rank, total }: { rank: number; total: number }) {
   const top = rank === 1
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 3, fontFamily: SPORT, fontWeight: 900, lineHeight: 1, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+    // Fast total bredde, venstrestilt innhold: «#N» starter på nøyaktig
+    // samme skjermposisjon på hver rad uansett hvor mange sifre rangeringen
+    // eller ligastørrelsen har — ellers hopper tallene ujevnt fra liga til
+    // liga (raden er selv høyrestilt mot kortkanten via space-between).
+    <span style={{ display: 'inline-flex', alignItems: 'baseline', justifyContent: 'flex-start', gap: 3, width: 90, fontFamily: SPORT, fontWeight: 900, lineHeight: 1, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
       <span style={{ fontSize: 20, color: top ? '#4ade80' : '#fff' }}>#{rank}</span>
-      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', fontFamily: 'var(--font-inter), sans-serif', fontWeight: 600 }}>av {total}</span>
+      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', fontFamily: 'var(--font-inter), sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>av {total}</span>
     </span>
   )
 }

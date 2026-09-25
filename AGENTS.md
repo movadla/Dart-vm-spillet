@@ -25,6 +25,13 @@ Restart av dev-server fra en agent (Windows): `taskkill //PID <pid> //T //F` på
 PID-en fra `netstat -ano | grep ":3001 "`, deretter `npx next dev -p 3001` i
 bakgrunnen. Turbopack-HMR mister av og til endringer — restart før verifisering.
 
+**Aldri `next build` mens dev-serveren kjører** — begge bruker samme `.next`-
+mappe, og et bygg midt i en dev-økt korrumperer Turbopacks worker-prosesser
+(«Jest worker encountered N child process exceptions» → alle sider 500, også
+etter at bygget er ferdig). Skjer det: stopp dev-serveren, `rm -rf .next`, og
+start den på nytt. Vil du kjøre `npm run build` for å verifisere et bygg,
+stopp dev-serveren først (eller vent til økten er ferdig med den).
+
 ## Hvor ting ligger
 
 ```
