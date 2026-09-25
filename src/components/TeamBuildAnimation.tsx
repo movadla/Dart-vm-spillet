@@ -6,8 +6,7 @@ import TeamTile from '@/components/TeamTile'
 import { POTS, getPickablePlayers, type Player } from '@/data/pots'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 import { usePageVisible } from '@/lib/usePageVisible'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT } from '@/config/theme'
 
 // Illustrerer HVORDAN man plukker laget sitt — ikke ekte/anbefalte valg.
 // Littler/Price er eksplisitt ønsket som de to første, rolige stegene;

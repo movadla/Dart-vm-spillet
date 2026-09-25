@@ -2,14 +2,15 @@ import { NextRequest } from 'next/server'
 import { createHmac } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
-const supabase = getSupabaseAdmin()
-
 function verifyToken(userId: string, token: string): boolean {
   const expected = createHmac('sha256', process.env.CRON_SECRET ?? '').update(userId).digest('hex')
   return token === expected
 }
 
 export async function GET(request: NextRequest) {
+  // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
+  // forståelig svar fra handleren, ikke crash ved import av ruten.
+  const supabase = getSupabaseAdmin()
   const { searchParams } = new URL(request.url)
   const userId = searchParams.get('id')
   const token = searchParams.get('token')

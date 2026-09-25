@@ -2,8 +2,7 @@
 
 import Link from 'next/link'
 import BrandBanner from '@/components/BrandBanner'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT } from '@/config/theme'
 
 export default function Error({ reset }: { reset: () => void }) {
   return (

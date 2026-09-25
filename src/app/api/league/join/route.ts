@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { KICKOFF } from '@/config/tournament'
-
-const supabase = getSupabaseAdmin()
+import { clientIp, isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
 
 // Ingen grense fantes tidligere — én liga kunne i praksis vokse til å romme
 // hele deltakerfeltet, noe leaderboardet i en liga (samme RankList-komponent
@@ -11,6 +10,9 @@ const supabase = getSupabaseAdmin()
 const MAX_LEAGUE_MEMBERS = 200
 
 export async function POST(req: NextRequest) {
+  // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
+  // forståelig svar fra handleren, ikke crash ved import av ruten.
+  const supabase = getSupabaseAdmin()
   if (new Date() >= KICKOFF) {
     return NextResponse.json({ error: 'Ligaer er låst etter at VM har startet.' }, { status: 403 })
   }
@@ -24,6 +26,14 @@ export async function POST(req: NextRequest) {
   if (!inviteCode?.trim()) {
     return NextResponse.json({ error: 'Mangler data' }, { status: 400 })
   }
+
+  // Koden er 6 tegn fra 32 mulige — uten grense kunne den gjettes med et
+  // skript. 30 forsøk/time per IP er rikelig for ekte bruk.
+  const ip = clientIp(req)
+  if (await isRateLimited(supabase, 'league-join', ip, 30, 60 * 60 * 1000)) {
+    return NextResponse.json({ error: 'For mange forsøk. Vent en time og prøv igjen.' }, { status: 429 })
+  }
+  await recordRateLimitHit(supabase, 'league-join', ip)
 
   const { data: participant } = await supabase
     .from('participants').select('id').eq('id', participantId).single()

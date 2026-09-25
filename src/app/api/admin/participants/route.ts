@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
-const supabase = getSupabaseAdmin()
 import { checkAdminAuth } from '@/lib/adminAuth'
 
 export async function GET(req: NextRequest) {
+  // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
+  // forståelig svar fra handleren, ikke crash ved import av ruten.
+  const supabase = getSupabaseAdmin()
   const authError = checkAdminAuth(req)
   if (authError) return authError
   const { data, error } = await supabase

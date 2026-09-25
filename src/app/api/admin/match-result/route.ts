@@ -5,9 +5,10 @@ import { STAGE_ORDER } from '@/config/scoring'
 import { validateMatchResultInput } from '@/lib/matchResultValidation'
 import { upsertMatchResult } from '@/lib/upsertMatchResult'
 
-const supabase = getSupabaseAdmin()
-
 export async function POST(req: NextRequest) {
+  // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
+  // forståelig svar fra handleren, ikke crash ved import av ruten.
+  const supabase = getSupabaseAdmin()
   const authError = checkAdminAuth(req)
   if (authError) return authError
   try {

@@ -1,9 +1,9 @@
 import { POTS } from '@/data/pots'
+import { POT_COLORS } from '@/config/potColors'
 
 const allPlayers = POTS.flatMap(p => p.players)
 export const iso2For = (name: string) => allPlayers.find(pl => pl.name === name)?.iso2 ?? ''
 
-const POT_COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#f97316', '#8b5cf6', '#06b6d4', '#ef4444', '#ec4899']
 
 const PREHEADER_PADDING = '&nbsp;'.repeat(100)
 

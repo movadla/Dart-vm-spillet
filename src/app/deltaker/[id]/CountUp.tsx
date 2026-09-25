@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { formatPoints } from '@/lib/format'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT } from '@/config/theme'
 
 /** Teller opp til `value` (900 ms, ease-out) — grønn gradient som resten av poengene. */
 export default function CountUp({ value, size = 56 }: { value: number; size?: number }) {

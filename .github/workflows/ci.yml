@@ -1,0 +1,28 @@
+name: CI
+
+# Kjøres på hver push og PR: typer, lint, tester og produksjonsbygg — samme
+# som `npm run check && npm run build` lokalt. Bygget trenger ikke ekte
+# Supabase-nøkler (alle klienter lages lazily og feiler pent), men Next
+# krever at variablene finnes for sider som leser dem ved bygg.
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder
+      NEXT_PUBLIC_BASE_URL: https://example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build

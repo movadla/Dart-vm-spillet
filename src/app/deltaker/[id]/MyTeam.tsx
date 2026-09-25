@@ -10,10 +10,10 @@ import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 import { STAGE_ORDER, STAGE_LABELS, CHAMPION_LABEL, type Stage } from '@/config/scoring'
 import { calcPlayerPoints, isPlayerEliminated, isPlayerChampion, furthestStageReached, type PickWithPot, type MatchResult } from '@/lib/scoring'
 import { formatPoints } from '@/lib/format'
+import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 
 const PlayerDetailPanel = dynamic(() => import('@/components/PlayerDetailPanel'), { ssr: false })
 
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const STAGE_INDEX: Record<string, number> = Object.fromEntries(STAGE_ORDER.map((s, i) => [s, i]))
 const GOLD = '#fbbf24'
 const SILVER = '#9ca3af'
@@ -58,7 +58,7 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
 
   if (sorted.length === 0) {
     return (
-      <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', padding: 20, color: 'rgba(255,255,255,0.6)', fontSize: 14, textAlign: 'center' }}>
+      <div style={{ background: CARD_GRADIENT, borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', padding: 20, color: 'rgba(255,255,255,0.6)', fontSize: 14, textAlign: 'center' }}>
         Ingen spillere registrert ennå.
       </div>
     )
@@ -94,7 +94,7 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
       </div>
 
       {/* Radene */}
-      <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
+      <div style={{ background: CARD_GRADIENT, borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', boxShadow: CARD_SHADOW }}>
         {sorted.map((pick, idx) => {
           const player = findPlayer(pick.player_name)
           const i = (pick.pot_number - 1) % POT_COLORS.length

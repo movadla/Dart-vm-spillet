@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
 
-const supabase = getSupabaseAdmin()
-
 // Ligaer som skal ha rang-piler (i tillegg til 'overall'). Bruk invite_code.
 const SNAPSHOT_LEAGUES = ['4B86F9', 'QTXXCF']
 
@@ -12,6 +10,9 @@ interface Pick { participant_id: string; pot_number: number; player_name: string
 // Lagrer dagens rangering (overall + utvalgte ligaer) i rank_snapshot.
 // Kjøres daglig (GitHub Actions). Pilene på leaderboard/liga = snapshot-rang − dagens rang.
 export async function GET(req: Request) {
+  // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
+  // forståelig svar fra handleren, ikke crash ved import av ruten.
+  const supabase = getSupabaseAdmin()
   const url = new URL(req.url)
   const secret = url.searchParams.get('secret')
   if (secret !== process.env.SYNC_SECRET && req.headers.get('x-vercel-cron') !== '1') {

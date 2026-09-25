@@ -6,9 +6,10 @@ import CopyCode from '@/components/CopyCode'
 import RankList from '@/components/RankList'
 import Countdown from '@/components/Countdown'
 import type { Metadata } from 'next'
-import LastUpdated from '@/app/deltaker/[id]/LastUpdated'
-import ShareButton from '@/app/ShareButton'
+import LastUpdated from '@/components/LastUpdated'
+import ShareButton from '@/components/ShareButton'
 import { getLeagueData } from '@/lib/participantData'
+import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 
 export const revalidate = 30
 
@@ -22,13 +23,11 @@ export async function generateMetadata({ params, searchParams }: {
   return { title: data ? `${data.league.name} – liga` : 'Liga' }
 }
 
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-
 const CARD: React.CSSProperties = {
-  background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
+  background: CARD_GRADIENT,
   borderRadius: 16,
   border: '1px solid rgba(255,255,255,0.12)',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)',
+  boxShadow: CARD_SHADOW,
 }
 
 export default async function LigaPage({ params, searchParams }: {

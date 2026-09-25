@@ -5,8 +5,8 @@ import Flag from '@/components/Flag'
 import type { Player } from '@/data/pots'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { PLAYER_STATS } from '@/data/playerStats'
+import { SPORT } from '@/config/theme'
 
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const GOLD = '#f3d576'
 const LABEL_GOLD = 'rgba(243,213,118,0.75)'
 // Én mal per pott (samme "is/krystall"-stil, kun hue-rotert til pottens

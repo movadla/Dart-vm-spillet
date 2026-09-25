@@ -1,10 +1,9 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import BrandBanner from '@/components/BrandBanner'
+import { SPORT } from '@/config/theme'
 
 export const metadata: Metadata = { title: 'Siden finnes ikke' }
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
 export default function NotFound() {
   return (

@@ -50,27 +50,47 @@ Alle miljøvariabler settes i Vercel-dashboardet (Settings → Environment Varia
 
 ## Arkitektur
 
+Kort versjon i `AGENTS.md` (leses av Claude Code). Fullt kart:
+
 ```
 src/
-├── app/
-│   ├── page.tsx               # Forside
-│   ├── tipp/                  # Registreringsflyten (6-stegs slideshow, ett per pott)
-│   ├── deltaker/[id]/         # "Min side" for hver deltaker
-│   ├── leaderboard/           # Poengtoppen
-│   ├── vm-info/               # Info om turneringen, reglene og trekningen
-│   ├── liga/                  # Private ligaer
-│   ├── admin/                 # Manuell registrering av kampresultater
-│   └── api/
-│       ├── admin/             # Admin-endepunkter (krever ADMIN_SECRET)
-│       └── ...
+├── config/
+│   ├── tournament.ts        # KICKOFF (VM-start = påmeldingsfrist) — ENESTE kilde til datoen
+│   ├── scoring.ts           # STAGE_ORDER, poengmodell, multiplikatorer
+│   ├── potColors.ts         # 6 pottfarger (+ mørk variant)
+│   └── theme.ts             # SPORT-font, kortgradient/-skygge, kontrastgrenser
 ├── data/
-│   └── pots.ts                 # 6 potter med dartspillere (PDC-seeding)
+│   ├── pots.ts              # Spillere/potter (pickable = valgbar i tippe-stegene)
+│   ├── playerStats.ts       # Snitt/beste prestasjon (eksempeldata til det er verifisert)
+│   └── playerPhotos.ts      # CC-lisensierte foto + kreditering (se docs/PLAYER_PHOTO_DATABANK.md)
 ├── lib/
-│   ├── scoring.ts               # Poengberegning (avledet direkte fra match_results)
-│   └── bracketProjection.ts     # Deterministisk eksempel-trekning (128 spillere, ingen walkover)
-└── config/
-    └── scoring.ts               # Poengkonfigurasjon
+│   ├── scoring.ts           # Poeng per spiller/deltaker, utslått/vinner — rent, testet
+│   ├── ranking.ts           # Leaderboard-rader, rangering — rent, testet
+│   ├── participantData.ts   # I/O: Min side, leaderboard, liga, kamper (Supabase ELLER demo)
+│   ├── demo.ts              # Fiktiv deltaker, 11 andre, to ligaer, kamper i tre faser
+│   ├── bracketProjection.ts # Eksempel-trekning (128 spillere), vei til finalen
+│   ├── format.ts            # nb-NO tallformat («41 p», «2,50»)
+│   ├── rateLimit.ts         # Per-IP-begrensning (tabell rate_limit_hits)
+│   └── email-*.ts           # E-postmaler (velkomst, daglig, broadcast)
+├── components/              # Delte UI-biter (BrandBanner, Countdown, TeamTile, RankList,
+│                            #   PlayerCard, PlayerDetailPanel, BracketModal, LeagueSection …)
+├── app/
+│   ├── page.tsx             # Forside (hero, nedtelling, intro-animasjon)
+│   ├── tipp/                # Tippe-flyten (intro → 6 valg → oppsummering → registrering)
+│   ├── deltaker/[id]/       # Min side (MyTeam, DemoBanner)
+│   ├── leaderboard/, liga/[code]/, finn/, vm-info/, personvern/
+│   ├── admin/               # Admin-panel (shared.ts + tabs/*)
+│   └── api/                 # Route handlers — admin/* krever checkAdminAuth(),
+│                            #   deltaker-skriving krever vm_auth-cookie, åpne ruter er rate-limitet
+├── proxy.ts                 # Beskytter /admin (konstant-tid cookie-sjekk)
+supabase/schema.sql          # Hele databasen (skjema dart_vm). legacy/ = historikk
+tools/verify/                # Headless-Chrome-harness + flyter (npm run verify)
+docs/                        # Bildekilder og lisenser
 ```
+
+Flyt for data: `participantData.ts` velger kilde (demo hvis id/kode/cookie er demo, ellers
+Supabase), beregner med `scoring.ts` + `ranking.ts`, og sidene rendrer. Ingen side snakker
+direkte med Supabase.
 
 ## Poengberegning
 
@@ -110,13 +130,17 @@ gratis Hobby-plan begrenser cron til én jobb i døgnet. Se kommentaren øverst 
 
 Det finnes ingen fri live-API for PDC-darts, så alle kampresultater legges inn manuelt via `/admin`: spiller 1/spiller 2, sett 1/sett 2, runde — skrives til `match_results`. Poengsum, hvilken runde en spiller har nådd, og hvem som er slått ut, avledes automatisk derfra.
 
-## Kjør tester
+## Sjekk før commit
 
 ```bash
-npm test
+npm run check     # tsc + eslint + vitest (samme som CI, .github/workflows/ci.yml)
+npm run build     # produksjonsbygg
+npm run verify -- http://localhost:3001/deltaker/demo tools/verify/flow-demo-minside.js shot.jpg
 ```
 
-Enhetstester dekker poengberegningslogikken (`src/lib/scoring.test.ts`) og trekningslogikken (`src/lib/bracketProjection.test.ts`).
+Enhetstester: poeng (`scoring.test.ts`), rangering (`ranking.test.ts`), trekning
+(`bracketProjection.test.ts`, `bracketPath.test.ts`), demo-data (`demo.test.ts`),
+tallformat (`format.test.ts`), admin-auth og resultatvalidering.
 
 ## Database-tabeller (Supabase)
 

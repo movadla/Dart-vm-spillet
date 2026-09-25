@@ -2,8 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT } from '@/config/theme'
 
 /** Snarvei til egen side for innloggede — plassen holdes av under SSR så listen ikke hopper. */
 export default function LeaderboardMyPage() {

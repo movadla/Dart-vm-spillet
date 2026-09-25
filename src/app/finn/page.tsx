@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation'
 import BrandBanner from '@/components/BrandBanner'
 import { DEMO_EMAIL } from '@/lib/demo'
 import { KICKOFF } from '@/config/tournament'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 
 // Demo-snarveien vises kun lokalt — i produksjon er demo-e-posten fortsatt
 // gyldig, men ikke annonsert.
@@ -77,7 +76,7 @@ export default function FinnPage() {
       </p>
 
       <form onSubmit={(e) => { e.preventDefault(); submit(email) }} noValidate>
-        <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', border: `1px solid ${error ? 'rgba(220,38,38,0.4)' : 'rgba(255,255,255,0.12)'}`, borderRadius: 16, padding: 16, marginBottom: 10, transition: 'border-color 0.2s', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
+        <div style={{ background: CARD_GRADIENT, border: `1px solid ${error ? 'rgba(220,38,38,0.4)' : 'rgba(255,255,255,0.12)'}`, borderRadius: 16, padding: 16, marginBottom: 10, transition: 'border-color 0.2s', boxShadow: CARD_SHADOW }}>
           <label htmlFor="finn-epost" style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 6 }}>
             E-post
           </label>

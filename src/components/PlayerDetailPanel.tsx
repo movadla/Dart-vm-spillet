@@ -10,11 +10,10 @@ import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { getPathToFinal, type PathStep } from '@/lib/bracketProjection'
 import { formatAvg, formatOdds, formatPercent } from '@/lib/format'
 import { lastName } from '@/components/TeamTile'
+import { SPORT } from '@/config/theme'
 
 // Braketten trengs sjelden — lastes først når noen åpner den.
 const BracketModal = dynamic(() => import('@/components/BracketModal'), { ssr: false })
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
 // «% valgt» vises først når det er nok deltakere til at tallet betyr noe —
 // 3 av 5 = 60 % ville lest som en sterk anbefaling. Under grensen vises «—».

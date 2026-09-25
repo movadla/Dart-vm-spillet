@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT } from '@/config/theme'
 
 interface Props {
   code: string

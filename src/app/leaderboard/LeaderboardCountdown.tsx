@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Countdown from '@/components/Countdown'
 import { KICKOFF_DATE_LABEL } from '@/config/tournament'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 
 /** Før VM: leaderboardet er tomt — vis nedtelling, antall påmeldte og påmeldingsknapp. */
 export default function LeaderboardCountdown({ participants }: { participants: number }) {
@@ -18,7 +17,7 @@ export default function LeaderboardCountdown({ participants }: { participants: n
   }, [])
 
   return (
-    <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, padding: '28px 20px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.12)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
+    <div style={{ background: CARD_GRADIENT, borderRadius: 20, padding: '28px 20px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.12)', boxShadow: CARD_SHADOW }}>
       <div style={{ marginBottom: 18 }}>
         <Countdown size={40} boxed align="center" label="Første poeng deles ut om" />
       </div>

@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import Flag from '@/components/Flag'
 import KickButton from '@/app/liga/[code]/KickButton'
 import { formatPoints } from '@/lib/format'
+import { SPORT, CARD_GRADIENT } from '@/config/theme'
 
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 // Grønn pall-kaskade (#22c55e). 1.plass gløder, 2/3 avtar.
 const RANK_COLORS = ['#4ade80', '#34d27a', '#2bb673']
 const RANK_BORDER = ['rgba(34,197,94,0.9)', 'rgba(34,197,94,0.4)', 'rgba(34,197,94,0.22)']
@@ -108,7 +108,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
           : isTop3 ? RANK_BORDER[styleIdx] : 'rgba(255,255,255,0.12)'
         const bg = isMe
           ? 'linear-gradient(180deg, rgba(59,130,246,0.13) 0%, rgba(37,99,235,0.06) 100%)'
-          : isTop3 ? RANK_BG[styleIdx] : 'linear-gradient(180deg, #161b27 0%, #12161f 100%)'
+          : isTop3 ? RANK_BG[styleIdx] : CARD_GRADIENT
 
         return (
           <Link key={id} ref={isMe ? myRowRef : undefined} href={`/deltaker/${id}${backRef ? `?from=${backRef}` : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}

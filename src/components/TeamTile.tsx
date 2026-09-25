@@ -4,8 +4,7 @@ import Flag from '@/components/Flag'
 import type { Player } from '@/data/pots'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { formatPoints } from '@/lib/format'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT } from '@/config/theme'
 
 export function lastName(name: string): string {
   const i = name.indexOf(' ')

@@ -14,8 +14,7 @@ import type { MatchResult } from '@/lib/scoring'
 import { getFirstMatchInfo, getBracketSection, getSeedLabel, isFillerName, R1_MATCHES } from '@/lib/bracketProjection'
 import { DrawBracket, PairBox } from '@/components/DrawBracket'
 import { KICKOFF } from '@/config/tournament'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 
 // Plassholdere i eksempel-trekningen («Kvalifisert spiller 12») vises kort som «Kvalifisert».
 const displayName = (n: string) => (isFillerName(n) ? 'Kvalifisert' : n)
@@ -29,10 +28,10 @@ const TABS: { id: Tab; label: string }[] = [
 ]
 
 const CARD: React.CSSProperties = {
-  background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
+  background: CARD_GRADIENT,
   borderRadius: 16,
   border: '1px solid rgba(255,255,255,0.12)',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)',
+  boxShadow: CARD_SHADOW,
   padding: '16px 18px',
 }
 

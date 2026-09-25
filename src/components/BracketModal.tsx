@@ -3,8 +3,7 @@
 import { useEffect } from 'react'
 import { STAGE_LABELS } from '@/config/scoring'
 import { getDrawSections, getPathToFinal, getSeedLabel, isFillerName } from '@/lib/bracketProjection'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT } from '@/config/theme'
 
 /**
  * Pop-up med spillerens potensielle vei til finalen og hele runde 1-

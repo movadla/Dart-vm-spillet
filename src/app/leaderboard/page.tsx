@@ -6,12 +6,11 @@ import { getLeaderboardData } from '@/lib/participantData'
 import LeaderboardCountdown from './LeaderboardCountdown'
 import LeaderboardMyPage from './LeaderboardMyPage'
 import RankList from '@/components/RankList'
-import LastUpdated from '../deltaker/[id]/LastUpdated'
+import LastUpdated from '@/components/LastUpdated'
+import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 
 export const revalidate = 30
 export const metadata: Metadata = { title: 'Leaderboard' }
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 
 export default async function LeaderboardPage({ searchParams }: { searchParams: Promise<{ fase?: string }> }) {
   const { fase } = await searchParams
@@ -50,7 +49,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
       {!vmStarted ? (
         <LeaderboardCountdown participants={rows.length} />
       ) : rows.length === 0 ? (
-        <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 16, padding: '36px 20px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.12)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
+        <div style={{ background: CARD_GRADIENT, borderRadius: 16, padding: '36px 20px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.12)', boxShadow: CARD_SHADOW }}>
           <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Ingen deltakere ennå</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Leaderboardet fylles når de første poengene deles ut.</div>
         </div>

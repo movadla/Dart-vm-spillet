@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
-const supabase = getSupabaseAdmin()
 import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
 
 interface Pick { participant_id: string; pot_number: number; player_name: string }
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ code: string }> }) {
+  // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
+  // forståelig svar fra handleren, ikke crash ved import av ruten.
+  const supabase = getSupabaseAdmin()
   const { code } = await params
 
   const { data: league } = await supabase

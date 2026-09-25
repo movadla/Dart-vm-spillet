@@ -3,8 +3,7 @@
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { DEMO_COOKIE, DEMO_ID, DEMO_PHASES, type DemoPhase } from '@/lib/demo'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT } from '@/config/theme'
 
 /**
  * Banner øverst på demo-deltakerens Min side: viser at dette er en demo, og

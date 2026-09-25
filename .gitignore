@@ -52,3 +52,7 @@ dev-server.log
 tunnel.log
 
 .vercel
+
+# Claude Code (lokale innstillinger, worktrees, verifiseringsbilder)
+.claude/
+tools/verify/*.jpg

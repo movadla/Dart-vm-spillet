@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
+import { clientIp, isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
 import { POTS } from '@/data/pots'
 import { Resend } from 'resend'
 import { buildWelcomeHtml, buildWelcomeText, iso2For } from '@/lib/email-welcome'
@@ -15,6 +16,13 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getSupabaseAdmin()
+
+  // Per IP: 10 påmeldinger/time er romslig for en husstand/kontor på samme
+  // nett, men stanser skriptet masse-registrering.
+  const ip = clientIp(req)
+  if (await isRateLimited(supabase, 'tipp', ip, 10, 60 * 60 * 1000)) {
+    return NextResponse.json({ error: 'For mange påmeldinger fra dette nettet. Prøv igjen om en time.' }, { status: 429 })
+  }
 
   try {
     const body = await req.json()
@@ -58,6 +66,9 @@ export async function POST(req: NextRequest) {
       .insert({ name: name.trim(), email: email.trim().toLowerCase(), ...(phone && typeof phone === 'string' ? { phone: phone.trim() } : {}) })
       .select('id')
       .single()
+
+    // Telles først når en påmelding faktisk ble forsøkt lagret (ikke på valideringsfeil).
+    await recordRateLimitHit(supabase, 'tipp', ip)
 
     if (participantError || !participant) {
       console.error('Participant insert error:', participantError)

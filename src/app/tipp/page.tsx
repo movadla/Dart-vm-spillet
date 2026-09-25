@@ -1,5 +1,16 @@
 'use client'
 
+// Tippe-flyten — én klientkomponent med seksjoner (søk på «── » for å hoppe):
+//   TippContent()      state, auth/edit-modus, lagring
+//   ── Stengt          etter frist
+//   ── Innloggingslenke / token (edit-modus)
+//   ── Bekreftelsesskjerm
+//   ── Steg 0          intro-slideshow (StepSlideshow)
+//   ── Registrering    navn/e-post
+//   ── Oppsummering    laget + «Endre»
+//   ── Steg 1–6        velg spiller (PlayerCard + PlayerDetailPanel)
+// Fremdriftsprikker/konfetti: ./ProgressDots.tsx
+
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -13,117 +24,16 @@ import TeamTile from '@/components/TeamTile'
 import { PLAYER_STATS } from '@/data/playerStats'
 import { formatAvg } from '@/lib/format'
 import StepSlideshow, { INTRO_LAST_SLIDE } from '@/components/StepSlideshow'
-import LeagueSection from '@/app/deltaker/[id]/LeagueSection'
-import ShareButton from '@/app/ShareButton'
+import LeagueSection from '@/components/LeagueSection'
+import ShareButton from '@/components/ShareButton'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 import { KICKOFF } from '@/config/tournament'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { Confetti, ProgressDots } from './ProgressDots'
+import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 
 const POT_COUNT = POTS.length
 const REGISTRATION_STEP = POT_COUNT + 1
 const SUMMARY_STEP = POT_COUNT + 2
-
-const CONFETTI_PIECES = [
-  { color: '#dc2626', left: 8,  size: 8, delay: 0,    rect: false },
-  { color: '#fbbf24', left: 22, size: 6, delay: 0.12, rect: true  },
-  { color: '#3b82f6', left: 38, size: 9, delay: 0.22, rect: false },
-  { color: '#22c55e', left: 52, size: 7, delay: 0.07, rect: true  },
-  { color: '#dc2626', left: 67, size: 8, delay: 0.17, rect: false },
-  { color: '#fbbf24', left: 82, size: 6, delay: 0.28, rect: true  },
-  { color: '#8b5cf6', left: 14, size: 7, delay: 0.33, rect: false },
-  { color: '#3b82f6', left: 58, size: 9, delay: 0.38, rect: true  },
-  { color: '#22c55e', left: 88, size: 6, delay: 0.42, rect: false },
-  { color: '#ec4899', left: 44, size: 8, delay: 0.48, rect: true  },
-  { color: '#fbbf24', left: 74, size: 7, delay: 0.52, rect: false },
-  { color: '#dc2626', left: 30, size: 5, delay: 0.58, rect: true  },
-]
-
-function Confetti() {
-  return (
-    <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, height: 0, overflow: 'visible', pointerEvents: 'none', zIndex: 50 }}>
-      {CONFETTI_PIECES.map((p, i) => (
-        <div key={i} style={{
-          position: 'absolute', top: -10, left: `${p.left}%`,
-          width: p.size, height: p.rect ? p.size * 1.6 : p.size,
-          background: p.color,
-          borderRadius: p.rect ? 2 : '50%',
-          animation: `confetti-fall 3s ${p.delay}s ease-in both`,
-        }} />
-      ))}
-    </div>
-  )
-}
-
-function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep, onTogglePoeng, poengActive }: {
-  step: number
-  /** Pottens multiplikator — vises i steg-linjen («Steg 3 av 6 · ×2») */
-  multiplier?: number
-  /** Valgene så langt — fullførte steg viser flagget til spilleren du valgte */
-  picks?: Record<number, string>
-  onGuide?: () => void
-  onStep?: (s: number) => void
-  onTogglePoeng?: () => void
-  poengActive?: boolean
-}) {
-  return (
-    <div style={{ marginBottom: 20 }}>
-      {/* Fullførte steg viser flagget til spilleren du valgte (og er klikkbare
-          for å gå tilbake), aktivt steg er en farget strek, kommende er prikker.
-          Alle har 20 px trykkflate. */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 2, marginBottom: 4 }}>
-        {POTS.map((pot, i) => {
-          const c = POT_COLORS[i % POT_COLORS.length]
-          const done = i < step - 1
-          const active = i === step - 1
-          const pickedName = picks[pot.potNumber]
-          const picked = pickedName ? pot.players.find((p) => p.name === pickedName) : undefined
-          return (
-            <button
-              key={i}
-              type="button"
-              onClick={done ? () => onStep?.(i + 1) : undefined}
-              disabled={!done}
-              aria-label={done ? `Gå til steg ${i + 1} (${pickedName})` : `Steg ${i + 1}`}
-              style={{ padding: '6px 4px', background: 'none', border: 'none', cursor: done ? 'pointer' : 'default', display: 'flex', alignItems: 'center' }}
-            >
-              {done && picked ? (
-                <span style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 0 2px ${c}`, background: '#000' }}>
-                  <Flag iso2={picked.iso2} size={18} />
-                </span>
-              ) : (
-                <span style={{ display: 'block', height: 8, width: active ? 22 : 8, borderRadius: 4, background: active ? c : 'rgba(255,255,255,0.2)', transition: 'width 0.25s ease, background 0.25s ease' }} />
-              )}
-            </button>
-          )
-        })}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <SmartBackButton />
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.12em', fontVariantNumeric: 'tabular-nums' }}>
-          STEG {step} AV {POT_COUNT}
-          {multiplier > 1 && <span style={{ color: multiplier === 2 ? '#f59e0b' : '#ef4444', marginLeft: 6 }}>· ×{multiplier}</span>}
-        </div>
-        {/* Guide og Poeng ved siden av hverandre oppe i høyre hjørne — Poeng
-            lå tidligere lenger ned i pott-headeren, atskilt fra Guide. */}
-        <div style={{ display: 'flex', gap: 6 }}>
-          {onGuide && (
-            <button onClick={onGuide} className="btn-hover" style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}>Guide</button>
-          )}
-          {onTogglePoeng && (
-            <button
-              onClick={onTogglePoeng}
-              className="btn-hover"
-              style={{ fontSize: 11, fontWeight: 700, color: poengActive ? '#fff' : 'rgba(255,255,255,0.7)', background: poengActive ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.08)', border: `1px solid ${poengActive ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.2)'}`, borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}
-            >
-              Poeng
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 function TippContent() {
   const searchParams = useSearchParams()
@@ -434,7 +344,7 @@ const inputStyle: React.CSSProperties = {
         </div>
 
         {/* Picks */}
-        <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', marginBottom: 20, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
+        <div style={{ background: CARD_GRADIENT, borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', marginBottom: 20, boxShadow: CARD_SHADOW }}>
           <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)' }}>
             Dine valg
           </div>
@@ -459,7 +369,7 @@ const inputStyle: React.CSSProperties = {
         </div>
 
         {/* Hva skjer nå? */}
-        <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '14px 16px', marginBottom: 24, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)' }}>
+        <div style={{ background: CARD_GRADIENT, border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '14px 16px', marginBottom: 24, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)' }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', marginBottom: 12 }}>Hva skjer nå?</div>
           {([
             ['1', 'Dart-VM starter 11. desember 2026, kl. 19:00'],
@@ -574,7 +484,7 @@ const inputStyle: React.CSSProperties = {
           })}
         </div>
 
-        <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', padding: '24px 20px', marginBottom: 16, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
+        <div style={{ background: CARD_GRADIENT, borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', padding: '24px 20px', marginBottom: 16, boxShadow: CARD_SHADOW }}>
           <div style={{ marginBottom: 16 }}>
             <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>Navn</label>
             <input style={inputStyle} type="text" placeholder="Ola Nordmann" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -680,7 +590,7 @@ const inputStyle: React.CSSProperties = {
           </div>
           {name && <div style={{ color: '#fff' }}>{name}</div>}
         </div>
-        <div style={{ background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', marginBottom: 20, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)' }}>
+        <div style={{ background: CARD_GRADIENT, borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', marginBottom: 20, boxShadow: CARD_SHADOW }}>
           {POTS.map((pot) => {
             const playerName = picks[pot.potNumber]
             const player = pot.players.find((p) => p.name === playerName)

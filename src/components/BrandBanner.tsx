@@ -1,5 +1,4 @@
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-
+import { SPORT } from '@/config/theme'
 /**
  * «— PDC World Championship — / DART-VM-SPILLET»-banneret som alle sidene
  * deler. Samme komponent (og samme mål) på Min side, leaderboard, liga,

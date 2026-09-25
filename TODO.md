@@ -4,7 +4,6 @@
 
 - [ ] **Spillerfakta i tippe-flyten er eksempeldata** (lagt inn 2026-09-24): `src/data/playerStats.ts` har snitt (three-dart average) og «beste prestasjon» for de 18 valgbare spillerne, alle med `verified: false` — panelet viser en gul «Eksempeldata»-merkelapp så lenge det står slik. Sjekk hver linje mot pdc.tv/Wikipedia, rett opp, og sett `verified: true`. **Snittet må oppdateres like før VM-start** (endrer seg gjennom sesongen). Det finnes ingen gratis PDC-API, så dette er manuelt.
 - [ ] **«Vei til finalen» og brakett-pop-upen bygger på eksempel-trekningen** (`src/lib/bracketProjection.ts`) og blir automatisk riktige når den ekte trekningen legges inn medio november — se README «Trekning — oppdatere med ekte data». Fjern «eksempel-trekning»-merknadene i `PlayerDetailPanel.tsx`/`BracketModal.tsx` når det er gjort.
-- [ ] **Bildekreditering:** «i»-knappen er fjernet fra kortene (2026-09-24); krediteringen (påkrevd av CC-lisensene) vises nå i spillerpanelet («Foto: …»). Lag i tillegg en samlet liste på info-siden (`/vm-info`) med alle spillerfoto + fotograf + lisens — trygt uansett hvor kortene vises (oppsummering, Min side, leaderboard).
 - [ ] **«% valgt»** (`/api/pick-share`) vises først fra 10 deltakere (`MIN_PARTICIPANTS_FOR_SHARE`). Bestem om du vil ha den synlig i det hele tatt før VM — tallet påvirker hva folk velger (flokkeffekt). Ved mange tusen deltakere bør endepunktet flyttes til en DB-view/RPC med `group by` i stedet for å hente alle picks-rader (cachet 60 s nå, så det holder lenge).
 
 - [ ] **Demo-deltakeren** (lagt inn 2026-09-24, se README → «Demo-deltaker»): `/finn` med `demo@dart-vm-spillet.no` → `/deltaker/demo`. Bestem før lansering om demoen skal være tilgjengelig i produksjon (den er harmløs og helt atskilt fra ekte data, men `/deltaker/demo` er en offentlig URL). Vil du fjerne den: slett demo-grenene i `src/lib/participantData.ts` og `src/app/api/finn/route.ts` (+ `league/mine`), så er `src/lib/demo.ts` død kode. Når `dart_vm`-skjemaet er eksponert kan jeg i tillegg legge inn en ekte testdeltaker i databasen.
@@ -54,16 +53,8 @@
 - [ ] Sett opp Vercel-prosjekt og fyll inn alle miljøvariablene fra `.env.example` der
 - [ ] Når Vercel-prosjektet er satt opp: bytt lenken i `src/app/admin/page.tsx` («Trafikk»-kortet) fra den generelle `vercel.com/dashboard` til den direkte `/analytics`-lenken for RIKTIG prosjekt — den pekte tidligere feilaktig til det gamle fotball-VM-prosjektets dashbord
 - [ ] Nærmere desember: sjekk PDC sin offisielle seeding mot `src/data/pots.ts` (rangeringen der er et øyeblikksbilde fra september og vil ha glidd)
-- [ ] Spillerinfo-panelet i tippe-flyten (vises når du velger en spiller) har tre nye felt i `Player`-typen (`src/data/pots.ts`): `titles` (antall PDC-titler), `bestResult2026` (beste resultat så langt i 2026, f.eks. "Kvartfinale i World Matchplay") og `form` (`'dårlig' | 'middels' | 'bra'`). INGEN spiller har noen av disse satt ennå — panelet viser "—"/"Ukjent" for alle. Gi meg tallene/tekstene (eller kilder jeg kan sjekke) så fyller jeg dem inn — ikke noe jeg finner på selv.
 - [ ] Fyll inn navn/foretak og adresse under «Behandlingsansvarlig» i `src/app/personvern/page.tsx` (påkrevd etter GDPR art. 13) — kan ikke gjette dette selv
 - [ ] Når PDC publiserer den faktiske trekningen (normalt medio november): følg steg-for-steg-oppskriften i `README.md` → «Trekning — oppdatere med ekte data»
-- [ ] Kun Luke Littler har et ekte spillerfoto på kortet sitt (`src/data/playerPhotos.ts`,
-      bildefil i `public/players/`) — hentet fra Wikimedia Commons med verifisert
-      CC BY-SA 4.0-lisens, kreditering, og AI-basert bakgrunnsfjerning (rembg). Vil du ha
-      foto på flere spillere: finn et CC-lisensiert bilde på Wikimedia Commons (sjekk
-      lisensfeltet på filsiden!), gi meg lenken, så laster jeg det ned, fjerner bakgrunnen
-      og legger det inn på samme måte. IKKE legg til bilder fra andre kilder (Google-søk,
-      pressebilder, sosiale medier) uten at jeg har verifisert lisensen.
 
 **Implementert 2026-09-23:** spillervalget vises som fullstørrelses showcase-kort
 i et sentrert grid, bygget på en ekte designet bildemal (ikke lenger CSS/SVG-tegnet
@@ -114,6 +105,8 @@ et bevisst valg fra deg fremfor at jeg griper inn på egen hånd.
       `send-daily-email/route.ts`) — risiko for at sendingen stopper
       midtveis ved mange mottakere, uten resume/retry.
 - [ ] Ingen 2FA på admin-innlogging.
+- [ ] Ingen Content-Security-Policy ennå (øvrige sikkerhetsheadere er på plass i `next.config.ts`) — krever at inline-stiler flyttes ut eller nonce-oppsett; flagcdn.com og Vercel Analytics må hvitelistes.
+- [ ] Daglig e-post (`/api/send-daily-email`) er ikke satt opp som cron noe sted (`vercel.json` har tom `crons`) — legg inn `{ "path": "/api/send-daily-email", "schedule": "0 7 * * *" }` når Vercel-prosjektet finnes; ruten godtar `Authorization: Bearer CRON_SECRET`.
 
 **Bør ha:**
 - [ ] `POTS`-spillerdata er en statisk kodefil (`src/data/pots.ts`) —
@@ -131,10 +124,6 @@ et bevisst valg fra deg fremfor at jeg griper inn på egen hånd.
       opprydding/TTL.
 - [ ] `snapshot-ranks.yml` har ingen reell feilvarsling ved feil (kun
       GitHubs standard-e-post til repo-eier).
-- [ ] `admin_session`-sammenligningen i `src/middleware.ts:10` bruker
-      `!==`, ikke konstant-tid. Lav praktisk risiko, men triviell å
-      bytte til `secureCompare()` (finnes allerede i
-      `src/lib/adminAuth.ts`, brukt i admin-login).
 - [ ] Tilgjengelighet er fortsatt tynt dekket i resten av appen (kun
       `StepSlideshow.tsx` er gjennomgått denne runden) — få
       `aria-label`, uverifisert tastaturnavigasjon andre steder.

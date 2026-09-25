@@ -2,7 +2,6 @@ import { Resend } from 'resend'
 import { createHmac } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 
-const supabase = getSupabaseAdmin()
 import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
 import { SCORING } from '@/config/scoring'
 import { buildDailyEmail, buildDailyPlainText, VM_TOTAL_DAYS } from '@/lib/email-daily'
@@ -34,6 +33,9 @@ interface LeaderboardRow {
 }
 
 export async function GET(request: Request) {
+  // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
+  // forståelig svar fra handleren, ikke crash ved import av ruten.
+  const supabase = getSupabaseAdmin()
   const { searchParams } = new URL(request.url)
   const testTo = searchParams.get('testTo')
 

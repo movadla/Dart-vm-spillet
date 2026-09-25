@@ -7,8 +7,6 @@ import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
 import { SCORING } from '@/config/scoring'
 import { buildDailyEmail, buildDailyPlainText, VM_TOTAL_DAYS } from '@/lib/email-daily'
 
-const supabase = getSupabaseAdmin()
-
 export const maxDuration = 60
 
 import { KICKOFF as VM_START } from '@/config/tournament'
@@ -27,6 +25,9 @@ interface MatchResultWithDate extends MatchResult {
 }
 
 export async function POST(req: NextRequest) {
+  // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
+  // forståelig svar fra handleren, ikke crash ved import av ruten.
+  const supabase = getSupabaseAdmin()
   const authError = checkAdminAuth(req)
   if (authError) return authError
 

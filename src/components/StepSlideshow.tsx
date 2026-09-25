@@ -10,8 +10,7 @@ import TeamTile, { lastName } from '@/components/TeamTile'
 import TeamBuildAnimation, { EXAMPLE_TEAM } from '@/components/TeamBuildAnimation'
 import { formatPoints } from '@/lib/format'
 import { usePageVisible } from '@/lib/usePageVisible'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT, CARD_GRADIENT } from '@/config/theme'
 
 // Én typografisk skala for alle intro-slidene: tittel / undertekst / etikett.
 // Sport-skriften brukes kun til titler, navn og tall — aldri til setninger.
@@ -478,7 +477,7 @@ function ProgressPhase() {
       {/* Liga-tabell: absolutt posisjonerte rader, så re-sortering glir */}
       <div style={reveal(step, 3, {
         position: 'relative', height: table.length * LEAGUE_ROW_H, maxWidth: 300, margin: '0 auto',
-        background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)', border: '1px solid rgba(255,255,255,0.1)',
+        background: CARD_GRADIENT, border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: 12, overflow: 'hidden', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 20px rgba(0,0,0,0.25)',
       })}>
         {table.map((row, i) => (

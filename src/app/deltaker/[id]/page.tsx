@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import BrandBanner from '@/components/BrandBanner'
-import ShareButton from '@/app/ShareButton'
+import ShareButton from '@/components/ShareButton'
 import { getParticipantPageData } from '@/lib/participantData'
 import { STAGE_ORDER, STAGE_LABELS, type Stage } from '@/config/scoring'
 import CountUp from './CountUp'
@@ -11,16 +11,16 @@ import Countdown from '@/components/Countdown'
 import type { Metadata } from 'next'
 import DemoBanner from './DemoBanner'
 import MyTeam from './MyTeam'
-import LeagueSection from './LeagueSection'
+import LeagueSection from '@/components/LeagueSection'
+import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
 const STAGE_INDEX: Record<string, number> = Object.fromEntries(STAGE_ORDER.map((s, i) => [s, i]))
 
 const CARD: React.CSSProperties = {
-  background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
+  background: CARD_GRADIENT,
   border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 16,
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)',
+  boxShadow: CARD_SHADOW,
 }
 const LABEL: React.CSSProperties = { fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }
 

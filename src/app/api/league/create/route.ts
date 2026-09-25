@@ -3,14 +3,15 @@ import { cookies } from 'next/headers'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { KICKOFF } from '@/config/tournament'
 
-const supabase = getSupabaseAdmin()
-
 function generateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
 
 export async function POST(req: NextRequest) {
+  // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
+  // forståelig svar fra handleren, ikke crash ved import av ruten.
+  const supabase = getSupabaseAdmin()
   if (new Date() >= KICKOFF) {
     return NextResponse.json({ error: 'Ligaer er låst etter at VM har startet.' }, { status: 403 })
   }

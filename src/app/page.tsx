@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import TeamBuildAnimation from '@/components/TeamBuildAnimation'
 import Countdown from '@/components/Countdown'
 import { KICKOFF } from '@/config/tournament'
+import { SPORT, CARD_GRADIENT } from '@/config/theme'
 
 function IconTarget() {
   return (
@@ -39,8 +40,6 @@ function IconTrophy() {
   )
 }
 
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
-
 type MyStats = { name: string; points: number; rank: number; totalParticipants: number }
 type PreviewRow = { id: string; name: string; points: number }
 
@@ -60,7 +59,7 @@ function MiniDashboard({ participantId }: { participantId: string }) {
 
   return (
     <div style={{
-      background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
+      background: CARD_GRADIENT,
       border: '1px solid rgba(255,255,255,0.12)',
       borderRadius: 16,
       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 20px rgba(0,0,0,0.25)',
@@ -96,7 +95,7 @@ function MiniLeaderboard() {
 
   return (
     <div style={{
-      background: 'linear-gradient(180deg, #161b27 0%, #12161f 100%)',
+      background: CARD_GRADIENT,
       border: '1px solid rgba(255,255,255,0.12)',
       borderRadius: 16,
       overflow: 'hidden',

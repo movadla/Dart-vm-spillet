@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Konstant-tid sammenligning uten Node-crypto (proxyen kjører i edge-runtime,
+// der `timingSafeEqual` fra src/lib/adminAuth.ts ikke er tilgjengelig).
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return diff === 0
+}
+
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
@@ -7,7 +16,8 @@ export function proxy(req: NextRequest) {
   if (pathname.startsWith('/admin')) {
     if (pathname === '/admin/login') return NextResponse.next()
     const cookie = req.cookies.get('admin_session')?.value
-    if (!process.env.ADMIN_SECRET || cookie !== process.env.ADMIN_SECRET) {
+    const secret = process.env.ADMIN_SECRET
+    if (!secret || !cookie || !safeEqual(cookie, secret)) {
       return NextResponse.redirect(new URL('/admin/login', req.url))
     }
     return NextResponse.next()

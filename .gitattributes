@@ -1,0 +1,7 @@
+# Én linjeslutt i repoet (LF) uansett Windows/macOS — fjerner CRLF-advarslene ved commit.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
+*.exe binary

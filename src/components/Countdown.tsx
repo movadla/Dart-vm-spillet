@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 import { KICKOFF } from '@/config/tournament'
 import { usePageVisible } from '@/lib/usePageVisible'
-
-const SPORT = 'var(--font-condensed), "Barlow Condensed", "Arial Narrow", Impact, sans-serif'
+import { SPORT } from '@/config/theme'
 
 function getTimeLeft() {
   const diff = KICKOFF.getTime() - Date.now()
