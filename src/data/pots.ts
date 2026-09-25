@@ -22,7 +22,6 @@ export interface Player {
 export interface Pot {
   potNumber: number
   name: string
-  emoji: string
   players: Player[]
 }
 
@@ -44,11 +43,16 @@ export function getPickablePlayers(pot: Pot): Player[] {
 // Pott 6 (useedede/kvalifiserte) er en illustrativ liste over kjente PDC-profesjonelle —
 // oppdater med det faktiske deltakerfeltet når PDC publiserer trekningen for
 // sesongens VM (vanligvis medio november).
+//
+// `name` er ren tekst UTEN emoji med vilje — den vises i mange ulike
+// sammenhenger (kortoverskrifter, en <optgroup>, aria-labels, oversatte
+// dict.players.potNames), og et emoji-tegn bakt inn i selve dataen krevde
+// regex-stripping (`.replace(/^[^\p{L}]+/u, '')`) på noen av dem men ikke
+// andre — det lekket forskjellig ut avhengig av hvilken skjerm man så på.
 export const POTS: Pot[] = [
   {
     potNumber: 1,
-    name: '👑 Favorittene',
-    emoji: '👑',
+    name: 'Favorittene',
     players: [
       { name: 'Luke Littler',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 1, seedNumber: 1, odds: '2.5' },
       { name: 'Luke Humphries',    nationality: 'England',     iso2: 'gb-eng', pdcRanking: 2, seedNumber: 2, odds: '3.5' },
@@ -57,8 +61,7 @@ export const POTS: Pot[] = [
   },
   {
     potNumber: 2,
-    name: '⭐ Toppseedet',
-    emoji: '⭐',
+    name: 'Toppseedet',
     players: [
       { name: 'Michael van Gerwen',nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 7,  seedNumber: 7,  odds: '9.0' },
       { name: 'Gerwyn Price',      nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 4, seedNumber: 4, odds: '11.0' },
@@ -67,8 +70,7 @@ export const POTS: Pot[] = [
   },
   {
     potNumber: 3,
-    name: '💪 Storfavoritter',
-    emoji: '💪',
+    name: 'Storfavoritter',
     players: [
       { name: 'James Wade',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 6,  seedNumber: 6,  odds: '15.0' },
       { name: 'Josh Rock',         nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 8,  seedNumber: 8,  odds: '17.0' },
@@ -78,8 +80,7 @@ export const POTS: Pot[] = [
   },
   {
     potNumber: 4,
-    name: '🏆 Seedet outsidere',
-    emoji: '🏆',
+    name: 'Seedet outsidere',
     players: [
       { name: 'Wessel Nijman',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 12, seedNumber: 12, odds: '26.0' },
       { name: 'Gary Anderson',     nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 11, seedNumber: 11, odds: '34.0' },
@@ -90,8 +91,7 @@ export const POTS: Pot[] = [
   },
   {
     potNumber: 5,
-    name: '🔥 Kvalifiserte',
-    emoji: '🔥',
+    name: 'Kvalifiserte',
     players: [
       { name: 'Ross Smith',            nationality: 'England',        iso2: 'gb-eng', pdcRanking: 14, seedNumber: 14, odds: '41.0' },
       { name: 'Rob Cross',             nationality: 'England',        iso2: 'gb-eng', pdcRanking: 21, seedNumber: 21, odds: '51.0' },
@@ -103,8 +103,7 @@ export const POTS: Pot[] = [
   },
   {
     potNumber: 6,
-    name: '🎲 Resten',
-    emoji: '🎲',
+    name: 'Resten',
     players: [
       { name: 'Luke Woodhouse',        nationality: 'England',        iso2: 'gb-eng', pdcRanking: 18, seedNumber: 18, odds: '81.0' },
       { name: 'Martin Schindler',      nationality: 'Tyskland',       iso2: 'de',     pdcRanking: 19, seedNumber: 19, odds: '81.0' },

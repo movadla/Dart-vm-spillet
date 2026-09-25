@@ -12,12 +12,12 @@ export const players = {
   },
   champion: 'World Champion',
   potNames: {
-    1: '👑 The Favourites',
-    2: '⭐ Top Seeds',
-    3: '💪 Strong Favourites',
-    4: '🏆 Seeded Outsiders',
-    5: '🔥 Qualifiers',
-    6: '🎲 The Rest',
+    1: 'The Favourites',
+    2: 'Top Seeds',
+    3: 'Strong Favourites',
+    4: 'Seeded Outsiders',
+    5: 'Qualifiers',
+    6: 'The Rest',
   },
   nationalities: {
     England: 'England',

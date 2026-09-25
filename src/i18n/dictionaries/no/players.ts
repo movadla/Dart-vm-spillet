@@ -24,12 +24,12 @@ export const players: PlayersDict = {
   },
   champion: 'VM-vinner',
   potNames: {
-    1: '👑 Favorittene',
-    2: '⭐ Toppseedet',
-    3: '💪 Storfavoritter',
-    4: '🏆 Seedet outsidere',
-    5: '🔥 Kvalifiserte',
-    6: '🎲 Resten',
+    1: 'Favorittene',
+    2: 'Toppseedet',
+    3: 'Storfavoritter',
+    4: 'Seedet outsidere',
+    5: 'Kvalifiserte',
+    6: 'Resten',
   },
   nationalities: {
     England: 'England',
