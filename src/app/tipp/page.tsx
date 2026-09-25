@@ -22,7 +22,7 @@ import { PlayerCard } from '@/components/PlayerCard'
 import PlayerDetailPanel from '@/components/PlayerDetailPanel'
 import TeamTile from '@/components/TeamTile'
 import { PLAYER_STATS } from '@/data/playerStats'
-import { formatAvg } from '@/lib/format'
+import { formatAvg, formatPoints } from '@/lib/format'
 import StepSlideshow, { INTRO_LAST_SLIDE } from '@/components/StepSlideshow'
 import LeagueSection from '@/components/LeagueSection'
 import ShareButton from '@/components/ShareButton'
@@ -712,10 +712,10 @@ const inputStyle: React.CSSProperties = {
           <span style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, color: 'rgba(0,0,0,0.45)', lineHeight: 1 }}>{step}</span>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Pottens navn (uten emoji) som tittel — «Velg din spiller» gjentok
-              bare steg-linjen; nå får hvert steg sin egen identitet */}
+          {/* Pottens navn som tittel — «Velg din spiller» gjentok bare
+              steg-linjen; nå får hvert steg sin egen identitet */}
           <div style={{ fontFamily: SPORT, fontSize: 26, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
-            {translatePotName(dict.players, pot.potNumber, pot.name).replace(/^[^\p{L}]+/u, '')}
+            {translatePotName(dict.players, pot.potNumber, pot.name)}
           </div>
           {/* Multiplikatoren står i steg-linjen over («Steg 3 av 6 · ×2»);
               her kun en rolig forklaring i vanlig tekst når den er > 1 */}
@@ -731,15 +731,15 @@ const inputStyle: React.CSSProperties = {
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>{dict.tipp.step.scoreInfo.title}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
             <span style={{ color: 'rgba(255,255,255,0.7)' }}>{dict.tipp.step.scoreInfo.perSet}</span>
-            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{SCORING.perSetWon}p</span>
+            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>+{formatPoints(SCORING.perSetWon, locale)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
             <span style={{ color: 'rgba(255,255,255,0.7)' }}>{dict.tipp.step.scoreInfo.perAdvancement}</span>
-            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{SCORING.perAdvancement}p</span>
+            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>+{formatPoints(SCORING.perAdvancement, locale)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'rgba(255,255,255,0.7)' }}>{dict.tipp.step.scoreInfo.forWinning}</span>
-            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>+{SCORING.tournamentWinner}p</span>
+            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>+{formatPoints(SCORING.tournamentWinner, locale)}</span>
           </div>
           <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
           {(() => {
