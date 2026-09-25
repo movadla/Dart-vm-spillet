@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { POTS, type Player } from '@/data/pots'
-import { SCORING, STAGE_LABELS } from '@/config/scoring'
+import { SCORING } from '@/config/scoring'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 import { PlayerCard } from '@/components/PlayerCard'
 import TeamTile, { lastName } from '@/components/TeamTile'
@@ -11,6 +11,7 @@ import TeamBuildAnimation, { EXAMPLE_TEAM } from '@/components/TeamBuildAnimatio
 import { formatPoints } from '@/lib/format'
 import { usePageVisible } from '@/lib/usePageVisible'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 // Én typografisk skala for alle intro-slidene: tittel / undertekst / etikett.
 // Sport-skriften brukes kun til titler, navn og tall — aldri til setninger.
@@ -67,7 +68,9 @@ const CTA_STYLE: React.CSSProperties = {
  * sveip eller piltaster (ingen auto-advance). Brukes som steg 0 i
  * tippe-flyten (tipp/page.tsx).
  */
-export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = '/tipp', ctaLabel = 'VELG SPILLERE →' }: Props) {
+export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = '/tipp', ctaLabel }: Props) {
+  const { dict } = useLocale()
+  const resolvedCtaLabel = ctaLabel ?? dict.tipp.stepSlideshow.ctaLabel
   const [visible, setVisible] = useState(false)
   const [phase, setPhase] = useState(0)
   // Retning på siste fasebytte → innholdet glir inn fra riktig side.
@@ -169,14 +172,14 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
 
       {/* Faseprikker som ekte tabs: klikkbare, piltast-navigerbare, med
           28 px trykkflate rundt selve streken */}
-      <div role="tablist" aria-label="Steg i introduksjonen" style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 16 }}>
+      <div role="tablist" aria-label={dict.tipp.stepSlideshow.tablistAriaLabel} style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 16 }}>
         {[0, 1, 2].map((i) => (
           <button
             key={i}
             role="tab"
             type="button"
             aria-selected={i === phase}
-            aria-label={`Slide ${i + 1} av 3`}
+            aria-label={dict.tipp.stepSlideshow.slideAriaLabel(i + 1)}
             aria-controls="step-slideshow-panel"
             tabIndex={i === phase ? 0 : -1}
             onClick={() => goToPhase(i)}
@@ -231,7 +234,7 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
               letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer',
             }}
           >
-            Tilbake
+            {dict.tipp.stepSlideshow.back}
           </button>
         )}
         {phase < LAST_PHASE ? (
@@ -245,15 +248,15 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
               border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(220,38,38,0.35)',
             }}
           >
-            Neste →
+            {dict.tipp.stepSlideshow.next}
           </button>
         ) : onStart ? (
           <button onClick={onStart} className="cta-pulse" style={CTA_STYLE}>
-            {ctaLabel}
+            {resolvedCtaLabel}
           </button>
         ) : (
           <Link href={ctaHref} className="cta-btn cta-pulse" style={{ ...CTA_STYLE, textAlign: 'center', textDecoration: 'none' }}>
-            {ctaLabel}
+            {resolvedCtaLabel}
           </Link>
         )}
       </div>
@@ -294,18 +297,19 @@ function reveal(step: number, from: number, extra?: React.CSSProperties): React.
 const INTRO_STEPS = [0, 1300, 2700]
 
 function IntroPhase({ onFinished }: { onFinished: () => void }) {
+  const { dict } = useLocale()
   const step = useTimedSteps(INTRO_STEPS)
   const [done, setDone] = useState(false)
   return (
     <div style={{ textAlign: 'center' }}>
-      <div style={{ ...H1, marginBottom: 10 }}>Slik fungerer det</div>
+      <div style={{ ...H1, marginBottom: 10 }}>{dict.tipp.stepSlideshow.intro.title}</div>
       <div style={reveal(step, 1, { ...SUB, marginBottom: 22 })}>
-        Velg 6 spillere – én fra hvert nivå
+        {dict.tipp.stepSlideshow.intro.subtitle}
       </div>
       <TeamBuildAnimation startDelay={INTRO_STEPS[2]} allowSkip onFinished={() => { setDone(true); onFinished() }} />
       {/* Spol-hint for dem som har sett animasjonen før — forsvinner når den er ferdig */}
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 2, opacity: step >= 2 && !done ? 1 : 0, transition: 'opacity 0.4s ease' }}>
-        Trykk på laget for å spole fram
+        {dict.tipp.stepSlideshow.intro.skipHint}
       </div>
     </div>
   )
@@ -317,6 +321,7 @@ const EXAMPLE_STEPS = [0, 1300, 2700, 3400, 5400, 6600, 7300, 8100]
 const EXAMPLE_CARD_WIDTH = 92
 
 function ExamplePhase() {
+  const { locale, dict } = useLocale()
   const step = useTimedSteps(EXAMPLE_STEPS)
   const [opponent, setOpponent] = useState<Player>(UNSEEDED[0])
   useEffect(() => {
@@ -330,15 +335,15 @@ function ExamplePhase() {
 
   return (
     <div className="card-mini" style={{ textAlign: 'center' }}>
-      <div style={{ ...H1, marginBottom: 10 }}>Følg spillerne gjennom VM</div>
+      <div style={{ ...H1, marginBottom: 10 }}>{dict.tipp.stepSlideshow.example.title}</div>
       <div style={reveal(step, 1, { ...SUB, marginBottom: 18 })}>
-        Du får poeng for hver seier og hvert sett
+        {dict.tipp.stepSlideshow.example.subtitle}
       </div>
 
       <div style={reveal(step, 2, { marginBottom: 10 })}>
         {/* «Eksempel» over runden, så ingen tror det er en ekte kamp */}
-        <div style={{ ...LABEL, fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 2 }}>Eksempel</div>
-        <div style={{ ...LABEL, color: '#f3d576' }}>{STAGE_LABELS.r1}</div>
+        <div style={{ ...LABEL, fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 2 }}>{dict.tipp.stepSlideshow.example.exampleLabel}</div>
+        <div style={{ ...LABEL, color: '#f3d576' }}>{dict.players.stages.r1}</div>
       </div>
 
       {/* Kampoppsett: Littler-kortet vs. en tilfeldig useeded — «VS» byttes
@@ -361,9 +366,9 @@ function ExamplePhase() {
               {EXAMPLE_SETS_WON}–{EXAMPLE_SETS_LOST}
             </div>
           ) : (
-            <div key="vs" style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>VS</div>
+            <div key="vs" style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>{dict.tipp.stepSlideshow.example.vs}</div>
           )}
-          <div style={{ ...LABEL, fontSize: 11, opacity: step >= 4 ? 1 : 0, transition: 'opacity 0.4s ease' }}>sett</div>
+          <div style={{ ...LABEL, fontSize: 11, opacity: step >= 4 ? 1 : 0, transition: 'opacity 0.4s ease' }}>{dict.tipp.stepSlideshow.example.setsUnit}</div>
         </div>
         <div style={{ width: EXAMPLE_CARD_WIDTH, flexShrink: 0, pointerEvents: 'none' }}>
           <PlayerCard
@@ -382,15 +387,15 @@ function ExamplePhase() {
       {/* Poengrader — én og én, så summen */}
       <div style={{ maxWidth: 260, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
         <div style={reveal(step, 5, rowStyle)}>
-          <span>Seier</span>
-          <span style={valueStyle}>{formatPoints(EXAMPLE_WIN_PTS)}</span>
+          <span>{dict.tipp.stepSlideshow.example.win}</span>
+          <span style={valueStyle}>{formatPoints(EXAMPLE_WIN_PTS, locale)}</span>
         </div>
         <div style={reveal(step, 6, rowStyle)}>
-          <span>Sett vunnet</span>
-          <span style={valueStyle}>{formatPoints(EXAMPLE_SET_PTS)}</span>
+          <span>{dict.tipp.stepSlideshow.example.setsWon}</span>
+          <span style={valueStyle}>{formatPoints(EXAMPLE_SET_PTS, locale)}</span>
         </div>
         <div style={reveal(step, 7, { ...rowStyle, borderTop: '1px solid rgba(243,213,118,0.3)', marginTop: 2, padding: '8px 4px 0' })}>
-          <span style={LABEL}>Totalt</span>
+          <span style={LABEL}>{dict.tipp.stepSlideshow.example.total}</span>
           <span
             className={step >= 7 ? 'multiplier-badge' : undefined}
             style={{
@@ -399,7 +404,7 @@ function ExamplePhase() {
               borderRadius: 8, padding: '4px 12px',
             }}
           >
-            +{formatPoints(EXAMPLE_TOTAL)}
+            +{formatPoints(EXAMPLE_TOTAL, locale)}
           </span>
         </div>
       </div>
@@ -412,17 +417,9 @@ function ExamplePhase() {
 // summen av brikkene over: startsummen fordeles tilfeldig på de seks, og hvert
 // klatretrinn legger økningen på én tilfeldig spiller.
 const PROGRESS_STEPS = [0, 1300, 3300, 4600, 5700, 6500, 7300, 8100]
-const LEAGUE_RIVALS = [
-  { name: 'Team 180', points: 41 },
-  { name: 'Bullseye-gjengen', points: 38 },
-  { name: 'Triple 20', points: 36 },
-  { name: 'Dartmestrene', points: 33 },
-  { name: 'Oche-banden', points: 31 },
-  { name: 'Nine-darter', points: 29 },
-  { name: 'Kasteskjeva', points: 27 },
-  { name: 'Tungvekterne', points: 25 },
-  { name: 'Bakerste bord', points: 22 },
-]
+// Poengene per rival-navn, indeksmatchet med dict.tipp.stepSlideshow.progress.rivals
+// (navnene er språkavhengig eksempeldata, poengene er ikke).
+const LEAGUE_RIVAL_POINTS = [41, 38, 36, 33, 31, 29, 27, 25, 22]
 // 20 p = 10. plass, så 26/30/34/37 → 8./6./4./3. plass.
 const YOUR_POINTS_BY_STEP = [20, 20, 20, 20, 26, 30, 34, 37]
 const LEAGUE_ROW_H = 22
@@ -434,9 +431,11 @@ function distribute(total: number, buckets: number, min: number): number[] {
 }
 
 function ProgressPhase() {
+  const { locale, dict } = useLocale()
   const step = useTimedSteps(PROGRESS_STEPS)
   const [playerPoints, setPlayerPoints] = useState<number[]>(() => distribute(YOUR_POINTS_BY_STEP[0], EXAMPLE_TEAM.length, 2))
   const appliedRef = useRef(0)
+  const leagueRivals = dict.tipp.stepSlideshow.progress.rivals.map((name, i) => ({ name, points: LEAGUE_RIVAL_POINTS[i] }))
 
   // Hvert klatretrinn: legg økningen på én tilfeldig spiller, så brikkene og
   // tabellen alltid summerer likt.
@@ -453,13 +452,13 @@ function ProgressPhase() {
   }, [step])
 
   const yourPoints = playerPoints.reduce((a, b) => a + b, 0)
-  const table = [...LEAGUE_RIVALS.map((r) => ({ ...r, you: false })), { name: 'Laget ditt', points: yourPoints, you: true }]
+  const table = [...leagueRivals.map((r) => ({ ...r, you: false })), { name: dict.common.yourTeam, points: yourPoints, you: true }]
     .sort((a, b) => b.points - a.points)
   const yourRank = table.findIndex((r) => r.you) + 1
 
   return (
     <div style={{ textAlign: 'center' }}>
-      <div style={{ ...H1, marginBottom: 14 }}>Følg utviklingen på «Min side»</div>
+      <div style={{ ...H1, marginBottom: 14 }}>{dict.tipp.stepSlideshow.progress.title}</div>
 
       {/* Laget med poeng per spiller */}
       <div style={reveal(step, 1, { display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16 })} inert>
@@ -471,7 +470,7 @@ function ProgressPhase() {
       </div>
 
       <div style={reveal(step, 2, { ...H1, fontSize: 22, marginBottom: 12 })}>
-        Opprett eller delta i egne ligaer
+        {dict.tipp.stepSlideshow.progress.leagues}
       </div>
 
       {/* Liga-tabell: absolutt posisjonerte rader, så re-sortering glir */}
@@ -499,13 +498,13 @@ function ProgressPhase() {
               {row.name}
             </span>
             <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: row.you ? '#f59e0b' : 'rgba(255,255,255,0.6)', fontVariantNumeric: 'tabular-nums' }}>
-              {formatPoints(row.points)}
+              {formatPoints(row.points, locale)}
             </span>
           </div>
         ))}
       </div>
       <div style={reveal(step, 3, { ...LABEL, marginTop: 8 })}>
-        {yourRank}. plass
+        {dict.tipp.stepSlideshow.progress.rank(yourRank)}
       </div>
     </div>
   )

@@ -27,9 +27,12 @@ import StepSlideshow, { INTRO_LAST_SLIDE } from '@/components/StepSlideshow'
 import LeagueSection from '@/components/LeagueSection'
 import ShareButton from '@/components/ShareButton'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
-import { KICKOFF } from '@/config/tournament'
+import { KICKOFF, formatKickoffDateTime } from '@/config/tournament'
 import { Confetti, ProgressDots } from './ProgressDots'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
+import { translatePotName, translateBestAchievement } from '@/lib/i18n/translatePlayer'
+import LocaleSwitch from '@/components/LocaleSwitch'
 
 const POT_COUNT = POTS.length
 const REGISTRATION_STEP = POT_COUNT + 1
@@ -38,6 +41,7 @@ const SUMMARY_STEP = POT_COUNT + 2
 function TippContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { locale, dict } = useLocale()
   const editId = searchParams.get('edit')
   const isEditMode = !!editId
 
@@ -121,9 +125,9 @@ function TippContent() {
       .then(r => r.json())
       .then(data => {
         if (data.ok) setPinVerified(true)
-        else { setVerifyingToken(false); setTokenError(data.error ?? 'Ugyldig lenke') }
+        else { setVerifyingToken(false); setTokenError(data.error ?? dict.tipp.loginLink.invalidLink) }
       })
-      .catch(() => { setVerifyingToken(false); setTokenError('Noe gikk galt') })
+      .catch(() => { setVerifyingToken(false); setTokenError(dict.tipp.loginLink.genericError) })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -155,7 +159,7 @@ const inputStyle: React.CSSProperties = {
         })
         if (!res.ok) {
           const data = await res.json()
-          throw new Error(data.error ?? 'Kunne ikke lagre picks')
+          throw new Error(data.error ?? dict.tipp.registration.genericError)
         }
         router.push(`/deltaker/${editId}`)
       } else {
@@ -167,14 +171,14 @@ const inputStyle: React.CSSProperties = {
         const data = await res.json()
         if (!res.ok) {
           if (data.duplicate) setDuplicateEmail(true)
-          throw new Error(data.error || 'Noe gikk galt')
+          throw new Error(data.error || dict.tipp.registration.genericError)
         }
         setParticipantId(data.participantId)
         setSubmitted(true)
         try { localStorage.setItem('vm_participant_id', data.participantId) } catch {}
       }
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Noe gikk galt')
+      setError(e instanceof Error ? e.message : dict.tipp.registration.genericError)
     } finally {
       setSubmitting(false)
     }
@@ -185,16 +189,16 @@ const inputStyle: React.CSSProperties = {
     return (
       <div className="page-bg" style={{ minHeight: '100vh', color: '#fff', padding: '48px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
         <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, marginBottom: 20 }}>
-          <div style={{ fontSize: 48, color: '#fff' }}>Påmelding</div>
-          <div style={{ fontSize: 48, color: '#dc2626' }}>stengt</div>
+          <div style={{ fontSize: 48, color: '#fff' }}>{dict.tipp.closed.title1}</div>
+          <div style={{ fontSize: 48, color: '#dc2626' }}>{dict.tipp.closed.title2}</div>
         </div>
         <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', marginBottom: 32, maxWidth: 280 }}>
-          Dart-VM 2026 er i gang. Påmelding og endring av picks er ikke lenger mulig.
+          {dict.tipp.closed.body}
         </p>
         <Link href="/leaderboard" style={{ display: 'inline-block', padding: '14px 28px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontWeight: 800, fontSize: 14, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 12, textDecoration: 'none', fontFamily: SPORT, boxShadow: '0 4px 20px rgba(220,38,38,0.3)', marginBottom: 12 }}>
-          Se leaderboard →
+          {dict.tipp.closed.leaderboardCta}
         </Link>
-        <Link href="/" className="back-btn">← Hjem</Link>
+        <Link href="/" className="back-btn">{dict.common.nav.home}</Link>
       </div>
     )
   }
@@ -204,7 +208,7 @@ const inputStyle: React.CSSProperties = {
     if (verifyingToken) {
       return (
         <div className="page-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>
-          Verifiserer lenke…
+          {dict.tipp.loginLink.verifying}
         </div>
       )
     }
@@ -212,28 +216,28 @@ const inputStyle: React.CSSProperties = {
     return (
       <div className="page-bg" style={{ minHeight: '100vh', padding: '40px 20px 56px', color: '#fff', position: 'relative', overflow: 'hidden' }}>
         <div style={{ marginBottom: 24 }}>
-          <Link href={`/deltaker/${editId}`} className="back-btn">← Tilbake</Link>
+          <Link href={`/deltaker/${editId}`} className="back-btn">{dict.tipp.loginLink.back}</Link>
         </div>
 
         <div style={{ fontFamily: SPORT, fontSize: 52, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, marginBottom: 16 }}>
-          <div style={{ color: 'rgba(255,255,255,0.3)' }}>Endre</div>
-          <div style={{ color: '#fff' }}>dine</div>
-          <div style={{ color: '#dc2626' }}>valg</div>
+          <div style={{ color: 'rgba(255,255,255,0.3)' }}>{dict.tipp.loginLink.title1}</div>
+          <div style={{ color: '#fff' }}>{dict.tipp.loginLink.title2}</div>
+          <div style={{ color: '#dc2626' }}>{dict.tipp.loginLink.title3}</div>
         </div>
         <p style={{ color: 'rgba(255,255,255,0.4)', marginBottom: 32, fontSize: 14, lineHeight: 1.6 }}>
-          Vi sender en innloggingslenke til e-posten din. Klikk lenken for å endre valgene dine.
+          {dict.tipp.loginLink.intro}
         </p>
 
         {tokenError && (
           <div style={{ padding: '12px 16px', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 12, color: '#ef4444', fontSize: 14, fontWeight: 600, marginBottom: 20 }}>
-            {tokenError} — Send en ny lenke under.
+            {tokenError} {dict.tipp.loginLink.tokenErrorSuffix}
           </div>
         )}
 
         {!linkSentTo ? (
           <>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>Din e-postadresse</label>
+              <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>{dict.tipp.loginLink.emailLabel}</label>
               <input
                 type="email"
                 value={linkEmail}
@@ -255,10 +259,10 @@ const inputStyle: React.CSSProperties = {
                     body: JSON.stringify({ participantId: editId, email: linkEmail.trim() }),
                   })
                   const data = await res.json()
-                  if (!res.ok) { setSendLinkError(data.error ?? 'Noe gikk galt'); return }
+                  if (!res.ok) { setSendLinkError(data.error ?? dict.tipp.loginLink.genericError); return }
                   setLinkSentTo(data.maskedEmail)
                 } catch {
-                  setSendLinkError('Noe gikk galt')
+                  setSendLinkError(dict.tipp.loginLink.genericError)
                 } finally {
                   setSendingLink(false)
                 }
@@ -274,7 +278,7 @@ const inputStyle: React.CSSProperties = {
                 marginBottom: 12,
               }}
             >
-              {sendingLink ? 'Sender…' : 'Send innloggingslenke →'}
+              {sendingLink ? dict.tipp.loginLink.submitSending : dict.tipp.loginLink.submitIdle}
             </button>
             {sendLinkError && (
               <div style={{ padding: '12px 16px', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 12, color: '#ef4444', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
@@ -284,8 +288,8 @@ const inputStyle: React.CSSProperties = {
           </>
         ) : (
           <div style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 16, padding: '20px 18px', marginBottom: 12 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#22c55e', marginBottom: 6 }}>Lenke er sendt!</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>Sjekk innboksen til <strong style={{ color: 'rgba(255,255,255,0.7)' }}>{linkSentTo}</strong>.<br />Lenken er gyldig i 1 time.</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#22c55e', marginBottom: 6 }}>{dict.tipp.loginLink.sent.title}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>{dict.tipp.loginLink.sent.checkInboxBefore} <strong style={{ color: 'rgba(255,255,255,0.7)' }}>{linkSentTo}</strong>{dict.tipp.loginLink.sent.checkInboxAfter}<br />{dict.tipp.loginLink.sent.validFor}</div>
           </div>
         )}
       </div>
@@ -332,8 +336,8 @@ const inputStyle: React.CSSProperties = {
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{ fontFamily: SPORT, fontSize: 56, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.88, letterSpacing: '-2px', marginBottom: 14 }}>
-            <div style={{ color: 'rgba(255,255,255,0.45)' }}>Du er</div>
-            <div style={{ color: '#fff' }}>påmeldt!</div>
+            <div style={{ color: 'rgba(255,255,255,0.45)' }}>{dict.tipp.confirmation.heading1}</div>
+            <div style={{ color: '#fff' }}>{dict.tipp.confirmation.heading2}</div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 4, fontSize: 22 }}>
             {POTS.map(pot => {
@@ -346,7 +350,7 @@ const inputStyle: React.CSSProperties = {
         {/* Picks */}
         <div style={{ background: CARD_GRADIENT, borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', marginBottom: 20, boxShadow: CARD_SHADOW }}>
           <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)' }}>
-            Dine valg
+            {dict.tipp.confirmation.yourPicks}
           </div>
           {POTS.map((pot) => {
             const player = pot.players.find((p) => p.name === picks[pot.potNumber])
@@ -360,7 +364,7 @@ const inputStyle: React.CSSProperties = {
                   <Flag iso2={player?.iso2 ?? ''} size={24} />
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700 }}>{picks[pot.potNumber]}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Nivå {pot.potNumber}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{dict.common.teamTile.level(pot.potNumber)}</div>
                   </div>
                 </div>
               </div>
@@ -370,10 +374,10 @@ const inputStyle: React.CSSProperties = {
 
         {/* Hva skjer nå? */}
         <div style={{ background: CARD_GRADIENT, border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '14px 16px', marginBottom: 24, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', marginBottom: 12 }}>Hva skjer nå?</div>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', marginBottom: 12 }}>{dict.tipp.confirmation.whatsNext}</div>
           {([
-            ['1', 'Dart-VM starter 11. desember 2026, kl. 19:00'],
-            ['2', 'Du kan endre valg frem til turneringen begynner'],
+            ['1', dict.tipp.confirmation.startsOn(formatKickoffDateTime(locale))],
+            ['2', dict.tipp.confirmation.canChangeUntilStart],
           ] as [string, string][]).map(([n, text]) => (
             <div key={n} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 6 }}>
               <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: '#dc2626', lineHeight: 1.5, flexShrink: 0 }}>{n}</span>
@@ -391,17 +395,17 @@ const inputStyle: React.CSSProperties = {
         <div style={{ marginBottom: 12 }}>
           <ShareButton
             url="/"
-            text="Jeg er påmeldt Dart-VM-spillet — bli med du også!"
-            label="Inviter venner →"
+            text={dict.tipp.confirmation.inviteText}
+            label={dict.tipp.confirmation.inviteLabel}
             variant="primary"
           />
         </div>
 
         <Link href={`/deltaker/${participantId}`} style={{ display: 'block', padding: '16px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontWeight: 800, fontSize: 15, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 12, textDecoration: 'none', fontFamily: SPORT, textAlign: 'center', boxShadow: '0 4px 20px rgba(220,38,38,0.35)', marginBottom: 12 }}>
-          Se min side →
+          {dict.tipp.confirmation.seeMyPage}
         </Link>
         <div style={{ textAlign: 'center' }}>
-          <Link href="/" className="back-btn">← Tilbake til start</Link>
+          <Link href="/" className="back-btn">{dict.tipp.confirmation.backToStart}</Link>
         </div>
       </div>
     )
@@ -412,18 +416,21 @@ const inputStyle: React.CSSProperties = {
     return (
       <div className="page-bg app-frame" style={{ height: '100dvh', color: '#fff', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <Link href="/" className="back-btn">← Hjem</Link>
-          {slideshowSlide < INTRO_LAST_SLIDE && (
-            <button
-              onClick={() => {
-                try { localStorage.setItem('vm_tipp_intro_seen', '1') } catch {}
-                setStep(1)
-              }}
-              style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 999, cursor: 'pointer', padding: '7px 14px', letterSpacing: '0.02em' }}
-            >
-              Hopp over
-            </button>
-          )}
+          <Link href="/" className="back-btn">{dict.common.nav.home}</Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <LocaleSwitch />
+            {slideshowSlide < INTRO_LAST_SLIDE && (
+              <button
+                onClick={() => {
+                  try { localStorage.setItem('vm_tipp_intro_seen', '1') } catch {}
+                  setStep(1)
+                }}
+                style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 999, cursor: 'pointer', padding: '7px 14px', letterSpacing: '0.02em' }}
+              >
+                {dict.tipp.stepSlideshow.skip}
+              </button>
+            )}
+          </div>
         </div>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 0, padding: '0 20px' }}>
@@ -458,17 +465,17 @@ const inputStyle: React.CSSProperties = {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
-          <button onClick={() => setStep(SUMMARY_STEP)} className="back-btn" style={{ cursor: 'pointer' }}>← Tilbake</button>
+          <button onClick={() => setStep(SUMMARY_STEP)} className="back-btn" style={{ cursor: 'pointer' }}>{dict.tipp.registration.back}</button>
         </div>
         <div style={{ marginBottom: 16 }}>
           {/* Samme eyebrow-plass som «Min side»/«Liga» over tittelen */}
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>Siste steg</div>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>{dict.tipp.registration.lastStep}</div>
           <div style={{ fontFamily: SPORT, fontSize: 34, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.95, marginBottom: 8 }}>
-            <span style={{ color: '#fff' }}>Registrer </span>
-            <span style={{ color: '#dc2626' }}>deg</span>
+            <span style={{ color: '#fff' }}>{dict.tipp.registration.title1} </span>
+            <span style={{ color: '#dc2626' }}>{dict.tipp.registration.title2}</span>
           </div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
-            E-posten brukes til å finne siden din igjen.
+            {dict.tipp.registration.intro}
           </div>
         </div>
 
@@ -486,12 +493,12 @@ const inputStyle: React.CSSProperties = {
 
         <div style={{ background: CARD_GRADIENT, borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', padding: '24px 20px', marginBottom: 16, boxShadow: CARD_SHADOW }}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>Navn</label>
-            <input style={inputStyle} type="text" placeholder="Ola Nordmann" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
+            <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>{dict.tipp.registration.nameLabel}</label>
+            <input style={inputStyle} type="text" placeholder={dict.tipp.registration.namePlaceholder} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>E-post</label>
-            <input style={inputStyle} type="email" placeholder="ola@example.com" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>{dict.tipp.registration.emailLabel}</label>
+            <input style={inputStyle} type="email" placeholder={dict.tipp.registration.emailPlaceholder} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
         </div>
 
@@ -513,11 +520,11 @@ const inputStyle: React.CSSProperties = {
                     if (res.ok && data.id) {
                       router.push(`/deltaker/${data.id}`)
                     } else {
-                      setError('Fant ikke siden din. Ta kontakt.')
+                      setError(dict.tipp.registration.notFoundError)
                       setDuplicateEmail(false)
                     }
                   } catch {
-                    setError('Noe gikk galt')
+                    setError(dict.tipp.registration.genericError)
                     setDuplicateEmail(false)
                   } finally {
                     setFindingPage(false)
@@ -525,7 +532,7 @@ const inputStyle: React.CSSProperties = {
                 }}
                 style={{ display: 'inline-block', padding: '9px 18px', background: '#dc2626', color: '#fff', fontWeight: 800, fontSize: 13, letterSpacing: '0.05em', textTransform: 'uppercase', borderRadius: 8, border: 'none', cursor: findingPage ? 'not-allowed' : 'pointer', fontFamily: SPORT, opacity: findingPage ? 0.6 : 1 }}
               >
-                {findingPage ? 'Leter...' : 'Gå til min side →'}
+                {findingPage ? dict.tipp.registration.findingPage : dict.tipp.registration.goToMyPage}
               </button>
             )}
           </div>
@@ -543,11 +550,11 @@ const inputStyle: React.CSSProperties = {
             boxShadow: valid && !submitting ? '0 4px 20px rgba(220,38,38,0.35)' : 'none',
           }}
         >
-          {submitting ? 'Lagrer…' : !valid ? 'Fyll inn navn og e-post' : 'Meld meg på →'}
+          {submitting ? dict.tipp.registration.submitSaving : !valid ? dict.tipp.registration.submitFillIn : dict.tipp.registration.submitIdle}
         </button>
         <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 12 }}>
-          Ved å melde deg på godtar du at vi lagrer navn og e-post for å drive spillet. Se{' '}
-          <Link href="/personvern" style={{ color: 'rgba(255,255,255,0.4)' }}>personvernsiden</Link> for detaljer.
+          {dict.tipp.registration.consentBefore}{' '}
+          <Link href="/personvern" style={{ color: 'rgba(255,255,255,0.4)' }}>{dict.tipp.registration.consentLink}</Link> {dict.tipp.registration.consentAfter}
         </p>
       </div>
     )
@@ -573,19 +580,19 @@ const inputStyle: React.CSSProperties = {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
           {isEditMode
-            ? <Link href={`/deltaker/${editId}`} className="back-btn">← Min side</Link>
-            : <Link href="/" className="back-btn">← Hjem</Link>
+            ? <Link href={`/deltaker/${editId}`} className="back-btn">{dict.common.nav.myPage}</Link>
+            : <Link href="/" className="back-btn">{dict.common.nav.home}</Link>
           }
           <Link href="/vm-info?tab=regler" target="_blank" style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.65)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
-            Regler og poeng →
+            {dict.tipp.summary.rulesAndPoints}
           </Link>
         </div>
         <div style={{ fontFamily: SPORT, fontSize: 26, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.95, marginBottom: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.55)', fontSize: 15, letterSpacing: '0.15em', marginBottom: 2 }}>
-            {isEditMode ? 'Bekreft endringer' : 'Oppsummering'}
+            {isEditMode ? dict.tipp.summary.confirmChanges : dict.tipp.summary.heading}
             {/* Grønn hake = laget er komplett (erstatter «6 av 6 valgt») */}
             {allPicked && (
-              <span aria-label="Alle seks spillere er valgt" title="Alle seks spillere er valgt" style={{ width: 18, height: 18, borderRadius: '50%', background: '#22c55e', color: '#052e16', fontSize: 11, fontWeight: 900, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', letterSpacing: 0, animation: 'flag-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both' }}>✓</span>
+              <span aria-label={dict.tipp.summary.allPickedAriaLabel} title={dict.tipp.summary.allPickedAriaLabel} style={{ width: 18, height: 18, borderRadius: '50%', background: '#22c55e', color: '#052e16', fontSize: 11, fontWeight: 900, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', letterSpacing: 0, animation: 'flag-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both' }}>✓</span>
             )}
           </div>
           {name && <div style={{ color: '#fff' }}>{name}</div>}
@@ -599,7 +606,7 @@ const inputStyle: React.CSSProperties = {
             const multiplier = SCORING.underdogMultiplier[pot.potNumber]
             return (
               // Hele raden er trykkflate (ikke bare «Endre»-pillen) — går til pottens steg.
-              <button key={pot.potNumber} type="button" onClick={() => setStep(pot.potNumber)} className="pick-row" aria-label={`Endre valg for nivå ${pot.potNumber}`} style={{ display: 'flex', alignItems: 'center', width: '100%', padding: 0, background: 'none', border: 'none', color: 'inherit', textAlign: 'left', cursor: 'pointer', borderBottom: pot.potNumber < POT_COUNT ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+              <button key={pot.potNumber} type="button" onClick={() => setStep(pot.potNumber)} className="pick-row" aria-label={dict.tipp.summary.changeAriaLabel(pot.potNumber)} style={{ display: 'flex', alignItems: 'center', width: '100%', padding: 0, background: 'none', border: 'none', color: 'inherit', textAlign: 'left', cursor: 'pointer', borderBottom: pot.potNumber < POT_COUNT ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
                 {/* Samme lag-brikke som i introen (foto på pott-farge) */}
                 <div style={{ width: 62, flexShrink: 0, padding: '6px 0 6px 10px', background: `${color}12`, borderRight: `2px solid ${color}30`, alignSelf: 'stretch', display: 'flex', alignItems: 'center' }}>
                   <div style={{ width: 44 }}>
@@ -609,7 +616,7 @@ const inputStyle: React.CSSProperties = {
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '6px 12px', minWidth: 0 }}>
                   <Flag iso2={player?.iso2 ?? ''} size={20} />
                   <div style={{ flex: 1, minWidth: 0, fontFamily: SPORT, fontSize: 16, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1.1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: player ? '#fff' : 'rgba(255,255,255,0.45)' }}>
-                    {playerName ?? 'Ikke valgt'}
+                    {playerName ?? dict.tipp.summary.notSelected}
                   </div>
                   {/* Fast kolonne, så «Endre» står på samme sted i alle rader; ×1 vises ikke (tom plass) */}
                   <div style={{ width: 34, textAlign: 'center', flexShrink: 0, padding: '3px 0', borderRadius: 6, fontFamily: SPORT, fontSize: 13, fontWeight: 900, fontVariantNumeric: 'tabular-nums',
@@ -622,7 +629,7 @@ const inputStyle: React.CSSProperties = {
                     className="btn-hover"
                     style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.85)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '6px 10px', flexShrink: 0, letterSpacing: '0.04em' }}
                   >
-                    Endre
+                    {dict.tipp.summary.change}
                   </span>
                 </div>
               </button>
@@ -650,13 +657,13 @@ const inputStyle: React.CSSProperties = {
             boxShadow: allPicked && !submitting ? '0 4px 20px rgba(220,38,38,0.35)' : 'none',
           }}
         >
-          {submitting ? 'Lagrer…' : isEditMode ? 'Lagre endringer →' : 'Fortsett til registrering →'}
+          {submitting ? dict.tipp.summary.submitSaving : isEditMode ? dict.tipp.summary.submitSaveChanges : dict.tipp.summary.submitContinue}
         </button>
         <button
           onClick={() => setStep(POT_COUNT)}
           style={{ display: 'block', width: '100%', padding: '13px', background: 'transparent', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
         >
-          ← Tilbake
+          {dict.tipp.summary.back}
         </button>
       </div>
     )
@@ -708,30 +715,30 @@ const inputStyle: React.CSSProperties = {
           {/* Pottens navn (uten emoji) som tittel — «Velg din spiller» gjentok
               bare steg-linjen; nå får hvert steg sin egen identitet */}
           <div style={{ fontFamily: SPORT, fontSize: 26, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
-            {pot.name.replace(/^[^\p{L}]+/u, '')}
+            {translatePotName(dict.players, pot.potNumber, pot.name).replace(/^[^\p{L}]+/u, '')}
           </div>
           {/* Multiplikatoren står i steg-linjen over («Steg 3 av 6 · ×2»);
               her kun en rolig forklaring i vanlig tekst når den er > 1 */}
           {multiplier > 1 && (
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
-              {multiplier === 2 ? 'Dobbelt' : multiplier === 3 ? 'Trippelt' : 'Firedobbelt'} poeng i denne potten
+              {dict.tipp.step.multiplierNote(multiplier === 2 ? dict.tipp.step.multiplierWords.double : multiplier === 3 ? dict.tipp.step.multiplierWords.triple : dict.tipp.step.multiplierWords.quadruple)}
             </div>
           )}
         </div>
       </div>
       {showScoreInfo && (
         <div style={{ marginBottom: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px', fontSize: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>Poeng</div>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>{dict.tipp.step.scoreInfo.title}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.7)' }}>Per vunnet sett</span>
+            <span style={{ color: 'rgba(255,255,255,0.7)' }}>{dict.tipp.step.scoreInfo.perSet}</span>
             <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{SCORING.perSetWon}p</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.7)' }}>Per kampseier (avansement)</span>
+            <span style={{ color: 'rgba(255,255,255,0.7)' }}>{dict.tipp.step.scoreInfo.perAdvancement}</span>
             <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>{SCORING.perAdvancement}p</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'rgba(255,255,255,0.7)' }}>For å vinne turneringen</span>
+            <span style={{ color: 'rgba(255,255,255,0.7)' }}>{dict.tipp.step.scoreInfo.forWinning}</span>
             <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>+{SCORING.tournamentWinner}p</span>
           </div>
           <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
@@ -745,10 +752,10 @@ const inputStyle: React.CSSProperties = {
               else groups.push({ pots: [pot.potNumber], mult })
             }
             return groups.map((g, i) => {
-              const label = g.pots.length === 1 ? `Pott ${g.pots[0]}` : `Pott ${g.pots[0]}–${g.pots[g.pots.length - 1]}`
+              const label = dict.tipp.step.scoreInfo.potLabel(g.pots[0], g.pots.length > 1 ? g.pots[g.pots.length - 1] : undefined)
               return (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: i === groups.length - 1 ? 0 : 4 }}>
-                  <span style={{ color: 'rgba(255,255,255,0.7)' }}>{label} scorer ×{g.mult}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.7)' }}>{label} ×{g.mult}</span>
                   <span style={{ fontFamily: SPORT, fontWeight: 600, color: g.mult >= 3 ? '#ef4444' : '#f59e0b' }}>×{g.mult}</span>
                 </div>
               )
@@ -756,7 +763,7 @@ const inputStyle: React.CSSProperties = {
           })()}
           <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
           <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, lineHeight: 1.5 }}>
-            Ved lik poengsum vinner den som meldte seg på tidligst.
+            {dict.tipp.step.scoreInfo.tieBreak}
           </div>
         </div>
       )}
@@ -788,7 +795,7 @@ const inputStyle: React.CSSProperties = {
           <div key={rowIndex} style={{ width: '100%', maxWidth: Math.min(row.length * 176, 400), margin: '0 auto' }}>
             <div
               role="radiogroup"
-              aria-label={`Velg spiller fra ${pot.name}${playerRows.length > 1 ? `, rad ${rowIndex + 1}` : ''}`}
+              aria-label={dict.tipp.step.chooseAriaLabel(translatePotName(dict.players, pot.potNumber, pot.name), playerRows.length > 1 ? rowIndex + 1 : undefined)}
               style={{
                 display: 'grid', gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
                 gap: 14, padding: rowIndex === 0 ? '6px 6px 8px' : '0 6px 8px',
@@ -829,11 +836,11 @@ const inputStyle: React.CSSProperties = {
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontVariantNumeric: 'tabular-nums', textAlign: 'center' }}>
                   <span style={{ fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 15 }}>#{selectedPlayerData.pdcRanking}</span>
                   <span style={{ color: 'rgba(255,255,255,0.35)', margin: '0 7px' }}>·</span>
-                  Snitt <span style={{ fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 15 }}>{formatAvg(stats?.avg)}</span>
+                  {dict.tipp.step.avgLabel} <span style={{ fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 15 }}>{formatAvg(stats?.avg, locale)}</span>
                   {stats?.bestAchievement && (
                     <>
                       <span style={{ color: 'rgba(255,255,255,0.35)', margin: '0 7px' }}>·</span>
-                      {stats.bestAchievement}
+                      {translateBestAchievement(dict.players, selectedPlayerData.name, stats.bestAchievement)}
                     </>
                   )}
                 </span>
@@ -843,7 +850,7 @@ const inputStyle: React.CSSProperties = {
                   className="btn-hover"
                   style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', color: '#fff', background: 'rgba(255,255,255,0.08)', border: `1px solid ${color}88`, borderRadius: 999, padding: '7px 14px', cursor: 'pointer', flexShrink: 0 }}
                 >
-                  Detaljer →
+                  {dict.tipp.step.details}
                 </button>
               </div>
               <PlayerDetailPanel
@@ -852,7 +859,7 @@ const inputStyle: React.CSSProperties = {
                 open={panelOpen}
                 onClose={() => setPanelOpen(false)}
                 onNext={() => { setPanelOpen(false); goNext() }}
-                nextLabel={step < POT_COUNT ? 'Neste →' : 'Se oppsummering →'}
+                nextLabel={step < POT_COUNT ? dict.tipp.step.next : dict.tipp.step.seeSummary}
                 potNumber={pot.potNumber}
               />
             </>
@@ -882,14 +889,14 @@ const inputStyle: React.CSSProperties = {
           transition: 'background 0.2s, box-shadow 0.2s, filter 0.12s, border-color 0.2s',
         }}
       >
-        {!selectedPlayer ? 'Velg en spiller' : step < POT_COUNT ? 'Neste →' : 'Se oppsummering →'}
+        {!selectedPlayer ? dict.tipp.step.choosePlayer : step < POT_COUNT ? dict.tipp.step.next : dict.tipp.step.seeSummary}
       </button>
       <button
         onClick={() => setStep(step === 1 ? 0 : step - 1)}
         className="btn-hover"
         style={{ display: 'block', width: '100%', padding: '13px', background: 'transparent', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
       >
-        ← Tilbake
+        {dict.tipp.step.back}
       </button>
     </div>
   )

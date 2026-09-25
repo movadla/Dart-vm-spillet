@@ -7,6 +7,7 @@ import { POTS } from '@/data/pots'
 import Flag from '@/components/Flag'
 import SmartBackButton from '@/components/SmartBackButton'
 import { POT_COLORS } from '@/config/potColors'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 const POT_COUNT = POTS.length
 
@@ -52,6 +53,7 @@ export function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep
   onTogglePoeng?: () => void
   poengActive?: boolean
 }) {
+  const { dict } = useLocale()
   return (
     <div style={{ marginBottom: 20 }}>
       {/* Fullførte steg viser flagget til spilleren du valgte (og er klikkbare
@@ -70,7 +72,7 @@ export function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep
               type="button"
               onClick={done ? () => onStep?.(i + 1) : undefined}
               disabled={!done}
-              aria-label={done ? `Gå til steg ${i + 1} (${pickedName})` : `Steg ${i + 1}`}
+              aria-label={done ? dict.tipp.progressDots.stepAriaLabelDone(i + 1, pickedName ?? '') : dict.tipp.progressDots.stepAriaLabelPending(i + 1)}
               style={{ padding: '6px 4px', background: 'none', border: 'none', cursor: done ? 'pointer' : 'default', display: 'flex', alignItems: 'center' }}
             >
               {done && picked ? (
@@ -87,14 +89,14 @@ export function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <SmartBackButton />
         <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.12em', fontVariantNumeric: 'tabular-nums' }}>
-          STEG {step} AV {POT_COUNT}
+          {dict.tipp.progressDots.stepOf(step, POT_COUNT)}
           {multiplier > 1 && <span style={{ color: multiplier === 2 ? '#f59e0b' : '#ef4444', marginLeft: 6 }}>· ×{multiplier}</span>}
         </div>
         {/* Guide og Poeng ved siden av hverandre oppe i høyre hjørne — Poeng
             lå tidligere lenger ned i pott-headeren, atskilt fra Guide. */}
         <div style={{ display: 'flex', gap: 6 }}>
           {onGuide && (
-            <button onClick={onGuide} className="btn-hover" style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}>Guide</button>
+            <button onClick={onGuide} className="btn-hover" style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}>{dict.tipp.progressDots.guide}</button>
           )}
           {onTogglePoeng && (
             <button
@@ -102,7 +104,7 @@ export function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep
               className="btn-hover"
               style={{ fontSize: 11, fontWeight: 700, color: poengActive ? '#fff' : 'rgba(255,255,255,0.7)', background: poengActive ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.08)', border: `1px solid ${poengActive ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.2)'}`, borderRadius: 8, cursor: 'pointer', padding: '5px 10px', letterSpacing: '0.06em' }}
             >
-              Poeng
+              {dict.tipp.progressDots.points}
             </button>
           )}
         </div>
