@@ -54,6 +54,24 @@ export default function PersonvernPage() {
       </div>
 
       <div style={CARD}>
+        <div style={H}>Informasjonskapsler (cookies)</div>
+        <p style={P}>
+          Vi bruker kun strengt nødvendige informasjonskapsler — ingen sporing, annonser eller
+          analyse-cookies, og du trenger derfor ikke samtykke til dem:
+        </p>
+        <ul style={{ ...P, margin: '10px 0 0', paddingLeft: 18 }}>
+          <li style={{ marginBottom: 6 }}><strong style={{ color: '#fff' }}>vm_auth</strong> — bekrefter hvem du er når du endrer valgene dine eller oppretter/blir med i en liga. Varer i 2 timer.</li>
+          <li style={{ marginBottom: 6 }}><strong style={{ color: '#fff' }}>admin_session</strong> — kun for spillets administrator, gir tilgang til å legge inn kampresultater.</li>
+          <li><strong style={{ color: '#fff' }}>vm_demo</strong> — husker hvilken fase du ser demo-deltakeren i (kun relevant om du utforsker demoversjonen av «Min side»).</li>
+        </ul>
+        <p style={{ ...P, marginTop: 10 }}>
+          I tillegg lagrer nettleseren din id-en til din egen «Min side» lokalt (localStorage,
+          ikke en cookie) slik at du slipper å logge inn på nytt hver gang — dette sendes aldri
+          til oss og ligger kun i din egen nettleser.
+        </p>
+      </div>
+
+      <div style={CARD}>
         <div style={H}>Hvor lenge</div>
         <p style={P}>
           Opplysningene lagres så lenge spillet pågår og en rimelig periode etterpå, med mindre
