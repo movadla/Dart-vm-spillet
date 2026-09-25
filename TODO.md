@@ -99,14 +99,17 @@ et bevisst valg fra deg fremfor at jeg griper inn på egen hånd.
       er en ekte database å teste opp mot i denne økten.
 - [ ] Manuell resultatinnlegging (admin) skalerer ikke til tusenvis av
       ventende deltakere — organisatorisk begrensning, ikke en kodefiks.
-- [ ] Delt admin-hemmelighet, ingen individuelle admin-kontoer, ingen
-      audit-trail for admin-handlinger (hvem endret hva er usporbart).
+- [x] **Løst 2026-09-25:** Audit-logg for admin-handlinger lagt til
+      (`admin_audit_log`-tabell, `src/lib/adminAudit.ts`, alle 7
+      mutasjons-endepunkter i `/api/admin/*`, vises i admin → Verktøy).
+      Delt admin-hemmelighet uten individuelle kontoer er fortsatt en
+      begrensning — loggen sier HVA og NÅR, ikke HVEM.
 - [ ] Synkron masseutsending av e-post uten kø (`broadcast/route.ts`,
       `send-daily-email/route.ts`) — risiko for at sendingen stopper
       midtveis ved mange mottakere, uten resume/retry.
 - [ ] Ingen 2FA på admin-innlogging.
 - [ ] Ingen Content-Security-Policy ennå (øvrige sikkerhetsheadere er på plass i `next.config.ts`) — krever at inline-stiler flyttes ut eller nonce-oppsett; flagcdn.com og Vercel Analytics må hvitelistes.
-- [ ] Daglig e-post (`/api/send-daily-email`) er ikke satt opp som cron noe sted (`vercel.json` har tom `crons`) — legg inn `{ "path": "/api/send-daily-email", "schedule": "0 7 * * *" }` når Vercel-prosjektet finnes; ruten godtar `Authorization: Bearer CRON_SECRET`.
+- [x] **Løst 2026-09-25:** Daglig e-post er nå satt opp som cron i `vercel.json` (`0 7 * * *`) — trer i kraft når prosjektet deployes til Vercel med `CRON_SECRET` satt som miljøvariabel.
 
 **Bør ha:**
 - [ ] `POTS`-spillerdata er en statisk kodefil (`src/data/pots.ts`) —
@@ -124,13 +127,18 @@ et bevisst valg fra deg fremfor at jeg griper inn på egen hånd.
       opprydding/TTL.
 - [ ] `snapshot-ranks.yml` har ingen reell feilvarsling ved feil (kun
       GitHubs standard-e-post til repo-eier).
-- [ ] Tilgjengelighet er fortsatt tynt dekket i resten av appen (kun
-      `StepSlideshow.tsx` er gjennomgått denne runden) — få
-      `aria-label`, uverifisert tastaturnavigasjon andre steder.
-- [ ] Personvernerklæringen dokumenterer ikke cookie-bruk eksplisitt
-      (`admin_session`, `vm_auth` — trolig "strengt nødvendige" og
-      dermed unntatt samtykke, men bør stå der for et
-      internasjonalt/EU-publikum).
+- [ ] Tilgjengelighet er fortsatt tynt dekket i resten av appen. **Lagt
+      til 2026-09-25:** en ekte Lighthouse-kjøring (produksjonsbygg, 5
+      sider) fant og fikk fikset `label-content-name-mismatch` i
+      `TeamBuildAnimation.tsx` og bildeforvrengning i `Flag.tsx`, pluss
+      manglende `aria-label` på ✕-lukkeknappene i `DeltakereTab.tsx`/
+      `LigaerTab.tsx`. Ingen flere Lighthouse-funn på de 5 sidene som
+      ble testet, men resten av appen (spesielt admin) er ikke
+      systematisk gjennomgått — uverifisert tastaturnavigasjon andre steder.
+- [x] **Løst 2026-09-25:** Personvernerklæringen dokumenterer nå
+      cookie-bruk eksplisitt (`vm_auth`, `admin_session`, `vm_demo` —
+      alle "strengt nødvendige", ikke samtykkepliktige) i en egen
+      seksjon i `src/app/personvern/page.tsx`.
 - [ ] `vm_auth`-cookien er den rå, usignerte deltaker-UUID-en —
       fungerer i praksis siden UUID-er er ugjettbare, men selve
       identiteten ER sesjonshemmeligheten. Vurder en signert/kortlevd
