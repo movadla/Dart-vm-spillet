@@ -190,6 +190,41 @@ function resolveWinner(start: number, end: number, stageIdx: number, matches: Ma
   return played?.winner ?? null
 }
 
+export interface BracketSlot {
+  /** Kjent motstander (runde 1: alltid kjent — det er selve trekningen). `null` = venter på at forrige runde avgjøres. */
+  player1: string | null
+  player2: string | null
+  /** Den faktisk registrerte kampen for dette bracket-slotet, hvis begge sider er kjent og kampen er spilt. */
+  match: MatchResult | null
+}
+
+/**
+ * Alle bracket-slotene for én runde (64 for runde 1, 32 for runde 2, … 1 for finalen) —
+ * navnene kjent så langt braketten er avgjort, uansett hvor mange av dem som faktisk har
+ * et registrert resultat i `matches` ennå. Brukt av «Kamper»-fanen i VM-guiden til å
+ * plassere hvert kort på riktig sted i selve turneringstreet (så vinneren alltid havner
+ * midt mellom de to rundene som feeder den), i stedet for bare å liste opp de kampene som
+ * tilfeldigvis er spilt så langt.
+ */
+export function getBracketRound(stage: (typeof ROUND_STAGES)[number], matches: MatchResult[]): BracketSlot[] {
+  const stageIdx = ROUND_STAGES.indexOf(stage)
+  const blockSize = 2 ** (stageIdx + 1)
+  const half = blockSize / 2
+  const count = BRACKET_SIZE / blockSize
+  return Array.from({ length: count }, (_, i) => {
+    const start = i * blockSize
+    const player1 = resolveWinner(start, start + half, stageIdx, matches)
+    const player2 = resolveWinner(start + half, start + blockSize, stageIdx, matches)
+    const match = player1 != null && player2 != null
+      ? matches.find((mt) =>
+          (mt.stage ?? 'r1') === stage &&
+          ((mt.player1 === player1 && mt.player2 === player2) || (mt.player1 === player2 && mt.player2 === player1)))
+        ?? null
+      : null
+    return { player1, player2, match }
+  })
+}
+
 export interface NextMatchInfo {
   stage: (typeof ROUND_STAGES)[number]
   /** null = ikke avgjort ennå OG ingen navngitt eksempel-favoritt i den blokken (rent plasseringsspiller-felt). */

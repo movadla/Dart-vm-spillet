@@ -13,6 +13,7 @@ import { STAGE_ORDER, SCORING } from '@/config/scoring'
 import type { MatchResult } from '@/lib/scoring'
 import { getFirstMatchInfo, getBracketSection, getSeedLabel, isFillerName, R1_MATCHES } from '@/lib/bracketProjection'
 import { DrawBracket, PairBox } from '@/components/DrawBracket'
+import MatchBracket from '@/components/MatchBracket'
 import { KICKOFF } from '@/config/tournament'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
@@ -160,17 +161,6 @@ export default function VmInfoPage() {
   }, [])
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Sluttspillet vises som en horisontalt scrollbar bracket: én kolonne per runde
-  // (r1 → final), pluss en avsluttende VM-vinner-kolonne. Vi kjenner ikke fremtidige
-  // parringer (ingen datakilde for det), så runder uten registrerte kamper får bare
-  // én "Ikke spilt"-plassholderboks — det er nok til å vise bracket-formen.
-  const bracketColumns = STAGE_ORDER.map((stage) => ({
-    stage,
-    rows: matches.filter((m) => (m.stage ?? 'r1') === stage),
-  }))
-  const finalRows = bracketColumns.find((c) => c.stage === 'final')?.rows ?? []
-  const champion = finalRows.find((m) => m.winner != null)?.winner ?? null
-
   return (
     <div className="page-bg app-frame" style={{ minHeight: '100vh', color: '#fff', padding: '16px 20px 40px', position: 'relative' }}>
 
@@ -248,77 +238,7 @@ export default function VmInfoPage() {
               {dict.vmInfo.matchesTab.empty}
             </div>
           )}
-
-          <div style={{ overflowX: 'auto', paddingBottom: 10, marginLeft: -16, marginRight: -16, paddingLeft: 16, paddingRight: 16 }}>
-            <div style={{ display: 'flex', gap: 10, width: 'max-content' }}>
-
-              {bracketColumns.map(({ stage, rows }) => (
-                <div key={stage} style={{ width: 148, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', textAlign: 'center', padding: '0 2px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 10 }}>
-                    {dict.players.stages[stage]}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, justifyContent: 'center' }}>
-                    {rows.length > 0 ? (
-                      rows.map((m, i) => {
-                        const p1Wins = m.winner != null && m.winner === m.player1
-                        const p2Wins = m.winner != null && m.winner === m.player2
-                        return (
-                          <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, overflow: 'hidden' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 8px', background: p1Wins ? 'rgba(255,255,255,0.06)' : 'transparent' }}>
-                              <span style={{ flexShrink: 0 }}><Flag iso2={getIso2(m.player1)} size={14} /></span>
-                              <span style={{ flex: 1, fontSize: 11, fontWeight: p1Wins ? 800 : 400, color: p1Wins ? '#fff' : 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {m.player1}
-                              </span>
-                              <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: p1Wins ? '#fff' : 'rgba(255,255,255,0.6)', flexShrink: 0 }}>
-                                {m.sets1}
-                              </span>
-                            </div>
-                            <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 8px', background: p2Wins ? 'rgba(255,255,255,0.06)' : 'transparent' }}>
-                              <span style={{ flexShrink: 0 }}><Flag iso2={getIso2(m.player2)} size={14} /></span>
-                              <span style={{ flex: 1, fontSize: 11, fontWeight: p2Wins ? 800 : 400, color: p2Wins ? '#fff' : 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {m.player2}
-                              </span>
-                              <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: p2Wins ? '#fff' : 'rgba(255,255,255,0.6)', flexShrink: 0 }}>
-                                {m.sets2}
-                              </span>
-                            </div>
-                          </div>
-                        )
-                      })
-                    ) : (
-                      <div style={{ border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 10, padding: '14px 6px', textAlign: 'center', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>
-                        {dict.vmInfo.matchesTab.notPlayed}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {/* VM-vinner */}
-              <div style={{ width: 148, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#f59e0b', textAlign: 'center', padding: '0 2px 8px', borderBottom: '1px solid rgba(245,158,11,0.25)', marginBottom: 10 }}>
-                  {dict.players.champion}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center' }}>
-                  {champion ? (
-                    <div style={{ background: 'linear-gradient(180deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.05) 100%)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 12, padding: '16px 8px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 22, lineHeight: 1 }}>🏆</span>
-                      <Flag iso2={getIso2(champion)} size={20} />
-                      <span style={{ fontSize: 12, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.2 }}>
-                        {champion}
-                      </span>
-                    </div>
-                  ) : (
-                    <div style={{ border: '1px dashed rgba(245,158,11,0.2)', borderRadius: 10, padding: '14px 6px', textAlign: 'center', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(245,158,11,0.6)' }}>
-                      {dict.vmInfo.matchesTab.notDecided}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-            </div>
-          </div>
+          <MatchBracket stages={STAGE_ORDER} matches={matches} />
         </div>
       )}
 
