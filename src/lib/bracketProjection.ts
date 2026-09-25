@@ -1,4 +1,5 @@
 import { POTS } from '@/data/pots'
+import { furthestStageReached, isPlayerChampion, isPlayerEliminated, type MatchResult } from './scoring'
 
 // Genererer en illustrativ, stabil eksempel-trekning for hele 128-spiller-braketten
 // (rent utslagsspill, ingen walkover/bye — alle spiller runde 1) — PDC har ikke publisert
@@ -162,4 +163,79 @@ export function getDrawSections(): DrawSection[] {
 
 export function isFillerName(name: string): boolean {
   return isFiller(name)
+}
+
+// ── Neste kamp ───────────────────────────────────────────────────────────
+//
+// BRACKET_SLOTS definerer hele braketten som et fullstendig utslags-tre, ikke
+// bare runde 1: runde k sin kamp nr. i er mellom vinneren av de to runde
+// (k−1)-kampene som "feeder" den. Det betyr at vi kan slå opp den EKTE
+// motstanderen (ikke bare et eksempel) så snart resultatet for hele den
+// andre halvparten av braketten er registrert i match_results — helt uten en
+// egen "hvem møter hvem"-tabell. `resolveWinner` går rekursivt ned treet og
+// stopper med `null` i det den treffer en runde som ikke er avgjort ennå.
+
+/** Vinneren av bracket-blokken [start, end) på runde `stageIdx` (0 = runde 1-slot), eller
+ * `null` hvis den blokken ikke er avgjort i `matches` ennå. */
+function resolveWinner(start: number, end: number, stageIdx: number, matches: MatchResult[]): string | null {
+  if (stageIdx === 0) return BRACKET_SLOTS[start]
+  const half = (end - start) / 2
+  const left = resolveWinner(start, start + half, stageIdx - 1, matches)
+  const right = resolveWinner(start + half, end, stageIdx - 1, matches)
+  if (left == null || right == null) return null
+  const stage = ROUND_STAGES[stageIdx - 1]
+  const played = matches.find((m) =>
+    (m.stage ?? 'r1') === stage && m.winner != null &&
+    ((m.player1 === left && m.player2 === right) || (m.player1 === right && m.player2 === left)))
+  return played?.winner ?? null
+}
+
+export interface NextMatchInfo {
+  stage: (typeof ROUND_STAGES)[number]
+  /** null = ikke avgjort ennå OG ingen navngitt eksempel-favoritt i den blokken (rent plasseringsspiller-felt). */
+  opponent: string | null
+  isFiller: boolean
+  /** true = ekte, avgjort motstander. false = beste eksempel-gjetning (se getPathToFinal) inntil runden er avgjort. */
+  confirmed: boolean
+}
+
+/**
+ * Spillerens neste kamp: ekte og avgjort så langt braketten faktisk er spilt
+ * (via `resolveWinner`), ellers samme "beste favoritt"-eksempel som
+ * `getPathToFinal` bruker — helt til den runden faktisk er avgjort. `null` =
+ * ingen neste kamp (slått ut, allerede vunnet finalen, eller ukjent spiller).
+ */
+export function getNextMatch(playerName: string, matches: MatchResult[]): NextMatchInfo | null {
+  const slot = BRACKET_SLOTS.indexOf(playerName)
+  if (slot < 0) return null
+  if (isPlayerEliminated(playerName, matches) || isPlayerChampion(playerName, matches)) return null
+
+  const furthest = furthestStageReached(playerName, matches, ROUND_STAGES)
+  const nextIdx = furthest ? ROUND_STAGES.indexOf(furthest as (typeof ROUND_STAGES)[number]) + 1 : 0
+  if (nextIdx <= 0 && furthest && ROUND_STAGES.indexOf(furthest as (typeof ROUND_STAGES)[number]) < 0) return null
+  if (nextIdx >= ROUND_STAGES.length) return null
+  const nextStage = ROUND_STAGES[nextIdx]
+
+  // Runde 1: motstanderen er alltid den faste trekningen (den er allerede "fasit" i appen).
+  if (nextIdx === 0) {
+    const info = getFirstMatchInfo(playerName)
+    if (!info) return null
+    return { stage: nextStage, opponent: info.opponent.name, isFiller: info.opponent.isFiller, confirmed: true }
+  }
+
+  const blockSize = 2 ** (nextIdx + 1)
+  const half = blockSize / 2
+  const blockStart = Math.floor(slot / blockSize) * blockSize
+  const inUpperHalf = slot < blockStart + half
+  const oppStart = inUpperHalf ? blockStart + half : blockStart
+
+  const resolved = resolveWinner(oppStart, oppStart + half, nextIdx, matches)
+  if (resolved != null) {
+    return { stage: nextStage, opponent: resolved, isFiller: isFiller(resolved), confirmed: true }
+  }
+
+  const guess = getPathToFinal(playerName).find((s) => s.stage === nextStage)
+  return guess
+    ? { stage: nextStage, opponent: guess.opponent, isFiller: false, confirmed: false }
+    : { stage: nextStage, opponent: null, isFiller: false, confirmed: false }
 }

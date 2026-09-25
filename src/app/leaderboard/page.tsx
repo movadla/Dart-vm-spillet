@@ -33,15 +33,11 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
         <h1 style={{ fontFamily: SPORT, fontSize: 36, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1, margin: 0, whiteSpace: 'nowrap' }}>
           <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Leader</span><span style={{ color: '#dc2626' }}>board</span>
         </h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
-          <span>{rows.length} {rows.length === 1 ? 'deltaker' : 'deltakere'}</span>
-          {vmStarted && (
-            <>
-              <span aria-hidden style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>
-              <LastUpdated fetchedAt={new Date().toISOString()} />
-            </>
-          )}
-        </div>
+        {vmStarted && (
+          <div style={{ marginTop: 6 }}>
+            <LastUpdated fetchedAt={new Date().toISOString()} />
+          </div>
+        )}
       </div>
 
       <LeaderboardMyPage />

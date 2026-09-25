@@ -5,15 +5,10 @@ import type { Player } from '@/data/pots'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { formatPoints } from '@/lib/format'
 import { SPORT } from '@/config/theme'
-
-export function lastName(name: string): string {
-  const i = name.indexOf(' ')
-  return i < 0 ? name : name.slice(i + 1)
-}
-export function initials(name: string): string {
-  const parts = name.split(' ').filter(Boolean)
-  return ((parts[0]?.[0] ?? '') + (parts[parts.length - 1]?.[0] ?? '')).toUpperCase()
-}
+// Re-eksportert for bakoverkompatibilitet med eksisterende importer — men en
+// server-komponent MÅ importere fra '@/lib/playerName' direkte (se den filen).
+export { lastName, initials } from '@/lib/playerName'
+import { lastName, initials } from '@/lib/playerName'
 
 export interface TeamTileProps {
   /** undefined = tom plass (viser pott-nummeret) */

@@ -7,38 +7,7 @@ import TeamBuildAnimation from '@/components/TeamBuildAnimation'
 import Countdown from '@/components/Countdown'
 import { KICKOFF } from '@/config/tournament'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
-
-function IconTarget() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <circle cx="11" cy="11" r="9" stroke="white" strokeWidth="1.5" strokeOpacity="0.85"/>
-      <circle cx="11" cy="11" r="5.5" stroke="white" strokeWidth="1.5" strokeOpacity="0.6"/>
-      <circle cx="11" cy="11" r="2" fill="white" fillOpacity="0.8"/>
-    </svg>
-  )
-}
-
-function IconChart() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <polyline points="2,17 7,11 12,13.5 20,4" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.9"/>
-      <polyline points="16,4 20,4 20,8" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.9"/>
-      <line x1="2" y1="20" x2="20" y2="20" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.3"/>
-    </svg>
-  )
-}
-
-function IconTrophy() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <path d="M7 2 H15 V12 C15 14.2 13.2 16 11 16 C8.8 16 7 14.2 7 12 Z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" strokeOpacity="0.9"/>
-      <path d="M7 5 H3.5 C3.5 5 3.5 10.5 7 10.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.9"/>
-      <path d="M15 5 H18.5 C18.5 5 18.5 10.5 15 10.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.9"/>
-      <line x1="11" y1="16" x2="11" y2="19" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.9"/>
-      <line x1="7" y1="20" x2="15" y2="20" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeOpacity="0.9"/>
-    </svg>
-  )
-}
+import { IconTarget, IconChart, IconTrophy } from '@/components/icons'
 
 type MyStats = { name: string; points: number; rank: number; totalParticipants: number }
 type PreviewRow = { id: string; name: string; points: number }

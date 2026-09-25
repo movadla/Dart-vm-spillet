@@ -63,9 +63,11 @@ export type Mode = 'idle' | 'create' | 'join'
  * skjemaer på plass. Låst etter VM-start; skjult for demo-deltakeren (som
  * ikke har noen innlogging å opprette ligaer med).
  */
-export default function LeagueSection({ participantId, showHeader = true, mode: modeProp, onModeChange, overallRank, overallTotal, vmStarted }: {
+export default function LeagueSection({ participantId, showHeader = true, showInviteInline = true, mode: modeProp, onModeChange, overallRank, overallTotal, vmStarted }: {
   participantId: string
   showHeader?: boolean
+  /** false = ikke vis ligakode/inviter-knapp her — de vises i stedet inne på selve liga-siden (/liga/[code]). */
+  showInviteInline?: boolean
   mode?: Mode
   onModeChange?: (m: Mode) => void
   overallRank?: number
@@ -176,14 +178,16 @@ export default function LeagueSection({ participantId, showHeader = true, mode: 
       {/* Nye liga-bekreftelse */}
       {newLeague && (
         <div style={{ background: 'linear-gradient(160deg, rgba(34,197,94,0.1) 0%, rgba(34,197,94,0.03) 100%)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 14, padding: '14px 16px', marginBottom: 8, animation: 'slide-enter 0.2s ease-out' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#4ade80', marginBottom: 6 }}>{newLeague.name}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Kode:</span>
-            <CopyCode code={newLeague.invite_code} fontSize={20} letterSpacing="0.1em" />
-            <ShareLeagueButton name={newLeague.name} code={newLeague.invite_code} />
-          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#4ade80', marginBottom: showInviteInline ? 6 : 10 }}>{newLeague.name}</div>
+          {showInviteInline && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Kode:</span>
+              <CopyCode code={newLeague.invite_code} fontSize={20} letterSpacing="0.1em" />
+              <ShareLeagueButton name={newLeague.name} code={newLeague.invite_code} />
+            </div>
+          )}
           <Link href={`/liga/${newLeague.invite_code}`} className="text-link" style={{ fontSize: 13, color: '#4ade80', fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: 3 }}>
-            Se ligaen →
+            {showInviteInline ? 'Se ligaen →' : 'Opprettet · Se ligaen for kode →'}
           </Link>
         </div>
       )}
@@ -202,7 +206,7 @@ export default function LeagueSection({ participantId, showHeader = true, mode: 
                 <span aria-hidden style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>›</span>
               </span>
             </Link>
-            {!started && (
+            {!started && showInviteInline && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 10px 0 12px', borderLeft: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
                 <CopyCode code={l.invite_code} fontSize={14} color="rgba(255,255,255,0.75)" letterSpacing="0.14em" />
                 <ShareLeagueButton name={l.name} code={l.invite_code} />

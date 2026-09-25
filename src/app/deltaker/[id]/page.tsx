@@ -11,10 +11,19 @@ import Countdown from '@/components/Countdown'
 import type { Metadata } from 'next'
 import DemoBanner from './DemoBanner'
 import MyTeam from './MyTeam'
+import NextMatches from './NextMatches'
 import LeagueSection from '@/components/LeagueSection'
+import SectionHeader from '@/components/SectionHeader'
+import { IconTarget, IconNextMatch, IconTrophy } from '@/components/icons'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 
 const STAGE_INDEX: Record<string, number> = Object.fromEntries(STAGE_ORDER.map((s, i) => [s, i]))
+
+// Én farge per seksjon — sammen med ikonet gjør dette det umiddelbart tydelig
+// hvilken del av Min side man ser på.
+const TEAM_COLOR = '#f3d576' // gull — samme farge som «Laget ditt»-finalen i intro-animasjonen
+const MATCH_COLOR = '#60a5fa' // blå — «neste kamper»
+const LEAGUE_COLOR = '#4ade80' // grønn — samme som leaderboard/plassering
 
 const CARD: React.CSSProperties = {
   background: CARD_GRADIENT,
@@ -23,16 +32,6 @@ const CARD: React.CSSProperties = {
   boxShadow: CARD_SHADOW,
 }
 const LABEL: React.CSSProperties = { fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }
-
-function SectionTitle({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '22px 0 8px' }}>
-      <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)' }}>{children}</span>
-      <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-      {action}
-    </div>
-  )
-}
 
 export const revalidate = 30
 
@@ -136,13 +135,17 @@ export default async function DeltakerPage({ params, searchParams }: {
         </div>
       )}
 
-      {/* ── Laget ── */}
-      <SectionTitle>Laget ditt</SectionTitle>
+      {/* ── Mitt lag ── */}
+      <SectionHeader icon={<IconTarget />} color={TEAM_COLOR} title="Mitt lag" />
       <MyTeam picks={picks} matchResults={matchResults} vmStarted={vmStarted} />
 
+      {/* ── Neste kamper ── */}
+      <SectionHeader icon={<IconNextMatch />} color={MATCH_COLOR} title="Neste kamper" />
+      <NextMatches picks={picks} matchResults={matchResults} />
+
       {/* ── Ligaer ── */}
-      <SectionTitle>Ligaer</SectionTitle>
-      <LeagueSection participantId={p.id} showHeader={false} overallRank={rank} overallTotal={totalParticipants} vmStarted={vmStarted} />
+      <SectionHeader icon={<IconTrophy />} color={LEAGUE_COLOR} title="Ligaer" />
+      <LeagueSection participantId={p.id} showHeader={false} showInviteInline={false} overallRank={rank} overallTotal={totalParticipants} vmStarted={vmStarted} />
 
       {/* ── Info, deling, bytt bruker ── */}
       <div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
