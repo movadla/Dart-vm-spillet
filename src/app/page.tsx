@@ -10,7 +10,8 @@ import { KICKOFF } from '@/config/tournament'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
 import { IconTarget, IconChart, IconTrophy } from '@/components/icons'
 import { useLocale } from '@/lib/i18n/useLocale'
-import { POINTS_SUFFIX } from '@/lib/format'
+import { POINTS_SUFFIX, formatPoints } from '@/lib/format'
+import { SCORING } from '@/config/scoring'
 
 type MyStats = { name: string; points: number; rank: number; totalParticipants: number }
 type PreviewRow = { id: string; name: string; points: number }
@@ -178,7 +179,7 @@ function ClosedCTA({ ctaRef }: { ctaRef: React.RefObject<HTMLAnchorElement | nul
 }
 
 export default function HomePage() {
-  const { dict } = useLocale()
+  const { dict, locale } = useLocale()
   const [participantId, setParticipantId] = useState<string | null>(null)
   const [headerVisible, setHeaderVisible] = useState(false)
   const ctaRef = useRef<HTMLAnchorElement>(null)
@@ -225,7 +226,10 @@ export default function HomePage() {
             mixBlendMode: 'color', opacity: 0.9,
           }} />
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 220, background: 'linear-gradient(to bottom, transparent, #0a0a0a)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 42%, rgba(0,0,0,0.55) 0%, transparent 65%)' }} />
+          {/* Litt mørkere og bredere enn før (0.55/65% → 0.68/75%) — teksten i
+              midtsonen (tittel/nedtelling/CTA) hadde for lav kontrast mot
+              scenebildet der det var lysest. */}
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 42%, rgba(0,0,0,0.68) 0%, transparent 75%)' }} />
         </div>
 
       {/* ── HERO ── */}
@@ -233,8 +237,13 @@ export default function HomePage() {
 
         <div style={{ position: 'relative' }}>
           {/* Tittel */}
-          <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', marginBottom: 24, lineHeight: 1 }}>
-            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 15, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, marginBottom: 6, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
+          <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', marginBottom: 16, lineHeight: 1 }}>
+            {/* Grønn var et tredje signalfarge ved siden av rødt/blått — leste
+                underbevisst som et resultat/suksess-signal (samme grønt som
+                poeng og seiere ellers i appen) i stedet for en nøytral
+                overskrift. Nøytral hvit/dempet holder oppmerksomheten på
+                selve tittelen og CTA-en. */}
+            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 15, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, marginBottom: 6, whiteSpace: 'nowrap', color: 'rgba(255,255,255,0.5)' }}>
               — PDC World Championship —
             </div>
             <div style={{ fontSize: 'clamp(44px, 12.5vw, 76px)', letterSpacing: '-2px', lineHeight: 1, whiteSpace: 'nowrap' }}>
@@ -243,9 +252,16 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Nedtelling */}
-          <div style={{ marginTop: 24 }} />
-          {!isLive && <div style={{ marginBottom: 28, textAlign: 'center' }}><Countdown size={38} label={dict.common.countdown.labelUntilStart} align="center" /></div>}
+          {/* Konsept-setning — uten denne var «hva er dette» ikke lesbart før
+              man hadde scrollet forbi hele første skjermbilde. */}
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.75)', marginBottom: 20, letterSpacing: '0.01em' }}>
+            {dict.home.hero.tagline}
+          </div>
+
+          {/* Nedtelling — mindre enn før (var 38) så den ikke konkurrerer
+              visuelt med CTA-knappen om førsteblikket. */}
+          <div style={{ marginTop: 16 }} />
+          {!isLive && <div style={{ marginBottom: 24, textAlign: 'center' }}><Countdown size={26} label={dict.common.countdown.labelUntilStart} align="center" /></div>}
 
           {/* CTA */}
           <div style={{ marginTop: 40 }} />
@@ -290,8 +306,10 @@ export default function HomePage() {
 
         </div>
 
-        {/* Scroll-indikator */}
-        <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 16px', opacity: 0.65, pointerEvents: 'none', userSelect: 'none' }}>
+        {/* Scroll-indikator — hevet fra 0.65 opasitet siden seksjonen under
+            («Slik fungerer det») er usynlig helt til man scroller, og dette
+            er det eneste signalet om at det finnes mer innhold. */}
+        <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 16px', opacity: 0.85, pointerEvents: 'none', userSelect: 'none' }}>
           <svg className="bounce-arrow" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5 8l6 6 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -325,6 +343,12 @@ export default function HomePage() {
           { icon: <IconTrophy />, glow: 'rgba(251,191,36,0.22)' },
         ].map(({ icon, glow }, i) => {
           const { title, desc } = dict.home.howItWorks.cards[i]
+          // Kort 2 («Poeng underveis») bytter den abstrakte teksten ut med
+          // konkrete tall fra selve poengsystemet — konkrete tall overbeviser
+          // raskere enn en generell påstand.
+          const body = i === 1
+            ? dict.home.howItWorks.pointsDesc(formatPoints(SCORING.perSetWon, locale), formatPoints(SCORING.perAdvancement, locale))
+            : desc
           return (
           <div key={title} className="how-it-works-card" style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
             <div style={{
@@ -336,7 +360,7 @@ export default function HomePage() {
             }}>{icon}</div>
             <div style={{ paddingTop: 2 }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 3 }}>{title}</div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.62)', lineHeight: 1.55 }}>{desc}</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.62)', lineHeight: 1.55 }}>{body}</div>
             </div>
           </div>
           )

@@ -30,6 +30,7 @@ export const home = {
     getStarted: 'Get started →',
     alreadySignedUp: 'Already signed up? Find your page →',
     scrollHint: 'More info',
+    tagline: 'Pick 6 dart players. Follow them through the World Championship.',
   },
   howItWorks: {
     eyebrow: 'How it works',
@@ -40,6 +41,7 @@ export const home = {
       { title: 'Points as you go', desc: 'Advancing in the knockout stage earns points for each of your players' },
       { title: 'Play against friends', desc: 'Start private leagues and compare yourself with others on the leaderboard' },
     ],
+    pointsDesc: (perSet, perAdvancement) => `${perSet} per set won, ${perAdvancement} per match win in the knockout stage — for each of your players`,
   },
   footer: {
     myPage: 'My page',

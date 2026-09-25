@@ -60,7 +60,11 @@ const FLY_DUR_FAST = 420
 
 function buildSchedule(): Event[] {
   const events: Event[] = []
-  let t = SLOT_START + LEVELS.length * SLOT_STAGGER + 700
+  // Bufferen etter at de 6 lagplassene har poppet inn var 700ms — nesten
+  // halvannet sekund uten synlig bevegelse rett etter at demoen kommer inn i
+  // synsfeltet på forsiden, som leste som at siden hang. 350ms er nok til at
+  // plass-poppingen rekker å fullføre uten å kollidere med kandidat-kortene.
+  let t = SLOT_START + LEVELS.length * SLOT_STAGGER + 350
   const PACE = [
     { hold: 1700, pick: 1100, fly: FLY_DUR_SLOW, gap: 850 },
     { hold: 1500, pick: 1000, fly: FLY_DUR_SLOW, gap: 650 },

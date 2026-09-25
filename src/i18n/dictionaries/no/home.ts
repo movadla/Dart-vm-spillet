@@ -16,12 +16,14 @@ export interface HomeDict {
     getStarted: string
     alreadySignedUp: string
     scrollHint: string
+    tagline: string
   }
   howItWorks: {
     eyebrow: string
     title: string
     subtitle: string
     cards: { title: string; desc: string }[]
+    pointsDesc: (perSet: string, perAdvancement: string) => string
   }
   footer: { myPage: string; join: string; infoAndRules: string; privacy: string }
 }
@@ -56,6 +58,7 @@ export const home: HomeDict = {
     getStarted: 'Kom i gang →',
     alreadySignedUp: 'Allerede påmeldt? Finn siden din →',
     scrollHint: 'Mer info',
+    tagline: 'Velg 6 dartspillere. Følg dem gjennom VM.',
   },
   howItWorks: {
     eyebrow: 'Slik fungerer det',
@@ -66,6 +69,7 @@ export const home: HomeDict = {
       { title: 'Poeng underveis', desc: 'Avansement i sluttspillet gir poeng for hver av spillerne dine' },
       { title: 'Spill mot venner', desc: 'Opprett private ligaer og sammenlign deg med andre på leaderboardet' },
     ],
+    pointsDesc: (perSet, perAdvancement) => `${perSet} per vunnet sett, ${perAdvancement} per kampseier i sluttspillet — for hver av spillerne dine`,
   },
   footer: {
     myPage: 'Min side',
