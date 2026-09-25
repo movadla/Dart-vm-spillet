@@ -6,6 +6,8 @@ import type { Player } from '@/data/pots'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { PLAYER_STATS } from '@/data/playerStats'
 import { SPORT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
+import { formatAvg, formatOdds } from '@/lib/format'
 
 const GOLD = '#f3d576'
 const LABEL_GOLD = 'rgba(243,213,118,0.75)'
@@ -21,17 +23,6 @@ function templateSrc(potNumber: number): string {
 // shadow-verdi, noe som ga usystematisk lesbarhet. Brukes ikke på
 // ODDS/SNITT (de ligger alltid på ren kort-bakgrunn, ikke over foto).
 const SHADOW_OVER_PHOTO = '0 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6)'
-
-// Norsk komma-format ("101,23" / "2,50"), ikke punktum — samme tallformat på
-// begge stat-verdiene. Snittet kommer fra playerStats.ts (eksempeldata til
-// det er kontrollert, se TODO.md).
-function formatAvg(avg: number | undefined): string {
-  return avg == null ? '—' : avg.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-function formatOdds(odds: string): string {
-  const n = Number.parseFloat(odds)
-  return Number.isFinite(n) ? n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : odds
-}
 
 // Etternavn dominerer (som på referansekortene), fornavn lite over. Første
 // ord = fornavn, resten = etternavn, så "van Gerwen"/"De Decker"/"O'Connor"
@@ -218,6 +209,7 @@ export function PlayerCard({
   potNumber: number
   onClick: () => void
 }) {
+  const { locale, dict } = useLocale()
   const photo = PLAYER_PHOTOS[player.name]
   const { first, last } = splitName(player.name)
   const longSurname = last.length > 10
@@ -243,7 +235,7 @@ export function PlayerCard({
     <button
       role="radio"
       aria-checked={selected}
-      aria-label={`${player.name} – ranking ${player.pdcRanking}, odds ${formatOdds(player.odds)}`}
+      aria-label={dict.common.playerCard.ariaLabel(player.name, player.pdcRanking, formatOdds(player.odds, locale))}
       onClick={onClick}
       className={`player-card${selected ? ' player-card--selected' : ''}${dimmed ? ' player-card--dimmed' : ''}`}
       style={buttonStyle}
@@ -330,7 +322,7 @@ export function PlayerCard({
           fontFamily: SPORT, fontWeight: 700, whiteSpace: 'nowrap', lineHeight: 1,
           fontSize: '3.9cqw', letterSpacing: '0.03em', color: LABEL_GOLD,
           textShadow: SHADOW_OVER_PHOTO,
-        }}>RANK</span>
+        }}>{dict.common.playerCard.rank}</span>
       </div>
       <div style={{
         position: 'absolute', left: ZONES.topCol.left, width: ZONES.topCol.width, top: ZONES.topCol.valueRow.top, zIndex: 1,
@@ -385,8 +377,8 @@ export function PlayerCard({
       <IconBadge zone={ZONES.snittIcon}>
         <ArrowsIcon size="clamp(10px, 9cqw, 16px)" />
       </IconBadge>
-      <StatCol zone={ZONES.statCols[0]} labelTop={ZONES.statLabel.top} valueTop={ZONES.statValue.top} label="ODDS" value={formatOdds(player.odds)} />
-      <StatCol zone={ZONES.statCols[1]} labelTop={ZONES.statLabel.top} valueTop={ZONES.statValue.top} label="SNITT" value={formatAvg(PLAYER_STATS[player.name]?.avg)} />
+      <StatCol zone={ZONES.statCols[0]} labelTop={ZONES.statLabel.top} valueTop={ZONES.statValue.top} label={dict.common.playerCard.odds} value={formatOdds(player.odds, locale)} />
+      <StatCol zone={ZONES.statCols[1]} labelTop={ZONES.statLabel.top} valueTop={ZONES.statValue.top} label={dict.common.playerCard.avg} value={formatAvg(PLAYER_STATS[player.name]?.avg, locale)} />
 
       {/* Folie-glans: en svak diagonal lysstripe over hele kortet, maskert med
           selve mal-bildet så den følger skjoldformen (ikke rektangelet), og

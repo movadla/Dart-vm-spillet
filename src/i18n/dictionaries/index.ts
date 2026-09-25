@@ -11,10 +11,12 @@ import { errors as noErrors } from './no/errors'
 import { errors as enErrors } from './en/errors'
 import { finn as noFinn } from './no/finn'
 import { finn as enFinn } from './en/finn'
+import { home as noHome } from './no/home'
+import { home as enHome } from './en/home'
 
 const dictionaries = {
-  no: { common: noCommon, players: noPlayers, leaderboard: noLeaderboard, liga: noLiga, errors: noErrors, finn: noFinn },
-  en: { common: enCommon, players: enPlayers, leaderboard: enLeaderboard, liga: enLiga, errors: enErrors, finn: enFinn },
+  no: { common: noCommon, players: noPlayers, leaderboard: noLeaderboard, liga: noLiga, errors: noErrors, finn: noFinn, home: noHome },
+  en: { common: enCommon, players: enPlayers, leaderboard: enLeaderboard, liga: enLiga, errors: enErrors, finn: enFinn, home: enHome },
 } as const
 
 export type Dictionary = (typeof dictionaries)['no']

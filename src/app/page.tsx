@@ -5,14 +5,18 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import TeamBuildAnimation from '@/components/TeamBuildAnimation'
 import Countdown from '@/components/Countdown'
+import LocaleSwitch from '@/components/LocaleSwitch'
 import { KICKOFF } from '@/config/tournament'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
 import { IconTarget, IconChart, IconTrophy } from '@/components/icons'
+import { useLocale } from '@/lib/i18n/useLocale'
+import { POINTS_SUFFIX } from '@/lib/format'
 
 type MyStats = { name: string; points: number; rank: number; totalParticipants: number }
 type PreviewRow = { id: string; name: string; points: number }
 
 function MiniDashboard({ participantId }: { participantId: string }) {
+  const { dict } = useLocale()
   const [stats, setStats] = React.useState<MyStats | null>(null)
 
   React.useEffect(() => {
@@ -37,20 +41,21 @@ function MiniDashboard({ participantId }: { participantId: string }) {
       marginBottom: 20,
     }}>
       <div style={{ flex: 1, padding: '14px 18px 12px' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', marginBottom: 4 }}>Poeng</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', marginBottom: 4 }}>{dict.home.miniDashboard.points}</div>
         <div style={{ fontFamily: SPORT, fontSize: 40, fontWeight: 900, color: '#f59e0b', lineHeight: 1, letterSpacing: '-1.5px' }}>{stats.points}</div>
       </div>
       <div style={{ width: 1, background: 'rgba(255,255,255,0.07)', alignSelf: 'stretch' }} />
       <div style={{ padding: '14px 18px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(251,191,36,0.5)', marginBottom: 2 }}>Plassering</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(251,191,36,0.5)', marginBottom: 2 }}>{dict.home.miniDashboard.rank}</div>
         <div style={{ fontFamily: SPORT, fontSize: 40, fontWeight: 900, color: '#fbbf24', lineHeight: 1, letterSpacing: '-1.5px' }}>#{stats.rank}</div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.22)', marginTop: 2 }}>av {stats.totalParticipants}</div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.22)', marginTop: 2 }}>{dict.home.miniDashboard.ofTotal(stats.totalParticipants)}</div>
       </div>
     </div>
   )
 }
 
 function MiniLeaderboard() {
+  const { dict, locale } = useLocale()
   const [data, setData] = React.useState<{ rows: PreviewRow[]; total: number } | null>(null)
 
   React.useEffect(() => {
@@ -72,14 +77,14 @@ function MiniLeaderboard() {
       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 20px rgba(0,0,0,0.25)',
     }}>
       <div style={{ padding: '10px 16px 9px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>Leaderboard</span>
-        <Link href="/leaderboard" className="text-link" style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontWeight: 600 }}>Se alle {data.total} →</Link>
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>{dict.home.stickyHeader.leaderboard}</span>
+        <Link href="/leaderboard" className="text-link" style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontWeight: 600 }}>{dict.home.miniLeaderboard.seeAll(data.total)}</Link>
       </div>
       {data.rows.map((row, i) => (
         <Link key={row.id} href={`/deltaker/${row.id}?from=leaderboard`} className="lb-card" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)', textDecoration: 'none' }}>
           <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.22)', width: 20, textAlign: 'right', flexShrink: 0 }}>{i + 1}</span>
           <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#fff', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</span>
-          <span style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: '#f59e0b', flexShrink: 0, lineHeight: 1 }}>{row.points}<span style={{ fontSize: 11, color: 'rgba(245,158,11,0.5)' }}>p</span></span>
+          <span style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: '#f59e0b', flexShrink: 0, lineHeight: 1 }}>{row.points}<span style={{ fontSize: 11, color: 'rgba(245,158,11,0.5)' }}>{POINTS_SUFFIX[locale]}</span></span>
         </Link>
       ))}
     </div>
@@ -87,6 +92,7 @@ function MiniLeaderboard() {
 }
 
 function StickyHeader({ visible, isLive }: { visible: boolean; isLive: boolean }) {
+  const { dict } = useLocale()
   if (!visible) return null
   return (
     <div style={{
@@ -99,29 +105,31 @@ function StickyHeader({ visible, isLive }: { visible: boolean; isLive: boolean }
       padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 20px 12px',
     }}>
       <span style={{ fontFamily: SPORT, fontSize: 19, fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
-        DART-VM <span style={{ color: '#dc2626' }}>2026</span>
+        {dict.home.stickyHeader.brand} <span style={{ color: '#dc2626' }}>2026</span>
       </span>
       <div style={{ display: 'flex', gap: 14, alignItems: 'center', whiteSpace: 'nowrap' }}>
         <Link href="/vm-info" className="text-link" style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textDecoration: 'none', letterSpacing: '0.03em' }}>
-          Info
+          {dict.home.stickyHeader.info}
         </Link>
         <Link href="/leaderboard" className="text-link" style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textDecoration: 'none', letterSpacing: '0.03em' }}>
-          Leaderboard
+          {dict.home.stickyHeader.leaderboard}
         </Link>
         <Link href="/finn" className="text-link" style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textDecoration: 'none', letterSpacing: '0.03em' }}>
-          Min side
+          {dict.home.stickyHeader.myPage}
         </Link>
         {!isLive && (
           <Link href="/tipp" className="btn-hover" style={{ fontSize: 12, fontWeight: 700, color: '#dc2626', textDecoration: 'none', letterSpacing: '0.03em' }}>
-            Bli med →
+            {dict.home.stickyHeader.join}
           </Link>
         )}
+        <LocaleSwitch />
       </div>
     </div>
   )
 }
 
 function ClosedCTA({ ctaRef }: { ctaRef: React.RefObject<HTMLAnchorElement | null> }) {
+  const { dict } = useLocale()
   const [email, setEmail] = React.useState('')
   const [sent, setSent] = React.useState(false)
   const [sending, setSending] = React.useState(false)
@@ -138,7 +146,7 @@ function ClosedCTA({ ctaRef }: { ctaRef: React.RefObject<HTMLAnchorElement | nul
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>
-        Påmelding er stengt
+        {dict.home.closedCta.signupClosed}
       </div>
       <Link
         ref={ctaRef}
@@ -146,22 +154,22 @@ function ClosedCTA({ ctaRef }: { ctaRef: React.RefObject<HTMLAnchorElement | nul
         className="cta-pulse cta-btn"
         style={{ display: 'block', padding: '20px', background: 'linear-gradient(180deg, #ff4444 0%, #c81e1e 100%)', color: '#fff', fontFamily: SPORT, fontWeight: 900, fontSize: 20, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: 14, textDecoration: 'none', marginBottom: 20, boxShadow: '0 6px 36px rgba(220,38,38,0.75)' }}
       >
-        Min side →
+        {dict.home.closedCta.myPage}
       </Link>
       {sent ? (
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.04em' }}>Takk! Vi varsler deg til neste spill.</div>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.04em' }}>{dict.home.closedCta.thanks}</div>
       ) : (
         <form onSubmit={handleSubscribe} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <input
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="din@epost.no"
+            placeholder={dict.home.closedCta.emailPlaceholder}
             required
             style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, color: '#fff', fontSize: 13, outline: 'none' }}
           />
           <button type="submit" className="btn-hover" disabled={sending} style={{ width: '100%', padding: '11px 16px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', letterSpacing: '0.04em' }}>
-            {sending ? '…' : 'Varsle meg om neste spill'}
+            {sending ? dict.home.closedCta.sending : dict.home.closedCta.notifyMe}
           </button>
         </form>
       )}
@@ -170,6 +178,7 @@ function ClosedCTA({ ctaRef }: { ctaRef: React.RefObject<HTMLAnchorElement | nul
 }
 
 export default function HomePage() {
+  const { dict } = useLocale()
   const [participantId, setParticipantId] = useState<string | null>(null)
   const [headerVisible, setHeaderVisible] = useState(false)
   const ctaRef = useRef<HTMLAnchorElement>(null)
@@ -236,7 +245,7 @@ export default function HomePage() {
 
           {/* Nedtelling */}
           <div style={{ marginTop: 24 }} />
-          {!isLive && <div style={{ marginBottom: 28, textAlign: 'center' }}><Countdown size={38} label="VM starter om" align="center" /></div>}
+          {!isLive && <div style={{ marginBottom: 28, textAlign: 'center' }}><Countdown size={38} label={dict.common.countdown.labelUntilStart} align="center" /></div>}
 
           {/* CTA */}
           <div style={{ marginTop: 40 }} />
@@ -248,14 +257,14 @@ export default function HomePage() {
                 className="cta-pulse cta-btn"
                 style={{ display: 'block', padding: '18px', background: 'linear-gradient(180deg, #ff1a1a 0%, #cc0000 100%)', color: '#fff', fontFamily: SPORT, fontWeight: 900, fontSize: 18, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: 14, textDecoration: 'none', marginBottom: 10, boxShadow: '0 6px 40px rgba(220,38,38,0.8), 0 2px 0 rgba(255,100,100,0.3) inset' }}
               >
-                Min side →
+                {dict.home.hero.myPage}
               </Link>
               <button
                 className="text-link"
                 onClick={() => { try { localStorage.removeItem('vm_participant_id') } catch {} setParticipantId(null) }}
                 style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 20, letterSpacing: '0.04em' }}
               >
-                Bytt bruker
+                {dict.home.hero.switchUser}
               </button>
             </>
           ) : isLive ? (
@@ -271,10 +280,10 @@ export default function HomePage() {
                 className="cta-pulse cta-btn"
                 style={{ display: 'block', padding: '18px', background: 'linear-gradient(180deg, #ff4444 0%, #dc2626 100%)', color: '#fff', fontFamily: SPORT, fontWeight: 900, fontSize: 18, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: 14, textDecoration: 'none', marginBottom: 10, boxShadow: '0 4px 28px rgba(220,38,38,0.55)' }}
               >
-                Kom i gang →
+                {dict.home.hero.getStarted}
               </Link>
               <Link href="/finn" className="btn-hover" style={{ display: 'inline-block', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)', textDecoration: 'none', marginBottom: 20, padding: '9px 16px', borderRadius: 999, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', letterSpacing: '0.01em' }}>
-                Allerede påmeldt? Finn siden din →
+                {dict.home.hero.alreadySignedUp}
               </Link>
             </>
           )}
@@ -286,7 +295,7 @@ export default function HomePage() {
           <svg className="bounce-arrow" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5 8l6 6 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#fff' }}>Mer info</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#fff' }}>{dict.home.hero.scrollHint}</span>
         </div>
       </div>
       </div>{/* end first-screen wrapper */}
@@ -295,13 +304,13 @@ export default function HomePage() {
       <div className="gradient-divider" />
       <div style={{ padding: '48px 20px 40px' }}>
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', marginBottom: 8, textAlign: 'center' }}>
-          Slik fungerer det
+          {dict.home.howItWorks.eyebrow}
         </div>
         <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', color: '#fff', textAlign: 'center', lineHeight: 1 }}>
-          De 6 pottene
+          {dict.home.howItWorks.title}
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', margin: '8px 0 24px', lineHeight: 1.5 }}>
-          Velg 6 spillere – én fra hvert nivå
+          {dict.home.howItWorks.subtitle}
         </div>
         {/* Selvspillende demo av valget (samme som intro-sliden i /tipp) —
             starter først når den er skrollet inn i bildet, siden den ligger
@@ -311,10 +320,12 @@ export default function HomePage() {
         </div>
         <div className="how-it-works-grid">
         {[
-          { icon: <IconTarget />, glow: 'rgba(34,197,94,0.22)',   title: 'Velg 6 spillere',   desc: 'Velg én dartspiller fra hvert av de 6 nivåene' },
-          { icon: <IconChart />,  glow: 'rgba(245,158,11,0.22)',  title: 'Poeng underveis',   desc: 'Avansement i sluttspillet gir poeng for hver av spillerne dine' },
-          { icon: <IconTrophy />, glow: 'rgba(251,191,36,0.22)',  title: 'Spill mot venner',  desc: 'Opprett private ligaer og sammenlign deg med andre på leaderboardet' },
-        ].map(({ icon, glow, title, desc }) => (
+          { icon: <IconTarget />, glow: 'rgba(34,197,94,0.22)' },
+          { icon: <IconChart />,  glow: 'rgba(245,158,11,0.22)' },
+          { icon: <IconTrophy />, glow: 'rgba(251,191,36,0.22)' },
+        ].map(({ icon, glow }, i) => {
+          const { title, desc } = dict.home.howItWorks.cards[i]
+          return (
           <div key={title} className="how-it-works-card" style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
             <div style={{
               width: 48, height: 48, borderRadius: 14, flexShrink: 0,
@@ -328,17 +339,18 @@ export default function HomePage() {
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.62)', lineHeight: 1.55 }}>{desc}</div>
             </div>
           </div>
-        ))}
+          )
+        })}
         </div>
       </div>
 
       {/* ── FOOTER-LENKER ── */}
       <div style={{ padding: '32px 20px 16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10 }}>
         <Link href={participantId ? `/deltaker/${participantId}` : '/finn'} className="cta-btn" style={{ fontSize: 15, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: '0.04em', padding: '12px 28px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', borderRadius: 24, fontFamily: SPORT, textTransform: 'uppercase' }}>
-          {participantId ? 'Min side' : 'Meld deg på'}
+          {participantId ? dict.home.footer.myPage : dict.home.footer.join}
         </Link>
         <Link href="/vm-info" className="guide-btn" style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.6)', textDecoration: 'none', letterSpacing: '0.02em', padding: '12px 24px', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 24 }}>
-          Info og regler
+          {dict.home.footer.infoAndRules}
         </Link>
       </div>
 
@@ -349,7 +361,7 @@ export default function HomePage() {
         </a>
         <span style={{ color: 'rgba(255,255,255,0.12)', margin: '0 8px' }}>·</span>
         <Link href="/personvern" className="text-link" style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)', textDecoration: 'none', letterSpacing: '0.02em' }}>
-          Personvern
+          {dict.home.footer.privacy}
         </Link>
       </div>
     </div>

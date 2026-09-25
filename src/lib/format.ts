@@ -7,7 +7,9 @@ import type { Locale } from '@/config/i18n'
 const NNBSP = ' '
 
 const INTL_LOCALE: Record<Locale, string> = { no: 'nb-NO', en: 'en-US' }
-const POINTS_SUFFIX: Record<Locale, string> = { no: 'p', en: 'pts' }
+/** Eksportert for steder som trenger «p»/«pts»-suffikset separat fra tallet
+ * (egen styling på suffikset), f.eks. MiniLeaderboard på forsiden. */
+export const POINTS_SUFFIX: Record<Locale, string> = { no: 'p', en: 'pts' }
 
 export function formatPoints(n: number, locale: Locale = 'no'): string {
   return `${n.toLocaleString(INTL_LOCALE[locale])}${NNBSP}${POINTS_SUFFIX[locale]}`

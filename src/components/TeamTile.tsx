@@ -5,6 +5,7 @@ import type { Player } from '@/data/pots'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { formatPoints } from '@/lib/format'
 import { SPORT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 // Re-eksportert for bakoverkompatibilitet med eksisterende importer — men en
 // server-komponent MÅ importere fra '@/lib/playerName' direkte (se den filen).
 export { lastName, initials } from '@/lib/playerName'
@@ -41,6 +42,7 @@ export default function TeamTile({
   player, potNumber, color, colorDark, label = true, points, inProgress = false, glow = false, dimmed = false,
   pop = false, popDelayMs = 0, hidden = false, tileRef,
 }: TeamTileProps) {
+  const { locale, dict } = useLocale()
   const photo = player ? PLAYER_PHOTOS[player.name] : undefined
   const filled = !!player
   return (
@@ -80,7 +82,7 @@ export default function TeamTile({
         )}
       </div>
       {label && (() => {
-        const text = player ? lastName(player.name) : `Nivå ${potNumber}`
+        const text = player ? lastName(player.name) : dict.common.teamTile.level(potNumber)
         // Lange ETT-ORDS etternavn («Woodhouse», «Humphries», «Wattimena») får
         // aldri brytes eller renne inn i nabobrikken: de settes på én linje og
         // kondenseres (scaleX) i stedet — som navnetrekk på en sportsgrafikk.
@@ -106,7 +108,7 @@ export default function TeamTile({
       })()}
       {points != null && (
         <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color: '#f59e0b', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-          {formatPoints(points)}
+          {formatPoints(points, locale)}
         </span>
       )}
     </div>

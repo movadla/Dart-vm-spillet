@@ -64,6 +64,14 @@ async function main() {
   await send('Page.enable')
   await send('Runtime.enable')
   await send('Emulation.setDeviceMetricsOverride', { width: 430, height: 900, deviceScaleFactor: 2, mobile: true })
+  // VERIFY_LOCALE=en npm run verify -- ... — setter vm_locale-cookien FØR
+  // navigasjon, så i18n-sidene rendres på engelsk fra første respons (uten
+  // dette ville proxy.ts sin Accept-Language-deteksjon uansett gitt norsk,
+  // siden headless Chrome ikke sender en engelsk-foretrukket header by default).
+  if (process.env.VERIFY_LOCALE) {
+    await send('Network.enable')
+    await send('Network.setCookie', { name: 'vm_locale', value: process.env.VERIFY_LOCALE, url, path: '/' })
+  }
   await send('Page.navigate', { url })
   await new Promise((r) => setTimeout(r, 1500))
 

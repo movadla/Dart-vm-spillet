@@ -29,6 +29,17 @@ export const common = {
   copyCode: {
     pressToCopy: 'Tap to copy',
   },
+  teamTile: {
+    level: (n) => `Tier ${n}`,
+  },
+  playerCard: {
+    rank: 'RANK',
+    odds: 'ODDS',
+    avg: 'AVG',
+    ariaLabel: (name, rank, odds) => `${name} – ranking ${rank}, odds ${odds}`,
+  },
+  yourTeam: 'Your team',
+  skipToFinishedTeam: 'Skip ahead to the finished team',
   rankList: {
     you: 'you',
     rankUp: (n) => `up ${n}`,

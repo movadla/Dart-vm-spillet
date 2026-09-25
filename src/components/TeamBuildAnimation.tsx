@@ -7,6 +7,7 @@ import { POTS, getPickablePlayers, type Player } from '@/data/pots'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 import { usePageVisible } from '@/lib/usePageVisible'
 import { SPORT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 // Illustrerer HVORDAN man plukker laget sitt — ikke ekte/anbefalte valg.
 // Littler/Price er eksplisitt ønsket som de to første, rolige stegene;
@@ -98,6 +99,7 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
   allowSkip?: boolean
   onFinished?: () => void
 }) {
+  const { dict } = useLocale()
   const pageVisible = usePageVisible()
   const [armed, setArmed] = useState(!startOnView && startDelay === 0)
   const [landedCount, setLandedCount] = useState(0)
@@ -195,7 +197,7 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
     <div
       role={allowSkip ? 'button' : undefined}
       tabIndex={allowSkip && started && !finished ? 0 : -1}
-      aria-label={allowSkip ? 'Spol fram til ferdig lag' : undefined}
+      aria-label={allowSkip ? dict.common.skipToFinishedTeam : undefined}
       onClick={skip}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); skip() } }}
       style={{ cursor: allowSkip && started && !finished ? 'pointer' : 'default', outline: 'none' }}
@@ -307,7 +309,7 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
                 filter: 'drop-shadow(0 2px 8px rgba(243,213,118,0.35))',
               }}
             >
-              Laget ditt
+              {dict.common.yourTeam}
             </div>
           </div>
         )}

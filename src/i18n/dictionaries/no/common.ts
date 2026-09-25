@@ -27,6 +27,17 @@ export interface CommonDict {
   copyCode: {
     pressToCopy: string
   }
+  teamTile: {
+    level: (n: number) => string
+  }
+  playerCard: {
+    rank: string
+    odds: string
+    avg: string
+    ariaLabel: (name: string, rank: number, odds: string) => string
+  }
+  yourTeam: string
+  skipToFinishedTeam: string
   rankList: {
     you: string
     rankUp: (n: number) => string
@@ -67,6 +78,17 @@ export const common: CommonDict = {
   copyCode: {
     pressToCopy: 'Trykk for å kopiere',
   },
+  teamTile: {
+    level: (n) => `Nivå ${n}`,
+  },
+  playerCard: {
+    rank: 'RANK',
+    odds: 'ODDS',
+    avg: 'SNITT',
+    ariaLabel: (name, rank, odds) => `${name} – ranking ${rank}, odds ${odds}`,
+  },
+  yourTeam: 'Laget ditt',
+  skipToFinishedTeam: 'Spol fram til ferdig lag',
   rankList: {
     you: 'deg',
     rankUp: (n) => `opp ${n}`,
