@@ -22,6 +22,13 @@ export const common = {
     labelUntilFirstPoints: 'First points land in',
   },
   lastUpdated: 'Updated {time}',
+  share: {
+    defaultLabel: 'Share with friends',
+    copied: '✓ Copied',
+  },
+  copyCode: {
+    pressToCopy: 'Tap to copy',
+  },
   rankList: {
     you: 'you',
     rankUp: (n) => `up ${n}`,

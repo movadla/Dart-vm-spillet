@@ -20,6 +20,13 @@ export interface CommonDict {
     labelUntilFirstPoints: string
   }
   lastUpdated: string
+  share: {
+    defaultLabel: string
+    copied: string
+  }
+  copyCode: {
+    pressToCopy: string
+  }
   rankList: {
     you: string
     rankUp: (n: number) => string
@@ -53,6 +60,13 @@ export const common: CommonDict = {
     labelUntilFirstPoints: 'Første poeng deles ut om',
   },
   lastUpdated: 'Oppdatert {time}',
+  share: {
+    defaultLabel: 'Del med venner',
+    copied: '✓ Kopiert',
+  },
+  copyCode: {
+    pressToCopy: 'Trykk for å kopiere',
+  },
   rankList: {
     you: 'deg',
     rankUp: (n) => `opp ${n}`,

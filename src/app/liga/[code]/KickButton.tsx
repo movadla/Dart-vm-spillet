@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 interface Props {
   leagueId: string
@@ -12,6 +13,7 @@ interface Props {
 
 export default function KickButton({ leagueId, memberId, memberName, createdBy }: Props) {
   const router = useRouter()
+  const { dict } = useLocale()
   const [isAdmin, setIsAdmin] = useState(false)
   const [kicking, setKicking] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -30,7 +32,7 @@ export default function KickButton({ leagueId, memberId, memberName, createdBy }
 
   async function handleKick(e: React.MouseEvent) {
     e.stopPropagation()
-    if (!window.confirm(`Fjerne ${memberName} fra ligaen?`)) return
+    if (!window.confirm(dict.liga.kick.confirm(memberName))) return
     setKicking(true)
     setError(null)
     try {
@@ -44,9 +46,9 @@ export default function KickButton({ leagueId, memberId, memberName, createdBy }
       })
       if (res.ok) { router.refresh(); return }
       const data = await res.json().catch(() => null)
-      setError(res.status === 401 ? 'Økten din er utløpt — gå til «Min side» og be om en ny innloggingslenke.' : (data?.error ?? 'Kunne ikke fjerne medlemmet'))
+      setError(res.status === 401 ? dict.liga.kick.sessionExpired : (data?.error ?? dict.liga.kick.fallbackError))
     } catch {
-      setError('Noe gikk galt')
+      setError(dict.liga.kick.genericError)
     }
     setKicking(false)
   }
@@ -70,7 +72,7 @@ export default function KickButton({ leagueId, memberId, memberName, createdBy }
           flexShrink: 0,
         }}
       >
-        {kicking ? '…' : 'Kick'}
+        {kicking ? '…' : dict.liga.kick.button}
       </button>
       {error && (
         <div role="alert" style={{

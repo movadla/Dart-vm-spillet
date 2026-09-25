@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { SPORT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 interface Props {
   code: string
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function CopyCode({ code, fontSize = 18, color = '#dc2626', letterSpacing = '0.12em' }: Props) {
+  const { dict } = useLocale()
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
@@ -24,7 +26,7 @@ export default function CopyCode({ code, fontSize = 18, color = '#dc2626', lette
   return (
     <button
       onClick={handleCopy}
-      title="Trykk for å kopiere"
+      title={dict.common.copyCode.pressToCopy}
       style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
     >
       <span style={{
@@ -34,7 +36,7 @@ export default function CopyCode({ code, fontSize = 18, color = '#dc2626', lette
         transition: 'color 0.15s, letter-spacing 0.15s',
         lineHeight: 1,
       }}>
-        {copied ? '✓ Kopiert' : code}
+        {copied ? dict.common.share.copied : code}
       </span>
     </button>
   )

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { SPORT } from '@/config/theme'
+import { useLocale } from '@/lib/i18n/useLocale'
 
 interface Props {
   /** Absolutt URL eller relativ sti (løses mot window.location.origin) */
@@ -17,9 +18,10 @@ export default function ShareButton({
   url,
   title = 'Dart-VM-spillet',
   text,
-  label = 'Del med venner',
+  label,
   variant = 'default',
 }: Props) {
+  const { dict } = useLocale()
   const [copied, setCopied] = useState(false)
 
   async function handleShare() {
@@ -72,7 +74,7 @@ export default function ShareButton({
         whiteSpace: 'nowrap',
       }}
     >
-      {copied ? '✓ Kopiert' : label}
+      {copied ? dict.common.share.copied : (label ?? dict.common.share.defaultLabel)}
     </button>
   )
 }
