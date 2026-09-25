@@ -139,6 +139,9 @@ export const deltaker: DeltakerDict = {
     noTop16: 'Ingen topp 16 før finalen',
     seeFullDraw: 'Se hele trekningen →',
     photo: 'Foto',
-    shortStage: { r1: '1. runde', r2: '2. runde', r3: '3. runde', r4: '4. runde', qf: 'kvart', sf: 'semi', final: 'finale' },
+    // Alle syv formene skal være like «tunge» (ett ord + evt. tall) — «4. runde»
+    // ved siden av «kvart»/«semi» så synlig ujevnt ut i de tre kolonnene i
+    // «vei til finalen» (én lang, to korte).
+    shortStage: { r1: 'Runde 1', r2: 'Runde 2', r3: 'Runde 3', r4: 'Runde 4', qf: 'Kvart', sf: 'Semi', final: 'Finale' },
   },
 }

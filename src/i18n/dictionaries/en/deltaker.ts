@@ -68,6 +68,6 @@ export const deltaker = {
     noTop16: 'No top 16 before the final',
     seeFullDraw: 'See the full draw →',
     photo: 'Photo',
-    shortStage: { r1: 'Round 1', r2: 'Round 2', r3: 'Round 3', r4: 'Round 4', qf: 'QF', sf: 'SF', final: 'Final' },
+    shortStage: { r1: 'Round 1', r2: 'Round 2', r3: 'Round 3', r4: 'Round 4', qf: 'Quarter', sf: 'Semi', final: 'Final' },
   },
 } satisfies DeltakerDict
