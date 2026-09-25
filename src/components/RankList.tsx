@@ -8,13 +8,18 @@ import { formatPoints } from '@/lib/format'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
 
-// Grønn pall-kaskade (#22c55e). 1.plass gløder, 2/3 avtar.
-const RANK_COLORS = ['#4ade80', '#34d27a', '#2bb673']
-const RANK_BORDER = ['rgba(34,197,94,0.9)', 'rgba(34,197,94,0.4)', 'rgba(34,197,94,0.22)']
-const RANK_BG = ['linear-gradient(180deg, rgba(34,197,94,0.14) 0%, rgba(34,197,94,0.04) 100%)', 'rgba(34,197,94,0.035)', 'rgba(34,197,94,0.02)']
+// Gull/sølv/bronse-pall (samme farger som MEDAL_COLORS under) — IKKE grønt.
+// Grønt er reservert for rankDelta-pilene («▲ flyttet opp»), et helt annet
+// signal (retning på endring) enn selve plasseringen. Delte gjorde de to
+// tingene vanskelige å skille fra hverandre ved et raskt blikk, og var
+// dessuten et rent fargesignal uten annen forsterkning — dårlig for
+// fargesvaksynede. 1. plass gløder tydeligst, 2./3. avtar.
+const RANK_COLORS = ['#fbbf24', '#9ca3af', '#cd7c2f']
+const RANK_BORDER = ['rgba(251,191,36,0.9)', 'rgba(156,163,175,0.5)', 'rgba(205,124,47,0.35)']
+const RANK_BG = ['linear-gradient(180deg, rgba(251,191,36,0.14) 0%, rgba(251,191,36,0.04) 100%)', 'rgba(156,163,175,0.05)', 'rgba(205,124,47,0.04)']
 const RANK_GLOW = [
-  'inset 0 0 0 1px rgba(74,222,128,0.3), inset 0 1px 8px rgba(74,222,128,0.2), 0 0 18px rgba(34,197,94,0.55), 0 0 48px rgba(34,197,94,0.32)',
-  '0 0 12px rgba(34,197,94,0.15)',
+  'inset 0 0 0 1px rgba(253,224,71,0.35), inset 0 1px 8px rgba(251,191,36,0.2), 0 0 18px rgba(251,191,36,0.5), 0 0 48px rgba(251,191,36,0.28)',
+  '0 0 12px rgba(156,163,175,0.18)',
   '',
 ]
 
@@ -119,7 +124,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
           >
             <div className="lb-card" style={{
               background: bg,
-              borderTop: isTop3 && rank === 1 && !isMe ? '2px solid rgba(34,197,94,0.8)' : `1px solid ${borderColor}`,
+              borderTop: isTop3 && rank === 1 && !isMe ? '2px solid rgba(251,191,36,0.85)' : `1px solid ${borderColor}`,
               borderRight: `1px solid ${borderColor}`,
               borderBottom: `1px solid ${borderColor}`,
               borderLeft: `1px solid ${borderColor}`,
@@ -143,7 +148,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                   <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color: isTop3 ? RANK_COLORS[styleIdx] : isMe ? '#93c5fd' : 'rgba(255,255,255,0.7)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{vmStarted ? rank : '–'}</span>
                 </div>
                 {rankDelta != null && (
-                  <span aria-label={rankDelta > 0 ? dict.common.rankList.rankUp(rankDelta) : rankDelta < 0 ? dict.common.rankList.rankDown(Math.abs(rankDelta)) : dict.common.rankList.rankUnchanged} style={{ fontSize: 11, fontWeight: 800, lineHeight: 1, marginTop: 4, letterSpacing: '0.02em', fontVariantNumeric: 'tabular-nums', color: rankDelta > 0 ? '#4ade80' : rankDelta < 0 ? '#f87171' : isMe ? 'rgba(147,197,253,0.7)' : 'rgba(255,255,255,0.45)' }}>
+                  <span aria-label={rankDelta > 0 ? dict.common.rankList.rankUp(rankDelta) : rankDelta < 0 ? dict.common.rankList.rankDown(Math.abs(rankDelta)) : dict.common.rankList.rankUnchanged} style={{ fontSize: 13, fontWeight: 800, lineHeight: 1, marginTop: 5, letterSpacing: '0.02em', fontVariantNumeric: 'tabular-nums', color: rankDelta > 0 ? '#4ade80' : rankDelta < 0 ? '#f87171' : isMe ? 'rgba(147,197,253,0.7)' : 'rgba(255,255,255,0.45)' }}>
                     {rankDelta > 0 ? `▲${rankDelta}` : rankDelta < 0 ? `▼${Math.abs(rankDelta)}` : '–'}
                   </span>
                 )}
@@ -168,7 +173,11 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                         const medalColor = medal ? MEDAL_COLORS[medal] : null
                         return (
                           <span key={i} style={{
-                            display: 'inline-flex', opacity: vmStarted && eliminated ? 0.25 : 1, filter: vmStarted && eliminated ? 'grayscale(1)' : 'none',
+                            // Samme demping som TeamTile («dimmed»-tilstanden på Min side) —
+                            // var tidligere grayscale(1) + 0.25 opacity, som gjorde et flagg
+                            // med fin detaljering (f.eks. Englands kors) nesten uleselig og
+                            // så ut som et ødelagt bilde i stedet for en tydelig «ute»-markering.
+                            display: 'inline-flex', opacity: vmStarted && eliminated ? 0.45 : 1, filter: vmStarted && eliminated ? 'grayscale(0.8)' : 'none',
                             border: medalColor ? `2px solid ${medalColor}` : '2px solid transparent',
                             background: medalColor ? `${medalColor}33` : 'none',
                             boxShadow: medalColor ? `0 0 6px ${medalColor}99` : 'none',
