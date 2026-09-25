@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { checkAdminAuth } from '@/lib/adminAuth'
 import { Resend } from 'resend'
 import { buildBroadcastHtml, buildBroadcastText } from '@/lib/email-broadcast'
+import { logAdminAction } from '@/lib/adminAudit'
 
 export const maxDuration = 60
 
@@ -109,5 +110,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Sending feilet: ${errors.join('; ')}` }, { status: 502 })
   }
 
+  await logAdminAction('broadcast.send', { subject, sent, recipients: participants.length })
   return NextResponse.json({ sent, errors: errors.length ? errors : undefined })
 }

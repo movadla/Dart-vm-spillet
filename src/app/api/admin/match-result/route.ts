@@ -4,6 +4,7 @@ import { checkAdminAuth } from '@/lib/adminAuth'
 import { STAGE_ORDER } from '@/config/scoring'
 import { validateMatchResultInput } from '@/lib/matchResultValidation'
 import { upsertMatchResult } from '@/lib/upsertMatchResult'
+import { logAdminAction } from '@/lib/adminAudit'
 
 export async function POST(req: NextRequest) {
   // Klienten lages per kall — manglende Supabase-konfigurasjon skal gi et
@@ -24,6 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Kunne ikke lagre resultat' }, { status: 500 })
     }
 
+    await logAdminAction('match-result.upsert', { ...validation.value })
     return NextResponse.json({ success: true })
   } catch (e) {
     console.error('Match result route error:', e)

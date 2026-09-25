@@ -4,6 +4,7 @@ import { checkAdminAuth } from '@/lib/adminAuth'
 import { STAGE_ORDER } from '@/config/scoring'
 import { validateMatchResultInput } from '@/lib/matchResultValidation'
 import { upsertMatchResult } from '@/lib/upsertMatchResult'
+import { logAdminAction } from '@/lib/adminAudit'
 
 interface RowResult { index: number; ok: boolean; error?: string }
 
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     const succeeded = results.filter((r) => r.ok).length
+    await logAdminAction('match-result.bulk_import', { succeeded, failed: results.length - succeeded })
     return NextResponse.json({ succeeded, failed: results.length - succeeded, results })
   } catch (e) {
     console.error('Bulk match result route error:', e)

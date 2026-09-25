@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { checkAdminAuth } from '@/lib/adminAuth'
+import { logAdminAction } from '@/lib/adminAudit'
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authError = checkAdminAuth(req)
@@ -13,6 +14,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const { error } = await supabase.from('leagues').delete().eq('id', id)
 
   if (error) return NextResponse.json({ error: 'Feil ved sletting' }, { status: 500 })
+  await logAdminAction('league.delete', { id })
   return NextResponse.json({ ok: true })
 }
 
@@ -30,5 +32,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .eq('id', id)
 
   if (error) return NextResponse.json({ error: 'Feil ved oppdatering' }, { status: 500 })
+  await logAdminAction('league.update', { id, hidden_until_kickoff })
   return NextResponse.json({ ok: true })
 }

@@ -11,9 +11,24 @@ import { SPORT } from '@/config/theme'
 import { ALL_PLAYERS, ALL_MATCH_PLAYERS, MATCH_STAGES, ADMIN_HEADERS, Tab, Participant, League, LeagueMember, MagicLink, card, cardHead, label, inputStyle, selectStyle, btn, csvExport } from '../shared'
 
 // ─── Tab: Verktøy ─────────────────────────────────────────────────────────────
+interface AuditLogEntry { id: string; action: string; detail: Record<string, unknown> | null; created_at: string }
+
+const AUDIT_ACTION_LABELS: Record<string, string> = {
+  'match-result.upsert': 'Kampresultat lagret',
+  'match-result.bulk_import': 'Kampresultater importert',
+  'participant.delete': 'Deltaker slettet',
+  'match-results.reset_all': 'Alle kampresultater nullstilt',
+  'league.delete': 'Liga slettet',
+  'league.update': 'Liga oppdatert',
+  'broadcast.send': 'Melding sendt til deltakere',
+  'status-email.send': 'Statusmail sendt',
+}
+
 export function VerktøyTab({ headers }: { headers: Record<string, string> }) {
   const [links, setLinks] = useState<MagicLink[]>([])
   const [linksLoading, setLinksLoading] = useState(true)
+  const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([])
+  const [auditLoading, setAuditLoading] = useState(true)
   const [matchForm, setMatchForm] = useState({ player1: '', player2: '', sets1: '', sets2: '', stage: 'r1' })
   const [matchMsg, setMatchMsg] = useState('')
   const [bulkText, setBulkText] = useState('')
@@ -24,6 +39,13 @@ export function VerktøyTab({ headers }: { headers: Record<string, string> }) {
       .then((r) => r.json())
       .then((d) => setLinks(d.links ?? []))
       .finally(() => setLinksLoading(false))
+  }, [headers])
+
+  useEffect(() => {
+    fetch('/api/admin/audit-log', { headers })
+      .then((r) => r.json())
+      .then((d) => setAuditLog(d.entries ?? []))
+      .finally(() => setAuditLoading(false))
   }, [headers])
 
   async function submitMatchResult(e: React.FormEvent) {
@@ -159,6 +181,28 @@ export function VerktøyTab({ headers }: { headers: Record<string, string> }) {
             </div>
           )
         })}
+      </div>
+
+      {/* Aktivitetslogg — hva som er gjort via admin, ikke hvem (delt hemmelighet, ingen individuelle admin-kontoer) */}
+      <div style={card}>
+        <div style={cardHead}><span style={label}>Aktivitetslogg (siste 50)</span></div>
+        {auditLoading ? (
+          <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>Laster...</div>
+        ) : auditLog.length === 0 ? (
+          <div style={{ padding: 24, color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>Ingen registrerte handlinger ennå.</div>
+        ) : auditLog.map((entry) => (
+          <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>{AUDIT_ACTION_LABELS[entry.action] ?? entry.action}</div>
+              {entry.detail && (
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                  {Object.entries(entry.detail).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+                </div>
+              )}
+            </div>
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>{new Date(entry.created_at).toLocaleString('nb-NO')}</span>
+          </div>
+        ))}
       </div>
     </>
   )

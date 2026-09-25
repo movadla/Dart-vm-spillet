@@ -6,6 +6,7 @@ import { checkAdminAuth } from '@/lib/adminAuth'
 import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
 import { SCORING } from '@/config/scoring'
 import { buildDailyEmail, buildDailyPlainText, VM_TOTAL_DAYS } from '@/lib/email-daily'
+import { logAdminAction } from '@/lib/adminAudit'
 
 export const maxDuration = 60
 
@@ -162,5 +163,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  await logAdminAction('status-email.send', { sent, total: recipients.length })
   return NextResponse.json({ sent, total: recipients.length, errors: errors.length ? errors : undefined })
 }

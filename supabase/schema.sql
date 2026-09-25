@@ -114,6 +114,17 @@ create table rate_limit_hits (
 );
 create index rate_limit_hits_lookup_idx on rate_limit_hits (bucket, key, created_at);
 
+-- Audit-logg for admin-handlinger. Admin-autentisering er én delt hemmelighet
+-- (ingen individuelle admin-kontoer), så loggen registrerer HVA som ble gjort
+-- og NÅR, men ikke hvilken person — se src/lib/adminAudit.ts.
+create table admin_audit_log (
+  id uuid primary key default gen_random_uuid(),
+  action text not null,
+  detail jsonb,
+  created_at timestamptz default now()
+);
+create index admin_audit_log_created_idx on admin_audit_log (created_at desc);
+
 -- === Tilganger ===
 -- Et NYTT skjema (i motsetning til "public") kommer ikke med noen
 -- forhåndskonfigurerte tilganger for Supabase sine roller — uten disse ville
@@ -141,5 +152,6 @@ alter table newsletter_signups    enable row level security;
 alter table rank_snapshot         enable row level security;
 alter table admin_login_attempts  enable row level security;
 alter table rate_limit_hits       enable row level security;
+alter table admin_audit_log       enable row level security;
 
 create policy "anon read" on match_results for select to anon using (true);
