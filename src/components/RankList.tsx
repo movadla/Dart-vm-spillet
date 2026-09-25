@@ -145,9 +145,11 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                 borderRight: `1px solid ${borderColor}`,
                 padding: '9px 0',
               }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: isTop3 ? `${RANK_COLORS[styleIdx]}18` : 'rgba(255,255,255,0.05)', border: `1.5px solid ${isTop3 ? `${RANK_COLORS[styleIdx]}55` : 'rgba(255,255,255,0.14)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {/* 32px/18px (var 28px/15px) — tallet så lite og litt malplassert ut i
+                    sirkelen, spesielt étsifrede plasseringer. */}
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: isTop3 ? `${RANK_COLORS[styleIdx]}18` : 'rgba(255,255,255,0.05)', border: `1.5px solid ${isTop3 ? `${RANK_COLORS[styleIdx]}55` : 'rgba(255,255,255,0.14)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {/* Før VM har ingen poeng — «1» på alle rader ville sett ut som en feil */}
-                  <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, color: isTop3 ? RANK_COLORS[styleIdx] : isMe ? '#93c5fd' : 'rgba(255,255,255,0.7)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{vmStarted ? rank : '–'}</span>
+                  <span style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: isTop3 ? RANK_COLORS[styleIdx] : isMe ? '#93c5fd' : 'rgba(255,255,255,0.7)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{vmStarted ? rank : '–'}</span>
                 </div>
                 {rankDelta != null && (
                   <span aria-label={rankDelta > 0 ? dict.common.rankList.rankUp(rankDelta) : rankDelta < 0 ? dict.common.rankList.rankDown(Math.abs(rankDelta)) : dict.common.rankList.rankUnchanged} style={{ fontSize: 13, fontWeight: 800, lineHeight: 1, marginTop: 5, letterSpacing: '0.02em', fontVariantNumeric: 'tabular-nums', color: rankDelta > 0 ? '#4ade80' : rankDelta < 0 ? '#f87171' : isMe ? 'rgba(147,197,253,0.7)' : 'rgba(255,255,255,0.45)' }}>
