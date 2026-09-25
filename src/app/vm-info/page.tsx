@@ -7,7 +7,7 @@ import BrandBanner from '@/components/BrandBanner'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { POTS, getIso2, getPickablePlayers, type Player } from '@/data/pots'
 import { POT_COLORS } from '@/config/potColors'
-import { formatOdds } from '@/lib/format'
+import { formatOdds, formatPoints } from '@/lib/format'
 import Flag from '@/components/Flag'
 import { STAGE_ORDER, SCORING } from '@/config/scoring'
 import type { MatchResult } from '@/lib/scoring'
@@ -27,6 +27,25 @@ const CARD: React.CSSProperties = {
   border: '1px solid rgba(255,255,255,0.12)',
   boxShadow: CARD_SHADOW,
   padding: '16px 18px',
+}
+
+// Regel-fanens 3 hovedkort brukte identisk CARD med ingen visuell forskjell —
+// fire like grå bokser etter hverandre var vanskelig å skanne. Toppkanten
+// farges nå til samme aksentfarge som tallene inni kortet (samme prinsipp
+// som pott-fargebåndene i spillere-fanen), så øyet kan skille dem fra hverandre.
+function cardWithAccent(color: string): React.CSSProperties {
+  // Ikke bland `border`-shorthand med `borderTop` i samme style-objekt (React-advarsel) —
+  // hver kant settes derfor for seg i stedet for å gjenbruke CARD sin shorthand.
+  return {
+    background: CARD_GRADIENT,
+    borderRadius: 16,
+    boxShadow: CARD_SHADOW,
+    padding: '16px 18px',
+    borderTop: `2px solid ${color}`,
+    borderRight: '1px solid rgba(255,255,255,0.12)',
+    borderBottom: '1px solid rgba(255,255,255,0.12)',
+    borderLeft: '1px solid rgba(255,255,255,0.12)',
+  }
 }
 
 const LABEL: React.CSSProperties = {
@@ -78,7 +97,10 @@ export default function VmInfoPage() {
   const [activeTab, setActiveTab] = useState<Tab>(() => (KICKOFF <= new Date() ? 'kamper' : 'regler'))
   const [participantId, setParticipantId] = useState<string | null>(null)
   const [matches, setMatches] = useState<MatchResult[]>([])
-  const [drawPlayer, setDrawPlayer] = useState<string>('')
+  // Forhåndsvalgt med samme «eksempel-spiller» som resten av appen bruker
+  // (StepSlideshow/TeamBuildAnimation) — uten dette var fanen et tomt
+  // skjema med mye ledig plass under helt til noen selv valgte en spiller.
+  const [drawPlayer, setDrawPlayer] = useState<string>('Luke Littler')
   const [showFullBracket, setShowFullBracket] = useState(false)
   const rulesRef = useRef<HTMLDivElement>(null)
 
@@ -200,7 +222,7 @@ export default function VmInfoPage() {
               <div key={pot.potNumber} style={{ borderRadius: 14, overflow: 'hidden', background: '#111', border: `1px solid ${color}30` }}>
                 <div style={{ background: color, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)' }}>
                   <span style={{ fontFamily: SPORT, fontSize: 32, fontWeight: 900, color: 'rgba(0,0,0,0.4)', lineHeight: 1 }}>{pot.potNumber}</span>
-                  <div style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(0,0,0,0.65)', textTransform: 'uppercase', lineHeight: 1 }}>{potName.replace(/^[^\p{L}]+/u, '')}</div>
+                  <div style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(0,0,0,0.65)', textTransform: 'uppercase', lineHeight: 1 }}>{potName}</div>
                   <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'rgba(0,0,0,0.6)', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{dict.vmInfo.playersTab.pickableCount(pickable.length)}</span>
                 </div>
                 {pickable.map((player, i) => <PlayerRow key={player.name} player={player} last={i === pickable.length - 1 && rest.length === 0} />)}
@@ -398,7 +420,7 @@ export default function VmInfoPage() {
       {activeTab === 'regler' && (
         <div role="tabpanel" id="panel-regler" aria-labelledby="tab-regler" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-          <div ref={rulesRef} style={CARD}>
+          <div ref={rulesRef} style={cardWithAccent('#3b82f6')}>
             <div style={LABEL}>{dict.vmInfo.rulesTab.inShort}</div>
             {dict.vmInfo.rulesTab.bullets.map((t, i) => (
               <div key={t} style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', padding: '9px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
@@ -407,26 +429,26 @@ export default function VmInfoPage() {
             ))}
           </div>
 
-          <div style={CARD}>
+          <div style={cardWithAccent('#f59e0b')}>
             <div style={LABEL}>{dict.vmInfo.rulesTab.pointsOverview}</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0' }}>
               <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.vmInfo.rulesTab.perSet}</span>
-              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.perSetWon}p</span>
+              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{formatPoints(SCORING.perSetWon, locale)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.vmInfo.rulesTab.perAdvancement}</span>
-              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.perAdvancement}p</span>
+              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{formatPoints(SCORING.perAdvancement, locale)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.vmInfo.rulesTab.forWinning}</span>
-              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{SCORING.tournamentWinner}p</span>
+              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{formatPoints(SCORING.tournamentWinner, locale)}</span>
             </div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 10, lineHeight: 1.5 }}>
               {dict.vmInfo.rulesTab.pointsNote}
             </div>
           </div>
 
-          <div style={CARD}>
+          <div style={cardWithAccent('#ef4444')}>
             <div style={LABEL}>{dict.vmInfo.rulesTab.multiplier}</div>
             {POTS
               .filter((pot) => (SCORING.underdogMultiplier[pot.potNumber] ?? 1) > 1)
