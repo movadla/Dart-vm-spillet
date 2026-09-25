@@ -113,7 +113,11 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
                         {pick.player_name}
                       </span>
                       {multiplier > 1 && (
-                        <span style={{ fontFamily: SPORT, fontSize: 12, fontWeight: 900, flexShrink: 0, color: multiplier >= 3 ? '#ef4444' : '#f59e0b', background: multiplier >= 3 ? 'rgba(220,38,38,0.12)' : 'rgba(245,158,11,0.12)', border: `1px solid ${multiplier >= 3 ? 'rgba(220,38,38,0.35)' : 'rgba(245,158,11,0.35)'}`, borderRadius: 4, padding: '1px 6px', lineHeight: 1.4 }}>
+                        // Multiplikatoren er en av de mest strategisk interessante
+                        // mekanikkene i spillet (outsider-bonus), men var tidligere
+                        // en liten, lett-oversett badge — mer størrelse/vekt/glød
+                        // gir den plassen den fortjener ved siden av navnet.
+                        <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, flexShrink: 0, color: multiplier >= 3 ? '#ff6b6b' : '#fbbf24', background: multiplier >= 3 ? 'rgba(220,38,38,0.18)' : 'rgba(245,158,11,0.18)', border: `1px solid ${multiplier >= 3 ? 'rgba(239,68,68,0.55)' : 'rgba(245,158,11,0.55)'}`, borderRadius: 5, padding: '2px 8px', lineHeight: 1.4, boxShadow: `0 0 10px ${multiplier >= 3 ? 'rgba(239,68,68,0.3)' : 'rgba(245,158,11,0.3)'}` }}>
                           ×{multiplier}
                         </span>
                       )}
