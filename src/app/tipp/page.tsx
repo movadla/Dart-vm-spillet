@@ -668,11 +668,11 @@ const inputStyle: React.CSSProperties = {
   const color = POT_COLORS[potIndex % POT_COLORS.length]
   const colorDark = POT_COLORS_DARK[potIndex % POT_COLORS_DARK.length]
   const pickablePlayers = getPickablePlayers(pot)
-  // Potter med 5 kandidater (pott 5/6) i én rad ble for trangt — split i to
-  // rader (3 øverst, 2 under) i stedet. Potter med ≤4 beholder én rad
-  // uendret. Generell formel (ceil av halvparten) i tilfelle et fremtidig
-  // pott-oppsett skulle gi enda flere kandidater.
-  const rowSize = pickablePlayers.length > 4 ? Math.ceil(pickablePlayers.length / 2) : pickablePlayers.length
+  // Potter med 4+ kandidater i én rad ble for trangt/lite kortene fylte for
+  // lite av skjermen — split i to rader i stedet (4 → 2+2, 6 → 3+3, 5 → 3+2
+  // osv. via generell formel/ceil av halvparten). Potter med ≤3 (pott 1)
+  // beholder én rad uendret.
+  const rowSize = pickablePlayers.length > 3 ? Math.ceil(pickablePlayers.length / 2) : pickablePlayers.length
   const playerRows: (typeof pickablePlayers)[] = []
   for (let i = 0; i < pickablePlayers.length; i += rowSize) playerRows.push(pickablePlayers.slice(i, i + rowSize))
 
@@ -765,10 +765,16 @@ const inputStyle: React.CSSProperties = {
           som én enhet, så både gridet og detalj-seksjonen er tilgjengelig uten
           at Neste-knappen flytter seg. */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, marginBottom: 14, overflowY: 'auto' }}>
-        {/* margin: auto 0 sentrerer kortene + hurtiginfoen vertikalt i sonen
-            mellom header og Neste-knappen (ellers ble det et stort tomrom
-            under kortene på høye skjermer) */}
-        <div style={{ margin: 'auto 0' }}>
+        {/* marginTop: auto (uten marginBottom: auto) sentrerer kortene +
+            hurtiginfoen vertikalt når alt får plass (ellers ble det et stort
+            tomrom under kortene på høye skjermer) — men når innholdet er
+            høyere enn sonen (potter med 2x2-rader + lang bestAchievement-
+            tekst på hurtiginfo-linjen), kollapser marginTop til 0 i stedet
+            for å klippe likt av topp OG bunn: da starter innholdet øverst og
+            overskuddet er nederst, der overflowY:auto faktisk kan scrolle
+            til det (symmetrisk `margin: auto 0` klippet bunnteksten usynlig
+            uten noen scroll-indikasjon). */}
+        <div style={{ marginTop: 'auto', marginBottom: 0 }}>
         {/* Ytre wrapper (vanlig blokk-element, ikke selv en flex-item med
             display:grid) håndterer maks-bredde + sentrering — å sette
             maxWidth+margin:auto DIREKTE på selve grid-diven, som var en
