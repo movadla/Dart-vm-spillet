@@ -10,11 +10,7 @@ import type { Locale } from './i18n'
 // VM-oppsettet: pots.ts, bracketProjection.ts, scoring.ts STAGE_ORDER m.fl.)
 // når det nærmer seg VM-trekningen i november.
 //
-// MIDLERTIDIG TESTMODUS (fjern denne linjen og bytt tilbake til raden over
-// FØR faktisk lansering!): satt til fortiden for å se hvordan Min side/
-// leaderboard ser ut etter at "turneringen har startet" (poeng/plassering
-// vises, påmelding/lagendring stenger) — se chat 2026-09-27.
-export const KICKOFF = new Date('2026-09-01T00:00:00Z')
+export const KICKOFF = new Date('2026-09-28T19:00:00Z')
 
 const INTL_LOCALE: Record<Locale, string> = { no: 'nb-NO', en: 'en-US' }
 
