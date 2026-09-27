@@ -25,7 +25,7 @@ export interface StageSchedule {
 // til) sto ikke i kildene, så de står fortsatt som «ikke satt» i stedet for
 // å gjette. Fyll inn etter hvert som PDC/Sky Sports bekrefter dem.
 export const STAGE_SCHEDULE: Record<Stage, StageSchedule> = {
-  r1: { date: '2026-09-28', time: null },
+  r1: { date: '2026-09-28', time: '21:00' },
   r2: { date: null, time: null },
   qf: { date: null, time: null },
   sf: { date: null, time: null },
@@ -48,6 +48,6 @@ export function getScheduleLabel(stage: Stage, locale: Locale = 'no'): ScheduleL
   const notSet = NOT_SET[locale]
   if (!s.date) return { dateLabel: notSet, timeLabel: notSet, dateKnown: false, timeKnown: false }
   const d = new Date(`${s.date}T00:00:00Z`)
-  const dateLabel = d.toLocaleDateString(INTL_LOCALE[locale], { day: 'numeric', month: 'long', timeZone: 'UTC' })
+  const dateLabel = d.toLocaleDateString(INTL_LOCALE[locale], { day: 'numeric', month: 'short', timeZone: 'UTC' })
   return { dateLabel, timeLabel: s.time ?? notSet, dateKnown: true, timeKnown: !!s.time }
 }

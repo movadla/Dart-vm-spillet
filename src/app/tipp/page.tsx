@@ -27,7 +27,7 @@ import StepSlideshow, { INTRO_LAST_SLIDE } from '@/components/StepSlideshow'
 import LeagueSection from '@/components/LeagueSection'
 import ShareButton from '@/components/ShareButton'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
-import { KICKOFF, formatKickoffDateTime } from '@/config/tournament'
+import { KICKOFF } from '@/config/tournament'
 import { Confetti, ProgressDots } from './ProgressDots'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
@@ -339,10 +339,14 @@ const inputStyle: React.CSSProperties = {
             <div style={{ color: 'rgba(255,255,255,0.45)' }}>{dict.tipp.confirmation.heading1}</div>
             <div style={{ color: '#fff' }}>{dict.tipp.confirmation.heading2}</div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 4, fontSize: 22 }}>
-            {POTS.map(pot => {
-              const player = pot.players.find(p => p.name === picks[pot.potNumber])
-              return <Flag key={pot.potNumber} iso2={player?.iso2 ?? ''} size={22} />
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, padding: '10px 8px', borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            {POTS.map((pot, i) => {
+              const player = pot.players.find((p) => p.name === picks[pot.potNumber])
+              return (
+                <div key={pot.potNumber} style={{ width: 48 }}>
+                  <TeamTile player={player} potNumber={pot.potNumber} color={POT_COLORS[i % POT_COLORS.length]} colorDark={POT_COLORS_DARK[i % POT_COLORS_DARK.length]} />
+                </div>
+              )
             })}
           </div>
         </div>
@@ -372,19 +376,9 @@ const inputStyle: React.CSSProperties = {
           })}
         </div>
 
-        {/* Hva skjer nå? */}
-        <div style={{ background: CARD_GRADIENT, border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '14px 16px', marginBottom: 24, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', marginBottom: 12 }}>{dict.tipp.confirmation.whatsNext}</div>
-          {([
-            ['1', dict.tipp.confirmation.startsOn(formatKickoffDateTime(locale))],
-            ['2', dict.tipp.confirmation.canChangeUntilStart],
-          ] as [string, string][]).map(([n, text]) => (
-            <div key={n} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 6 }}>
-              <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: '#dc2626', lineHeight: 1.5, flexShrink: 0 }}>{n}</span>
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>{text}</span>
-            </div>
-          ))}
-        </div>
+        <Link href={`/deltaker/${participantId}`} style={{ display: 'block', padding: '16px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontWeight: 800, fontSize: 15, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 12, textDecoration: 'none', fontFamily: SPORT, textAlign: 'center', boxShadow: '0 4px 20px rgba(220,38,38,0.35)', marginBottom: 24 }}>
+          {dict.tipp.confirmation.seeMyPage}
+        </Link>
 
         <LeagueSection participantId={participantId} showHeader={true} />
 
@@ -401,9 +395,6 @@ const inputStyle: React.CSSProperties = {
           />
         </div>
 
-        <Link href={`/deltaker/${participantId}`} style={{ display: 'block', padding: '16px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontWeight: 800, fontSize: 15, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 12, textDecoration: 'none', fontFamily: SPORT, textAlign: 'center', boxShadow: '0 4px 20px rgba(220,38,38,0.35)', marginBottom: 12 }}>
-          {dict.tipp.confirmation.seeMyPage}
-        </Link>
         <div style={{ textAlign: 'center' }}>
           <Link href="/" className="back-btn">{dict.tipp.confirmation.backToStart}</Link>
         </div>

@@ -207,12 +207,10 @@ export default function VmInfoPage() {
             const color = POT_COLORS[(pot.potNumber - 1) % POT_COLORS.length]
             const pickable = getPickablePlayers(pot)
             const rest = pot.players.filter((p) => !pickable.includes(p))
-            const potName = translatePotName(dict.players, pot.potNumber, pot.name)
             return (
               <div key={pot.potNumber} style={{ borderRadius: 14, overflow: 'hidden', background: '#111', border: `1px solid ${color}30` }}>
                 <div style={{ background: color, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)' }}>
                   <span style={{ fontFamily: SPORT, fontSize: 32, fontWeight: 900, color: 'rgba(0,0,0,0.4)', lineHeight: 1 }}>{pot.potNumber}</span>
-                  <div style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(0,0,0,0.65)', textTransform: 'uppercase', lineHeight: 1 }}>{potName}</div>
                   <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'rgba(0,0,0,0.6)', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{dict.vmInfo.playersTab.pickableCount(pickable.length)}</span>
                 </div>
                 {pickable.map((player, i) => <PlayerRow key={player.name} player={player} last={i === pickable.length - 1 && rest.length === 0} />)}
@@ -233,11 +231,6 @@ export default function VmInfoPage() {
       {/* ── KAMPER (bracket) ── */}
       {activeTab === 'kamper' && (
         <div role="tabpanel" id="panel-kamper" aria-labelledby="tab-kamper">
-          {matches.length === 0 && (
-            <div style={{ ...CARD, textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 16 }}>
-              {dict.vmInfo.matchesTab.empty}
-            </div>
-          )}
           <MatchBracket stages={STAGE_ORDER} matches={matches} />
         </div>
       )}
