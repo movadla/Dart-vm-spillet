@@ -7,8 +7,8 @@ import type { Player } from '@/data/pots'
 import { POTS } from '@/data/pots'
 import { PLAYER_STATS } from '@/data/playerStats'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
-import { getPathToFinal, getNextMatch } from '@/lib/bracketProjection'
-import { calcPlayerPoints, getPlayerMatches, isPlayerChampion, isPlayerEliminated, type MatchResult } from '@/lib/scoring'
+import { getPathToFinal } from '@/lib/bracketProjection'
+import { calcPlayerPoints, getPlayerMatches, type MatchResult } from '@/lib/scoring'
 import type { Stage } from '@/config/scoring'
 import { formatAvg, formatPoints } from '@/lib/format'
 import { lastName } from '@/components/TeamTile'
@@ -36,14 +36,6 @@ function SectionTitle({ children, tag }: { children: ReactNode; tag?: ReactNode 
 }
 function FieldLabel({ children }: { children: ReactNode }) {
   return <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>{children}</span>
-}
-function ExampleTag() {
-  const { dict } = useLocale()
-  return (
-    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 4, padding: '2px 5px', whiteSpace: 'nowrap' }}>
-      {dict.deltaker.playerDetailPanel.exampleTag}
-    </span>
-  )
 }
 function Stat({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -101,12 +93,7 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
   const stats = PLAYER_STATS[player.name]
   const photo = PLAYER_PHOTOS[player.name]
   const path = getPathToFinal(player.name)
-  // Kamper — det første som vises: neste kamp (ekte og avgjort, eller samme
-  // favoritt-eksempel som «vei til finalen» inntil runden er spilt), og en
-  // liste over spilte kamper med poengene spilleren faktisk fikk i hver av dem.
-  const champion = isPlayerChampion(player.name, matchResults)
-  const eliminated = !champion && isPlayerEliminated(player.name, matchResults)
-  const next = !champion && !eliminated ? getNextMatch(player.name, matchResults) : null
+  // Kamper — liste over spilte kamper med poengene spilleren faktisk fikk i hver av dem.
   const myMatches = getPlayerMatches(player.name, matchResults)
 
   // Sveip ned: arket følger fingeren når innholdet står øverst; slipp > 90 px lukker.
@@ -175,43 +162,12 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
 
         {/* Innhold — krysstoner når spilleren byttes mens arket er åpent */}
         <div ref={bodyRef} key={player.name} style={{ padding: '2px 16px 6px', overflowY: 'auto', animation: 'slide-enter 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
-          <SectionTitle>{dict.deltaker.playerDetailPanel.matches}</SectionTitle>
-
-          {/* Neste kamp — alltid først: dette er det man vil vite */}
-          <div style={{ background: `${color}14`, border: `1px solid ${color}44`, borderRadius: 12, padding: '9px 12px', marginBottom: 8 }}>
-            <div style={{ marginBottom: 5 }}><FieldLabel>{dict.deltaker.playerDetailPanel.nextMatch}</FieldLabel></div>
-            {champion ? (
-              <span style={{ fontSize: 14, fontWeight: 800, color: '#fbbf24', letterSpacing: '0.02em' }}>{dict.players.champion} 🏆</span>
-            ) : eliminated ? (
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.6)' }}>{dict.deltaker.playerDetailPanel.outOfTournament}</span>
-            ) : next ? (
-              <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                    {dict.players.stages[next.stage as Stage]}
-                  </span>
-                  <span aria-hidden style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>·</span>
-                  {next.opponent && !next.isFiller ? (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                      <Flag iso2={iso2For(next.opponent)} size={15} />
-                      <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(next.opponent)}</span>
-                    </span>
-                  ) : (
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
-                      {next.isFiller ? dict.common.qualifiedFillerLabel : dict.deltaker.playerDetailPanel.notDecided}
-                    </span>
-                  )}
-                  {!next.confirmed && <span style={{ marginLeft: 'auto' }}><ExampleTag /></span>}
-                </div>
-              </>
-            ) : (
-              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>—</span>
-            )}
-          </div>
-
-          {/* Tidligere kamper — poengene spilleren faktisk fikk i hver av dem */}
+          {/* Tidligere kamper — poengene spilleren faktisk fikk i hver av dem.
+              «Neste kamp» er fjernet herfra: runde 1 vises allerede øverst i
+              «Potensiell vei til finalen» under. */}
           {myMatches.length > 0 && (
             <div style={{ marginBottom: 6 }}>
+              <SectionTitle>{dict.deltaker.playerDetailPanel.matches}</SectionTitle>
               <div style={{ margin: '2px 0 4px' }}><FieldLabel>{dict.deltaker.playerDetailPanel.previousMatches}</FieldLabel></div>
               {myMatches.map((m, k) => {
                 const isP1 = m.player1 === player.name
@@ -255,7 +211,7 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {path.map((s) => (
                   <div key={s.stage} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderRadius: 10, background: `${color}14`, border: `1px solid ${color}44` }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', flexShrink: 0 }}>
+                    <span style={{ width: 96, flexShrink: 0, fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>
                       {dict.players.stages[s.stage]}
                     </span>
                     <span style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
