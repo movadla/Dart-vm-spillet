@@ -47,23 +47,25 @@ export default async function NextMatches({ picks, matchResults }: { picks: Pick
         const schedule = getScheduleLabel(next.stage as Stage, locale)
         return (
           <div key={pick.pot_number} style={{ padding: '10px 14px', borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)' }}>
-            {/* Ditt eget spillernavn her (i tillegg til motstanderens) tvang to
-                fulle navn inn i samme rad ved siden av runde-label — på en
-                smal skjerm/lange navn (engelsk «QUARTER-FINAL», «Humphries»,
-                «van Veen») ble begge kuttet til uleselige forkortelser.
-                Flagget alene holder raden knyttet til riktig spiller (laget
-                står uansett rett over i «Mitt lag»); motstanderens navn får nå
-                all plassen den trenger. */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* To rader: din spiller + runde øverst, motstander under — å
+                presse begge fulle navn OG runde-label inn i én rad ble for
+                trangt på smale skjermer/lange navn («van Duijvenbode»). */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
               <Flag iso2={iso2For(pick.player_name)} size={18} />
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', flexShrink: 0, whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                {lastName(pick.player_name)}
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', flexShrink: 0, whiteSpace: 'nowrap', marginLeft: 'auto' }}>
                 {players.stages[next.stage as Stage]}
               </span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto', minWidth: 0 }}>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, minWidth: 0 }}>
+              <span aria-hidden style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>vs</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                 {next.opponent && !next.isFiller ? (
                   <>
-                    <Flag iso2={iso2For(next.opponent)} size={18} />
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(next.opponent)}</span>
+                    <Flag iso2={iso2For(next.opponent)} size={16} />
+                    <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(next.opponent)}</span>
                   </>
                 ) : (
                   <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
@@ -78,9 +80,8 @@ export default async function NextMatches({ picks, matchResults }: { picks: Pick
               </div>
             </div>
             {schedule.dateKnown && (
-              <div style={{ textAlign: 'right', fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 3, lineHeight: 1.5 }}>
-                <div>{schedule.dateLabel}</div>
-                <div>{schedule.timeLabel}</div>
+              <div style={{ textAlign: 'right', fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>
+                {schedule.dateLabel} · {schedule.timeLabel}
               </div>
             )}
           </div>

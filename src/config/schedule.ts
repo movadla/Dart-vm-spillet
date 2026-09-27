@@ -20,12 +20,17 @@ export interface StageSchedule {
 }
 
 // MIDLERTIDIG (2026-09-27): World Grand Prix 2026 varer 28. sep–4. okt.
-// Kun 1. runde-datoen er bekreftet i kildene research fant — resten av
-// kampplanen (hvilken dag PDC legger runde 2/kvartfinale/semifinale/finale
-// til) sto ikke i kildene, så de står fortsatt som «ikke satt» i stedet for
-// å gjette. Fyll inn etter hvert som PDC/Sky Sports bekrefter dem.
+// Kun 1. runde-DATOEN er bekreftet i kildene research fant (spilles over to
+// kvelder, 28.–29. sep) — IKKE noe klokkeslett per enkeltkamp. 21:00 er kun
+// turneringens generelle åpningstidspunkt (KICKOFF i tournament.ts), ikke et
+// bekreftet starttidspunkt for hver av de 16 runde 1-kampene — PDC bestemmer
+// typisk rekkefølgen/klokkeslettene per kamp nærmere selve dagen (jf.
+// tilstand 2 i kommentaren over). IKKE sett time her igjen uten en ekte kilde
+// per kamp. Resten av kampplanen (runde 2/kvart/semi/finale-datoer) sto
+// heller ikke i kildene, derfor «ikke satt». Fyll inn etter hvert som
+// PDC/Sky Sports bekrefter dem.
 export const STAGE_SCHEDULE: Record<Stage, StageSchedule> = {
-  r1: { date: '2026-09-28', time: '21:00' },
+  r1: { date: '2026-09-28', time: null },
   r2: { date: null, time: null },
   qf: { date: null, time: null },
   sf: { date: null, time: null },

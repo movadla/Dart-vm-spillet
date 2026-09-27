@@ -268,19 +268,24 @@ export default function VmInfoPage() {
             {ctaLabel}
           </Link>
 
-          <details style={CARD}>
-            <summary style={{ ...LABEL, marginBottom: 0, cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* Bevisst svært lite fremtredende (ikke i et CARD, minimal skrift) —
+              men ikke fjernet: CC-lisensene på spillerbildene krever
+              kreditering et sted brukeren kan finne den, og de fleste stedene
+              bildene vises (lagkort, tippe-flyten) har ingen kreditering ved
+              siden av selve bildet. */}
+          <details style={{ padding: '2px 4px' }}>
+            <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 9, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>
               <span>{dict.vmInfo.rulesTab.photoCredit.summary}</span>
-              <span aria-hidden style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>▾</span>
+              <span aria-hidden style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>▾</span>
             </summary>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, margin: '10px 0 8px' }}>
+            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5, margin: '8px 0 6px' }}>
               {dict.vmInfo.rulesTab.photoCredit.intro}
             </p>
             <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
               {PHOTO_CREDITS.map((c) => (
-                <li key={c.name} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 12, padding: '5px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <span style={{ color: '#fff', fontWeight: 600, flexShrink: 0 }}>{c.name}</span>
-                  <a href={c.url} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.65)', textAlign: 'right', textDecoration: 'underline', textUnderlineOffset: 2 }}>{c.credit}</a>
+                <li key={c.name} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 10, padding: '4px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600, flexShrink: 0 }}>{c.name}</span>
+                  <a href={c.url} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'right', textDecoration: 'underline', textUnderlineOffset: 2 }}>{c.credit}</a>
                 </li>
               ))}
             </ul>

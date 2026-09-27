@@ -6,7 +6,6 @@ import Flag from '@/components/Flag'
 import type { Player } from '@/data/pots'
 import { POTS } from '@/data/pots'
 import { PLAYER_STATS } from '@/data/playerStats'
-import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { getPathToFinal } from '@/lib/bracketProjection'
 import { calcPlayerPoints, getPlayerMatches, type MatchResult } from '@/lib/scoring'
 import type { Stage } from '@/config/scoring'
@@ -42,14 +41,6 @@ function Stat({ label, children }: { label: string; children: ReactNode }) {
     <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '9px 10px', minWidth: 0 }}>
       <div style={{ marginBottom: 5 }}><FieldLabel>{label}</FieldLabel></div>
       <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, color: '#fff', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{children}</div>
-    </div>
-  )
-}
-function InfoRow({ label, children, last = false }: { label: string; children: ReactNode; last?: boolean }) {
-  return (
-    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '9px 0', borderBottom: last ? 'none' : '1px solid rgba(255,255,255,0.08)' }}>
-      <span style={{ width: 140, flexShrink: 0, paddingTop: 2, whiteSpace: 'nowrap' }}><FieldLabel>{label}</FieldLabel></span>
-      <div style={{ flex: 1, minWidth: 0, fontSize: 14, color: '#fff', lineHeight: 1.4, textAlign: 'right' }}>{children}</div>
     </div>
   )
 }
@@ -91,7 +82,6 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
   if (!open) return null
 
   const stats = PLAYER_STATS[player.name]
-  const photo = PLAYER_PHOTOS[player.name]
   const path = getPathToFinal(player.name)
   // Kamper — liste over spilte kamper med poengene spilleren faktisk fikk i hver av dem.
   const myMatches = getPlayerMatches(player.name, matchResults)
@@ -228,14 +218,6 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
               {dict.deltaker.playerDetailPanel.seeFullDraw}
             </button>
           </div>
-
-          {photo && (
-            <InfoRow label={dict.deltaker.playerDetailPanel.photo} last>
-              <a href={photo.creditUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, textDecoration: 'underline', textUnderlineOffset: 3 }}>
-                {photo.credit}
-              </a>
-            </InfoRow>
-          )}
         </div>
 
         {/* Bunn: lukk / gå videre */}
