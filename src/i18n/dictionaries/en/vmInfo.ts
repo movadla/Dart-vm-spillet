@@ -41,16 +41,13 @@ export const vmInfo = {
     bullets: [
       'You pick one player from each of 6 pots',
       'The pots are based on PDC ranking and winner odds',
-      'You can change your picks until the Worlds start',
       'You earn points for every set your player wins and for every match win — plus a bonus if he wins the whole tournament',
     ],
     pointsOverview: 'Points overview',
     perSet: 'Per set won',
     perAdvancement: 'Per match win (advancement)',
     forWinning: 'For winning the whole tournament',
-    pointsNote: 'Everything adds up continuously through the tournament, and the total is multiplied by the pot multiplier.',
     multiplier: 'Multiplier',
-    multiplierNote: 'Points for players from these pots are multiplied by the factor — underdogs pay off the most.',
     photoCredit: {
       summary: 'Photo credits',
       intro: 'The player photos are sourced from Wikimedia Commons under Creative Commons licenses and cropped/cut out for the cards. Photographer and license per image:',

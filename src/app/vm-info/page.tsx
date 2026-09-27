@@ -5,22 +5,20 @@ import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
 import BrandBanner from '@/components/BrandBanner'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
-import { POTS, getIso2, getPickablePlayers, type Player } from '@/data/pots'
+import { POTS, getPickablePlayers, type Player } from '@/data/pots'
 import { POT_COLORS } from '@/config/potColors'
 import { formatOdds, formatPoints } from '@/lib/format'
 import Flag from '@/components/Flag'
 import { STAGE_ORDER, SCORING } from '@/config/scoring'
 import type { MatchResult } from '@/lib/scoring'
-import { getFirstMatchInfo, getBracketSection, getSeedLabel, isFillerName, R1_MATCHES } from '@/lib/bracketProjection'
-import { DrawBracket, PairBox } from '@/components/DrawBracket'
 import MatchBracket from '@/components/MatchBracket'
 import { KICKOFF } from '@/config/tournament'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
-import { translateNationality, translatePotName } from '@/lib/i18n/translatePlayer'
+import { translateNationality } from '@/lib/i18n/translatePlayer'
 import LocaleSwitch from '@/components/LocaleSwitch'
 
-type Tab = 'spillere' | 'kamper' | 'trekning' | 'regler'
+type Tab = 'spillere' | 'kamper' | 'regler'
 
 const CARD: React.CSSProperties = {
   background: CARD_GRADIENT,
@@ -89,20 +87,13 @@ export default function VmInfoPage() {
   const TABS: { id: Tab; label: string }[] = [
     { id: 'spillere', label: dict.vmInfo.tabs.players },
     { id: 'kamper', label: dict.vmInfo.tabs.matches },
-    { id: 'trekning', label: dict.vmInfo.tabs.draw },
     { id: 'regler', label: dict.vmInfo.tabs.rules },
   ]
-  const displayName = (n: string) => (isFillerName(n) ? dict.common.qualifiedFillerLabel : n)
 
   // Etter kickoff: Kamper som standard. Før: Regler (forklarer spillet).
   const [activeTab, setActiveTab] = useState<Tab>(() => (KICKOFF <= new Date() ? 'kamper' : 'regler'))
   const [participantId, setParticipantId] = useState<string | null>(null)
   const [matches, setMatches] = useState<MatchResult[]>([])
-  // Forhåndsvalgt med samme «eksempel-spiller» som resten av appen bruker
-  // (StepSlideshow/TeamBuildAnimation) — uten dette var fanen et tomt
-  // skjema med mye ledig plass under helt til noen selv valgte en spiller.
-  const [drawPlayer, setDrawPlayer] = useState<string>('Luke Littler')
-  const [showFullBracket, setShowFullBracket] = useState(false)
   const rulesRef = useRef<HTMLDivElement>(null)
 
   // Påmelding stenger ved kickoff — CTA-lenker peker til Min side i stedet for stengt /tipp.
@@ -150,13 +141,6 @@ export default function VmInfoPage() {
       setActiveTab('kamper')
     } else if (tab === 'regler') {
       setActiveTab('regler')
-    } else if (tab === 'trekning') {
-      setActiveTab('trekning')
-    }
-    const spiller = params.get('spiller')
-    if (spiller) {
-      setActiveTab('trekning')
-      setDrawPlayer(spiller)
     }
   }, [])
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -235,100 +219,6 @@ export default function VmInfoPage() {
         </div>
       )}
 
-      {/* ── TREKNING (projisert eksempel-trekning) ── */}
-      {activeTab === 'trekning' && (
-        <div role="tabpanel" id="panel-trekning" aria-labelledby="tab-trekning" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ ...CARD, textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 1.5 }}>
-            {dict.vmInfo.drawTab.disclaimer.before}<strong style={{ color: '#fff' }}>{dict.vmInfo.drawTab.disclaimer.example}</strong>{dict.vmInfo.drawTab.disclaimer.after}
-          </div>
-
-          <div style={CARD}>
-            <div style={LABEL}>{dict.vmInfo.drawTab.selectPlayer}</div>
-            <select
-              value={drawPlayer}
-              onChange={(e) => setDrawPlayer(e.target.value)}
-              style={{ width: '100%', padding: '11px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, color: '#fff', fontSize: 14 }}
-            >
-              <option value="">{dict.vmInfo.drawTab.selectPlaceholder}</option>
-              {POTS.map((pot) => (
-                <optgroup key={pot.potNumber} label={translatePotName(dict.players, pot.potNumber, pot.name)}>
-                  {pot.players.map((p) => (
-                    <option key={p.name} value={p.name}>{p.name}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </div>
-
-          {drawPlayer && (() => {
-            const info = getFirstMatchInfo(drawPlayer)
-            const section = getBracketSection(drawPlayer)
-            if (!info) return null
-            const pairA = {
-              a: { name: drawPlayer, seedLabel: getSeedLabel(drawPlayer), highlighted: true },
-              b: { name: displayName(info.opponent.name), seedLabel: getSeedLabel(info.opponent.name), faded: info.opponent.isFiller },
-            }
-            const pairB = {
-              a: { name: displayName(info.round2Pair[0].name), seedLabel: getSeedLabel(info.round2Pair[0].name), faded: info.round2Pair[0].isFiller },
-              b: { name: displayName(info.round2Pair[1].name), seedLabel: getSeedLabel(info.round2Pair[1].name), faded: info.round2Pair[1].isFiller },
-            }
-            return (
-              <>
-                <div style={CARD}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px', marginBottom: 8 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{dict.vmInfo.drawTab.round1}</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{dict.vmInfo.drawTab.round2}</span>
-                  </div>
-                  <DrawBracket pairA={pairA} pairB={pairB} />
-                </div>
-
-                {section.length > 0 && (
-                  <div style={CARD}>
-                    <div style={LABEL}>{dict.vmInfo.drawTab.otherSeeded}</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {section.map((name) => (
-                        <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
-                          <Flag iso2={getIso2(name)} size={18} />
-                          {name}
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 10 }}>
-                      {dict.vmInfo.drawTab.otherSeededHint}
-                    </div>
-                  </div>
-                )}
-              </>
-            )
-          })()}
-
-          <button
-            onClick={() => setShowFullBracket((s) => !s)}
-            style={{ padding: '12px', background: showFullBracket ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, color: '#fff', fontSize: 13, fontWeight: 700, letterSpacing: '0.03em', cursor: 'pointer' }}
-          >
-            {showFullBracket ? dict.vmInfo.drawTab.hideFullBracket : dict.vmInfo.drawTab.showFullBracket}
-          </button>
-
-          {showFullBracket && (
-            <div style={CARD}>
-              <div style={LABEL}>{dict.vmInfo.drawTab.fullBracketLabel(R1_MATCHES.length, 128)}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
-                {R1_MATCHES.map(([a, b], i) => (
-                  <div key={i}>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>{dict.vmInfo.drawTab.matchLabel(i + 1)}</div>
-                    <PairBox
-                      a={{ name: displayName(a), seedLabel: getSeedLabel(a), faded: isFillerName(a), highlighted: a === drawPlayer }}
-                      b={{ name: displayName(b), seedLabel: getSeedLabel(b), faded: isFillerName(b), highlighted: b === drawPlayer }}
-                      compact
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* ── REGLER ── */}
       {activeTab === 'regler' && (
         <div role="tabpanel" id="panel-regler" aria-labelledby="tab-regler" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -356,9 +246,6 @@ export default function VmInfoPage() {
               <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.vmInfo.rulesTab.forWinning}</span>
               <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{formatPoints(SCORING.tournamentWinner, locale)}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 10, lineHeight: 1.5 }}>
-              {dict.vmInfo.rulesTab.pointsNote}
-            </div>
           </div>
 
           <div style={cardWithAccent('#ef4444')}>
@@ -370,14 +257,11 @@ export default function VmInfoPage() {
                 const col = mult >= 3 ? '#ef4444' : '#f59e0b'
                 return (
                   <div key={pot.potNumber} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{translatePotName(dict.players, pot.potNumber, pot.name)}</span>
+                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.common.teamTile.level(pot.potNumber)}</span>
                     <span style={{ fontSize: 20, color: col, fontWeight: 900, fontFamily: SPORT }}>×{mult}</span>
                   </div>
                 )
               })}
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 10, lineHeight: 1.5 }}>
-              {dict.vmInfo.rulesTab.multiplierNote}
-            </div>
           </div>
 
           <Link href={ctaHref} className="cta-btn" style={{ display: 'block', padding: '15px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontFamily: SPORT, fontSize: 20, fontWeight: 900, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 999, textDecoration: 'none', textAlign: 'center', boxShadow: '0 4px 20px rgba(220,38,38,0.35)' }}>

@@ -37,9 +37,7 @@ export interface VmInfoDict {
     perSet: string
     perAdvancement: string
     forWinning: string
-    pointsNote: string
     multiplier: string
-    multiplierNote: string
     photoCredit: { summary: string; intro: string }
   }
   bracketModal: {
@@ -95,16 +93,13 @@ export const vmInfo: VmInfoDict = {
     bullets: [
       'Du velger én spiller fra hver av 6 potter',
       'Pottene er basert på PDC-ranking og vinnerodds',
-      'Valgene kan endres frem til turneringen starter',
       'Du får poeng for hvert sett spilleren din vinner og for hver kampseier — pluss bonus om han vinner hele turneringen',
     ],
     pointsOverview: 'Poengoversikt',
     perSet: 'Per vunnet sett',
     perAdvancement: 'Per kampseier (avansement)',
     forWinning: 'For å vinne hele turneringen',
-    pointsNote: 'Alt legges sammen fortløpende gjennom turneringen, og summen ganges med pott-multiplikatoren.',
     multiplier: 'Multiplikator',
-    multiplierNote: 'Poeng for spillere fra disse pottene ganges med faktoren — outsidere gir størst gevinst.',
     photoCredit: {
       summary: 'Fotokreditering',
       intro: 'Spillerfotoene er hentet fra Wikimedia Commons under Creative Commons-lisenser og beskåret/frilagt for kortene. Fotograf og lisens per bilde:',
