@@ -188,4 +188,15 @@ export const PLAYER_PHOTOS: Record<string, { src: string; credit: string; credit
     credit: 'Sven Mandel · CC BY-SA 4.0',
     creditUrl: "https://commons.wikimedia.org/wiki/File:William_O%27Connor_(darts_player)_(cropped).jpg",
   },
+  'Kevin Doets': {
+    // Opprinnelig UTELATT med vilje (se PLAYER_PHOTO_DATABANK.md) — eneste
+    // kildebilde er fra en presse-konferanse med PDC/Paddy Power/Sky Sports-
+    // logoer tett rundt hodet OG et PDC-merket mikrofonflagg helt inntil
+    // haken. Løst 2026-09-27 ved å beskjære bildet til bare hode/ansikt
+    // (over der mikrofonene begynner) FØR bakgrunnsfjerning, slik at verken
+    // bakgrunns-logoene eller mikrofonflagget er med i sluttresultatet.
+    src: '/players/kevin-doets-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Kevin_Doets_2024.png',
+  },
 }

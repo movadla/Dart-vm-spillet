@@ -10,12 +10,11 @@ import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { getPathToFinal, getNextMatch } from '@/lib/bracketProjection'
 import { calcPlayerPoints, getPlayerMatches, isPlayerChampion, isPlayerEliminated, type MatchResult } from '@/lib/scoring'
 import type { Stage } from '@/config/scoring'
-import { getScheduleLabel } from '@/config/schedule'
 import { formatAvg, formatPoints } from '@/lib/format'
 import { lastName } from '@/components/TeamTile'
 import { SPORT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
-import { translateBestAchievement, translateNationality } from '@/lib/i18n/translatePlayer'
+import { translateBestAchievement } from '@/lib/i18n/translatePlayer'
 
 // Braketten trengs sjelden — lastes først når noen åpner den.
 const BracketModal = dynamic(() => import('@/components/BracketModal'), { ssr: false })
@@ -109,20 +108,12 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
     .sort((a, b) => a.pdcRanking - b.pdcRanking)
     .slice(0, 3)
     .sort((a, b) => STAGE_INDEX[a.stage] - STAGE_INDEX[b.stage])
-  const eksempeldataTag = stats && !stats.verified ? (
-    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 4, padding: '2px 5px', whiteSpace: 'nowrap' }}>
-      {dict.deltaker.playerDetailPanel.exampleDataTag}
-    </span>
-  ) : undefined
-
   // Kamper — det første som vises: neste kamp (ekte og avgjort, eller samme
-  // favoritt-eksempel som «vei til finalen» inntil runden er spilt), med
-  // dato/klokkeslett når PDC har kunngjort det, og en liste over spilte
-  // kamper med poengene spilleren faktisk fikk i hver av dem.
+  // favoritt-eksempel som «vei til finalen» inntil runden er spilt), og en
+  // liste over spilte kamper med poengene spilleren faktisk fikk i hver av dem.
   const champion = isPlayerChampion(player.name, matchResults)
   const eliminated = !champion && isPlayerEliminated(player.name, matchResults)
   const next = !champion && !eliminated ? getNextMatch(player.name, matchResults) : null
-  const nextSchedule = next ? getScheduleLabel(next.stage as Stage, locale) : null
   const myMatches = getPlayerMatches(player.name, matchResults)
 
   // Sveip ned: arket følger fingeren når innholdet står øverst; slipp > 90 px lukker.
@@ -177,9 +168,6 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
               <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {player.name}
               </div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 3 }}>
-                {translateNationality(dict.players, player.nationality)} · {player.seedNumber != null ? dict.deltaker.playerDetailPanel.seedLabel(player.seedNumber) : dict.deltaker.playerDetailPanel.unseeded}
-              </div>
             </div>
             <button
               type="button"
@@ -222,11 +210,6 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
                   )}
                   {!next.confirmed && <span style={{ marginLeft: 'auto' }}><ExampleTag /></span>}
                 </div>
-                {nextSchedule?.dateKnown && (
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
-                    {nextSchedule.dateLabel} · {nextSchedule.timeLabel}
-                  </div>
-                )}
               </>
             ) : (
               <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>—</span>
@@ -263,22 +246,21 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
             </div>
           )}
 
-          <SectionTitle tag={eksempeldataTag}>{dict.deltaker.playerDetailPanel.stats}</SectionTitle>
+          <SectionTitle>{dict.deltaker.playerDetailPanel.stats}</SectionTitle>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <Stat label={dict.deltaker.playerDetailPanel.worldRanking}>{player.pdcRanking}</Stat>
             <Stat label={dict.deltaker.playerDetailPanel.avg}>{formatAvg(stats?.avg, locale)}</Stat>
           </div>
 
-          <SectionTitle tag={eksempeldataTag}>{dict.deltaker.playerDetailPanel.info}</SectionTitle>
+          <SectionTitle>{dict.deltaker.playerDetailPanel.info}</SectionTitle>
           <InfoRow label={dict.deltaker.playerDetailPanel.bestAchievement}>{stats?.bestAchievement ? translateBestAchievement(dict.players, player.name, stats.bestAchievement) : '—'}</InfoRow>
 
           {/* Vei til finalen — alltid nøyaktig 3 kolonner på én rad, aldri
               tekst i to linjer: egen (ikke InfoRow-etikett-kolonnen, som gir
               for lite bredde til tre bokser side ved side). */}
           <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            <div style={{ marginBottom: 8 }}>
               <FieldLabel>{dict.deltaker.playerDetailPanel.pathToFinal}</FieldLabel>
-              <ExampleTag />
             </div>
             {path.length ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>

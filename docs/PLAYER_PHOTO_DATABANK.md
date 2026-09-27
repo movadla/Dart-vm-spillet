@@ -193,7 +193,7 @@ med.
 - Video-stillbilde: [Andrew_Gilding_2024.png](https://commons.wikimedia.org/wiki/File:Andrew_Gilding_2024.png) — CC BY 3.0, © DARTS NOW.
 
 **Kevin Doets**
-- Video-stillbilde (YouTube-lisens dobbeltsjekket direkte): [Kevin_Doets_2024.png](https://commons.wikimedia.org/wiki/File:Kevin_Doets_2024.png) — CC BY 3.0, © DARTS NOW. Ansikt tydelig, profesjonell komposisjon.
+- ✅ **I bruk (2026-09-27):** [Kevin_Doets_2024.png](https://commons.wikimedia.org/wiki/File:Kevin_Doets_2024.png) — CC BY 3.0, © DARTS NOW. Kilden er en pressekonferanse med PDC/Paddy Power/Sky Sports-logoer i bakgrunnen OG et PDC-merket mikrofonflagg helt inntil haken — det var derfor bildet opprinnelig ble utelatt. Løst ved å beskjære til kun hode/ansikt (over der mikrofonene begynner i bildet) FØR bakgrunnsfjerning, slik at verken bakgrunnslogoene eller mikrofonen er med i sluttresultatet. Strammere beskjæring enn de andre spillerbildene (kun ansikt, ikke skuldre/drakt), men trademark-trygt.
 
 **Daryl Gurney**
 - Video-stillbilde: [Team_NI_Darts_WC_2025_(Gurney_cropped).png](https://commons.wikimedia.org/wiki/File:Team_NI_Darts_WC_2025_(Gurney_cropped).png) — CC BY 3.0, © DARTS NOW. Allerede beskåret til kun Gurney.
