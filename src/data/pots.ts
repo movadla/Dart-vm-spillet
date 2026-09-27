@@ -120,17 +120,21 @@ export const POTS: Pot[] = [
       { name: 'Danny Noppert',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 8, seedNumber: 8, odds: '81.0' },
       { name: 'Dirk van Duijvenbode',  nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 26, seedNumber: null, odds: '81.0' },
       { name: 'Jermaine Wattimena',    nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 19, seedNumber: null, odds: '81.0' },
+      // Nivå 6 er "resten" av 32-feltet, men kun de 8 med lavest odds vises
+      // som valgbare i tippe-stegene (pickable: false under) — resten er
+      // fortsatt med i selve braketten/spilleroversikten, bare ikke et
+      // pott-alternativ. Se getPickablePlayers().
       { name: 'Krzysztof Ratajski',    nationality: 'Polen',       iso2: 'pl',     pdcRanking: 20, seedNumber: null, odds: '126.0' },
-      { name: "William O'Connor",      nationality: 'Irland',      iso2: 'ie',     pdcRanking: 22, seedNumber: null, odds: '126.0' },
-      { name: 'Luke Woodhouse',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 17, seedNumber: null, odds: '126.0' },
-      { name: 'Cameron Menzies',       nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 28, seedNumber: null, odds: '126.0' },
-      { name: 'Andrew Gilding',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 21, seedNumber: null, odds: '126.0' },
-      { name: 'Joe Cullen',            nationality: 'England',     iso2: 'gb-eng', pdcRanking: 32, seedNumber: null, odds: '126.0' },
-      { name: 'Dave Chisnall',         nationality: 'England',     iso2: 'gb-eng', pdcRanking: 30, seedNumber: null, odds: '126.0' },
-      { name: 'Niels Zonneveld',       nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 27, seedNumber: null, odds: '151.0' },
-      { name: 'Ryan Joyce',            nationality: 'England',     iso2: 'gb-eng', pdcRanking: 25, seedNumber: null, odds: '176.0' },
-      { name: 'Sebastian Białecki',    nationality: 'Polen',       iso2: 'pl',     pdcRanking: 31, seedNumber: null, odds: '201.0' },
-      { name: 'Niko Springer',         nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 29, seedNumber: null, odds: '201.0' },
+      { name: "William O'Connor",      nationality: 'Irland',      iso2: 'ie',     pdcRanking: 22, seedNumber: null, odds: '126.0', pickable: false },
+      { name: 'Luke Woodhouse',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 17, seedNumber: null, odds: '126.0', pickable: false },
+      { name: 'Cameron Menzies',       nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 28, seedNumber: null, odds: '126.0', pickable: false },
+      { name: 'Andrew Gilding',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 21, seedNumber: null, odds: '126.0', pickable: false },
+      { name: 'Joe Cullen',            nationality: 'England',     iso2: 'gb-eng', pdcRanking: 32, seedNumber: null, odds: '126.0', pickable: false },
+      { name: 'Dave Chisnall',         nationality: 'England',     iso2: 'gb-eng', pdcRanking: 30, seedNumber: null, odds: '126.0', pickable: false },
+      { name: 'Niels Zonneveld',       nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 27, seedNumber: null, odds: '151.0', pickable: false },
+      { name: 'Ryan Joyce',            nationality: 'England',     iso2: 'gb-eng', pdcRanking: 25, seedNumber: null, odds: '176.0', pickable: false },
+      { name: 'Sebastian Białecki',    nationality: 'Polen',       iso2: 'pl',     pdcRanking: 31, seedNumber: null, odds: '201.0', pickable: false },
+      { name: 'Niko Springer',         nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 29, seedNumber: null, odds: '201.0', pickable: false },
     ],
   },
 ]
