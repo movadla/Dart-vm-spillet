@@ -5,10 +5,10 @@ import { POTS } from '@/data/pots'
 const ALL_PLAYERS = POTS.flatMap((p) => p.players)
 
 describe('bracketProjection', () => {
-  it('har 64 runde 1-kamper som dekker 128 distinkte spillere (ingen walkover)', () => {
-    expect(R1_MATCHES).toHaveLength(64)
+  it('har 16 runde 1-kamper som dekker 32 distinkte spillere (ingen walkover)', () => {
+    expect(R1_MATCHES).toHaveLength(16)
     const names = new Set(R1_MATCHES.flat())
-    expect(names.size).toBe(128)
+    expect(names.size).toBe(32)
   })
 
   it('gir alle navngitte spillere en direkte runde 1-motstander', () => {
@@ -28,7 +28,7 @@ describe('bracketProjection', () => {
     expect(info.round2Pair.map((s) => s.name)).not.toContain(info.opponent.name)
   })
 
-  it('returnerer 7 andre seeder i samme del av braketten', () => {
+  it('returnerer andre seeder i samme del av braketten', () => {
     const someSeed = ALL_PLAYERS.find((p) => p.seedNumber === 1)!
     const section = getBracketSection(someSeed.name)
     expect(section.length).toBeGreaterThan(0)

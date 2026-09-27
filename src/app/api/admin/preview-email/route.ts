@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     })
   } else if (type === 'broadcast') {
     const subject = req.nextUrl.searchParams.get('subject') ?? '24 timer igjen til å endre valg!'
-    const body = req.nextUrl.searchParams.get('body') ?? 'VM starter i morgen kveld, og fristen for å endre lagvalgene dine er klokken 21:00.\n\nHar du meldt deg inn i en liga? Del ligakoden din med venner og kollegaer før det er for sent.\n\nLykke til!'
+    const body = req.nextUrl.searchParams.get('body') ?? 'Turneringen starter i morgen kveld, og fristen for å endre lagvalgene dine er klokken 21:00.\n\nHar du meldt deg inn i en liga? Del ligakoden din med venner og kollegaer før det er for sent.\n\nLykke til!'
     html = buildBroadcastHtml(name, subject, body, `${baseUrl}/deltaker/demo`)
   } else {
     const ctaUrl = `${baseUrl}/deltaker/demo`

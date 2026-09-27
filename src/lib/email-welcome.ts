@@ -20,7 +20,7 @@ export function buildWelcomeText(name: string, ctaUrl: string, picks: { team: st
     '',
     `Se din side: ${ctaUrl}`,
     '',
-    'Du kan endre valgene dine når som helst frem til dart-VM starter 11. desember kl. 19:00.',
+    'Du kan endre valgene dine når som helst frem til turneringen starter 28. september kl. 21:00.',
     '',
     '---',
     'Du mottar daglige oppdateringer under dart-VM.',
@@ -88,7 +88,7 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
             <!-- Logo -->
             <tr>
               <td align="left" style="padding-bottom:8px;">
-                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#4ade80;margin-bottom:8px;text-shadow:0 0 16px rgba(34,197,94,0.5);">— PDC World Championship —</div>
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#4ade80;margin-bottom:8px;text-shadow:0 0 16px rgba(34,197,94,0.5);">— PDC World Grand Prix —</div>
                 <div style="font-family:'Barlow Condensed','Arial Narrow',Impact,Arial,sans-serif;font-weight:900;text-transform:uppercase;font-size:64px;letter-spacing:-2px;line-height:1;white-space:nowrap;text-shadow:0 0 48px rgba(220,38,38,0.45),0 0 96px rgba(59,130,246,0.25);">
                   <span style="color:rgba(255,255,255,0.35);">DART-VM-</span><span style="color:#ffffff;">SPILLET</span><span style="font-size:28px;letter-spacing:0.04em;color:rgba(255,255,255,0.22);padding-left:10px;vertical-align:middle;">2026</span>
                 </div>
@@ -137,7 +137,7 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
             <tr>
               <td style="padding-bottom:24px;">
                 <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.4);line-height:1.7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-                  Du kan endre valgene dine når som helst frem til dart-VM starter <strong style="color:rgba(255,255,255,0.65);">11. desember kl. 19:00</strong>.
+                  Du kan endre valgene dine når som helst frem til turneringen starter <strong style="color:rgba(255,255,255,0.65);">28. september kl. 21:00</strong>.
                 </p>
               </td>
             </tr>
@@ -176,8 +176,8 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
             <tr>
               <td>
                 <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.15);line-height:2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-                  Du mottar daglige oppdateringer under dart-VM.<br>
-                  Valg kan endres frem til turneringsstart 11. desember.
+                  Du mottar daglige oppdateringer under turneringen.<br>
+                  Valg kan endres frem til turneringsstart 28. september.
                 </p>
               </td>
             </tr>

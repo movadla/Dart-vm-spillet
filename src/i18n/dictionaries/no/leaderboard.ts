@@ -16,7 +16,7 @@ export const leaderboard: LeaderboardDict = {
     body: 'Leaderboardet fylles når de første poengene deles ut.',
   },
   countdown: {
-    starts: (date) => `Dart-VM starter ${date}.`,
+    starts: (date) => `Turneringen starter ${date}.`,
     participants: (n) => `${n} ${n === 1 ? 'deltaker er' : 'deltakere er'} påmeldt så langt.`,
     beFirst: 'Bli den første som melder seg på.',
     joinCta: 'Meld deg på →',

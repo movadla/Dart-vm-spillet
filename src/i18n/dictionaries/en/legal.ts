@@ -18,7 +18,7 @@ export const legal = {
   },
   ogImage: {
     brandLine: 'DART-VM 2026',
-    tagline: 'Pick 6 dart players. Follow the Worlds. Play against friends.',
+    tagline: 'Pick 6 dart players. Follow the tournament. Play against friends.',
   },
   privacy: {
     metaTitle: 'Privacy',

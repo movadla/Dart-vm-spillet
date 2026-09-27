@@ -5,7 +5,7 @@ export const tipp = {
   closed: {
     title1: 'Sign-up',
     title2: 'closed',
-    body: 'Dart-VM 2026 is underway. Signing up and changing picks is no longer possible.',
+    body: 'The tournament is underway. Signing up and changing picks is no longer possible.',
     leaderboardCta: 'See leaderboard →',
   },
   loginLink: {
@@ -34,7 +34,7 @@ export const tipp = {
     heading2: 'signed up!',
     yourPicks: 'Your picks',
     whatsNext: 'What happens now?',
-    startsOn: (when) => `Dart-VM starts ${when}`,
+    startsOn: (when) => `The tournament starts ${when}`,
     canChangeUntilStart: 'You can change your picks until the tournament begins',
     inviteText: 'I’m signed up for Dart-VM-spillet — join me!',
     inviteLabel: 'Invite friends →',

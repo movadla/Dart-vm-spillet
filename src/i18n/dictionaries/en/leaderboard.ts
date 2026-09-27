@@ -7,7 +7,7 @@ export const leaderboard = {
     body: 'The leaderboard fills up once the first points are awarded.',
   },
   countdown: {
-    starts: (date) => `The World Championship starts ${date}.`,
+    starts: (date) => `The tournament starts ${date}.`,
     participants: (n) => `${n} ${n === 1 ? 'participant has' : 'participants have'} signed up so far.`,
     beFirst: 'Be the first to sign up.',
     joinCta: 'Sign up →',

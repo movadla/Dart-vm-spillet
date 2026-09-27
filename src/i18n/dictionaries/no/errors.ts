@@ -115,7 +115,7 @@ export const errors: ErrorsDict = {
     internalError: 'Intern serverfeil',
   },
   tippUpdate: {
-    locked: 'VM er i gang — picks er låst',
+    locked: 'Turneringen er i gang — picks er låst',
     notLoggedIn: 'Ikke innlogget — be om en ny innloggingslenke',
     tooManyAttempts: 'For mange lagringer. Vent litt og prøv igjen.',
     missingData: 'Mangler data',
@@ -141,14 +141,14 @@ export const errors: ErrorsDict = {
     expired: 'Lenken har utløpt',
   },
   leagueCreate: {
-    locked: 'Ligaer er låst etter at VM har startet.',
+    locked: 'Ligaer er låst etter at turneringen har startet.',
     notLoggedIn: 'Ikke innlogget — be om en ny innloggingslenke',
     missingData: 'Mangler data',
     participantNotFound: 'Fant ikke deltaker',
     couldNotCreate: 'Kunne ikke opprette liga',
   },
   leagueJoin: {
-    locked: 'Ligaer er låst etter at VM har startet.',
+    locked: 'Ligaer er låst etter at turneringen har startet.',
     notLoggedIn: 'Ikke innlogget — be om en ny innloggingslenke',
     missingData: 'Mangler data',
     tooManyAttempts: 'For mange forsøk. Vent en time og prøv igjen.',

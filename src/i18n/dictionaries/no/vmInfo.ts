@@ -55,7 +55,7 @@ export interface VmInfoDict {
 }
 
 export const vmInfo: VmInfoDict = {
-  title: 'VM-guide',
+  title: 'Turneringsguide',
   tabsAriaLabel: 'Innhold',
   tabs: { players: 'Spillere', matches: 'Kamper', draw: 'Trekning', rules: 'Regler' },
   ctaLabel: { yourPage: 'Din side →', myPage: 'Min side →', pickPlayers: 'Velg spillere →' },
@@ -95,7 +95,7 @@ export const vmInfo: VmInfoDict = {
     bullets: [
       'Du velger én spiller fra hver av 6 potter',
       'Pottene er basert på PDC-ranking og vinnerodds',
-      'Valgene kan endres frem til VM starter',
+      'Valgene kan endres frem til turneringen starter',
       'Du får poeng for hvert sett spilleren din vinner og for hver kampseier — pluss bonus om han vinner hele turneringen',
     ],
     pointsOverview: 'Poengoversikt',

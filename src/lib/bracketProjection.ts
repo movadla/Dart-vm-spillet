@@ -1,17 +1,27 @@
 import { POTS } from '@/data/pots'
 import { furthestStageReached, isPlayerChampion, isPlayerEliminated, type MatchResult } from './scoring'
 
-// Genererer en illustrativ, stabil eksempel-trekning for hele 128-spiller-braketten
-// (rent utslagsspill, ingen walkover/bye — alle spiller runde 1) — PDC har ikke publisert
-// den faktiske trekningen ennå (kommer normalt medio november). Vi har kun 64 navngitte
-// spillere i datasettet, så resten av feltet fylles med tydelig merkede plasseringsspillere
-// ("Kvalifisert spiller N") som ikke er valgbare.
+// MIDLERTIDIG (2026-09-27): PDC World Grand Prix 2026, ikke VM — se
+// src/data/pots.ts og src/config/tournament.ts for kontekst.
 //
-// Trekningen er deterministisk (samme resultat hver gang appen bygges) — ikke reell
-// tilfeldig hver renders, og skal erstattes med ekte data når trekningen er kjent.
+// I motsetning til VM-oppsettet er HELE feltet her kjent og navngitt (32
+// spillere, ingen plasseringsspillere) OG selve runde 1-trekningen er en
+// ekte, bekreftet trekning (kryssjekket mot Wikipedia/dartsnews/ESPN/Yahoo
+// 2026-09-27) — ikke et algoritmisk eksempel. `isFiller` finnes fortsatt i
+// typene under (UI-et i resten av appen bruker det til å skille ekte
+// motstandere fra plasseringsspillere), men er alltid `false` her siden alle
+// 32 er ekte, navngitte spillere.
+//
+// Selve trekningen er offentliggjort seed-for-seed (seed N møter en navngitt
+// kvalifisert spiller), men PDC/kildene oppga ikke det fysiske brakett-treet
+// (hvilken «kvart» hver seed sitter i utover at topp-seedene holdes fra
+// hverandre til finalen, som er standard praksis). Vi bruker derfor samme
+// standard turneringsseeding som resten av appen (seedOrder — sprer de beste
+// seedene maksimalt utover braketten) til å plassere seed 1–16, og setter
+// inn den BEKREFTEDE runde 1-motstanderen i nabo-slotet — så runde 1 er 100 %
+// ekte, mens runde 2+ er beste estimat inntil braketten faktisk spilles ut.
 
-const BRACKET_SIZE = 128
-const FILLER_COUNT = BRACKET_SIZE - POTS.flatMap((p) => p.players).length // 64
+const BRACKET_SIZE = 32
 const ALL_PLAYERS = POTS.flatMap((p) => p.players)
 
 /** Standard turneringsseeding — sprer de beste rangeringene maksimalt utover braketten (1 og 2 møtes først i finalen). */
@@ -26,17 +36,44 @@ function seedOrder(n: number): number[] {
   return out
 }
 
-// Alle 128 "rangeringsplasser": de 64 navngitte spillerne (etter pdcRanking) + 64
-// plasseringsspillere som fortsetter rangeringsrekken.
-const RANKED_FIELD: string[] = [
-  ...ALL_PLAYERS.slice().sort((a, b) => a.pdcRanking - b.pdcRanking).map((p) => p.name),
-  ...Array.from({ length: FILLER_COUNT }, (_, i) => `Kvalifisert spiller ${i + 1}`),
-]
+const SEED_NAME_BY_NUMBER = new Map(ALL_PLAYERS.filter((p) => p.seedNumber != null).map((p) => [p.seedNumber as number, p.name]))
 
-// Bracket-slot (0-indeksert) → spillernavn, plassert via standard turneringsseeding.
-const BRACKET_SLOTS: string[] = seedOrder(BRACKET_SIZE).map((rank) => RANKED_FIELD[rank - 1])
+// Bekreftet runde 1-trekning (seed → navngitt kvalifisert motstander).
+const R1_OPPONENT_BY_SEED: Record<number, string> = {
+  1: 'Luke Woodhouse',
+  2: 'Dave Chisnall',
+  3: 'Dirk van Duijvenbode',
+  4: 'Sebastian Białecki',
+  5: 'Krzysztof Ratajski',
+  6: 'Joe Cullen',
+  7: 'Niels Zonneveld',
+  8: 'Niko Springer',
+  9: 'Ryan Joyce',
+  10: 'Damon Heta',
+  11: 'Andrew Gilding',
+  12: 'Rob Cross',
+  13: 'Cameron Menzies',
+  14: "William O'Connor",
+  15: 'Jermaine Wattimena',
+  16: 'Kevin Doets',
+}
 
-// 64 runde 1-kamper: [spillerA, spillerB][] — ingen bye, alle 128 spiller runde 1.
+// Bracket-slot (0-indeksert) → spillernavn. Bygget fra standard
+// turneringsseeding (seedOrder) for slotplassering, med den bekreftede
+// runde 1-motstanderen satt inn i nabo-slotet til hver seed.
+const SEED_SLOTS = seedOrder(BRACKET_SIZE)
+const BRACKET_SLOTS: string[] = new Array(BRACKET_SIZE)
+for (let pairIdx = 0; pairIdx < BRACKET_SIZE / 2; pairIdx++) {
+  const a = SEED_SLOTS[pairIdx * 2]
+  const b = SEED_SLOTS[pairIdx * 2 + 1]
+  const seedRank = a <= 16 ? a : b
+  const seedSlot = a <= 16 ? pairIdx * 2 : pairIdx * 2 + 1
+  const oppSlot = a <= 16 ? pairIdx * 2 + 1 : pairIdx * 2
+  BRACKET_SLOTS[seedSlot] = SEED_NAME_BY_NUMBER.get(seedRank) ?? `Seed ${seedRank}`
+  BRACKET_SLOTS[oppSlot] = R1_OPPONENT_BY_SEED[seedRank]
+}
+
+// 16 runde 1-kamper: [spillerA, spillerB][] — ingen bye, alle 32 spiller runde 1.
 export const R1_MATCHES: [string, string][] = Array.from({ length: BRACKET_SIZE / 2 }, (_, i) => [
   BRACKET_SLOTS[i * 2],
   BRACKET_SLOTS[i * 2 + 1],
@@ -48,8 +85,9 @@ R1_MATCHES.forEach(([a, b], i) => {
   NAME_TO_MATCH_INDEX.set(b, i)
 })
 
-function isFiller(name: string): boolean {
-  return name.startsWith('Kvalifisert spiller')
+// Ingen plasseringsspillere i World Grand Prix-feltet — hele feltet er kjent og navngitt.
+function isFiller(_name: string): boolean {
+  return false
 }
 
 export interface DrawSlotInfo { name: string; isFiller: boolean }
@@ -84,8 +122,9 @@ export function getSeedLabel(playerName: string): string | undefined {
 }
 
 /**
- * De 7 andre seedede spillerne i samme "kvartal" av braketten (gruppe på 8 sammenhengende
- * bracket-slots) — de du potensielt kan møte lenger ut i turneringen dersom alle vinner fram.
+ * De andre seedede spillerne i samme del av braketten (gruppe på 8
+ * sammenhengende bracket-slots — én av de 4 «kvartene» i en 32-brakett) —
+ * de du potensielt kan møte lenger ut i turneringen dersom alle vinner fram.
  */
 export function getBracketSection(playerName: string): string[] {
   const idx = NAME_TO_MATCH_INDEX.get(playerName)
@@ -99,8 +138,8 @@ export function getBracketSection(playerName: string): string[] {
 }
 
 const RANKING_BY_NAME = new Map(ALL_PLAYERS.map((p) => [p.name, p.pdcRanking]))
-// Runde k (1-basert) i en 128-brakett → stage-nøkkel i STAGE_ORDER.
-const ROUND_STAGES = ['r1', 'r2', 'r3', 'r4', 'qf', 'sf', 'final'] as const
+// Runde k (1-basert) i en 32-brakett → stage-nøkkel i STAGE_ORDER.
+const ROUND_STAGES = ['r1', 'r2', 'qf', 'sf', 'final'] as const
 
 export interface PathStep {
   stage: (typeof ROUND_STAGES)[number]
@@ -113,9 +152,8 @@ export interface PathStep {
  * «Potensiell vei til finalen»: for hver runde, den best rangerte spilleren
  * som kan dukke opp som motstander dersom alle favorittene vinner sine kamper —
  * dvs. beste rangering i den motsatte halvdelen av spillerens brakett-blokk
- * på det nivået. Runder der beste mulige motstander er en plasseringsspiller
- * (uten rangering) utelates. Bygger på eksempel-trekningen inntil den ekte
- * legges inn — merk det i UI.
+ * på det nivået. Bygger på seedplasseringen (runde 1 er ekte trekning, runde
+ * 2+ er beste estimat) inntil braketten faktisk er avgjort — merk det i UI.
  */
 export function getPathToFinal(playerName: string): PathStep[] {
   const slot = BRACKET_SLOTS.indexOf(playerName)
@@ -140,17 +178,18 @@ export function getPathToFinal(playerName: string): PathStep[] {
 }
 
 export interface DrawSection {
-  /** 1-basert seksjonsnummer (1–8), hver på 16 spillere / 8 runde 1-kamper. */
+  /** 1-basert seksjonsnummer, hver på 8 spillere / 4 runde 1-kamper (én av de 4 «kvartene»). */
   index: number
   /** Beste seed i seksjonen — brukes som overskrift («Seksjon 1 · seed 1»). */
   topSeed: string
   matches: [string, string][]
 }
 
-/** Hele runde 1-trekningen delt i 8 seksjoner à 8 kamper, for brakett-pop-upen. */
+/** Hele runde 1-trekningen delt i 4 seksjoner à 4 kamper (kvarter), for brakett-pop-upen. */
 export function getDrawSections(): DrawSection[] {
-  return Array.from({ length: 8 }, (_, i) => {
-    const matches = R1_MATCHES.slice(i * 8, i * 8 + 8)
+  const MATCHES_PER_SECTION = 4
+  return Array.from({ length: R1_MATCHES.length / MATCHES_PER_SECTION }, (_, i) => {
+    const matches = R1_MATCHES.slice(i * MATCHES_PER_SECTION, i * MATCHES_PER_SECTION + MATCHES_PER_SECTION)
     const names = matches.flat()
     const topSeed = names.reduce((best, n) => {
       const r = RANKING_BY_NAME.get(n)
@@ -199,9 +238,9 @@ export interface BracketSlot {
 }
 
 /**
- * Alle bracket-slotene for én runde (64 for runde 1, 32 for runde 2, … 1 for finalen) —
+ * Alle bracket-slotene for én runde (16 for runde 1, 8 for runde 2, … 1 for finalen) —
  * navnene kjent så langt braketten er avgjort, uansett hvor mange av dem som faktisk har
- * et registrert resultat i `matches` ennå. Brukt av «Kamper»-fanen i VM-guiden til å
+ * et registrert resultat i `matches` ennå. Brukt av «Kamper»-fanen i turneringsguiden til å
  * plassere hvert kort på riktig sted i selve turneringstreet (så vinneren alltid havner
  * midt mellom de to rundene som feeder den), i stedet for bare å liste opp de kampene som
  * tilfeldigvis er spilt så langt.
@@ -227,7 +266,7 @@ export function getBracketRound(stage: (typeof ROUND_STAGES)[number], matches: M
 
 export interface NextMatchInfo {
   stage: (typeof ROUND_STAGES)[number]
-  /** null = ikke avgjort ennå OG ingen navngitt eksempel-favoritt i den blokken (rent plasseringsspiller-felt). */
+  /** null = ikke avgjort ennå OG ingen navngitt eksempel-favoritt i den blokken. */
   opponent: string | null
   isFiller: boolean
   /** true = ekte, avgjort motstander. false = beste eksempel-gjetning (se getPathToFinal) inntil runden er avgjort. */

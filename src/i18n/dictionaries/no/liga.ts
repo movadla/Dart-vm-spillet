@@ -40,7 +40,7 @@ export const liga: LigaDict = {
   participants: (n) => `${n} ${n === 1 ? 'deltaker' : 'deltakere'}`,
   inviteCode: { label: 'Ligakode' },
   hidden: {
-    title: 'Deltakerlisten er skjult til VM starter',
+    title: 'Deltakerlisten er skjult til turneringen starter',
     body: 'Ligaeieren har valgt å holde lagene hemmelige frem til første kamp.',
   },
   empty: {
@@ -48,7 +48,7 @@ export const liga: LigaDict = {
     bodyBefore: 'Del ligakoden ',
     bodyAfter: ' med venner så de kan bli med.',
   },
-  pointsComingWhenStarts: (date) => `Poeng og plassering kommer når VM starter ${date}.`,
+  pointsComingWhenStarts: (date) => `Poeng og plassering kommer når turneringen starter ${date}.`,
   rankChip: { ofTotal: (total) => `av ${total}` },
   kick: {
     button: 'Kick',
@@ -70,7 +70,7 @@ export const liga: LigaDict = {
     wholeLeaderboard: 'Hele leaderboardet',
     joinBtn: 'Bli med i liga',
     createBtn: 'Opprett liga',
-    lockedAfterStart: 'Ligaene er låst etter VM-start.',
+    lockedAfterStart: 'Ligaene er låst etter at turneringen har startet.',
     genericError: 'Noe gikk galt',
     createForm: {
       heading: 'Opprett liga',

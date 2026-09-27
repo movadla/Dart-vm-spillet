@@ -77,18 +77,18 @@ export const deltaker: DeltakerDict = {
     myPage: 'Min side',
     totalPoints: 'Totalpoeng',
     rank: 'Plassering',
-    startsIn: 'VM starter om',
+    startsIn: 'Turneringen starter om',
     editTeam: 'Endre laget →',
     myTeamHeader: 'Mitt lag',
-    vmDecidedPrefix: 'VM er',
+    vmDecidedPrefix: 'Turneringen er',
     vmDecided: 'avgjort',
-    vmInStagePrefix: 'VM er i',
+    vmInStagePrefix: 'Turneringen er i',
     allMatches: 'Alle kamper →',
     nextMatchesHeader: 'Neste kamper',
     leaguesHeader: 'Ligaer',
-    vmGuide: 'VM-guide →',
+    vmGuide: 'Turneringsguide →',
     shareText: (rank, total) => `Jeg er #${rank} av ${total} i Dart-VM-spillet!`,
-    shareTextClosed: 'Bli med i Dart-VM-spillet – velg seks dartspillere og følg dem gjennom VM!',
+    shareTextClosed: 'Bli med i Dart-VM-spillet – velg seks dartspillere og følg dem gjennom turneringen!',
     shareLabel: 'Del →',
   },
   myTeam: {
@@ -100,7 +100,7 @@ export const deltaker: DeltakerDict = {
     won: 'over',
     lost: 'mot',
     matchSummary: (sets, wins, wonTournament, multiplier) =>
-      `${sets} sett · ${wins} ${wins === 1 ? 'seier' : 'seire'}${wonTournament ? ' · VM-seier' : ''}${multiplier > 1 ? ` · ×${multiplier}` : ''}`,
+      `${sets} sett · ${wins} ${wins === 1 ? 'seier' : 'seire'}${wonTournament ? ' · Turneringsseier' : ''}${multiplier > 1 ? ` · ×${multiplier}` : ''}`,
     playerInfo: 'Spillerinfo →',
     allMatches: 'Alle kamper →',
     nextPlayer: 'Neste spiller →',
@@ -111,7 +111,7 @@ export const deltaker: DeltakerDict = {
   demoBanner: {
     badge: 'Demo',
     tabsAriaLabel: 'Demo-fase',
-    phases: { for: 'Før VM', live: 'Underveis', ferdig: 'Etter finalen' },
+    phases: { for: 'Før start', live: 'Underveis', ferdig: 'Etter finalen' },
   },
   pointsDelta: {
     sinceYesterday: 'siden i går',
@@ -140,6 +140,6 @@ export const deltaker: DeltakerDict = {
     // Alle syv formene skal være like «tunge» (ett ord + evt. tall) — «4. runde»
     // ved siden av «kvart»/«semi» så synlig ujevnt ut i de tre kolonnene i
     // «vei til finalen» (én lang, to korte).
-    shortStage: { r1: 'Runde 1', r2: 'Runde 2', r3: 'Runde 3', r4: 'Runde 4', qf: 'Kvart', sf: 'Semi', final: 'Finale' },
+    shortStage: { r1: 'Runde 1', r2: 'Runde 2', qf: 'Kvart', sf: 'Semi', final: 'Finale' },
   },
 }

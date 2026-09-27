@@ -130,7 +130,7 @@ export const tipp: TippDict = {
   closed: {
     title1: 'Påmelding',
     title2: 'stengt',
-    body: 'Dart-VM 2026 er i gang. Påmelding og endring av picks er ikke lenger mulig.',
+    body: 'Turneringen er i gang. Påmelding og endring av picks er ikke lenger mulig.',
     leaderboardCta: 'Se leaderboard →',
   },
   loginLink: {
@@ -159,7 +159,7 @@ export const tipp: TippDict = {
     heading2: 'påmeldt!',
     yourPicks: 'Dine valg',
     whatsNext: 'Hva skjer nå?',
-    startsOn: (when) => `Dart-VM starter ${when}`,
+    startsOn: (when) => `Turneringen starter ${when}`,
     canChangeUntilStart: 'Du kan endre valg frem til turneringen begynner',
     inviteText: 'Jeg er påmeldt Dart-VM-spillet — bli med du også!',
     inviteLabel: 'Inviter venner →',
@@ -239,7 +239,7 @@ export const tipp: TippDict = {
       skipHint: 'Trykk på laget for å spole fram',
     },
     example: {
-      title: 'Følg spillerne gjennom VM',
+      title: 'Følg spillerne gjennom turneringen',
       subtitle: 'Du får poeng for hver seier og hvert sett',
       exampleLabel: 'Eksempel',
       vs: 'VS',

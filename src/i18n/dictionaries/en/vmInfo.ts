@@ -1,7 +1,7 @@
 import type { VmInfoDict } from '../no/vmInfo'
 
 export const vmInfo = {
-  title: 'World Championship Guide',
+  title: 'Tournament Guide',
   tabsAriaLabel: 'Content',
   tabs: { players: 'Players', matches: 'Matches', draw: 'Draw', rules: 'Rules' },
   ctaLabel: { yourPage: 'Your page →', myPage: 'My page →', pickPlayers: 'Pick players →' },

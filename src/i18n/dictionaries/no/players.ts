@@ -16,13 +16,11 @@ export const players: PlayersDict = {
   stages: {
     r1: '1. runde',
     r2: '2. runde',
-    r3: '3. runde',
-    r4: '4. runde',
     qf: 'Kvartfinale',
     sf: 'Semifinale',
     final: 'Finale',
   },
-  champion: 'VM-vinner',
+  champion: 'Turneringsvinner',
   potNames: {
     1: 'Favorittene',
     2: 'Toppseedet',

@@ -52,7 +52,7 @@ export const legal: LegalDict = {
   },
   ogImage: {
     brandLine: 'DART-VM 2026',
-    tagline: 'Velg 6 dartspillere. Følg dart-VM. Spill mot venner.',
+    tagline: 'Velg 6 dartspillere. Følg turneringen. Spill mot venner.',
   },
   privacy: {
     metaTitle: 'Personvern',

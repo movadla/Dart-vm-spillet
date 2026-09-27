@@ -2,7 +2,7 @@ import type { CommonDict } from '../no/common'
 
 export const common = {
   appName: 'Dart-VM-spillet',
-  appDescription: 'Pick 6 dart players. Follow them through the World Championship. Win the pot.',
+  appDescription: 'Pick 6 dart players. Follow them through the tournament. Win the pot.',
   nav: {
     home: '← Home',
     myPage: '← My page',

@@ -152,7 +152,7 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
               textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)',
             }}
           >
-            — PDC World Championship —
+            — PDC World Grand Prix —
           </div>
         )}
         <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: compactHeader ? 22 : 36, letterSpacing: '-1px', lineHeight: 1, transition: 'font-size 0.3s ease' }}>

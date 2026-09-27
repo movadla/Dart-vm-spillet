@@ -25,7 +25,7 @@ function getTimeLeft() {
 export default function Countdown({ size = 22, label, boxed = false, align = 'left' }: {
   /** Skriftstørrelse på tallene */
   size?: number
-  /** Liten overskrift over tallene, f.eks. «VM starter om» */
+  /** Liten overskrift over tallene, f.eks. «Turneringen starter om» */
   label?: string
   /** Tall i egne bokser (leaderboard-kortet) */
   boxed?: boolean

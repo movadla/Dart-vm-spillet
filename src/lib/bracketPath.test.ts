@@ -28,11 +28,11 @@ describe('getPathToFinal', () => {
 })
 
 describe('getDrawSections', () => {
-  it('dekker alle 64 runde 1-kamper i 8 seksjoner à 8', () => {
+  it('dekker alle 16 runde 1-kamper i 4 seksjoner à 4', () => {
     const sections = getDrawSections()
-    expect(sections).toHaveLength(8)
-    expect(sections.every((s) => s.matches.length === 8)).toBe(true)
+    expect(sections).toHaveLength(4)
+    expect(sections.every((s) => s.matches.length === 4)).toBe(true)
     const names = sections.flatMap((s) => s.matches.flat())
-    expect(new Set(names).size).toBe(128)
+    expect(new Set(names).size).toBe(32)
   })
 })

@@ -1,6 +1,7 @@
-// PDC World Championship varer normalt ~3 uker (medio desember – 3. januar).
-// Juster når de faktiske turneringsdatoene er offentliggjort.
-export const VM_TOTAL_DAYS = 24
+// MIDLERTIDIG (2026-09-27): PDC World Grand Prix varer 7 dager (28. sep–4. okt)
+// i stedet for VM sine normale ~3 ukene (medio desember – 3. januar) — bytt
+// tilbake til 24 når det nærmer seg VM i desember, se src/config/tournament.ts.
+export const VM_TOTAL_DAYS = 7
 
 export interface MatchResultLite {
   player1: string
@@ -178,7 +179,7 @@ export function buildDailyEmail(p: EmailParams): string {
             <!-- Logo -->
             <tr>
               <td align="left" style="padding-bottom:8px;">
-                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#4ade80;margin-bottom:8px;text-shadow:0 0 16px rgba(34,197,94,0.5);">— PDC World Championship —</div>
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#4ade80;margin-bottom:8px;text-shadow:0 0 16px rgba(34,197,94,0.5);">— PDC World Grand Prix —</div>
                 <div style="font-family:'Barlow Condensed','Arial Narrow',Impact,Arial,sans-serif;font-weight:900;text-transform:uppercase;font-size:64px;letter-spacing:-2px;line-height:1;white-space:nowrap;text-shadow:0 0 48px rgba(220,38,38,0.45),0 0 96px rgba(59,130,246,0.25);">
                   <span style="color:rgba(255,255,255,0.35);">DART-VM-</span><span style="color:#ffffff;">SPILLET</span><span style="font-size:28px;letter-spacing:0.04em;color:rgba(255,255,255,0.22);padding-left:10px;vertical-align:middle;">2026</span>
                 </div>

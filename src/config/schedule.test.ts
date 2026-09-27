@@ -3,7 +3,7 @@ import { getScheduleLabel, STAGE_SCHEDULE } from './schedule'
 
 describe('getScheduleLabel', () => {
   it('ingenting satt ennå → begge «Ikke satt»', () => {
-    const l = getScheduleLabel('r1')
+    const l = getScheduleLabel('r2')
     expect(l).toEqual({ dateLabel: 'Ikke satt', timeLabel: 'Ikke satt', dateKnown: false, timeKnown: false })
   })
 

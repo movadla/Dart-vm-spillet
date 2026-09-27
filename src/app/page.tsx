@@ -244,7 +244,7 @@ export default function HomePage() {
                 overskrift. Nøytral hvit/dempet holder oppmerksomheten på
                 selve tittelen og CTA-en. */}
             <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 15, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, marginBottom: 6, whiteSpace: 'nowrap', color: 'rgba(255,255,255,0.5)' }}>
-              — PDC World Championship —
+              — PDC World Grand Prix —
             </div>
             <div style={{ fontSize: 'clamp(44px, 12.5vw, 76px)', letterSpacing: '-2px', lineHeight: 1, whiteSpace: 'nowrap' }}>
               <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>

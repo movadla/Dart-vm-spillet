@@ -1,9 +1,15 @@
 import type { Locale } from './i18n'
 
-// Én kilde for turneringsdatoen. Første kamp i PDC World Darts Championship
-// 2026/27 = påmeldingsfrist = «VM starter». Tidligere lå denne datoen
-// hardkodet i 14 filer — endre KUN her.
-export const KICKOFF = new Date('2026-12-11T19:00:00Z')
+// Én kilde for turneringsdatoen. Første kamp = påmeldingsfrist = «turneringen
+// starter». Tidligere lå denne datoen hardkodet i 14 filer — endre KUN her.
+//
+// MIDLERTIDIG (2026-09-27): satt om til PDC World Grand Prix 2026 (28. sep–
+// 4. okt, Mattioli Arena, Leicester) som en generalprøve/test av appen mot en
+// ekte, nært forestående turnering — IKKE det faktiske dart-VM i desember.
+// Bytt tilbake til 2026-12-11T19:00:00Z (og se git-historikk for resten av
+// VM-oppsettet: pots.ts, bracketProjection.ts, scoring.ts STAGE_ORDER m.fl.)
+// når det nærmer seg VM-trekningen i november.
+export const KICKOFF = new Date('2026-09-28T19:00:00Z')
 
 const INTL_LOCALE: Record<Locale, string> = { no: 'nb-NO', en: 'en-US' }
 

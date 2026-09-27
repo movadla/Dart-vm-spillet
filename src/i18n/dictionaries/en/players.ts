@@ -4,13 +4,11 @@ export const players = {
   stages: {
     r1: 'Round 1',
     r2: 'Round 2',
-    r3: 'Round 3',
-    r4: 'Round 4',
     qf: 'Quarter-final',
     sf: 'Semi-final',
     final: 'Final',
   },
-  champion: 'World Champion',
+  champion: 'Tournament winner',
   potNames: {
     1: 'The Favourites',
     2: 'Top Seeds',

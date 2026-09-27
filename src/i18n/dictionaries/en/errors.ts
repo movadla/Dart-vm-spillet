@@ -28,7 +28,7 @@ export const errors = {
     internalError: 'Internal server error',
   },
   tippUpdate: {
-    locked: 'The Worlds is underway — picks are locked',
+    locked: 'The tournament is underway — picks are locked',
     notLoggedIn: 'Not signed in — request a new sign-in link',
     tooManyAttempts: 'Too many saves. Wait a moment and try again.',
     missingData: 'Missing data',
@@ -54,14 +54,14 @@ export const errors = {
     expired: 'The link has expired',
   },
   leagueCreate: {
-    locked: 'Leagues are locked once the Worlds have started.',
+    locked: 'Leagues are locked once the tournament has started.',
     notLoggedIn: 'Not signed in — request a new sign-in link',
     missingData: 'Missing data',
     participantNotFound: 'Participant not found',
     couldNotCreate: 'Could not create league',
   },
   leagueJoin: {
-    locked: 'Leagues are locked once the Worlds have started.',
+    locked: 'Leagues are locked once the tournament has started.',
     notLoggedIn: 'Not signed in — request a new sign-in link',
     missingData: 'Missing data',
     tooManyAttempts: 'Too many attempts. Wait an hour and try again.',

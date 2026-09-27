@@ -35,4 +35,7 @@ export const PLAYER_STATS: Record<string, PlayerStats> = {
   'Luke Woodhouse':      { avg: 94.3,  bestAchievement: 'Players Championship-vinner', verified: false },
   'Martin Schindler':    { avg: 94.9,  bestAchievement: 'European Tour-vinner 2024', verified: false },
   'Krzysztof Ratajski':  { avg: 94.5,  bestAchievement: 'World Grand Prix-semifinalist 2020', verified: false },
+  'Danny Noppert':       { avg: 95.7,  bestAchievement: 'European Championship-vinner 2021', verified: false },
+  'Chris Dobey':         { avg: 94.8,  bestAchievement: 'Players Championship-vinner', verified: false },
+  'Nathan Aspinall':     { avg: 94.6,  bestAchievement: 'UK Open-vinner 2022', verified: false },
 }

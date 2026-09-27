@@ -97,13 +97,13 @@ describe('isPlayerChampion', () => {
 describe('getPlayerMatches', () => {
   it('filtrerer bort andre spilleres kamper og sorterer kronologisk uansett rekkefølgen de ble lagt inn', () => {
     const matches = [
-      { player1: 'A', player2: 'C', sets1: 4, sets2: 1, stage: 'r4', winner: 'A' },
+      { player1: 'A', player2: 'C', sets1: 4, sets2: 1, stage: 'r2', winner: 'A' },
       { player1: 'X', player2: 'Y', sets1: 3, sets2: 0, stage: 'r1', winner: 'X' }, // andre spillere
       { player1: 'B', player2: 'A', sets1: 3, sets2: 6, stage: 'r1', winner: 'A' },
       { player1: 'A', player2: 'D', sets1: 3, sets2: 6, stage: 'qf', winner: 'D' },
     ]
     const mine = getPlayerMatches('A', matches)
-    expect(mine.map((m) => m.stage)).toEqual(['r1', 'r4', 'qf'])
+    expect(mine.map((m) => m.stage)).toEqual(['r1', 'r2', 'qf'])
     expect(mine.every((m) => m.player1 === 'A' || m.player2 === 'A')).toBe(true)
   })
 

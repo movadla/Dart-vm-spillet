@@ -20,7 +20,7 @@ import { translateBestAchievement, translateNationality } from '@/lib/i18n/trans
 // Braketten trengs sjelden — lastes først når noen åpner den.
 const BracketModal = dynamic(() => import('@/components/BracketModal'), { ssr: false })
 
-const STAGE_INDEX: Record<string, number> = { r1: 0, r2: 1, r3: 2, r4: 3, qf: 4, sf: 5, final: 6 }
+const STAGE_INDEX: Record<string, number> = { r1: 0, r2: 1, qf: 2, sf: 3, final: 4 }
 
 const ALL_PLAYERS = POTS.flatMap((p) => p.players)
 function iso2For(name: string): string {

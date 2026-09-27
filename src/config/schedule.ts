@@ -19,11 +19,14 @@ export interface StageSchedule {
   time: string | null
 }
 
+// MIDLERTIDIG (2026-09-27): World Grand Prix 2026 varer 28. sep–4. okt.
+// Kun 1. runde-datoen er bekreftet i kildene research fant — resten av
+// kampplanen (hvilken dag PDC legger runde 2/kvartfinale/semifinale/finale
+// til) sto ikke i kildene, så de står fortsatt som «ikke satt» i stedet for
+// å gjette. Fyll inn etter hvert som PDC/Sky Sports bekrefter dem.
 export const STAGE_SCHEDULE: Record<Stage, StageSchedule> = {
-  r1: { date: null, time: null },
+  r1: { date: '2026-09-28', time: null },
   r2: { date: null, time: null },
-  r3: { date: null, time: null },
-  r4: { date: null, time: null },
   qf: { date: null, time: null },
   sf: { date: null, time: null },
   final: { date: null, time: null },

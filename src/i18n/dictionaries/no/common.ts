@@ -52,7 +52,7 @@ export interface CommonDict {
 
 export const common: CommonDict = {
   appName: 'Dart-VM-spillet',
-  appDescription: 'Velg 6 dartspillere. Følg dem gjennom dart-VM. Vinn potten.',
+  appDescription: 'Velg 6 dartspillere. Følg dem gjennom turneringen. Vinn potten.',
   nav: {
     home: '← Hjem',
     myPage: '← Min side',
@@ -68,7 +68,7 @@ export const common: CommonDict = {
     days: 'dager',
     hours: 'timer',
     minutes: 'min',
-    labelUntilStart: 'VM starter om',
+    labelUntilStart: 'Turneringen starter om',
     labelUntilFirstPoints: 'Første poeng deles ut om',
   },
   lastUpdated: 'Oppdatert {time}',

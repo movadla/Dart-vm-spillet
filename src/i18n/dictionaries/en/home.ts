@@ -30,7 +30,7 @@ export const home = {
     getStarted: 'Get started →',
     alreadySignedUp: 'Already signed up? Find your page →',
     scrollHint: 'More info',
-    tagline: 'Pick 6 dart players. Follow them through the World Championship.',
+    tagline: 'Pick 6 dart players. Follow them through the tournament.',
   },
   howItWorks: {
     eyebrow: 'How it works',
