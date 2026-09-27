@@ -63,6 +63,7 @@ export interface DeltakerDict {
     info: string
     bestAchievement: string
     pathToFinal: string
+    potentialPathTitle: (name: string) => string
     noTop16: string
     seeFullDraw: string
     photo: string
@@ -134,6 +135,7 @@ export const deltaker: DeltakerDict = {
     info: 'Info',
     bestAchievement: 'Beste prestasjon',
     pathToFinal: 'Vei til finalen',
+    potentialPathTitle: (name) => `Potensiell vei til finalen for ${name}`,
     noTop16: 'Ingen topp 16 før finalen',
     seeFullDraw: 'Se hele trekningen →',
     photo: 'Foto',

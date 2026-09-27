@@ -64,6 +64,7 @@ export const deltaker = {
     info: 'Info',
     bestAchievement: 'Best achievement',
     pathToFinal: 'Path to the final',
+    potentialPathTitle: (name) => `Potential path to the final for ${name}`,
     noTop16: 'No top 16 before the final',
     seeFullDraw: 'See the full draw →',
     photo: 'Photo',

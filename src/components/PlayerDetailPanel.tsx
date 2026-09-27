@@ -14,12 +14,9 @@ import { formatAvg, formatPoints } from '@/lib/format'
 import { lastName } from '@/components/TeamTile'
 import { SPORT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
-import { translateBestAchievement } from '@/lib/i18n/translatePlayer'
 
 // Braketten trengs sjelden — lastes først når noen åpner den.
 const BracketModal = dynamic(() => import('@/components/BracketModal'), { ssr: false })
-
-const STAGE_INDEX: Record<string, number> = { r1: 0, r2: 1, qf: 2, sf: 3, final: 4 }
 
 const ALL_PLAYERS = POTS.flatMap((p) => p.players)
 function iso2For(name: string): string {
@@ -104,10 +101,6 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
   const stats = PLAYER_STATS[player.name]
   const photo = PLAYER_PHOTOS[player.name]
   const path = getPathToFinal(player.name)
-    .filter((s) => s.stage !== 'final')
-    .sort((a, b) => a.pdcRanking - b.pdcRanking)
-    .slice(0, 3)
-    .sort((a, b) => STAGE_INDEX[a.stage] - STAGE_INDEX[b.stage])
   // Kamper — det første som vises: neste kamp (ekte og avgjort, eller samme
   // favoritt-eksempel som «vei til finalen» inntil runden er spilt), og en
   // liste over spilte kamper med poengene spilleren faktisk fikk i hver av dem.
@@ -252,32 +245,30 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
             <Stat label={dict.deltaker.playerDetailPanel.avg}>{formatAvg(stats?.avg, locale)}</Stat>
           </div>
 
-          <SectionTitle>{dict.deltaker.playerDetailPanel.info}</SectionTitle>
-          <InfoRow label={dict.deltaker.playerDetailPanel.bestAchievement}>{stats?.bestAchievement ? translateBestAchievement(dict.players, player.name, stats.bestAchievement) : '—'}</InfoRow>
-
-          {/* Vei til finalen — alltid nøyaktig 3 kolonner på én rad, aldri
-              tekst i to linjer: egen (ikke InfoRow-etikett-kolonnen, som gir
-              for lite bredde til tre bokser side ved side). */}
+          {/* Potensiell vei til finalen — vertikal liste, alle 5 runder t.o.m.
+              finalen (ikke bare topp 3), med fullt navn og PDC-rangering. */}
           <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <div style={{ marginBottom: 8 }}>
-              <FieldLabel>{dict.deltaker.playerDetailPanel.pathToFinal}</FieldLabel>
+              <FieldLabel>{dict.deltaker.playerDetailPanel.potentialPathTitle(player.name)}</FieldLabel>
             </div>
             {path.length ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {path.map((s) => (
-                  <div key={s.stage} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '8px 4px', borderRadius: 10, background: `${color}14`, border: `1px solid ${color}44`, minWidth: 0 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', whiteSpace: 'nowrap' }}>
-                      {dict.deltaker.playerDetailPanel.shortStage[s.stage]}
+                  <div key={s.stage} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderRadius: 10, background: `${color}14`, border: `1px solid ${color}44` }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', flexShrink: 0 }}>
+                      {dict.players.stages[s.stage]}
                     </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0, maxWidth: '100%' }}>
-                      <Flag iso2={iso2For(s.opponent)} size={13} />
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(s.opponent)}</span>
+                    <span style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {s.opponent}
+                    </span>
+                    <span style={{ fontSize: 14, fontWeight: 900, color: '#fbbf24', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                      #{s.pdcRanking}
                     </span>
                   </div>
                 ))}
               </div>
             ) : <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{dict.deltaker.playerDetailPanel.noTop16}</div>}
-            <button type="button" onClick={() => setBracketOpen(true)} style={{ display: 'block', marginTop: 8, background: 'none', border: 'none', padding: 0, color: 'rgba(255,255,255,0.65)', fontSize: 12, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+            <button type="button" onClick={() => setBracketOpen(true)} style={{ display: 'block', marginTop: 10, background: 'none', border: 'none', padding: 0, color: 'rgba(255,255,255,0.65)', fontSize: 12, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}>
               {dict.deltaker.playerDetailPanel.seeFullDraw}
             </button>
           </div>
