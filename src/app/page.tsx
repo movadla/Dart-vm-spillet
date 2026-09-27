@@ -211,8 +211,12 @@ export default function HomePage() {
         {/* Bakgrunn dekker hele 100svh inkl. nedtelling. Foto: PDC World Darts
             Championship, semifinalescenen på Alexandra Palace 2016 —
             © dom fellowes, CC BY 2.0 (se PLAYER_PHOTO_DATABANK.md). Farge-
-            laget over toner bildet i sidens blå/røde palett (mixBlendMode:
-            'color') i stedet for å ligge som separate fargeklatter oppå. */}
+            laget over toner bildet (mixBlendMode: 'color') i stedet for å
+            ligge som separate fargeklatter oppå.
+            MIDLERTIDIG (2026-09-27): to blånyanser i stedet for blå/rød mens
+            appen peker mot World Grand Prix (jf. BrandBanner.tsx/globals.css
+            page-bg) — bytt tilbake til #c41230 på høyre side når det nærmer
+            seg VM i desember. */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
           <div style={{
             position: 'absolute', inset: 0,
@@ -222,7 +226,7 @@ export default function HomePage() {
           }} />
           <div style={{
             position: 'absolute', inset: 0,
-            background: 'radial-gradient(ellipse 140% 90% at 10% 0%, #0a3fa8 0%, transparent 52%), radial-gradient(ellipse 140% 90% at 90% 0%, #c41230 0%, transparent 52%)',
+            background: 'radial-gradient(ellipse 140% 90% at 10% 0%, #1d4ed8 0%, transparent 52%), radial-gradient(ellipse 140% 90% at 90% 0%, #0a1e4a 0%, transparent 52%)',
             mixBlendMode: 'color', opacity: 0.9,
           }} />
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 220, background: 'linear-gradient(to bottom, transparent, #0a0a0a)' }} />
@@ -243,12 +247,12 @@ export default function HomePage() {
                 poeng og seiere ellers i appen) i stedet for en nøytral
                 overskrift. Nøytral hvit/dempet holder oppmerksomheten på
                 selve tittelen og CTA-en. */}
-            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 15, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, marginBottom: 6, whiteSpace: 'nowrap', color: 'rgba(255,255,255,0.5)' }}>
+            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 15, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, marginBottom: 6, whiteSpace: 'nowrap', color: 'rgba(191,219,254,0.55)' }}>
               — PDC World Grand Prix —
             </div>
-            <div style={{ fontSize: 'clamp(44px, 12.5vw, 76px)', letterSpacing: '-2px', lineHeight: 1, whiteSpace: 'nowrap' }}>
-              <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
-              <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
+            <div style={{ fontSize: 'clamp(34px, 9.5vw, 64px)', letterSpacing: '-2px', lineHeight: 1.05, whiteSpace: 'nowrap' }}>
+              <span style={{ color: 'rgba(147,197,253,0.4)' }}>WORLD GRAND PRIX-</span>
+              <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, #bfdbfe 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
           </div>
 

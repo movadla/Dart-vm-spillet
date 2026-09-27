@@ -17,7 +17,7 @@ export const legal = {
     home: 'To the homepage →',
   },
   ogImage: {
-    brandLine: 'DART-VM 2026',
+    brandLine: 'WORLD GRAND PRIX 2026',
     tagline: 'Pick 6 dart players. Follow the tournament. Play against friends.',
   },
   privacy: {
@@ -26,7 +26,7 @@ export const legal = {
     back: '← To the homepage',
     whatWeStore: {
       h: 'What we store',
-      p: 'When you sign up for Dart-VM-spillet we store your name, email address, phone number if you provide one, and which dart players you’ve picked.',
+      p: 'When you sign up for World Grand Prix-Spillet we store your name, email address, phone number if you provide one, and which dart players you’ve picked.',
     },
     whatWeUseItFor: {
       h: 'What we use it for',

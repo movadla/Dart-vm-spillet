@@ -235,12 +235,13 @@ input::placeholder {
 }
 .live-pts { animation: pts-live-pulse 1.4s ease-in-out infinite; }
 
-/* Gjennomgående sidegrad — blå+rød toppgradient i hjørnene */
+/* Gjennomgående sidegrad — to blånyanser i hjørnene (World Grand Prix-tema,
+   MIDLERTIDIG 2026-09-27, jf. BrandBanner.tsx — var blå+rød for VM). */
 .page-bg {
-  background-color: #0d1117;
+  background-color: #070b16;
   background-image:
-    radial-gradient(ellipse 80% 25% at 0% 0%, #0d2040 0%, transparent 100%),
-    radial-gradient(ellipse 80% 25% at 100% 0%, #350a0a 0%, transparent 100%);
+    radial-gradient(ellipse 80% 25% at 0% 0%, #1d3f8f 0%, transparent 100%),
+    radial-gradient(ellipse 80% 25% at 100% 0%, #0a1e4a 0%, transparent 100%);
 }
 
 /* Tilbake/hjem-knapper — tydelig pill-form */

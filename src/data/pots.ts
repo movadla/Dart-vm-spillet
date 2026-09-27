@@ -51,76 +51,86 @@ export function getPickablePlayers(pot: Pot): Player[] {
 //  2) Chris Dobeys nasjonalitet var oppgitt som «Skottland» i to av kildene,
 //     men det er faktisk feil — han er fra Newcastle, England — rettet her.
 //
-// Odds er IKKE fra ekte markedsdata for dette turneringsoppsettet (ingen
-// kilde ga odds) — gjenbrukt/tilpasset fra de gamle VM-oddsene der spilleren
-// fantes fra før, som en grov tier-indikasjon, ikke faktiske odds.
+// ODDS (oppdatert 2026-09-27): ekte utfallsodds, hentet fra bet365 via
+// Oddschecker sin samlede World Grand Prix 2026-vinner-markedsside
+// (oddschecker.com/darts/world-grand-prix/winner) — ett enkelt, konsistent
+// øyeblikksbilde med alle 32 spillere priset individuelt, tatt 2026-09-27
+// (dagen før turneringsstart). Konvertert fra brøkodds til desimalodds
+// (brøk + 1) og avrundet til én desimal. BoyleSports (tittelsponsor) sin
+// EGEN liste fra 17. september ga tildels kortere odds på favorittene
+// (f.eks. Littler 4/7 der), men det ser ut som markedet siden har beveget
+// seg — bet365-øyeblikksbildet over er nyere og brukt som eneste kilde for
+// konsistens. Selve POTT-INNDELINGEN under er NÅ ogsÅ satt etter disse
+// oddsene (lavest → høyest), IKKE lenger etter PDC-seeding: pott 1 = de to
+// laveste oddsene, pott 2–5 = tre og tre i stigende oddsrekkefølge, pott 6 =
+// resten (18 spillere).
 export const POTS: Pot[] = [
   {
     potNumber: 1,
     name: 'Favorittene',
     players: [
-      { name: 'Luke Littler',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 1, seedNumber: 1, odds: '2.5' },
-      { name: 'Luke Humphries',    nationality: 'England',     iso2: 'gb-eng', pdcRanking: 2, seedNumber: 2, odds: '3.5' },
-      { name: 'Gian van Veen',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 3, seedNumber: 3, odds: '9.0' },
-      { name: 'Gerwyn Price',      nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 4, seedNumber: 4, odds: '11.0' },
+      { name: 'Luke Littler',      nationality: 'England',     iso2: 'gb-eng', pdcRanking: 1, seedNumber: 1, odds: '1.8' },
+      { name: 'Luke Humphries',    nationality: 'England',     iso2: 'gb-eng', pdcRanking: 2, seedNumber: 2, odds: '6.5' },
     ],
   },
   {
     potNumber: 2,
     name: 'Toppseedet',
     players: [
-      { name: 'Jonny Clayton',     nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 5, seedNumber: 5, odds: '13.0' },
-      { name: 'James Wade',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 6, seedNumber: 6, odds: '15.0' },
-      { name: 'Josh Rock',         nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 7, seedNumber: 7, odds: '17.0' },
-      { name: 'Danny Noppert',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 8, seedNumber: 8, odds: '26.0' },
+      { name: 'Gerwyn Price',      nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 4, seedNumber: 4, odds: '12.0' },
+      { name: 'Gian van Veen',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 3, seedNumber: 3, odds: '17.0' },
+      { name: 'James Wade',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 6, seedNumber: 6, odds: '23.0' },
     ],
   },
   {
     potNumber: 3,
     name: 'Storfavoritter',
     players: [
-      { name: 'Michael van Gerwen',nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 9,  seedNumber: 9,  odds: '9.0' },
-      { name: 'Gary Anderson',     nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 10, seedNumber: 10, odds: '34.0' },
-      { name: 'Stephen Bunting',   nationality: 'England',     iso2: 'gb-eng', pdcRanking: 11, seedNumber: 11, odds: '21.0' },
-      { name: 'Wessel Nijman',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 12, seedNumber: 12, odds: '26.0' },
+      { name: 'Ross Smith',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 13, seedNumber: 13, odds: '23.0' },
+      { name: 'Gary Anderson',     nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 10, seedNumber: 10, odds: '23.0' },
+      { name: 'Michael van Gerwen',nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 9,  seedNumber: 9,  odds: '26.0' },
     ],
   },
   {
     potNumber: 4,
     name: 'Seedet outsidere',
     players: [
-      { name: 'Ross Smith',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 13, seedNumber: 13, odds: '41.0' },
-      { name: 'Ryan Searle',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 14, seedNumber: 14, odds: '34.0' },
-      { name: 'Chris Dobey',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 15, seedNumber: 15, odds: '41.0' },
-      { name: 'Nathan Aspinall',   nationality: 'England',     iso2: 'gb-eng', pdcRanking: 16, seedNumber: 16, odds: '34.0' },
+      { name: 'Wessel Nijman',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 12, seedNumber: 12, odds: '29.0' },
+      { name: 'Jonny Clayton',     nationality: 'Wales',       iso2: 'gb-wls', pdcRanking: 5, seedNumber: 5, odds: '34.0' },
+      { name: 'Nathan Aspinall',   nationality: 'England',     iso2: 'gb-eng', pdcRanking: 16, seedNumber: 16, odds: '41.0' },
     ],
   },
   {
     potNumber: 5,
     name: 'Kvalifiserte',
     players: [
-      { name: 'Luke Woodhouse',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 17, seedNumber: null, odds: '81.0' },
-      { name: 'Kevin Doets',           nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 18, seedNumber: null, odds: '151.0' },
-      { name: 'Jermaine Wattimena',    nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 19, seedNumber: null, odds: '81.0' },
-      { name: 'Krzysztof Ratajski',    nationality: 'Polen',       iso2: 'pl',     pdcRanking: 20, seedNumber: null, odds: '101.0' },
-      { name: 'Andrew Gilding',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 21, seedNumber: null, odds: '151.0' },
-      { name: "William O'Connor",      nationality: 'Irland',      iso2: 'ie',     pdcRanking: 22, seedNumber: null, odds: '351.0' },
-      { name: 'Damon Heta',            nationality: 'Australia',   iso2: 'au',     pdcRanking: 23, seedNumber: null, odds: '101.0' },
+      { name: 'Chris Dobey',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 15, seedNumber: 15, odds: '41.0' },
       { name: 'Rob Cross',             nationality: 'England',     iso2: 'gb-eng', pdcRanking: 24, seedNumber: null, odds: '51.0' },
+      { name: 'Stephen Bunting',   nationality: 'England',     iso2: 'gb-eng', pdcRanking: 11, seedNumber: 11, odds: '51.0' },
     ],
   },
   {
     potNumber: 6,
     name: 'Resten',
     players: [
-      { name: 'Ryan Joyce',            nationality: 'England',     iso2: 'gb-eng', pdcRanking: 25, seedNumber: null, odds: '151.0' },
-      { name: 'Dirk van Duijvenbode',  nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 26, seedNumber: null, odds: '101.0' },
-      { name: 'Niels Zonneveld',       nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 27, seedNumber: null, odds: '251.0' },
-      { name: 'Cameron Menzies',       nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 28, seedNumber: null, odds: '151.0' },
-      { name: 'Niko Springer',         nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 29, seedNumber: null, odds: '751.0' },
-      { name: 'Dave Chisnall',         nationality: 'England',     iso2: 'gb-eng', pdcRanking: 30, seedNumber: null, odds: '201.0' },
-      { name: 'Sebastian Białecki',    nationality: 'Polen',       iso2: 'pl',     pdcRanking: 31, seedNumber: null, odds: '301.0' },
-      { name: 'Joe Cullen',            nationality: 'England',     iso2: 'gb-eng', pdcRanking: 32, seedNumber: null, odds: '151.0' },
+      { name: 'Josh Rock',         nationality: 'Nord-Irland', iso2: 'gb-nir', pdcRanking: 7, seedNumber: 7, odds: '51.0' },
+      { name: 'Kevin Doets',           nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 18, seedNumber: null, odds: '51.0' },
+      { name: 'Ryan Searle',       nationality: 'England',     iso2: 'gb-eng', pdcRanking: 14, seedNumber: 14, odds: '67.0' },
+      { name: 'Damon Heta',            nationality: 'Australia',   iso2: 'au',     pdcRanking: 23, seedNumber: null, odds: '67.0' },
+      { name: 'Danny Noppert',     nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 8, seedNumber: 8, odds: '81.0' },
+      { name: 'Dirk van Duijvenbode',  nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 26, seedNumber: null, odds: '81.0' },
+      { name: 'Jermaine Wattimena',    nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 19, seedNumber: null, odds: '81.0' },
+      { name: 'Krzysztof Ratajski',    nationality: 'Polen',       iso2: 'pl',     pdcRanking: 20, seedNumber: null, odds: '126.0' },
+      { name: "William O'Connor",      nationality: 'Irland',      iso2: 'ie',     pdcRanking: 22, seedNumber: null, odds: '126.0' },
+      { name: 'Luke Woodhouse',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 17, seedNumber: null, odds: '126.0' },
+      { name: 'Cameron Menzies',       nationality: 'Skottland',   iso2: 'gb-sct', pdcRanking: 28, seedNumber: null, odds: '126.0' },
+      { name: 'Andrew Gilding',        nationality: 'England',     iso2: 'gb-eng', pdcRanking: 21, seedNumber: null, odds: '126.0' },
+      { name: 'Joe Cullen',            nationality: 'England',     iso2: 'gb-eng', pdcRanking: 32, seedNumber: null, odds: '126.0' },
+      { name: 'Dave Chisnall',         nationality: 'England',     iso2: 'gb-eng', pdcRanking: 30, seedNumber: null, odds: '126.0' },
+      { name: 'Niels Zonneveld',       nationality: 'Nederland',   iso2: 'nl',     pdcRanking: 27, seedNumber: null, odds: '151.0' },
+      { name: 'Ryan Joyce',            nationality: 'England',     iso2: 'gb-eng', pdcRanking: 25, seedNumber: null, odds: '176.0' },
+      { name: 'Sebastian Białecki',    nationality: 'Polen',       iso2: 'pl',     pdcRanking: 31, seedNumber: null, odds: '201.0' },
+      { name: 'Niko Springer',         nationality: 'Tyskland',    iso2: 'de',     pdcRanking: 29, seedNumber: null, odds: '201.0' },
     ],
   },
 ]

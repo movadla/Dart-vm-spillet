@@ -38,4 +38,20 @@ export const PLAYER_STATS: Record<string, PlayerStats> = {
   'Danny Noppert':       { avg: 95.7,  bestAchievement: 'European Championship-vinner 2021', verified: false },
   'Chris Dobey':         { avg: 94.8,  bestAchievement: 'Players Championship-vinner', verified: false },
   'Nathan Aspinall':     { avg: 94.6,  bestAchievement: 'UK Open-vinner 2022', verified: false },
+  // Lagt til 2026-09-27 (World Grand Prix-generalprøven) — snitt er rullerende
+  // 12-måneders snitt fra dartsorakel.com, ikke et offisielt PDC-sesongsnitt
+  // (finnes ikke), se research-notat i chat-historikken. Alle kilder
+  // kryssjekket mot Wikipedia bortsett fra der annet er nevnt.
+  'Kevin Doets':            { avg: 95.6, bestAchievement: 'Players Championship 13-vinner 2026', verified: false },
+  'Andrew Gilding':         { avg: 93.0, bestAchievement: 'UK Open-vinner 2023', verified: false },
+  "William O'Connor":       { avg: 93.1, bestAchievement: 'Players Championship 13-vinner 2019', verified: false },
+  'Damon Heta':             { avg: 94.2, bestAchievement: 'World Cup of Darts-vinner 2022 (Australia)', verified: false },
+  'Ryan Joyce':             { avg: 91.4, bestAchievement: 'VM-kvartfinalist 2019', verified: false },
+  'Dirk van Duijvenbode':   { avg: 95.5, bestAchievement: 'World Grand Prix-finalist 2020', verified: false },
+  'Niels Zonneveld':        { avg: 94.2, bestAchievement: 'Players Championship 22-finalist 2025', verified: false },
+  'Cameron Menzies':        { avg: 92.9, bestAchievement: 'WDF VM-semifinalist 2022', verified: false },
+  'Niko Springer':          { avg: 91.9, bestAchievement: 'Hungarian Darts Trophy-vinner 2025', verified: false },
+  'Dave Chisnall':          { avg: 90.5, bestAchievement: 'VM-semifinalist 2021', verified: false },
+  'Sebastian Białecki':     { avg: 92.0, bestAchievement: 'Players Championship 22-vinner 2025', verified: false },
+  'Joe Cullen':             { avg: 92.6, bestAchievement: 'Masters-vinner 2022', verified: false },
 }

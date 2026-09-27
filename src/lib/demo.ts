@@ -54,31 +54,36 @@ function team(...names: string[]): PickWithPot[] {
 // spillere som faktisk er valgbare i pottene (én per pott), så Min side,
 // spillerpanelet og brikkene får foto/statistikk på samme måte som for
 // ekte deltakere.
+// MIDLERTIDIG (2026-09-27): pott-plasseringene under er oppdatert til å
+// matche src/data/pots.ts sin nye odds-baserte inndeling (2/3/3/3/3/18 —
+// se pots.ts sin toppkommentar). Selve kampresultatene (R1_RESULTS osv.
+// under) er UENDRET — de følger den ekte, bekreftede runde 1-trekningen i
+// bracketProjection.ts, som er uavhengig av hvilken pott en spiller ligger i.
 export const DEMO_PARTICIPANTS: DemoParticipant[] = [
   { id: 'demo', name: 'Ola Dartmann', email: DEMO_EMAIL, created_at: '2026-09-12T18:04:00Z',
-    picks: team('Luke Littler', 'Josh Rock', 'Gary Anderson', 'Nathan Aspinall', 'Rob Cross', 'Cameron Menzies') },
+    picks: team('Luke Littler', 'Gerwyn Price', 'Gary Anderson', 'Nathan Aspinall', 'Rob Cross', 'Cameron Menzies') },
   { id: 'demo-2', name: 'Kari Bull', email: 'kari@example.com', created_at: '2026-09-10T09:12:00Z',
-    picks: team('Luke Humphries', 'Danny Noppert', 'Michael van Gerwen', 'Ross Smith', 'Damon Heta', 'Dirk van Duijvenbode') },
+    picks: team('Luke Humphries', 'James Wade', 'Michael van Gerwen', 'Wessel Nijman', 'Stephen Bunting', 'Dirk van Duijvenbode') },
   { id: 'demo-3', name: 'Jonas Treble', email: 'jonas@example.com', created_at: '2026-09-11T20:40:00Z',
-    picks: team('Luke Littler', 'Jonny Clayton', 'Stephen Bunting', 'Ryan Searle', 'Jermaine Wattimena', 'Niels Zonneveld') },
+    picks: team('Luke Littler', 'Gian van Veen', 'Ross Smith', 'Jonny Clayton', 'Chris Dobey', 'Jermaine Wattimena') },
   { id: 'demo-4', name: 'Silje Oche', email: 'silje@example.com', created_at: '2026-09-13T07:55:00Z',
-    picks: team('Gian van Veen', 'James Wade', 'Wessel Nijman', 'Chris Dobey', 'Luke Woodhouse', 'Dave Chisnall') },
+    picks: team('Luke Humphries', 'Gerwyn Price', 'Gary Anderson', 'Nathan Aspinall', 'Rob Cross', 'Dave Chisnall') },
   { id: 'demo-5', name: 'Henrik Tops', email: 'henrik@example.com', created_at: '2026-09-14T12:30:00Z',
-    picks: team('Luke Humphries', 'Josh Rock', 'Michael van Gerwen', 'Ross Smith', 'Rob Cross', 'Sebastian Białecki') },
+    picks: team('Luke Littler', 'James Wade', 'Michael van Gerwen', 'Wessel Nijman', 'Stephen Bunting', 'Kevin Doets') },
   { id: 'demo-6', name: 'Maren Bullseye', email: 'maren@example.com', created_at: '2026-09-15T15:15:00Z',
-    picks: team('Luke Littler', 'Jonny Clayton', 'Stephen Bunting', 'Ryan Searle', 'Jermaine Wattimena', 'Niels Zonneveld') },
+    picks: team('Luke Humphries', 'Gian van Veen', 'Ross Smith', 'Jonny Clayton', 'Chris Dobey', 'Jermaine Wattimena') },
   { id: 'demo-7', name: 'Petter Ton-80', email: 'petter@example.com', created_at: '2026-09-16T08:00:00Z',
-    picks: team('Gerwyn Price', 'James Wade', 'Stephen Bunting', 'Nathan Aspinall', 'Andrew Gilding', 'Niko Springer') },
+    picks: team('Luke Littler', 'Gerwyn Price', 'Michael van Gerwen', 'Wessel Nijman', 'Rob Cross', 'Andrew Gilding') },
   { id: 'demo-8', name: 'Ida Checkout', email: 'ida@example.com', created_at: '2026-09-17T19:20:00Z',
-    picks: team('Luke Humphries', 'Jonny Clayton', 'Wessel Nijman', 'Ross Smith', "William O'Connor", 'Joe Cullen') },
+    picks: team('Luke Humphries', 'James Wade', 'Gary Anderson', 'Nathan Aspinall', 'Stephen Bunting', "William O'Connor") },
   { id: 'demo-9', name: 'Anders Flight', email: 'anders@example.com', created_at: '2026-09-18T10:10:00Z',
-    picks: team('Luke Littler', 'Danny Noppert', 'Gary Anderson', 'Ryan Searle', 'Kevin Doets', 'Ryan Joyce') },
+    picks: team('Luke Littler', 'Gian van Veen', 'Ross Smith', 'Jonny Clayton', 'Chris Dobey', 'Ryan Joyce') },
   { id: 'demo-10', name: 'Nora Dobbel', email: 'nora@example.com', created_at: '2026-09-19T21:45:00Z',
-    picks: team('Gian van Veen', 'James Wade', 'Stephen Bunting', 'Ross Smith', 'Krzysztof Ratajski', 'Cameron Menzies') },
+    picks: team('Luke Humphries', 'Gerwyn Price', 'Michael van Gerwen', 'Wessel Nijman', 'Rob Cross', 'Niels Zonneveld') },
   { id: 'demo-11', name: 'Lars Leg', email: 'lars@example.com', created_at: '2026-09-20T14:05:00Z',
-    picks: team('Luke Humphries', 'Jonny Clayton', 'Wessel Nijman', 'Chris Dobey', 'Andrew Gilding', 'Dave Chisnall') },
+    picks: team('Luke Littler', 'James Wade', 'Gary Anderson', 'Nathan Aspinall', 'Stephen Bunting', 'Krzysztof Ratajski') },
   { id: 'demo-12', name: 'Emma Nine-Darter', email: 'emma@example.com', created_at: '2026-09-21T16:35:00Z',
-    picks: team('Luke Littler', 'Danny Noppert', 'Gary Anderson', 'Ryan Searle', 'Jermaine Wattimena', 'Niels Zonneveld') },
+    picks: team('Luke Humphries', 'Gian van Veen', 'Ross Smith', 'Jonny Clayton', 'Chris Dobey', 'Niko Springer') },
 ]
 
 export const DEMO_LEAGUES: DemoLeague[] = [

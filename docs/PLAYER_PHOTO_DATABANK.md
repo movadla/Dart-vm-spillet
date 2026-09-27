@@ -12,6 +12,40 @@ CC BY 3.0, CC BY-SA 4.0, CC BY 2.0 eller CC0 — fri bruk med kreditering som
 angitt. **Ingen** pressebyrå-/Getty-bilder eller uklart lisensierte bilder er
 tatt med.
 
+**Oppdatert 2026-09-27:** lagt til kandidater for 11 spillere som manglet foto
+(Dobey, Aspinall, O'Connor, Heta, van Duijvenbode, Zonneveld, Springer,
+Chisnall, Białecki, Cullen) samt en re-sjekk av Noppert. Turneringsoppsettet
+er byttet til PDC World Grand Prix 2026, så potte-plasseringen under følger
+gjeldende `src/data/pots.ts` — noen spillere som sto i andre potter i den
+opprinnelige katalogen (23.09) er nå flyttet.
+
+**Lagt inn i appen 2026-09-27** (nedlastet, bakgrunn fjernet med rembg,
+WebP-optimalisert, kreditert i `src/data/playerPhotos.ts`): Dobey, Aspinall,
+Heta, Zonneveld, Springer, Noppert, Chisnall, Cullen. Dobeys bilde har et
+godt synlig «DARTS NOW»-mikrofonflagg tett inntil haken (ikke et PDC/Paddy
+Power-varemerke, så innafor lisens-/varemerkereglene, men kosmetisk mindre
+rent enn de andre) — vurder alt.-kandidaten (Chris_Dobey_2024.png) om du vil
+ha et penere bilde senere.
+
+**Løst 2026-09-27 (andre runde):** research-agenten kunne ikke bekrefte
+O'Connor/van Duijvenbode visuelt (kun tekst-metadata via WebFetch) — jeg
+lastet ned og så på pikslene selv:
+- **William O'Connor**: den opprinnelige kandidaten (William_O'Connor_(darts_player)_(cropped).jpg)
+  viste seg å VÆRE en ren solo-crop likevel (ingen Max Hopp i bildet) — lagt inn.
+- **Dirk van Duijvenbode**: den opprinnelige kandidaten var faktisk en
+  walk-on-scene med mange publikummere/staff i bildet (research-agentens
+  forbehold var korrekt der) — forkastet. Fant i stedet et rent solo-
+  jubelbilde fra selve kampen i samme Commons-kategori
+  ([Dirk_van_Duijvenbode_in_2019](https://commons.wikimedia.org/wiki/Category:Dirk_van_Duijvenbode_in_2019),
+  fil AK8I8915, samme fotograf/lisens) — lagt inn.
+
+**Fortsatt ikke løst:** Sebastian Białecki — dobbeltsjekket selv 2026-09-27
+(Commons-søk på «Bialecki»/«Białecki» + engelsk Wikipedia-infoboks) og
+bekrefter research-agentens funn: det finnes **ingen** fri/CC-lisensiert
+foto av ham noe sted. Kun betalte stockbilder (Target Darts m.fl.). Kan ikke
+løses uten at et nytt bilde faktisk publiseres med CC-lisens av noen — ikke
+noe å søke seg frem til.
+
 **To tillitsnivåer, markert per bilde:**
 - **★ Egen fotografering** — fotografen har selv tatt bildet og lastet det
   opp med "own work"-lisens (Sven Mandel, Sandro Halank, Jakob Gottfried,
@@ -66,8 +100,10 @@ tatt med.
 - Video-stillbilde: [Stephen_Bunting_2024.png](https://commons.wikimedia.org/wiki/File:Stephen_Bunting_2024.png) — CC BY 3.0, © DARTS NOW. Grand Slam of Darts 2024.
 - *Ikke fulgt opp:* Sandro Halank har ca. 41 kampfoto av Bunting i egen kategori på Commons — verdt et eget dypdykk om du vil ha samme fotograf-stil som Littler.
 
-**Danny Noppert** *(reserve — ikke valgbar akkurat nå, men fint å ha klart)*
-- ★ [Danny_noppert_en_theo_de_jong…cropped.jpg](https://commons.wikimedia.org/wiki/File:Danny_noppert_en_theo_de_jong-1510986499_(cropped).jpg) — CC BY-SA 4.0, © Rudy / Wikiportret.nl. Viser også Theo de Jong — trenger tettere beskjæring for å isolere Noppert.
+**Danny Noppert** *(nå i Pott 2 — Toppseedet, per gjeldende `pots.ts`)*
+- ✅ **Bedre alternativ funnet 2026-09-27, ren solo:** [Danny_Noppert_2025.png](https://commons.wikimedia.org/wiki/File:Danny_Noppert_2025.png) — CC BY 3.0, © DARTS NOW. 722×1051, portrettformat, ansikt tydelig, ingen andre personer i bildet — fra World Masters 2025-video. **Anbefales fremfor den gamle kandidaten under**, siden den er ren solo og slipper beskjæringsarbeidet.
+- Video-stillbilde (alt.): [Danny_Noppert_2026_World_Grand_Prix.png](https://commons.wikimedia.org/wiki/File:Danny_Noppert_2026_World_Grand_Prix.png) — CC BY 4.0, © DARTS NOW. Kun 536×399 (lavere oppløsning), fra World Grand Prix 2026-video.
+- ★ (gammel kandidat, re-sjekket 2026-09-27 — lisens fortsatt gyldig): [Danny_noppert_en_theo_de_jong…cropped.jpg](https://commons.wikimedia.org/wiki/File:Danny_noppert_en_theo_de_jong-1510986499_(cropped).jpg) — CC BY-SA 4.0, © Rudy / Wikiportret.nl. Viser fortsatt også Theo de Jong — trenger tettere beskjæring for å isolere Noppert. Ikke nødvendig å bruke nå som solo-alternativet over finnes.
 
 ## Pott 4 — Seedet outsidere
 
@@ -83,6 +119,13 @@ tatt med.
 
 **Ross Smith**
 - Video-stillbilde: [Ross_Smith_2024_2.png](https://commons.wikimedia.org/wiki/File:Ross_Smith_2024_2.png) — CC BY 3.0, © DARTS NOW.
+
+**Chris Dobey**
+- Video-stillbilde: [Chris_Dobey_2025.png](https://commons.wikimedia.org/wiki/File:Chris_Dobey_2025.png) — CC BY 3.0, © DARTS NOW. 663×840, portrettformat, ansikt tydelig og frontalt, ingen andre personer i bildet. Stillbilde fra YouTube-video 6. februar 2025 — anbefalt.
+- Video-stillbilde (alt.): [Chris_Dobey_2024.png](https://commons.wikimedia.org/wiki/File:Chris_Dobey_2024.png) — CC BY 3.0, © DARTS NOW. 617×695, fra VM 2025-video 30. desember 2024, ansikt klart og frontalt.
+
+**Nathan Aspinall**
+- Video-stillbilde: [Nathan_Aspinall_2024.png](https://commons.wikimedia.org/wiki/File:Nathan_Aspinall_2024.png) — CC BY 3.0, © DARTS NOW. 651×769, fra World Grand Prix 2024, ansikt tydelig, ingen andre personer.
 
 ## Pott 5 — Kvalifiserte
 
@@ -102,10 +145,46 @@ tatt med.
 **Rob Cross**
 - ★ [Rob_Cross_(darts_player),_2017_(cropped).jpg](https://commons.wikimedia.org/wiki/File:Rob_Cross_(darts_player),_2017_(cropped).jpg) — CC BY-SA 4.0, © Sven Mandel. Allerede beskåret, skarpt — beste enkeltfunn i hele søket.
 
-## Pott 6 — Resten (kun de 5 valgbare er søkt)
+**William O'Connor** *(usikker — ingen bekreftet ren solo-versjon funnet)*
+- ★ [William_O'Connor_(darts_player)_(cropped).jpg](https://commons.wikimedia.org/wiki/File:William_O%27Connor_(darts_player)_(cropped).jpg) — CC BY-SA 4.0, © Sven Mandel. 2170×3017, høyoppløst. **Viser også Max Hopp** i bildet til tross for at det er beskåret («cropped» her betyr trolig kun beskåret fra råbildet, ikke isolert til én spiller) — trenger tettere beskjæring, samme problem som Noppert-kandidaten under.
+- Kategorien [William_O'Connor_(darts_player)](https://commons.wikimedia.org/wiki/Category:William_O%27Connor_(darts_player)) har ellers kun kampbilder fra 2019 (Max Hopp-duellen, samme fotograf Sven Mandel, CC BY-SA 4.0) der «depicts»-metadata lister O'Connor alene på enkelte filer, men beskrivelsesteksten bekrefter ikke at Hopp er utenfor rammen — kunne ikke verifiseres som ren solo uten å åpne selve bildepikslene. Nyere gruppebilder («Williams, Anderson, Cross and O'Connor 2025») er uaktuelle (4 spillere i bildet).
+- **Konklusjon:** ingen kandidat kunne bekreftes som et rent solo-bilde med ansikt tydelig og ingen andre personer. Anbefaler enten å bruke O'Connor-cropped-bildet over med ytterligere beskjæring (fjerne Hopp manuelt), eller fortsette søket.
+
+**Damon Heta**
+- Video-stillbilde: [Damon_Heta_2025.png](https://commons.wikimedia.org/wiki/File:Damon_Heta_2025.png) — CC BY 3.0, © DARTS NOW. 721×1024, fra World Masters 2025, ansikt tydelig, solo — anbefalt.
+- *Ikke fulgt opp:* [Damon_Heta_Darts_Actueel_2022.jpg](https://commons.wikimedia.org/wiki/File:Damon_Heta_Darts_Actueel_2022.jpg) (© Darts Actueel) finnes også, ikke åpnet individuelt. Unngå [Damon_Heta_and_Simon_Whitlock_2025_PDC_World_Cup_of_Darts.png](https://commons.wikimedia.org/wiki/File:Damon_Heta_and_Simon_Whitlock_2025_PDC_World_Cup_of_Darts.png) — viser to spillere.
+
+## Pott 6 — Resten
+
+*(opprinnelig var kun de 5 valgbare søkt i denne potten; 2026-09-27 er
+van Duijvenbode, Zonneveld, Springer, Chisnall, Białecki og Cullen lagt til)*
 
 **Ryan Joyce**
 - Video-stillbilde: [Ryan_Joyce_Darts_Actueel_2022.jpg](https://commons.wikimedia.org/wiki/File:Ryan_Joyce_Darts_Actueel_2022.jpg) — CC BY 3.0, © Darts Actueel.
+
+**Dirk van Duijvenbode** *(usikker — se forbehold)*
+- ★ [Adrian_Lewis_6-2_Dirk_van_Duijvenbode…B70I6637.jpg](https://commons.wikimedia.org/wiki/File:Adrian_Lewis_6-2_Dirk_van_Duijvenbode_-_Dirk_van_Duijvenbode_-_2019250142802_2019-09-07_PDC_European_Darts_Matchplay_-_0267_-_B70I6637.jpg) — CC BY-SA 4.0, © Sven Mandel. 5472×3648. «Depicts»-feltet i strukturerte data lister kun van Duijvenbode (ikke Adrian Lewis), som indikerer et solo-utsnitt, men dette er **ikke visuelt bekreftet** — kunne ikke se selve bildepikslene, kun tekstmetadata. Samme fotoserie har mange filer med identisk mønster (kategorien [Dirk_van_Duijvenbode_in_2019](https://commons.wikimedia.org/wiki/Category:Dirk_van_Duijvenbode_in_2019), 53 filer) — verdt å sjekke flere om denne ikke passer.
+- Forkastet: [Dirk_van_Duijvenbode_(cropped).jpg](https://commons.wikimedia.org/wiki/File:Dirk_van_Duijvenbode_(cropped).jpg) — CC BY-SA 4.0, © Sven Mandel, 2587×2909 — bekreftet at den viser aksjonsøyeblikk mot Adrian Lewis, ikke en isolert portrett-crop til tross for navnet.
+- Fant ingen DARTS NOW/Darts Actueel-videostillbilde av van Duijvenbode i søket.
+
+**Niels Zonneveld**
+- Video-stillbilde: [Niels_Zonneveld.png](https://commons.wikimedia.org/wiki/File:Niels_Zonneveld.png) — CC BY 3.0, © Darts Actueel. 518×603, solo-portrett, ansikt tydelig, fra YouTube-video 29. oktober 2021 — anbefalt (eneste kandidat funnet).
+
+**Niko Springer**
+- ★ [Niko_Springer.jpg](https://commons.wikimedia.org/wiki/File:Niko_Springer.jpg) — CC BY-SA 4.0, © PhilippFips («Own work» bekreftet i Summary-feltet). 415×664, solo, ansikt tydelig — anbefalt (eneste kandidat funnet, men høyeste tillitsnivå siden det er egen fotografering).
+
+**Dave Chisnall**
+- ★ [Dave_Chisnall_6-2_Ryan_Meikle…B70I6438_(cropped).jpg](https://commons.wikimedia.org/wiki/File:Dave_Chisnall_6-2_Ryan_Meikle_-_Dave_Chisnall_-_2019250131009_2019-09-07_PDC_European_Darts_Matchplay_-_0068_-_B70I6438_(cropped).jpg) — CC BY-SA 4.0, © Sven Mandel. 2089×3004, bekreftet solo portrettutsnitt (beskåret fra kampfoto mot Ryan Meikle, samme mønster som Rob Cross- og Gerwyn Price-bildene over) — anbefalt.
+
+**Sebastian Białecki** — **ingen kandidat funnet.** Ingen Commons-kategori
+eller enkeltfil for ham (verken under «Białecki» eller «Bialecki»), verken i
+engelsk eller polsk Wikipedias infoboks. Kun stockbilder hos Target Darts og
+lignende kommersielle kilder, som ikke er CC-lisensiert og derfor ikke tatt
+med.
+
+**Joe Cullen**
+- ★ [2022-06-13_Play-offs…Sandro_Halank–110.jpg](https://commons.wikimedia.org/wiki/File:2022-06-13_Play-offs_(2022_Premier_League_Darts)_by_Sandro_Halank%E2%80%93110.jpg) — CC BY-SA 4.0, © Sandro Halank. 3191×3004, bekreftet solo (kun Cullen i beskrivelse/strukturerte data) — anbefalt.
+- ★ (alt.): [2022-06-13_Play-offs…Sandro_Halank–017.jpg](https://commons.wikimedia.org/wiki/File:2022-06-13_Play-offs_(2022_Premier_League_Darts)_by_Sandro_Halank%E2%80%93017.jpg) — CC BY-SA 4.0, © Sandro Halank. 4008×3379, også bekreftet solo.
 
 **Cameron Menzies**
 - Video-stillbilde: [Cameron_Menzies_2024.png](https://commons.wikimedia.org/wiki/File:Cameron_Menzies_2024.png) — CC BY 3.0, © DARTS NOW.

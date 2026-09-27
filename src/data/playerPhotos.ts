@@ -127,4 +127,65 @@ export const PLAYER_PHOTOS: Record<string, { src: string; credit: string; credit
     credit: 'DARTS NOW · CC BY 3.0',
     creditUrl: 'https://commons.wikimedia.org/wiki/File:Team_NI_Darts_WC_2025_(Gurney_cropped).png',
   },
+  // Lagt til 2026-09-27 (World Grand Prix-generalprøven) — se
+  // docs/PLAYER_PHOTO_DATABANK.md for research-notater per spiller.
+  'Chris Dobey': {
+    src: '/players/chris-dobey-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Chris_Dobey_2025.png',
+  },
+  'Nathan Aspinall': {
+    src: '/players/nathan-aspinall-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Nathan_Aspinall_2024.png',
+  },
+  'Damon Heta': {
+    src: '/players/damon-heta-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Damon_Heta_2025.png',
+  },
+  'Niels Zonneveld': {
+    src: '/players/niels-zonneveld-cutout.webp',
+    credit: 'Darts Actueel · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Niels_Zonneveld.png',
+  },
+  'Danny Noppert': {
+    src: '/players/danny-noppert-cutout.webp',
+    credit: 'DARTS NOW · CC BY 3.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Danny_Noppert_2025.png',
+  },
+  'Niko Springer': {
+    // Eneste kandidat funnet, men høyeste tillitsnivå (★ egen fotografering,
+    // "Own work" bekreftet i Summary-feltet) — se PLAYER_PHOTO_DATABANK.md.
+    src: '/players/niko-springer-cutout.webp',
+    credit: 'PhilippFips · CC BY-SA 4.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Niko_Springer.jpg',
+  },
+  'Dave Chisnall': {
+    src: '/players/dave-chisnall-cutout.webp',
+    credit: 'Sven Mandel · CC BY-SA 4.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Dave_Chisnall_6-2_Ryan_Meikle_-_Dave_Chisnall_-_2019250131009_2019-09-07_PDC_European_Darts_Matchplay_-_0068_-_B70I6438_(cropped).jpg',
+  },
+  'Joe Cullen': {
+    src: '/players/joe-cullen-cutout.webp',
+    credit: 'Sandro Halank · CC BY-SA 4.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:2022-06-13_Play-offs_(2022_Premier_League_Darts)_by_Sandro_Halank%E2%80%93110.jpg',
+  },
+  'Dirk van Duijvenbode': {
+    // Research-agenten fant kun tvetydige kandidater fra samme fotoserie
+    // (mange viser walk-on/publikum med flere personer) — selv lastet ned og
+    // sjekket flere bilder fra samme Commons-kategori 2026-09-27 og fant
+    // denne: en ren solo jubel-scene fra selve kampen, ingen andre spillere.
+    src: '/players/dirk-van-duijvenbode-cutout.webp',
+    credit: 'Sven Mandel · CC BY-SA 4.0',
+    creditUrl: 'https://commons.wikimedia.org/wiki/File:Adrian_Lewis_6-2_Dirk_van_Duijvenbode_-_Dirk_van_Duijvenbode_-_2019250142814_2019-09-07_PDC_European_Darts_Matchplay_-_0407_-_AK8I8915.jpg',
+  },
+  "William O'Connor": {
+    // Research-agenten kunne ikke bekrefte solo via tekst-metadata alene
+    // (fryktet Max Hopp var med i bildet) — selv lastet ned og sett på
+    // pikslene 2026-09-27: ren solo, ingen andre spillere i bildet.
+    src: "/players/william-oconnor-cutout.webp",
+    credit: 'Sven Mandel · CC BY-SA 4.0',
+    creditUrl: "https://commons.wikimedia.org/wiki/File:William_O%27Connor_(darts_player)_(cropped).jpg",
+  },
 }

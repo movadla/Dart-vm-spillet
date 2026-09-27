@@ -10,10 +10,10 @@ const PREHEADER_PADDING = '&nbsp;'.repeat(100)
 export function buildWelcomeText(name: string, ctaUrl: string, picks: { team: string; iso2: string }[]): string {
   const pickLines = picks.map((p, i) => `  ${i + 1}. ${p.team}`).join('\n')
   return [
-    'DART-VM-SPILLET 2026',
+    'WORLD GRAND PRIX-SPILLET 2026',
     '',
     `Hei ${name},`,
-    'Du er nå påmeldt Dart-VM-spillet!',
+    'Du er nå påmeldt World Grand Prix-Spillet!',
     '',
     `Dine ${picks.length} spillere:`,
     pickLines,
@@ -28,7 +28,7 @@ export function buildWelcomeText(name: string, ctaUrl: string, picks: { team: st
 }
 
 export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: string; iso2: string }[]): string {
-  const preheader = `Velkommen til Dart-VM-spillet`
+  const preheader = `Velkommen til World Grand Prix-Spillet`
 
   const pickRows = picks.map((pick, i) => {
     const isLast = i === picks.length - 1
@@ -65,7 +65,7 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="supported-color-schemes" content="dark">
-  <title>Du er påmeldt — Dart-VM-spillet</title>
+  <title>Du er påmeldt — World Grand Prix-Spillet</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&display=swap');
   </style>
@@ -88,9 +88,9 @@ export function buildWelcomeHtml(name: string, ctaUrl: string, picks: { team: st
             <!-- Logo -->
             <tr>
               <td align="left" style="padding-bottom:8px;">
-                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#4ade80;margin-bottom:8px;text-shadow:0 0 16px rgba(34,197,94,0.5);">— PDC World Grand Prix —</div>
-                <div style="font-family:'Barlow Condensed','Arial Narrow',Impact,Arial,sans-serif;font-weight:900;text-transform:uppercase;font-size:64px;letter-spacing:-2px;line-height:1;white-space:nowrap;text-shadow:0 0 48px rgba(220,38,38,0.45),0 0 96px rgba(59,130,246,0.25);">
-                  <span style="color:rgba(255,255,255,0.35);">DART-VM-</span><span style="color:#ffffff;">SPILLET</span><span style="font-size:28px;letter-spacing:0.04em;color:rgba(255,255,255,0.22);padding-left:10px;vertical-align:middle;">2026</span>
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#60a5fa;margin-bottom:8px;text-shadow:0 0 16px rgba(59,130,246,0.5);">— PDC World Grand Prix —</div>
+                <div style="font-family:'Barlow Condensed','Arial Narrow',Impact,Arial,sans-serif;font-weight:900;text-transform:uppercase;font-size:42px;letter-spacing:-1px;line-height:1;white-space:nowrap;text-shadow:0 0 48px rgba(59,130,246,0.45),0 0 96px rgba(30,58,138,0.35);">
+                  <span style="color:rgba(147,197,253,0.5);">WORLD GRAND PRIX-</span><span style="color:#ffffff;">SPILLET</span><span style="font-size:18px;letter-spacing:0.04em;color:rgba(255,255,255,0.22);padding-left:8px;vertical-align:middle;">2026</span>
                 </div>
               </td>
             </tr>

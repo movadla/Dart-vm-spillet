@@ -145,9 +145,9 @@ async function sendWelcomeEmail(p: {
     .map(([, team]) => ({ team, iso2: iso2For(team) }))
 
   await resend.emails.send({
-    from: `Dart-VM-spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`,
+    from: `World Grand Prix-Spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`,
     to: p.email,
-    subject: 'Du er påmeldt — Dart-VM-spillet',
+    subject: 'Du er påmeldt — World Grand Prix-Spillet',
     html: buildWelcomeHtml(p.name, ctaUrl, sortedPicks),
     text: buildWelcomeText(p.name, ctaUrl, sortedPicks),
   })

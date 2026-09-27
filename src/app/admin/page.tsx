@@ -58,7 +58,7 @@ function AdminContent() {
       </div>
 
       <div style={{ fontFamily: SPORT, fontSize: 52, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, marginBottom: 24 }}>
-        <div style={{ color: 'rgba(255,255,255,0.3)' }}>Dart-VM 2026</div>
+        <div style={{ color: 'rgba(255,255,255,0.3)' }}>World Grand Prix 2026</div>
         <div style={{ color: '#fff' }}>Admin</div>
       </div>
 

@@ -161,7 +161,7 @@ export const tipp: TippDict = {
     whatsNext: 'Hva skjer nå?',
     startsOn: (when) => `Turneringen starter ${when}`,
     canChangeUntilStart: 'Du kan endre valg frem til turneringen begynner',
-    inviteText: 'Jeg er påmeldt Dart-VM-spillet — bli med du også!',
+    inviteText: 'Jeg er påmeldt World Grand Prix-Spillet — bli med du også!',
     inviteLabel: 'Inviter venner →',
     seeMyPage: 'Se min side →',
     backToStart: '← Tilbake til start',

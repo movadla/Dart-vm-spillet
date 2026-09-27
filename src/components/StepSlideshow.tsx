@@ -145,21 +145,21 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
               textTransform: 'uppercase',
               letterSpacing: '0.18em',
               marginBottom: 6,
-              background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)',
+              background: 'linear-gradient(125deg, #eff6ff 0%, #93c5fd 14%, #3b82f6 45%, #1e3a8a 100%)',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)',
+              textShadow: '0 0 18px rgba(59,130,246,0.45), 0 0 5px rgba(59,130,246,0.55)',
             }}
           >
             — PDC World Grand Prix —
           </div>
         )}
-        <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: compactHeader ? 22 : 36, letterSpacing: '-1px', lineHeight: 1, transition: 'font-size 0.3s ease' }}>
-          <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
+        <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: compactHeader ? 'clamp(16px, 5vw, 22px)' : 'clamp(22px, 6.5vw, 36px)', letterSpacing: '-1px', lineHeight: 1, transition: 'font-size 0.3s ease' }}>
+          <span style={{ color: 'rgba(147,197,253,0.45)' }}>WORLD GRAND PRIX-</span>
           <span
             style={{
-              background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)',
+              background: 'linear-gradient(180deg, #ffffff 0%, #bfdbfe 100%)',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -294,7 +294,9 @@ function reveal(step: number, from: number, extra?: React.CSSProperties): React.
 
 // Fase 0 i tre trinn, så folk rekker å lese: overskrift → undertekst →
 // selve animasjonen (som tar plass fra start, så ingenting hopper).
-const INTRO_STEPS = [0, 1300, 2700]
+// MIDLERTIDIG (2026-09-27): alle tre STEPS-arrayene er skalert ×0.75
+// (25 % raskere) etter tilbakemelding om at introen gikk litt tregt.
+const INTRO_STEPS = [0, 975, 2025]
 
 function IntroPhase({ onFinished }: { onFinished: () => void }) {
   const { dict } = useLocale()
@@ -317,7 +319,7 @@ function IntroPhase({ onFinished }: { onFinished: () => void }) {
 
 // Fase 1: tekst → tekst → runde → kampoppsett med ekte kort → resultat →
 // poengrader → sum.
-const EXAMPLE_STEPS = [0, 1300, 2700, 3400, 5400, 6600, 7300, 8100]
+const EXAMPLE_STEPS = [0, 975, 2025, 2550, 4050, 4950, 5475, 6075]
 const EXAMPLE_CARD_WIDTH = 92
 
 function ExamplePhase() {
@@ -416,7 +418,7 @@ function ExamplePhase() {
 // laget ditt klatrer fra 10. til 3. plass. Lagets poeng i tabellen er ALLTID
 // summen av brikkene over: startsummen fordeles tilfeldig på de seks, og hvert
 // klatretrinn legger økningen på én tilfeldig spiller.
-const PROGRESS_STEPS = [0, 1300, 3300, 4600, 5700, 6500, 7300, 8100]
+const PROGRESS_STEPS = [0, 975, 2475, 3450, 4275, 4875, 5475, 6075]
 // Poengene per rival-navn, indeksmatchet med dict.tipp.stepSlideshow.progress.rivals
 // (navnene er språkavhengig eksempeldata, poengene er ikke).
 const LEAGUE_RIVAL_POINTS = [41, 38, 36, 33, 31, 29, 27, 25, 22]

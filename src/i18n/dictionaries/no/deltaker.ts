@@ -87,8 +87,8 @@ export const deltaker: DeltakerDict = {
     nextMatchesHeader: 'Neste kamper',
     leaguesHeader: 'Ligaer',
     vmGuide: 'Turneringsguide →',
-    shareText: (rank, total) => `Jeg er #${rank} av ${total} i Dart-VM-spillet!`,
-    shareTextClosed: 'Bli med i Dart-VM-spillet – velg seks dartspillere og følg dem gjennom turneringen!',
+    shareText: (rank, total) => `Jeg er #${rank} av ${total} i World Grand Prix-Spillet!`,
+    shareTextClosed: 'Bli med i World Grand Prix-Spillet – velg seks dartspillere og følg dem gjennom turneringen!',
     shareLabel: 'Del →',
   },
   myTeam: {

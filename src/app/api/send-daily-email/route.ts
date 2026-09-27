@@ -114,7 +114,7 @@ export async function GET(request: Request) {
       : [{ ...leaderboard[0], email: testTo }]
     : leaderboard
 
-  const fromAddr = `Dart-VM-spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`
+  const fromAddr = `World Grand Prix-Spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`
 
   const payloads = recipients.map(row => {
     const pointsDelta = row.picks.reduce((sum, pick) => {

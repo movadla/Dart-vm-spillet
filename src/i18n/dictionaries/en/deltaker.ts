@@ -17,8 +17,8 @@ export const deltaker = {
     nextMatchesHeader: 'Next matches',
     leaguesHeader: 'Leagues',
     vmGuide: 'Tournament guide →',
-    shareText: (rank, total) => `I'm #${rank} of ${total} in Dart-VM-spillet!`,
-    shareTextClosed: 'Join Dart-VM-spillet – pick six dart players and follow them through the tournament!',
+    shareText: (rank, total) => `I'm #${rank} of ${total} in World Grand Prix-Spillet!`,
+    shareTextClosed: 'Join World Grand Prix-Spillet – pick six dart players and follow them through the tournament!',
     shareLabel: 'Share →',
   },
   myTeam: {

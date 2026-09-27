@@ -17,7 +17,7 @@ export default async function Image() {
           flexDirection: 'column',
           alignItems: 'flex-start',
           justifyContent: 'flex-end',
-          background: '#0a0a0a',
+          background: '#070b16',
           padding: '72px 80px',
           fontFamily: 'Arial Narrow, Arial, sans-serif',
         }}
@@ -27,7 +27,7 @@ export default async function Image() {
           position: 'absolute',
           top: 0, left: 0, right: 0,
           height: 6,
-          background: '#dc2626',
+          background: 'linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%)',
           display: 'flex',
         }} />
 
@@ -38,7 +38,7 @@ export default async function Image() {
           top: '50%',
           fontSize: 520,
           fontWeight: 900,
-          color: 'rgba(220,38,38,0.04)',
+          color: 'rgba(59,130,246,0.06)',
           lineHeight: 1,
           letterSpacing: '-20px',
           display: 'flex',
@@ -51,10 +51,10 @@ export default async function Image() {
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 16, display: 'flex' }}>
             {legal.ogImage.brandLine}
           </div>
-          <div style={{ fontSize: 160, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.85, letterSpacing: '-4px', color: '#ffffff', display: 'flex' }}>
-            DART-VM-
+          <div style={{ fontSize: 92, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, letterSpacing: '-2px', color: '#93c5fd', display: 'flex' }}>
+            WORLD GRAND PRIX
           </div>
-          <div style={{ fontSize: 160, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.85, letterSpacing: '-4px', color: '#dc2626', display: 'flex' }}>
+          <div style={{ fontSize: 160, fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.85, letterSpacing: '-4px', color: '#ffffff', display: 'flex' }}>
             SPILLET
           </div>
         </div>

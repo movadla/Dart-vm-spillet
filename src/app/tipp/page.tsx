@@ -320,15 +320,15 @@ const inputStyle: React.CSSProperties = {
       <div className="page-bg" style={{ minHeight: '100vh', padding: '40px 20px 56px', color: '#fff', position: 'relative' }}>
         <Confetti />
 
-        {/* Brand banner — VM-SPILLET */}
+        {/* Brand banner — WORLD GRAND PRIX-SPILLET */}
         <div style={{ position: 'relative', height: 145, marginBottom: 20, pointerEvents: 'none', zIndex: 1 }}>
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
+            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, paddingTop: 4, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #eff6ff 0%, #93c5fd 14%, #3b82f6 45%, #1e3a8a 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(59,130,246,0.45), 0 0 5px rgba(59,130,246,0.55)' }}>
               — PDC World Grand Prix —
             </div>
-            <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 52, letterSpacing: '-1px', lineHeight: 1 }}>
-              <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
-              <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
+            <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 'clamp(30px, 8.5vw, 52px)', letterSpacing: '-1px', lineHeight: 1 }}>
+              <span style={{ color: 'rgba(147,197,253,0.45)' }}>WORLD GRAND PRIX-</span>
+              <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, #bfdbfe 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
           </div>
         </div>
@@ -455,12 +455,12 @@ const inputStyle: React.CSSProperties = {
         {/* Samme kompakte banner og knapperad som oppsummeringen */}
         <div style={{ position: 'relative', height: 70, marginBottom: 6, pointerEvents: 'none', zIndex: 1 }}>
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
+            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #eff6ff 0%, #93c5fd 14%, #3b82f6 45%, #1e3a8a 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(59,130,246,0.45), 0 0 5px rgba(59,130,246,0.55)' }}>
               — PDC World Grand Prix —
             </div>
-            <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 34, letterSpacing: '-1px', lineHeight: 1 }}>
-              <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
-              <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
+            <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 'clamp(20px, 6vw, 34px)', letterSpacing: '-1px', lineHeight: 1 }}>
+              <span style={{ color: 'rgba(147,197,253,0.45)' }}>WORLD GRAND PRIX-</span>
+              <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, #bfdbfe 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
           </div>
         </div>
@@ -569,12 +569,12 @@ const inputStyle: React.CSSProperties = {
             skal helst være synlig uten skrolling */}
         <div style={{ position: 'relative', height: 70, marginBottom: 6, pointerEvents: 'none', zIndex: 1 }}>
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)' }}>
+            <div style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', lineHeight: 1.3, whiteSpace: 'nowrap', background: 'linear-gradient(125deg, #eff6ff 0%, #93c5fd 14%, #3b82f6 45%, #1e3a8a 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 18px rgba(59,130,246,0.45), 0 0 5px rgba(59,130,246,0.55)' }}>
               — PDC World Grand Prix —
             </div>
-            <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 34, letterSpacing: '-1px', lineHeight: 1 }}>
-              <span style={{ color: 'rgba(255,255,255,0.38)' }}>DART-VM-</span>
-              <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
+            <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: 'clamp(20px, 6vw, 34px)', letterSpacing: '-1px', lineHeight: 1 }}>
+              <span style={{ color: 'rgba(147,197,253,0.45)' }}>WORLD GRAND PRIX-</span>
+              <span style={{ background: 'linear-gradient(180deg, #ffffff 0%, #bfdbfe 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SPILLET</span>
             </div>
           </div>
         </div>

@@ -51,7 +51,7 @@ export interface CommonDict {
 }
 
 export const common: CommonDict = {
-  appName: 'Dart-VM-spillet',
+  appName: 'World Grand Prix-Spillet',
   appDescription: 'Velg 6 dartspillere. Følg dem gjennom turneringen. Vinn potten.',
   nav: {
     home: '← Hjem',

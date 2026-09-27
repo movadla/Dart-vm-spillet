@@ -2,6 +2,15 @@
 
 ## Ting du (Morten) må gjøre selv — jeg kan ikke gjøre disse
 
+- [ ] **HASTER (kveld 2026-09-27, før World Grand Prix-generalprøven kan gå live):**
+      push/deploy commit `33f7033` (og alt etter) til produksjon. Dette
+      repoet har ingen git-remote konfigurert lokalt, så jeg kan ikke pushe
+      selv: `git remote add origin <din-repo-url>` (hvis den mangler) →
+      `git push origin master`. Sjekk samtidig at Vercel-prosjektets
+      miljøvariabler (spesielt `NEXT_PUBLIC_BASE_URL`) faktisk peker på
+      produksjons-domenet, og gjør en rask manuell test (velg lag →
+      registrer deg → «Min side») på selve produksjons-URL-en før du sender
+      ut lenken.
 - [ ] **Spillerfakta i tippe-flyten er eksempeldata** (lagt inn 2026-09-24): `src/data/playerStats.ts` har snitt (three-dart average) og «beste prestasjon» for de 18 valgbare spillerne, alle med `verified: false` — panelet viser en gul «Eksempeldata»-merkelapp så lenge det står slik. Sjekk hver linje mot pdc.tv/Wikipedia, rett opp, og sett `verified: true`. **Snittet må oppdateres like før VM-start** (endrer seg gjennom sesongen). Det finnes ingen gratis PDC-API, så dette er manuelt.
 - [ ] **«Vei til finalen» og brakett-pop-upen bygger på eksempel-trekningen** (`src/lib/bracketProjection.ts`) og blir automatisk riktige når den ekte trekningen legges inn medio november — se README «Trekning — oppdatere med ekte data». Fjern «eksempel-trekning»-merknadene i `PlayerDetailPanel.tsx`/`BracketModal.tsx` når det er gjort.
 **Fjernet 2026-09-25:** «% valgt» i spillerpanelet (og `/api/pick-share`) — del av en opprydding for å gjøre panelet enklere/raskere å lese. Si fra om du vil ha den tilbake (den løste seg selv unna spørsmålet i den gamle TODO-linjen om flokkeffekt).

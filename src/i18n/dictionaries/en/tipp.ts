@@ -36,7 +36,7 @@ export const tipp = {
     whatsNext: 'What happens now?',
     startsOn: (when) => `The tournament starts ${when}`,
     canChangeUntilStart: 'You can change your picks until the tournament begins',
-    inviteText: 'I’m signed up for Dart-VM-spillet — join me!',
+    inviteText: 'I’m signed up for World Grand Prix-Spillet — join me!',
     inviteLabel: 'Invite friends →',
     seeMyPage: 'See my page →',
     backToStart: '← Back to start',

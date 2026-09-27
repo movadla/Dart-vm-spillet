@@ -53,23 +53,28 @@ type Event = { t: number; kind: 'level'; level: number; phase: SubPhase } | { t:
 // De to første nivåene spilles rolig av med tydelige pauser mellom hvert
 // steg (nivåene → kandidatene → valget → flyr inn i laget), resten kjøres
 // raskt for å vise at mønsteret bare fortsetter. Alle tider i ms fra start.
-const SLOT_STAGGER = 90
-const SLOT_START = 150
-const FLY_DUR_SLOW = 700
-const FLY_DUR_FAST = 420
+// MIDLERTIDIG (2026-09-27): hele tidsskjemaet er skalert ×0.75 (25 % raskere)
+// etter tilbakemelding om at introen gikk litt tregt.
+const PACE_SCALE = 0.75
+const SLOT_STAGGER = 90 * PACE_SCALE
+const SLOT_START = 150 * PACE_SCALE
+const FLY_DUR_SLOW = 700 * PACE_SCALE
+const FLY_DUR_FAST = 420 * PACE_SCALE
 
 function buildSchedule(): Event[] {
   const events: Event[] = []
   // Bufferen etter at de 6 lagplassene har poppet inn var 700ms — nesten
   // halvannet sekund uten synlig bevegelse rett etter at demoen kommer inn i
-  // synsfeltet på forsiden, som leste som at siden hang. 350ms er nok til at
-  // plass-poppingen rekker å fullføre uten å kollidere med kandidat-kortene.
-  let t = SLOT_START + LEVELS.length * SLOT_STAGGER + 350
+  // synsfeltet på forsiden, som leste som at siden hang. Bufferen under er
+  // nok til at plass-poppingen rekker å fullføre uten å kollidere med
+  // kandidat-kortene, skalert med samme PACE_SCALE som resten.
+  const buffer = 350 * PACE_SCALE
+  let t = SLOT_START + LEVELS.length * SLOT_STAGGER + buffer
   const PACE = [
-    { hold: 1700, pick: 1100, fly: FLY_DUR_SLOW, gap: 850 },
-    { hold: 1500, pick: 1000, fly: FLY_DUR_SLOW, gap: 650 },
+    { hold: 1700 * PACE_SCALE, pick: 1100 * PACE_SCALE, fly: FLY_DUR_SLOW, gap: 850 * PACE_SCALE },
+    { hold: 1500 * PACE_SCALE, pick: 1000 * PACE_SCALE, fly: FLY_DUR_SLOW, gap: 650 * PACE_SCALE },
   ]
-  const fast = { hold: 560, pick: 320, fly: FLY_DUR_FAST, gap: 260 }
+  const fast = { hold: 560 * PACE_SCALE, pick: 320 * PACE_SCALE, fly: FLY_DUR_FAST, gap: 260 * PACE_SCALE }
   for (let i = 0; i < LEVELS.length; i++) {
     const p = PACE[i] ?? fast
     events.push({ t, kind: 'level', level: i, phase: 'revealed' })
@@ -81,7 +86,7 @@ function buildSchedule(): Event[] {
     events.push({ t, kind: 'level', level: i, phase: 'hidden' })
     t += p.gap
   }
-  events.push({ t: t + 350, kind: 'finish' })
+  events.push({ t: t + buffer, kind: 'finish' })
   return events
 }
 

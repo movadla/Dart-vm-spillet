@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
   const payloads = participants
     .filter(p => p.email)
     .map(p => ({
-      from: `Dart-VM-spillet <oppdatering@${domain}>`,
+      from: `World Grand Prix-Spillet <oppdatering@${domain}>`,
       to: p.email,
       subject,
       headers: {

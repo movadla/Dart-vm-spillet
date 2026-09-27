@@ -301,7 +301,7 @@ export function EpostTab({ participantCount, participants, headers }: { particip
         <form onSubmit={sendBroadcast} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Emne</label>
-            <input style={inputStyle} type="text" placeholder="Dart-VM-spillet — …" value={subject} onChange={(e) => setSubject(e.target.value)} required />
+            <input style={inputStyle} type="text" placeholder="World Grand Prix-Spillet — …" value={subject} onChange={(e) => setSubject(e.target.value)} required />
           </div>
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Innhold</label>
