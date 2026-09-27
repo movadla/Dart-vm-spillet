@@ -3,7 +3,6 @@ import { lastName } from '@/lib/playerName'
 import { POTS, getIso2, type Player } from '@/data/pots'
 import type { Stage } from '@/config/scoring'
 import { getNextMatch, type NextMatchInfo } from '@/lib/bracketProjection'
-import { getScheduleLabel } from '@/config/schedule'
 import { isPlayerChampion, isPlayerEliminated, type MatchResult, type PickWithPot } from '@/lib/scoring'
 import { CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 import { getLocale } from '@/lib/i18n/getLocale'
@@ -44,46 +43,34 @@ export default async function NextMatches({ picks, matchResults }: { picks: Pick
     <div style={{ background: CARD_GRADIENT, borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', boxShadow: CARD_SHADOW }}>
       {upcoming.map(({ pick, next }, idx) => {
         const isLast = idx === upcoming.length - 1
-        const schedule = getScheduleLabel(next.stage as Stage, locale)
         return (
-          <div key={pick.pot_number} style={{ padding: '10px 14px', borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)' }}>
-            {/* To rader: din spiller + runde øverst, motstander under — å
-                presse begge fulle navn OG runde-label inn i én rad ble for
-                trangt på smale skjermer/lange navn («van Duijvenbode»). */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <Flag iso2={iso2For(pick.player_name)} size={18} />
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-                {lastName(pick.player_name)}
+          <div key={pick.pot_number} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px', borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)', minWidth: 0 }}>
+            {/* Alt på én linje, samme struktur på hver rad (uansett om dato/
+                klokkeslett er kjent) — to rader ga ulik radhøyde og så rotete
+                ut når noen rader hadde en dato-linje og andre ikke. */}
+            <Flag iso2={iso2For(pick.player_name)} size={18} />
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 1, minWidth: 0 }}>
+              {lastName(pick.player_name)}
+            </span>
+            <span aria-hidden style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>vs</span>
+            {next.opponent && !next.isFiller ? (
+              <>
+                <Flag iso2={iso2For(next.opponent)} size={16} />
+                <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 1, minWidth: 0 }}>{lastName(next.opponent)}</span>
+              </>
+            ) : (
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {next.isFiller ? common.qualifiedFillerLabel : deltaker.playerDetailPanel.notDecided}
               </span>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', flexShrink: 0, whiteSpace: 'nowrap', marginLeft: 'auto' }}>
-                {players.stages[next.stage as Stage]}
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, minWidth: 0 }}>
-              <span aria-hidden style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>vs</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                {next.opponent && !next.isFiller ? (
-                  <>
-                    <Flag iso2={iso2For(next.opponent)} size={16} />
-                    <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(next.opponent)}</span>
-                  </>
-                ) : (
-                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
-                    {next.isFiller ? common.qualifiedFillerLabel : deltaker.playerDetailPanel.notDecided}
-                  </span>
-                )}
-                {!next.confirmed && (
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 4, padding: '2px 5px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                    {deltaker.playerDetailPanel.exampleTag}
-                  </span>
-                )}
-              </div>
-            </div>
-            {schedule.dateKnown && (
-              <div style={{ textAlign: 'right', fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>
-                {schedule.dateLabel} · {schedule.timeLabel}
-              </div>
             )}
+            {!next.confirmed && (
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 4, padding: '2px 5px', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                {deltaker.playerDetailPanel.exampleTag}
+              </span>
+            )}
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', flexShrink: 0, whiteSpace: 'nowrap', marginLeft: 'auto', paddingLeft: 8 }}>
+              {players.stages[next.stage as Stage]}
+            </span>
           </div>
         )
       })}
