@@ -61,6 +61,7 @@ export const deltaker = {
     stats: 'Stats',
     worldRanking: 'World ranking',
     avg: 'Avg',
+    checkoutPercent: 'Checkout %',
     info: 'Info',
     bestAchievement: 'Best achievement',
     pathToFinal: 'Path to the final',

@@ -9,7 +9,7 @@ import { PLAYER_STATS } from '@/data/playerStats'
 import { getPathToFinal } from '@/lib/bracketProjection'
 import { calcPlayerPoints, getPlayerMatches, type MatchResult } from '@/lib/scoring'
 import type { Stage } from '@/config/scoring'
-import { formatAvg, formatPoints } from '@/lib/format'
+import { formatAvg, formatPercent, formatPoints } from '@/lib/format'
 import { lastName } from '@/components/TeamTile'
 import { SPORT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
@@ -186,9 +186,12 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
           )}
 
           <SectionTitle>{dict.deltaker.playerDetailPanel.stats}</SectionTitle>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
             <Stat label={dict.deltaker.playerDetailPanel.worldRanking}>{player.pdcRanking}</Stat>
             <Stat label={dict.deltaker.playerDetailPanel.avg}>{formatAvg(stats?.avg, locale)}</Stat>
+            <Stat label={dict.deltaker.playerDetailPanel.checkoutPercent}>
+              {stats?.checkoutPercent != null ? formatPercent(stats.checkoutPercent, locale, 1) : '—'}
+            </Stat>
           </div>
 
           {/* Potensiell vei til finalen — vertikal liste, alle 5 runder t.o.m.

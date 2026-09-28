@@ -15,8 +15,11 @@ export function formatPoints(n: number, locale: Locale = 'no'): string {
   return `${n.toLocaleString(INTL_LOCALE[locale])}${NNBSP}${POINTS_SUFFIX[locale]}`
 }
 
-export function formatPercent(n: number, locale: Locale = 'no'): string {
-  return `${Math.round(n).toLocaleString(INTL_LOCALE[locale])}${NNBSP}%`
+/** `decimals` default 0 (f.eks. «% valgt»-merket på spillerkortene, der et
+ * avrundet heltall er nok) — sett til 1 for tall som allerede har egen
+ * presisjon fra kilden, f.eks. checkout-% («43,8 %», ikke avrundet til «44 %»). */
+export function formatPercent(n: number, locale: Locale = 'no', decimals = 0): string {
+  return `${n.toLocaleString(INTL_LOCALE[locale], { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${NNBSP}%`
 }
 
 /** Odds «2.5» → «2,50» (norsk) / «2.50» (engelsk). Ukjent format vises som det er. */

@@ -60,6 +60,7 @@ export interface DeltakerDict {
     stats: string
     worldRanking: string
     avg: string
+    checkoutPercent: string
     info: string
     bestAchievement: string
     pathToFinal: string
@@ -132,6 +133,7 @@ export const deltaker: DeltakerDict = {
     stats: 'Statistikk',
     worldRanking: 'Verdensranking',
     avg: 'Snitt',
+    checkoutPercent: 'Checkout-%',
     info: 'Info',
     bestAchievement: 'Beste prestasjon',
     pathToFinal: 'Vei til finalen',
