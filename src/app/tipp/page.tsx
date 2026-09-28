@@ -11,14 +11,14 @@
 //   ── Steg 1–6        velg spiller (PlayerCard + PlayerDetailPanel)
 // Fremdriftsprikker/konfetti: ./ProgressDots.tsx
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
 import { POTS, getPickablePlayers } from '@/data/pots'
 import Flag from '@/components/Flag'
 import { SCORING } from '@/config/scoring'
-import { PlayerCard } from '@/components/PlayerCard'
+import { PlayerCard, TEMPLATE_ASPECT } from '@/components/PlayerCard'
 import PlayerDetailPanel from '@/components/PlayerDetailPanel'
 import TeamTile from '@/components/TeamTile'
 import { PLAYER_STATS } from '@/data/playerStats'
@@ -111,6 +111,32 @@ function TippContent() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPanelOpen(false)
+  }, [step])
+
+  // Kort-gridets faktiske tilgjengelige plass i pikker-steget — MÅLT, ikke
+  // gjettet. Et fast px-tak (uansett hvor mye vi finjusterte det) traff
+  // enten for stort (scroll på ekte mobil med adressefelt synlig) eller for
+  // lite (stort tomrom over kortene når nettleseren senere kollapser
+  // adressefeltet/verktøylinjen, eller på et device med mer plass) — de
+  // varierer for mye seg imellom til at én konstant kan dekke begge. Denne
+  // diven er en flex:1-unge av hurtiginfo-linjen (som selv beholder sin
+  // naturlige høyde), så ResizeObserver-målingen er nøyaktig "det som er
+  // igjen" etter header/knapper/hurtiginfo — uansett faktisk synlig
+  // nettleserhøyde. cardsAreaSize er null helt til første måling kommer inn
+  // (ren layout-effekt, kjører før maling — praktisk talt ingen synlig
+  // "hopp" til riktig størrelse).
+  const cardsAreaRef = useRef<HTMLDivElement>(null)
+  const [cardsAreaSize, setCardsAreaSize] = useState<{ w: number; h: number } | null>(null)
+  useLayoutEffect(() => {
+    const el = cardsAreaRef.current
+    if (!el) return
+    const ro = new ResizeObserver((entries) => {
+      const box = entries[0]?.contentBoxSize?.[0]
+      if (box) setCardsAreaSize({ w: box.inlineSize, h: box.blockSize })
+      else setCardsAreaSize({ w: el.clientWidth, h: el.clientHeight })
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
   }, [step])
 
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -676,6 +702,31 @@ const inputStyle: React.CSSProperties = {
   const playerRows: (typeof pickablePlayers)[] = []
   for (let i = 0; i < pickablePlayers.length; i += rowSize) playerRows.push(pickablePlayers.slice(i, i + rowSize))
 
+  // Kort-bredde: fyller den MÅLTE tilgjengelige plassen (cardsAreaSize over)
+  // i stedet for et gjettet fast tak — et fast pikseltall traff enten for
+  // stort (scroll på ekte mobil med adressefelt synlig) eller ga et stort
+  // tomrom over kortene (når nettleseren senere kollapser adressefeltet,
+  // eller på et device med mer plass) — reelle nettlesere varierer for mye
+  // til at én konstant kan dekke begge. FALLBACK_CARD_WIDTH brukes kun i
+  // det aller første oppslaget, før ResizeObserver har målt noe.
+  const rowGap = playerRows.length > 1 ? 8 : 14
+  const colGap = playerRows.length > 1 ? 8 : 14
+  const ROW_PADDING_V = 8
+  const ROW_PADDING_H = 12
+  const FALLBACK_CARD_WIDTH = playerRows.length > 1 ? 95 : 176
+  const ABS_MAX_CARD_WIDTH = 200
+  const ABS_MIN_CARD_WIDTH = 68
+  let cardWidth = FALLBACK_CARD_WIDTH
+  if (cardsAreaSize) {
+    const rows = playerRows.length
+    const availableCardsH = cardsAreaSize.h - (rows - 1) * rowGap - rows * ROW_PADDING_V
+    const heightDerivedWidth = (availableCardsH / rows) * TEMPLATE_ASPECT
+    const widthDerivedWidth = Math.min(
+      ...playerRows.map((row) => (cardsAreaSize.w - (row.length - 1) * colGap - ROW_PADDING_H) / row.length),
+    )
+    cardWidth = Math.max(ABS_MIN_CARD_WIDTH, Math.min(heightDerivedWidth, widthDerivedWidth, ABS_MAX_CARD_WIDTH))
+  }
+
   function goNext() {
     if (step < POT_COUNT) setStep(s => s + 1)
     else setStep(SUMMARY_STEP)
@@ -768,44 +819,23 @@ const inputStyle: React.CSSProperties = {
           som én enhet, så både gridet og detalj-seksjonen er tilgjengelig uten
           at Neste-knappen flytter seg. */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, marginBottom: 8, overflowY: 'auto' }}>
-        {/* marginTop: auto (uten marginBottom: auto) sentrerer kortene +
-            hurtiginfoen vertikalt når alt får plass (ellers ble det et stort
-            tomrom under kortene på høye skjermer) — men når innholdet er
-            høyere enn sonen (potter med 2x2-rader + lang bestAchievement-
-            tekst på hurtiginfo-linjen), kollapser marginTop til 0 i stedet
-            for å klippe likt av topp OG bunn: da starter innholdet øverst og
-            overskuddet er nederst, der overflowY:auto faktisk kan scrolle
-            til det (symmetrisk `margin: auto 0` klippet bunnteksten usynlig
-            uten noen scroll-indikasjon). */}
-        <div style={{ marginTop: 'auto', marginBottom: 0 }}>
-        {/* Ytre wrapper (vanlig blokk-element, ikke selv en flex-item med
-            display:grid) håndterer maks-bredde + sentrering — å sette
-            maxWidth+margin:auto DIREKTE på selve grid-diven, som var en
-            flex-item i kolonnen over, kollapset hele gridet til 0px bredde
-            (auto-margin på tvers-aksen i en flex-kontekst overstyrer
-            stretch-oppførselen som ellers ville gitt gridet reell bredde). */}
-        {/* 176px per kort (var 128): på desktop ble kortene små og "bortkomne" i
-            all luften rundt — mer presens uten å miste én-rad-garantien
-            (1fr-kolonnene krymper fortsatt fritt på smale skjermer). Potter
-            med 4+ kandidater rendres nå som TO separate rad-grid (se
-            playerRows over) i stedet for én trang rad — hver rad er sin
-            egen sentrerte grid, ikke én stor grid med et ufullstendig siste
-            rad-forsøk. Når det er flere rader brukes et lavere per-kort-tak
-            (112px, ikke 176px) — de store kortenes to rader stakk under
-            «Neste»-knappen på et EKTE mobilnettleser-vindu (adressefelt +
-            verktøylinje spiser 150-250px sammenlignet med den 900px-høye
-            headless-emuleringen dette ble tegnet mot først) og krevde
-            scroll for å se hele valget. */}
-        {playerRows.map((row, rowIndex) => {
-          const cardMax = playerRows.length > 1 ? 95 : 176
-          return (
-          <div key={rowIndex} style={{ width: '100%', maxWidth: Math.min(row.length * cardMax, playerRows.length > 1 ? 280 : 400), margin: '0 auto' }}>
+        {/* cardsAreaRef måler NØYAKTIG det som er igjen etter at
+            hurtiginfo-linjen under (flexShrink: 0, egen naturlige høyde) har
+            tatt sin plass — flex: '1 1 auto' på denne diven betyr at
+            ResizeObserveren over ser den EKTE tilgjengelige høyden/bredden
+            for kortene på akkurat dette nettleser-vinduet, ikke en gjettet
+            konstant. justifyContent: center sentrerer radene i det tilfellet
+            bredden (ikke høyden) er den trangeste begrensningen, slik at det
+            ikke blir tomrom KUN i bunnen eller KUN i toppen. */}
+        <div ref={cardsAreaRef} style={{ flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        {playerRows.map((row, rowIndex) => (
+          <div key={rowIndex} style={{ width: '100%', maxWidth: row.length * cardWidth, margin: '0 auto' }}>
             <div
               role="radiogroup"
               aria-label={dict.tipp.step.chooseAriaLabel(translatePotName(dict.players, pot.potNumber, pot.name), playerRows.length > 1 ? rowIndex + 1 : undefined)}
               style={{
                 display: 'grid', gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
-                gap: playerRows.length > 1 ? 8 : 14, padding: rowIndex === 0 ? '4px 6px 4px' : '0 6px 4px',
+                gap: colGap, padding: '4px 6px',
               }}
             >
               {row.map((player) => {
@@ -826,14 +856,16 @@ const inputStyle: React.CSSProperties = {
               })}
             </div>
           </div>
-          )
-        })}
+        ))}
+        </div>
 
         {/* Hurtiginfo for valgt spiller + «Detaljer» som åpner bunnarket.
             Trykk på kortet er KUN valg — arket er et frivillig dypdykk. */}
         {/* Fast høyde: linjen finnes alltid, så kortene ikke hopper oppover
-            idet den fylles ved første valg. */}
-        <div style={{ minHeight: 44, marginTop: 8 }}>
+            idet den fylles ved første valg. flexShrink: 0 — denne skal ALDRI
+            ofres for å gi kortene mer plass, det er omvendt (kortene måler
+            seg etter det som er igjen når denne har tatt sitt). */}
+        <div style={{ minHeight: 44, marginTop: 8, flexShrink: 0 }}>
         {selectedPlayer && (() => {
           const selectedPlayerData = pot.players.find(p => p.name === selectedPlayer)
           if (!selectedPlayerData) return null
@@ -880,7 +912,6 @@ const inputStyle: React.CSSProperties = {
             </>
           )
         })()}
-        </div>
         </div>
       </div>
 

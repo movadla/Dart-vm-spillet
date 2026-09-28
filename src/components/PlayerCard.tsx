@@ -126,7 +126,10 @@ function PhotoPlaceholder({ name }: { name: string }) {
 // byttes ut eller flere legges til per pott. Alle posisjoner er prosent av
 // kortets bredde/høyde; kortet har LÅST aspect-ratio lik bildet, så tekst og
 // form kan ikke komme i utakt.
-const TEMPLATE_ASPECT = 1007 / 1562
+// Eksportert slik at forbrukere (tipp/page.tsx sin dynamiske kort-størrelse
+// basert på faktisk tilgjengelig plass) kan regne bredde<->høyde uten å
+// duplisere tallet.
+export const TEMPLATE_ASPECT = 1007 / 1562
 
 const ZONES = {
   photo: { left: '6%', right: '6%', top: '3%', bottom: '44.1%' }, // ned til navn-skillelinjen (55.9%)
