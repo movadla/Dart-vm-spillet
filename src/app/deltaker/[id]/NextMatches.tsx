@@ -7,6 +7,19 @@ import { isPlayerChampion, isPlayerEliminated, type MatchResult, type PickWithPo
 import { CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
+import { getScheduleLabel } from '@/config/schedule'
+import { SPORT } from '@/config/theme'
+
+// Faste grid-kolonner, samme på ALLE rader (kolonne 2/5 er de eneste
+// fleksible — resten har fast bredde) — dette (ikke fravær av dato/
+// klokkeslett) var det som fikset «rotete»-problemet: forrige runde hadde
+// ulik radstruktur avhengig av om dato var kjent eller ikke. Nå er
+// strukturen alltid lik, bare tekstinnholdet i dato/klokkeslett-cellene
+// endrer seg («Ikke satt» der PDC ikke har kunngjort det ennå).
+// Runde/dato/klokkeslett-kolonnene bruker SPORT (smal, kondensert skrift) —
+// «Kvartfinale»/«Ikke satt» er for brede til å få plass i vanlig skrift uten
+// enten å ellipsere hardt eller spise av navne-kolonnene.
+const GRID_COLUMNS = '16px minmax(0,1fr) 14px 14px minmax(0,1fr) 58px 42px 48px'
 
 const ALL_PLAYERS: Player[] = POTS.flatMap((p) => p.players)
 function iso2For(name: string): string {
@@ -43,33 +56,42 @@ export default async function NextMatches({ picks, matchResults }: { picks: Pick
     <div style={{ background: CARD_GRADIENT, borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', boxShadow: CARD_SHADOW }}>
       {upcoming.map(({ pick, next }, idx) => {
         const isLast = idx === upcoming.length - 1
+        const schedule = getScheduleLabel(next.stage as Stage, locale)
         return (
-          <div key={pick.pot_number} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px', borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)', minWidth: 0 }}>
-            {/* Alt på én linje, samme struktur på hver rad (uansett om dato/
-                klokkeslett er kjent) — to rader ga ulik radhøyde og så rotete
-                ut når noen rader hadde en dato-linje og andre ikke. */}
-            <Flag iso2={iso2For(pick.player_name)} size={18} />
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 1, minWidth: 0 }}>
+          <div key={pick.pot_number} style={{
+            display: 'grid', gridTemplateColumns: GRID_COLUMNS, alignItems: 'center', columnGap: 6,
+            padding: '11px 14px', borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
+          }}>
+            <Flag iso2={iso2For(pick.player_name)} size={16} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
               {lastName(pick.player_name)}
             </span>
-            <span aria-hidden style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>vs</span>
+            <span aria-hidden style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>vs</span>
             {next.opponent && !next.isFiller ? (
-              <>
-                <Flag iso2={iso2For(next.opponent)} size={16} />
-                <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 1, minWidth: 0 }}>{lastName(next.opponent)}</span>
-              </>
+              <Flag iso2={iso2For(next.opponent)} size={14} />
+            ) : <span />}
+            {next.opponent && !next.isFiller ? (
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                {lastName(next.opponent)}
+                {!next.confirmed && (
+                  <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 4, padding: '1px 4px', marginLeft: 5, whiteSpace: 'nowrap' }}>
+                    {deltaker.playerDetailPanel.exampleTag}
+                  </span>
+                )}
+              </span>
             ) : (
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
                 {next.isFiller ? common.qualifiedFillerLabel : deltaker.playerDetailPanel.notDecided}
               </span>
             )}
-            {!next.confirmed && (
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 4, padding: '2px 5px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                {deltaker.playerDetailPanel.exampleTag}
-              </span>
-            )}
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', flexShrink: 0, whiteSpace: 'nowrap', marginLeft: 'auto', paddingLeft: 8 }}>
+            <span style={{ fontFamily: SPORT, fontSize: 11, fontWeight: 700, letterSpacing: '0.01em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', textAlign: 'right', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
               {players.stages[next.stage as Stage]}
+            </span>
+            <span style={{ fontFamily: SPORT, fontSize: 11, fontWeight: 600, color: schedule.dateKnown ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.3)', textAlign: 'right', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+              {schedule.dateLabel}
+            </span>
+            <span style={{ fontFamily: SPORT, fontSize: 11, fontWeight: 600, color: schedule.timeKnown ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.3)', textAlign: 'right', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+              {schedule.timeLabel}
             </span>
           </div>
         )
