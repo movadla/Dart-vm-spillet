@@ -55,7 +55,7 @@ export const legal = {
       h: 'Your rights',
       p1: 'You can at any time ask to see what information we’ve stored about you, ask for it to be corrected, or ask to be deleted entirely from the game (sign-up, picks and all history). You can also unsubscribe from the daily emails at any time via the unsubscribe link at the bottom of each email.',
       p2Before: 'Send an email to',
-      email: 'kontakt@dart-vm-spillet.no',
+      email: 'vmspillet2026@gmail.com',
       p2After: 'to request access, correction or deletion.',
     },
   },

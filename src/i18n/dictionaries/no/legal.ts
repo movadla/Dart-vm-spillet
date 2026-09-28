@@ -89,7 +89,7 @@ export const legal: LegalDict = {
       h: 'Dine rettigheter',
       p1: 'Du kan når som helst be om å få se hvilke opplysninger vi har lagret om deg, be om at de rettes, eller be om at du slettes helt fra spillet (påmelding, picks og all historikk). Du kan også melde deg av de daglige e-postene når som helst via avmeldingslenken nederst i hver e-post.',
       p2Before: 'Send en e-post til',
-      email: 'kontakt@dart-vm-spillet.no',
+      email: 'vmspillet2026@gmail.com',
       p2After: 'for å be om innsyn, retting eller sletting.',
     },
   },
