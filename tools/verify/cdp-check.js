@@ -37,9 +37,16 @@ function putJson(path) {
 }
 
 async function main() {
+  // VERIFY_WIDTH/VERIFY_HEIGHT — override mobil-emuleringens størrelse (default
+  // 430x900). Nyttig for å sjekke ekte mobilnettlesere, der adressefelt/
+  // verktøylinje (Safari/Chrome) spiser en del av høyden — 900px logisk høyde
+  // er urealistisk stort sammenlignet med den faktiske synlige høyden på et
+  // ekte device.
+  const W = Number(process.env.VERIFY_WIDTH) || 430
+  const H = Number(process.env.VERIFY_HEIGHT) || 900
   const chrome = spawn(CHROME, [
     '--headless=new', `--remote-debugging-port=${PORT}`, `--user-data-dir=${PROFILE}`,
-    '--window-size=430,900', '--hide-scrollbars', '--no-first-run', '--no-default-browser-check', 'about:blank',
+    `--window-size=${W},${H}`, '--hide-scrollbars', '--no-first-run', '--no-default-browser-check', 'about:blank',
   ], { stdio: 'ignore' })
   const cleanup = () => { try { chrome.kill() } catch {} try { execSync(`taskkill /PID ${chrome.pid} /T /F`, { stdio: 'ignore' }) } catch {} }
   process.on('exit', cleanup)
@@ -63,7 +70,7 @@ async function main() {
 
   await send('Page.enable')
   await send('Runtime.enable')
-  await send('Emulation.setDeviceMetricsOverride', { width: 430, height: 900, deviceScaleFactor: 2, mobile: true })
+  await send('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 2, mobile: true })
   // VERIFY_LOCALE=en npm run verify -- ... — setter vm_locale-cookien FØR
   // navigasjon, så i18n-sidene rendres på engelsk fra første respons (uten
   // dette ville proxy.ts sin Accept-Language-deteksjon uansett gitt norsk,

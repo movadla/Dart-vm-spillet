@@ -55,11 +55,10 @@ export function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep
 }) {
   const { dict } = useLocale()
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div style={{ marginBottom: 8 }}>
       {/* Fullførte steg viser flagget til spilleren du valgte (og er klikkbare
-          for å gå tilbake), aktivt steg er en farget strek, kommende er prikker.
-          Alle har 20 px trykkflate. */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 2, marginBottom: 4 }}>
+          for å gå tilbake), aktivt steg er en farget strek, kommende er prikker. */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 2, marginBottom: 2 }}>
         {POTS.map((pot, i) => {
           const c = POT_COLORS[i % POT_COLORS.length]
           const done = i < step - 1
@@ -73,7 +72,7 @@ export function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep
               onClick={done ? () => onStep?.(i + 1) : undefined}
               disabled={!done}
               aria-label={done ? dict.tipp.progressDots.stepAriaLabelDone(i + 1, pickedName ?? '') : dict.tipp.progressDots.stepAriaLabelPending(i + 1)}
-              style={{ padding: '6px 4px', background: 'none', border: 'none', cursor: done ? 'pointer' : 'default', display: 'flex', alignItems: 'center' }}
+              style={{ padding: '4px', background: 'none', border: 'none', cursor: done ? 'pointer' : 'default', display: 'flex', alignItems: 'center' }}
             >
               {done && picked ? (
                 <span style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 0 2px ${c}`, background: '#000' }}>

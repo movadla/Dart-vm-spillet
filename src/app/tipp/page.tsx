@@ -682,7 +682,7 @@ const inputStyle: React.CSSProperties = {
   }
 
   return (
-    <div className="page-bg app-frame" style={{ height: '100dvh', padding: '24px 16px 20px', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+    <div className="page-bg app-frame" style={{ height: '100dvh', padding: '14px 16px 10px', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
       <ProgressDots
         step={step}
         multiplier={multiplier}
@@ -693,25 +693,28 @@ const inputStyle: React.CSSProperties = {
         poengActive={showScoreInfo}
       />
 
-      {/* Pot-header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: showScoreInfo ? 8 : 16 }}>
+      {/* Pot-header — kompakt (badge+tittel på 38px) siden den ekte
+          begrensningen på mobil ikke er 900px logisk høyde (headless-
+          emulering), men den faktiske synlige høyden i Safari/Chrome MED
+          adressefelt/verktøylinje synlig, ofte 150-250px mindre. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: showScoreInfo ? 6 : 8 }}>
         <div style={{
-          width: 44, height: 44, borderRadius: 14, background: color, flexShrink: 0,
+          width: 38, height: 38, borderRadius: 12, background: color, flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: `0 4px 16px ${color}55`,
         }}>
-          <span style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, color: 'rgba(0,0,0,0.45)', lineHeight: 1 }}>{step}</span>
+          <span style={{ fontFamily: SPORT, fontSize: 19, fontWeight: 900, color: 'rgba(0,0,0,0.45)', lineHeight: 1 }}>{step}</span>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Pottens navn som tittel — «Velg din spiller» gjentok bare
               steg-linjen; nå får hvert steg sin egen identitet */}
-          <div style={{ fontFamily: SPORT, fontSize: 26, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
+          <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
             {translatePotName(dict.players, pot.potNumber, pot.name)}
           </div>
           {/* Multiplikatoren står i steg-linjen over («Steg 3 av 6 · ×2»);
               her kun en rolig forklaring i vanlig tekst når den er > 1 */}
           {multiplier > 1 && (
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>
               {dict.tipp.step.multiplierNote(multiplier === 2 ? dict.tipp.step.multiplierWords.double : multiplier === 3 ? dict.tipp.step.multiplierWords.triple : dict.tipp.step.multiplierWords.quadruple)}
             </div>
           )}
@@ -764,7 +767,7 @@ const inputStyle: React.CSSProperties = {
           i stedet for et alltid-synlig sidepanel. Hele denne midtsonen scroller
           som én enhet, så både gridet og detalj-seksjonen er tilgjengelig uten
           at Neste-knappen flytter seg. */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, marginBottom: 14, overflowY: 'auto' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, marginBottom: 8, overflowY: 'auto' }}>
         {/* marginTop: auto (uten marginBottom: auto) sentrerer kortene +
             hurtiginfoen vertikalt når alt får plass (ellers ble det et stort
             tomrom under kortene på høye skjermer) — men når innholdet er
@@ -788,18 +791,21 @@ const inputStyle: React.CSSProperties = {
             playerRows over) i stedet for én trang rad — hver rad er sin
             egen sentrerte grid, ikke én stor grid med et ufullstendig siste
             rad-forsøk. Når det er flere rader brukes et lavere per-kort-tak
-            (132px, ikke 176px) — to rader av de store kortene stakk under
-            «Neste»-knappen på mobil og krevde scroll for å se hele valget. */}
+            (112px, ikke 176px) — de store kortenes to rader stakk under
+            «Neste»-knappen på et EKTE mobilnettleser-vindu (adressefelt +
+            verktøylinje spiser 150-250px sammenlignet med den 900px-høye
+            headless-emuleringen dette ble tegnet mot først) og krevde
+            scroll for å se hele valget. */}
         {playerRows.map((row, rowIndex) => {
-          const cardMax = playerRows.length > 1 ? 132 : 176
+          const cardMax = playerRows.length > 1 ? 95 : 176
           return (
-          <div key={rowIndex} style={{ width: '100%', maxWidth: Math.min(row.length * cardMax, playerRows.length > 1 ? 360 : 400), margin: '0 auto' }}>
+          <div key={rowIndex} style={{ width: '100%', maxWidth: Math.min(row.length * cardMax, playerRows.length > 1 ? 280 : 400), margin: '0 auto' }}>
             <div
               role="radiogroup"
               aria-label={dict.tipp.step.chooseAriaLabel(translatePotName(dict.players, pot.potNumber, pot.name), playerRows.length > 1 ? rowIndex + 1 : undefined)}
               style={{
                 display: 'grid', gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
-                gap: 14, padding: rowIndex === 0 ? '6px 6px 8px' : '0 6px 8px',
+                gap: playerRows.length > 1 ? 8 : 14, padding: rowIndex === 0 ? '4px 6px 4px' : '0 6px 4px',
               }}
             >
               {row.map((player) => {
@@ -827,15 +833,22 @@ const inputStyle: React.CSSProperties = {
             Trykk på kortet er KUN valg — arket er et frivillig dypdykk. */}
         {/* Fast høyde: linjen finnes alltid, så kortene ikke hopper oppover
             idet den fylles ved første valg. */}
-        <div style={{ minHeight: 48, marginTop: 12 }}>
+        <div style={{ minHeight: 44, marginTop: 8 }}>
         {selectedPlayer && (() => {
           const selectedPlayerData = pot.players.find(p => p.name === selectedPlayer)
           if (!selectedPlayerData) return null
           const stats = PLAYER_STATS[selectedPlayerData.name]
           return (
             <>
-              <div key={selectedPlayer} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap', padding: '0 6px', animation: 'slide-enter 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
-                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontVariantNumeric: 'tabular-nums', textAlign: 'center' }}>
+              {/* flexWrap fjernet: lange bestAchievement-tekster («European
+                  Championship-vinner 2021») fikk «Detaljer»-knappen til å
+                  hoppe ned på en egen linje under — en hel ekstra linjehøyde
+                  som ikke er der plass til på et ekte mobilvindu med
+                  adressefelt/verktøylinje synlig. Linjen er nå alltid étt
+                  fast-høyt rad; for lang tekst klippes med ellipsis i
+                  stedet (full tekst ligger uansett i «Detaljer»-arket). */}
+              <div key={selectedPlayer} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '0 6px', animation: 'slide-enter 0.3s cubic-bezier(0.22,1,0.36,1) both', minWidth: 0 }}>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontVariantNumeric: 'tabular-nums', textAlign: 'center', minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   <span style={{ fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 15 }}>#{selectedPlayerData.pdcRanking}</span>
                   <span style={{ color: 'rgba(255,255,255,0.35)', margin: '0 7px' }}>·</span>
                   {dict.tipp.step.avgLabel} <span style={{ fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 15 }}>{formatAvg(stats?.avg, locale)}</span>
@@ -877,7 +890,7 @@ const inputStyle: React.CSSProperties = {
         onClick={goNext}
         className={selectedPlayer ? 'btn-hover' : undefined}
         style={{
-          display: 'block', width: '100%', padding: '16px',
+          display: 'block', width: '100%', padding: '13px',
           background: selectedPlayer ? 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)' : 'transparent',
           color: selectedPlayer ? '#fff' : 'rgba(255,255,255,0.5)',
           // Deaktivert = tydelig «tom» tilstand (stiplet ramme), ikke en mørk
@@ -886,7 +899,7 @@ const inputStyle: React.CSSProperties = {
           borderRadius: 12, fontSize: 15, fontWeight: 800,
           cursor: selectedPlayer ? 'pointer' : 'not-allowed',
           fontFamily: SPORT, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
-          marginBottom: 10,
+          marginBottom: 6,
           boxShadow: selectedPlayer ? '0 4px 20px rgba(220,38,38,0.35)' : 'none',
           transition: 'background 0.2s, box-shadow 0.2s, filter 0.12s, border-color 0.2s',
         }}
@@ -896,7 +909,7 @@ const inputStyle: React.CSSProperties = {
       <button
         onClick={() => setStep(step === 1 ? 0 : step - 1)}
         className="btn-hover"
-        style={{ display: 'block', width: '100%', padding: '13px', background: 'transparent', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+        style={{ display: 'block', width: '100%', padding: '9px', background: 'transparent', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
       >
         {dict.tipp.step.back}
       </button>
