@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getScheduleLabel, STAGE_SCHEDULE } from './schedule'
+import { getScheduleLabel, getScheduleSortKey, STAGE_SCHEDULE } from './schedule'
 
 describe('getScheduleLabel', () => {
   it('ingenting satt ennå → begge «Ikke satt»', () => {
@@ -43,9 +43,10 @@ describe('getScheduleLabel', () => {
     expect(l.timeLabel).toBe('Ikke satt')
   })
 
-  it('en spiller som IKKE har et kjent per-kamp-klokkeslett (kveld 2) gir fortsatt «Ikke satt»', () => {
+  it('kveld 2-spiller (29. sep) har nå også et bekreftet klokkeslett', () => {
     const l = getScheduleLabel('r1', 'no', 'Luke Humphries')
-    expect(l.timeKnown).toBe(false)
+    expect(l.timeKnown).toBe(true)
+    expect(l.timeLabel).toBe('22:10')
   })
 
   it('kveld 2-spiller (29. sep) skal IKKE vises med kveld 1 sin dato (28. sep)', () => {
@@ -57,5 +58,28 @@ describe('getScheduleLabel', () => {
   it('kveld 1-spiller viser fortsatt 28. sep (ikke 29.)', () => {
     const l = getScheduleLabel('r1', 'no', 'Luke Littler')
     expect(l.dateLabel).toMatch(/28\.\s*sep/i)
+  })
+
+  it('en spiller uten NOEN kjent per-kamp-oppføring faller tilbake til «Ikke satt» klokkeslett', () => {
+    const l = getScheduleLabel('r1', 'no', 'Ukjent Spillernavn')
+    expect(l.timeKnown).toBe(false)
+  })
+})
+
+describe('getScheduleSortKey', () => {
+  it('tidligere kamp (kveld 1) gir en lavere nøkkel enn en senere (kveld 2)', () => {
+    const early = getScheduleSortKey('r1', 'Luke Littler') // 28. sep, 22:10
+    const later = getScheduleSortKey('r1', 'Luke Humphries') // 29. sep, 22:10
+    expect(early).toBeLessThan(later)
+  })
+
+  it('to kamper samme kveld sorteres etter klokkeslett', () => {
+    const first = getScheduleSortKey('r1', 'Danny Noppert') // 19:10
+    const last = getScheduleSortKey('r1', 'Luke Littler') // 22:10
+    expect(first).toBeLessThan(last)
+  })
+
+  it('ukjent dato gir Infinity (sorteres alltid sist)', () => {
+    expect(getScheduleSortKey('final')).toBe(Infinity)
   })
 })

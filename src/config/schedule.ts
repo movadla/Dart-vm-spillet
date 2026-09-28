@@ -46,14 +46,10 @@ export const STAGE_SCHEDULE: Record<Stage, StageSchedule> = {
 // getScheduleLabel()) som overstyrer BÅDE dato og klokkeslett fra
 // STAGE_SCHEDULE når den finnes.
 //
-// Kveld 1 (28. sep): klokkeslett bekreftet fra en livescore-side samme
-// kveld (19:10–22:40, 30 min mellomrom per kamp).
-// Kveld 2 (29. sep): DATOEN er bekreftet (samme kilder som over), men
-// ESPN/Sky Sports/Scotsman oppgir kun at kveldsøkten starter kl. 19:00
-// norsk tid (18:00 BST) — IKKE et eksakt klokkeslett per enkeltkamp slik vi
-// har for kveld 1. IKKE gjett/ekstrapoler dette (f.eks. anta samme 30-
-// minutters mønster som kveld 1) — sett time: null til en ekte kilde med
-// per-kamp-klokkeslett for 29. sep er funnet.
+// Kveld 1 (28. sep) og kveld 2 (29. sep): klokkeslett bekreftet fra samme
+// livescore-side, én kveld om gangen (kveld 1: 2026-09-28, kveld 2:
+// 2026-09-29) — begge kvelder følger samme mønster, 19:10–22:40 med 30 min
+// mellomrom per kamp.
 const R1_MATCH_SCHEDULE: Record<string, { date: string; time: string | null }> = {
   'Danny Noppert': { date: '2026-09-28', time: '19:10' }, 'Niko Springer': { date: '2026-09-28', time: '19:10' },
   'Ross Smith': { date: '2026-09-28', time: '19:40' }, 'Cameron Menzies': { date: '2026-09-28', time: '19:40' },
@@ -63,14 +59,14 @@ const R1_MATCH_SCHEDULE: Record<string, { date: string; time: string | null }> =
   'Michael van Gerwen': { date: '2026-09-28', time: '21:40' }, 'Ryan Joyce': { date: '2026-09-28', time: '21:40' },
   'Luke Littler': { date: '2026-09-28', time: '22:10' }, 'Luke Woodhouse': { date: '2026-09-28', time: '22:10' },
   'Wessel Nijman': { date: '2026-09-28', time: '22:40' }, 'Rob Cross': { date: '2026-09-28', time: '22:40' },
-  'Chris Dobey': { date: '2026-09-29', time: null }, 'Jermaine Wattimena': { date: '2026-09-29', time: null },
-  'Ryan Searle': { date: '2026-09-29', time: null }, "William O'Connor": { date: '2026-09-29', time: null },
-  'Josh Rock': { date: '2026-09-29', time: null }, 'Niels Zonneveld': { date: '2026-09-29', time: null },
-  'James Wade': { date: '2026-09-29', time: null }, 'Joe Cullen': { date: '2026-09-29', time: null },
-  'Gary Anderson': { date: '2026-09-29', time: null }, 'Damon Heta': { date: '2026-09-29', time: null },
-  'Gian van Veen': { date: '2026-09-29', time: null }, 'Dirk van Duijvenbode': { date: '2026-09-29', time: null },
-  'Luke Humphries': { date: '2026-09-29', time: null }, 'Dave Chisnall': { date: '2026-09-29', time: null },
-  'Stephen Bunting': { date: '2026-09-29', time: null }, 'Andrew Gilding': { date: '2026-09-29', time: null },
+  'Chris Dobey': { date: '2026-09-29', time: '19:10' }, 'Jermaine Wattimena': { date: '2026-09-29', time: '19:10' },
+  'Ryan Searle': { date: '2026-09-29', time: '19:40' }, "William O'Connor": { date: '2026-09-29', time: '19:40' },
+  'Josh Rock': { date: '2026-09-29', time: '20:10' }, 'Niels Zonneveld': { date: '2026-09-29', time: '20:10' },
+  'James Wade': { date: '2026-09-29', time: '20:40' }, 'Joe Cullen': { date: '2026-09-29', time: '20:40' },
+  'Gary Anderson': { date: '2026-09-29', time: '21:10' }, 'Damon Heta': { date: '2026-09-29', time: '21:10' },
+  'Gian van Veen': { date: '2026-09-29', time: '21:40' }, 'Dirk van Duijvenbode': { date: '2026-09-29', time: '21:40' },
+  'Luke Humphries': { date: '2026-09-29', time: '22:10' }, 'Dave Chisnall': { date: '2026-09-29', time: '22:10' },
+  'Stephen Bunting': { date: '2026-09-29', time: '22:40' }, 'Andrew Gilding': { date: '2026-09-29', time: '22:40' },
 }
 
 export interface ScheduleLabel {
@@ -90,14 +86,30 @@ const INTL_LOCALE: Record<Locale, string> = { no: 'nb-NO', en: 'en-US' }
  * og klokkeslett fra STAGE_SCHEDULE når det finnes (kun relevant for runde 1
  * så langt, siden det er den eneste runden som spilles over flere dager).
  */
-export function getScheduleLabel(stage: Stage, locale: Locale = 'no', playerName?: string): ScheduleLabel {
+/** Slår opp rå dato+klokkeslett (ikke tekst) — delt av getScheduleLabel() og getScheduleSortKey(). */
+function resolveSchedule(stage: Stage, playerName?: string): { date: string | null; time: string | null } {
   const s = STAGE_SCHEDULE[stage]
-  const notSet = NOT_SET[locale]
   const override = playerName ? R1_MATCH_SCHEDULE[playerName] : undefined
-  const date = override?.date ?? s.date
+  return { date: override?.date ?? s.date, time: override ? override.time : s.time }
+}
+
+export function getScheduleLabel(stage: Stage, locale: Locale = 'no', playerName?: string): ScheduleLabel {
+  const notSet = NOT_SET[locale]
+  const { date, time } = resolveSchedule(stage, playerName)
   if (!date) return { dateLabel: notSet, timeLabel: notSet, dateKnown: false, timeKnown: false }
   const d = new Date(`${date}T00:00:00Z`)
   const dateLabel = d.toLocaleDateString(INTL_LOCALE[locale], { day: 'numeric', month: 'short', timeZone: 'UTC' })
-  const time = override ? override.time : s.time
   return { dateLabel, timeLabel: time ?? notSet, dateKnown: true, timeKnown: !!time }
+}
+
+/**
+ * Sorteringsnøkkel (epoch ms, tidligst = lavest) for «neste kamper»-lista.
+ * Ukjent dato gir Infinity (sorteres sist). Kjent dato med ukjent
+ * klokkeslett bruker 00:00 den dagen (kampen er i hvert fall DEN dagen,
+ * selv om nøyaktig rekkefølge innad i dagen ikke er kjent ennå).
+ */
+export function getScheduleSortKey(stage: Stage, playerName?: string): number {
+  const { date, time } = resolveSchedule(stage, playerName)
+  if (!date) return Infinity
+  return new Date(`${date}T${time ?? '00:00'}:00Z`).getTime()
 }

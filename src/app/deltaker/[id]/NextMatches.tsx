@@ -4,8 +4,8 @@ import { useState } from 'react'
 import Flag from '@/components/Flag'
 import { lastName } from '@/lib/playerName'
 import { POTS, getIso2, type Player } from '@/data/pots'
-import type { Stage } from '@/config/scoring'
-import { getScheduleLabel } from '@/config/schedule'
+import { STAGE_ORDER, type Stage } from '@/config/scoring'
+import { getScheduleLabel, getScheduleSortKey } from '@/config/schedule'
 import { getNextMatch, type NextMatchInfo } from '@/lib/bracketProjection'
 import { isPlayerChampion, isPlayerEliminated, type MatchResult, type PickWithPot } from '@/lib/scoring'
 import { CARD_GRADIENT, CARD_SHADOW, SPORT } from '@/config/theme'
@@ -15,6 +15,7 @@ const ALL_PLAYERS: Player[] = POTS.flatMap((p) => p.players)
 function iso2For(name: string): string {
   return ALL_PLAYERS.find((p) => p.name === name)?.iso2 ?? getIso2(name)
 }
+const STAGE_INDEX: Record<string, number> = Object.fromEntries(STAGE_ORDER.map((s, i) => [s, i]))
 
 /**
  * «Neste kamper» på Min side: kun spillerne som faktisk HAR en neste kamp —
@@ -32,11 +33,22 @@ export default function NextMatches({ picks, matchResults }: { picks: PickWithPo
   const { deltaker, players, common } = dict
   const [openRow, setOpenRow] = useState<number | null>(null)
 
+  // Sortert etter når kampen faktisk spilles (tidligst øverst) — ikke etter
+  // pott-nummer som før. Ukjent dato/klokkeslett gir Infinity (se
+  // getScheduleSortKey()) og havner sist, med rundenummer og pott-nummer som
+  // stabile sekundære sorteringer for kamper som ellers ville vært likestilt.
   const upcoming = picks
-    .slice()
-    .sort((a, b) => a.pot_number - b.pot_number)
     .map((pick) => ({ pick, next: getUpcoming(pick.player_name, matchResults) }))
     .filter((row): row is { pick: PickWithPot; next: NextMatchInfo } => row.next !== null)
+    .sort((a, b) => {
+      const keyA = getScheduleSortKey(a.next.stage as Stage, a.pick.player_name)
+      const keyB = getScheduleSortKey(b.next.stage as Stage, b.pick.player_name)
+      if (keyA !== keyB) return keyA - keyB
+      const stageA = STAGE_INDEX[a.next.stage] ?? 0
+      const stageB = STAGE_INDEX[b.next.stage] ?? 0
+      if (stageA !== stageB) return stageA - stageB
+      return a.pick.pot_number - b.pick.pot_number
+    })
 
   if (upcoming.length === 0) {
     return (
