@@ -82,7 +82,7 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
   if (!open) return null
 
   const stats = PLAYER_STATS[player.name]
-  const path = getPathToFinal(player.name)
+  const path = getPathToFinal(player.name, matchResults)
   // Kamper — liste over spilte kamper med poengene spilleren faktisk fikk i hver av dem.
   const myMatches = getPlayerMatches(player.name, matchResults)
 
@@ -207,12 +207,14 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
                     <span style={{ width: 96, flexShrink: 0, fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>
                       {dict.players.stages[s.stage]}
                     </span>
-                    <span style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {s.opponent}
+                    <span style={{ flex: 1, minWidth: 0, fontSize: s.opponent ? 15 : 13, fontWeight: s.opponent ? 700 : 500, fontStyle: s.opponent ? 'normal' : 'italic', color: s.opponent ? '#fff' : 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {s.opponent ?? (s.candidates ? `${lastName(s.candidates[0])}/${lastName(s.candidates[1])}` : dict.deltaker.playerDetailPanel.notDecided)}
                     </span>
-                    <span style={{ fontSize: 14, fontWeight: 900, color: '#fbbf24', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                      #{s.pdcRanking}
-                    </span>
+                    {s.pdcRanking != null && (
+                      <span style={{ fontSize: 14, fontWeight: 900, color: '#fbbf24', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                        #{s.pdcRanking}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -242,7 +244,7 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
           </button>
         </div>
 
-        {bracketOpen && <BracketModal playerName={player.name} color={color} onClose={() => setBracketOpen(false)} />}
+        {bracketOpen && <BracketModal playerName={player.name} color={color} matchResults={matchResults} onClose={() => setBracketOpen(false)} />}
       </div>
     </div>
   )

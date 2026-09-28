@@ -108,7 +108,7 @@ export const vmInfo: VmInfoDict = {
   bracketModal: {
     dialogAriaLabel: (name) => `Trekning for ${name}`,
     title: 'Trekningen',
-    subtitle: 'Eksempel-trekning – byttes ut når PDC publiserer den ekte (medio november)',
+    subtitle: 'Runde 1 er den bekreftede trekningen. Runde 2 og senere er beste estimat inntil de faktisk avgjøres.',
     close: 'Lukk',
     pathToFinal: (name) => `Potensiell vei til finalen for ${name}`,
     round1Section: 'Runde 1 – din seksjon',

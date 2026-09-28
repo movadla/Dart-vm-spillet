@@ -143,19 +143,54 @@ const ROUND_STAGES = ['r1', 'r2', 'qf', 'sf', 'final'] as const
 
 export interface PathStep {
   stage: (typeof ROUND_STAGES)[number]
-  /** Best rangerte spiller som kan bli motstander i denne runden hvis alle favoritter vinner. */
-  opponent: string
-  pdcRanking: number
+  /** Bekreftet motstander, ELLER den eneste reelt gjenværende kandidaten
+   * (selv om den ikke er "offisielt" bekreftet ennå via en spilt kamp et
+   * annet sted i braketten) — se `confirmed` for hvilket av de to. `null`
+   * når minst 2 spillere fortsatt er reelt mulige. */
+  opponent: string | null
+  /** Satt KUN når `opponent` er null og nøyaktig 2 spillere er reelt mulig
+   * ennå (typisk: den ene kampen som avgjør denne motstanderen er ikke
+   * spilt ennå). Vises som "A/B" i UI i stedet for å late som om det ene
+   * navnet er avgjort. `undefined` (ikke satt) betyr at det er FLERE enn 2
+   * reelle kandidater igjen — for tidlig i braketten til å liste dem, vis
+   * «Ikke bestemt» i stedet. */
+  candidates?: [string, string]
+  pdcRanking: number | null
+  /** true = ekte, avgjort motstander (runde 1 er alltid dette — det er selve
+   * trekningen — eller en senere runde der matches faktisk avgjør blokken). */
+  confirmed: boolean
+}
+
+/** Alle spillere som ennå er matematisk mulig som vinner av bracket-blokken
+ * [start, end) på runde `stageIdx` (samme konvensjon som `resolveWinner`) —
+ * lengde 1 betyr reelt avgjort (selv om `resolveWinner` alene ikke fanger
+ * det, f.eks. fordi selve kampen på DENNE runden ikke er spilt ennå, men
+ * begge sider av den kampen uansett er de eneste to som er mulig). */
+function possibleWinners(start: number, end: number, stageIdx: number, matches: MatchResult[]): string[] {
+  if (stageIdx === 0) return [BRACKET_SLOTS[start]]
+  const resolved = resolveWinner(start, end, stageIdx, matches)
+  if (resolved != null) return [resolved]
+  const half = (end - start) / 2
+  return [
+    ...possibleWinners(start, start + half, stageIdx - 1, matches),
+    ...possibleWinners(start + half, end, stageIdx - 1, matches),
+  ]
 }
 
 /**
- * «Potensiell vei til finalen»: for hver runde, den best rangerte spilleren
- * som kan dukke opp som motstander dersom alle favorittene vinner sine kamper —
- * dvs. beste rangering i den motsatte halvdelen av spillerens brakett-blokk
- * på det nivået. Bygger på seedplasseringen (runde 1 er ekte trekning, runde
- * 2+ er beste estimat) inntil braketten faktisk er avgjort — merk det i UI.
+ * «Potensiell vei til finalen»: for hver runde, hvem som faktisk KAN dukke
+ * opp som motstander gitt det som er spilt av `matches` så langt. Runde 1 er
+ * alltid den ekte trekningen. For runde 2+: hvis nøyaktig én spiller er
+ * reelt mulig, vises den (bekreftet). Hvis nøyaktig to er mulig (typisk: én
+ * enkelt kamp et annet sted i braketten avgjør det, men den er ikke spilt
+ * ennå), vises BEGGE som kandidater — IKKE bare den høyest rangerte, som om
+ * det var avgjort (dette var en reell bug: en spiller kunne vises som
+ * "motstander" i runde 2 før han i det hele tatt hadde vunnet sin egen
+ * runde 1-kamp). Er det flere enn to reelle kandidater igjen (for tidlig i
+ * braketten), vises verken navn eller kandidater — UI-et viser «Ikke
+ * bestemt» i stedet for et gjettet navn.
  */
-export function getPathToFinal(playerName: string): PathStep[] {
+export function getPathToFinal(playerName: string, matches: MatchResult[] = []): PathStep[] {
   const slot = BRACKET_SLOTS.indexOf(playerName)
   if (slot < 0) return []
   const steps: PathStep[] = []
@@ -165,14 +200,24 @@ export function getPathToFinal(playerName: string): PathStep[] {
     const blockStart = Math.floor(slot / blockSize) * blockSize
     const inUpperHalf = slot < blockStart + half
     const oppStart = inUpperHalf ? blockStart + half : blockStart
-    let best: PathStep | null = null
-    for (let s = oppStart; s < oppStart + half; s++) {
-      const name = BRACKET_SLOTS[s]
-      const ranking = RANKING_BY_NAME.get(name)
-      if (ranking == null) continue
-      if (!best || ranking < best.pdcRanking) best = { stage: ROUND_STAGES[k - 1], opponent: name, pdcRanking: ranking }
+    const stage = ROUND_STAGES[k - 1]
+
+    if (k === 1) {
+      // Runde 1 er alltid den ekte, kjente trekningen — ingen usikkerhet.
+      const name = BRACKET_SLOTS[oppStart]
+      steps.push({ stage, opponent: name, pdcRanking: RANKING_BY_NAME.get(name) ?? null, confirmed: true })
+      continue
     }
-    if (best) steps.push(best)
+
+    const candidates = [...new Set(possibleWinners(oppStart, oppStart + half, k - 1, matches))]
+    if (candidates.length === 1) {
+      const name = candidates[0]
+      steps.push({ stage, opponent: name, pdcRanking: RANKING_BY_NAME.get(name) ?? null, confirmed: true })
+    } else if (candidates.length === 2) {
+      steps.push({ stage, opponent: null, candidates: [candidates[0], candidates[1]], pdcRanking: null, confirmed: false })
+    } else {
+      steps.push({ stage, opponent: null, pdcRanking: null, confirmed: false })
+    }
   }
   return steps
 }
@@ -266,10 +311,13 @@ export function getBracketRound(stage: (typeof ROUND_STAGES)[number], matches: M
 
 export interface NextMatchInfo {
   stage: (typeof ROUND_STAGES)[number]
-  /** null = ikke avgjort ennå OG ingen navngitt eksempel-favoritt i den blokken. */
+  /** null = ikke avgjort ennå OG ikke nøyaktig 1 reell kandidat (se `candidates`). */
   opponent: string | null
+  /** Satt KUN når `opponent` er null og nøyaktig 2 spillere er reelt mulig
+   * ennå — vises som "A/B", IKKE som om ett av navnene var avgjort. */
+  candidates?: [string, string]
   isFiller: boolean
-  /** true = ekte, avgjort motstander. false = beste eksempel-gjetning (se getPathToFinal) inntil runden er avgjort. */
+  /** true = ekte, avgjort motstander. false = fortsatt usikkert (se getPathToFinal) inntil runden er avgjort. */
   confirmed: boolean
 }
 
@@ -297,19 +345,15 @@ export function getNextMatch(playerName: string, matches: MatchResult[]): NextMa
     return { stage: nextStage, opponent: info.opponent.name, isFiller: info.opponent.isFiller, confirmed: true }
   }
 
-  const blockSize = 2 ** (nextIdx + 1)
-  const half = blockSize / 2
-  const blockStart = Math.floor(slot / blockSize) * blockSize
-  const inUpperHalf = slot < blockStart + half
-  const oppStart = inUpperHalf ? blockStart + half : blockStart
-
-  const resolved = resolveWinner(oppStart, oppStart + half, nextIdx, matches)
-  if (resolved != null) {
-    return { stage: nextStage, opponent: resolved, isFiller: isFiller(resolved), confirmed: true }
+  // getPathToFinal() gjør nå selv jobben med å avgjøre om motstanderen er
+  // reelt avgjort, nøyaktig 2 kandidater, eller for usikkert ennå (se der).
+  const step = getPathToFinal(playerName, matches).find((s) => s.stage === nextStage)
+  if (!step) return { stage: nextStage, opponent: null, isFiller: false, confirmed: false }
+  return {
+    stage: nextStage,
+    opponent: step.opponent,
+    candidates: step.candidates,
+    isFiller: step.opponent != null && isFiller(step.opponent),
+    confirmed: step.confirmed,
   }
-
-  const guess = getPathToFinal(playerName).find((s) => s.stage === nextStage)
-  return guess
-    ? { stage: nextStage, opponent: guess.opponent, isFiller: false, confirmed: false }
-    : { stage: nextStage, opponent: null, isFiller: false, confirmed: false }
 }

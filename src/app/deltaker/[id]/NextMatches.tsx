@@ -86,7 +86,14 @@ export default function NextMatches({ picks, matchResults }: { picks: PickWithPo
                 {lastName(pick.player_name)}
               </span>
               <span aria-hidden style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>vs</span>
-              {hasOpponent ? (
+              {next.candidates ? (
+                <>
+                  <span />
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                    {lastName(next.candidates[0])}/{lastName(next.candidates[1])}
+                  </span>
+                </>
+              ) : hasOpponent ? (
                 <>
                   <Flag iso2={iso2For(next.opponent as string)} size={16} />
                   <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>

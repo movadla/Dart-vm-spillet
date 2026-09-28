@@ -56,7 +56,7 @@ export const vmInfo = {
   bracketModal: {
     dialogAriaLabel: (name) => `Draw for ${name}`,
     title: 'The Draw',
-    subtitle: 'Example draw – replaced once the PDC publishes the real one (mid-November)',
+    subtitle: 'Round 1 is the confirmed draw. Round 2 onward is our best estimate until those matches are actually decided.',
     close: 'Close',
     pathToFinal: (name) => `Potential path to the final for ${name}`,
     round1Section: 'Round 1 – your section',

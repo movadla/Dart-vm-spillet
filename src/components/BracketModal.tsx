@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react'
 import { getDrawSections, getPathToFinal, getSeedLabel, isFillerName } from '@/lib/bracketProjection'
+import { lastName } from '@/components/TeamTile'
+import type { MatchResult } from '@/lib/scoring'
 import { SPORT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
 
@@ -11,7 +13,7 @@ import { useLocale } from '@/lib/i18n/useLocale'
  * ligger sammenlagt bak en overskrift, så listen ikke er 64 rader lang.
  * Lukkes med ✕, Escape eller klikk utenfor.
  */
-export default function BracketModal({ playerName, color, onClose }: { playerName: string; color: string; onClose: () => void }) {
+export default function BracketModal({ playerName, color, matchResults, onClose }: { playerName: string; color: string; matchResults: MatchResult[]; onClose: () => void }) {
   const { dict } = useLocale()
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); onClose() } }
@@ -19,7 +21,7 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
     return () => window.removeEventListener('keydown', onKey, true)
   }, [onClose])
 
-  const path = getPathToFinal(playerName)
+  const path = getPathToFinal(playerName, matchResults)
   const sections = getDrawSections()
   const ownIndex = sections.findIndex((s) => s.matches.some(([a, b]) => a === playerName || b === playerName))
   const ordered = ownIndex >= 0 ? [sections[ownIndex], ...sections.filter((_, i) => i !== ownIndex)] : sections
@@ -90,12 +92,15 @@ export default function BracketModal({ playerName, color, onClose }: { playerNam
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 18 }}>
             {path.map((s) => {
-              const top16 = s.pdcRanking <= 16
+              const top16 = s.pdcRanking != null && s.pdcRanking <= 16
+              const label = s.opponent ?? (s.candidates ? `${lastName(s.candidates[0])}/${lastName(s.candidates[1])}` : dict.deltaker.playerDetailPanel.notDecided)
               return (
                 <div key={s.stage} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 8, background: top16 ? `${color}1f` : 'rgba(255,255,255,0.03)', border: `1px solid ${top16 ? `${color}55` : 'rgba(255,255,255,0.06)'}` }}>
                   <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', width: 88, flexShrink: 0 }}>{dict.players.stages[s.stage]}</span>
-                  <span style={{ flex: 1, fontSize: 13, fontWeight: top16 ? 800 : 500, color: top16 ? '#fff' : 'rgba(255,255,255,0.65)' }}>{s.opponent}</span>
-                  <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: top16 ? '#f3d576' : 'rgba(255,255,255,0.4)', fontVariantNumeric: 'tabular-nums' }}>#{s.pdcRanking}</span>
+                  <span style={{ flex: 1, fontSize: 13, fontWeight: top16 ? 800 : 500, fontStyle: s.opponent ? 'normal' : 'italic', color: top16 ? '#fff' : 'rgba(255,255,255,0.65)' }}>{label}</span>
+                  {s.pdcRanking != null && (
+                    <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, color: top16 ? '#f3d576' : 'rgba(255,255,255,0.4)', fontVariantNumeric: 'tabular-nums' }}>#{s.pdcRanking}</span>
+                  )}
                 </div>
               )
             })}
