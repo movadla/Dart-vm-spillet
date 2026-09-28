@@ -114,6 +114,41 @@ create table rate_limit_hits (
 );
 create index rate_limit_hits_lookup_idx on rate_limit_hits (bucket, key, created_at);
 
+-- Atomisk "sjekk og registrer" for rate_limit_hits. Den gamle applikasjons-
+-- siden gjorde dette som to separate kall (tell rader, så sett inn én) — et
+-- klassisk kappløp der to samtidige forespørsler begge kan lese antall <
+-- grense FØR noen av dem har rukket å sette inn, og dermed slippe én for
+-- mange gjennom. pg_advisory_xact_lock låser på en hash av bucket+key inntil
+-- transaksjonen er ferdig, så samtidige kall for SAMME bucket+key kø-legges
+-- i stedet for å race mot hverandre. Se src/lib/rateLimit.ts sin
+-- tryRecordRateLimitHit().
+-- Skjema/tabell fullt kvalifisert (dart_vm.*) i stedet for å stole på
+-- search_path — denne funksjonen ble en gang limt inn og kjørt ALENE i en
+-- fersk SQL Editor-fane (uten `set search_path to dart_vm` fra toppen av
+-- denne fila) og havnet da i "public" ved en feil. Kvalifisert eksplisitt
+-- her så det ikke kan skje igjen, uansett hvordan denne blokken kjøres.
+create or replace function dart_vm.check_rate_limit(p_bucket text, p_key text, p_limit int, p_window_ms bigint)
+returns boolean
+language plpgsql
+as $$
+declare
+  v_count int;
+  v_window_start timestamptz := now() - (p_window_ms::text || ' milliseconds')::interval;
+begin
+  perform pg_advisory_xact_lock(hashtextextended(p_bucket || ':' || p_key, 0));
+
+  select count(*) into v_count from dart_vm.rate_limit_hits
+    where bucket = p_bucket and key = p_key and created_at >= v_window_start;
+
+  if v_count >= p_limit then
+    return false;
+  end if;
+
+  insert into dart_vm.rate_limit_hits (bucket, key) values (p_bucket, p_key);
+  return true;
+end;
+$$;
+
 -- Audit-logg for admin-handlinger. Admin-autentisering er én delt hemmelighet
 -- (ingen individuelle admin-kontoer), så loggen registrerer HVA som ble gjort
 -- og NÅR, men ikke hvilken person — se src/lib/adminAudit.ts.
@@ -137,6 +172,10 @@ grant all on all tables in schema dart_vm to anon, authenticated, service_role;
 grant all on all sequences in schema dart_vm to anon, authenticated, service_role;
 alter default privileges in schema dart_vm grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema dart_vm grant all on sequences to anon, authenticated, service_role;
+-- Funksjoner trenger samme eksplisitte GRANT som tabeller over — PostgREST
+-- avviser ellers check_rate_limit()-kallet fra service_role på ren manglende
+-- tilgang, samme årsak som resten av denne seksjonen.
+grant execute on function dart_vm.check_rate_limit(text, text, int, bigint) to anon, authenticated, service_role;
 
 -- === Row Level Security ===
 -- Kun match_results er lesbar for anon (offentlig kampdata, brukt av

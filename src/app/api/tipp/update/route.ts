@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
-import { POTS } from '@/data/pots'
+import { tryRecordRateLimitHit } from '@/lib/rateLimit'
+import { POTS, getPickablePlayers } from '@/data/pots'
 import { KICKOFF } from '@/config/tournament'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
@@ -12,10 +12,12 @@ import { getDictionary } from '@/i18n/dictionaries'
 const UPDATE_LIMIT = 30
 const UPDATE_WINDOW_MS = 60 * 60 * 1000
 
-// Bygg et oppslag: potNumber → Set<playerName> for rask validering
+// Bygg et oppslag: potNumber → Set<playerName> for rask validering.
+// getPickablePlayers() her, IKKE pot.players direkte — se samme kommentar i
+// src/app/api/tipp/route.ts.
 const VALID_PLAYERS: Record<number, Set<string>> = {}
 for (const pot of POTS) {
-  VALID_PLAYERS[pot.potNumber] = new Set(pot.players.map((p) => p.name))
+  VALID_PLAYERS[pot.potNumber] = new Set(getPickablePlayers(pot).map((p) => p.name))
 }
 
 export async function POST(req: NextRequest) {
@@ -39,10 +41,9 @@ export async function POST(req: NextRequest) {
 
   const supabase = getSupabaseAdmin()
 
-  if (await isRateLimited(supabase, 'tipp-update', participantId, UPDATE_LIMIT, UPDATE_WINDOW_MS)) {
+  if (!(await tryRecordRateLimitHit(supabase, 'tipp-update', participantId, UPDATE_LIMIT, UPDATE_WINDOW_MS))) {
     return NextResponse.json({ error: dict.tooManyAttempts }, { status: 429 })
   }
-  await recordRateLimitHit(supabase, 'tipp-update', participantId)
 
   const { picks } = await req.json()
 

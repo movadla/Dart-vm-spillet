@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { KICKOFF } from '@/config/tournament'
-import { clientIp, isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
+import { clientIp, tryRecordRateLimitHit } from '@/lib/rateLimit'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
 
@@ -33,10 +33,9 @@ export async function POST(req: NextRequest) {
   // Koden er 6 tegn fra 32 mulige — uten grense kunne den gjettes med et
   // skript. 30 forsøk/time per IP er rikelig for ekte bruk.
   const ip = clientIp(req)
-  if (await isRateLimited(supabase, 'league-join', ip, 30, 60 * 60 * 1000)) {
+  if (!(await tryRecordRateLimitHit(supabase, 'league-join', ip, 30, 60 * 60 * 1000))) {
     return NextResponse.json({ error: dict.tooManyAttempts }, { status: 429 })
   }
-  await recordRateLimitHit(supabase, 'league-join', ip)
 
   const { data: participant } = await supabase
     .from('participants').select('id').eq('id', participantId).single()

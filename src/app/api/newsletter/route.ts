@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { clientIp, isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
+import { clientIp, tryRecordRateLimitHit } from '@/lib/rateLimit'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
 
@@ -20,10 +20,9 @@ export async function POST(req: NextRequest) {
   try { supabase = getSupabaseAdmin() } catch { return NextResponse.json({ error: dict.dbNotSetUp }, { status: 503 }) }
 
   const ip = clientIp(req)
-  if (await isRateLimited(supabase, 'newsletter', ip, LIMIT, WINDOW_MS)) {
+  if (!(await tryRecordRateLimitHit(supabase, 'newsletter', ip, LIMIT, WINDOW_MS))) {
     return NextResponse.json({ error: dict.tooManyAttempts }, { status: 429 })
   }
-  await recordRateLimitHit(supabase, 'newsletter', ip)
 
   await supabase.from('newsletter_signups').upsert({ email: email.trim().toLowerCase() })
 

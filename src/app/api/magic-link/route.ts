@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { randomBytes } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { clientIp, isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
+import { clientIp, tryRecordRateLimitHit } from '@/lib/rateLimit'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
 
@@ -21,10 +21,9 @@ export async function POST(req: NextRequest) {
   // Per IP i tillegg til per deltaker (3/time under): hindrer at én maskin
   // sender lenker til mange deltakere på rad.
   const ip = clientIp(req)
-  if (await isRateLimited(supabase, 'magic-link', ip, 10, 60 * 60 * 1000)) {
+  if (!(await tryRecordRateLimitHit(supabase, 'magic-link', ip, 10, 60 * 60 * 1000))) {
     return NextResponse.json({ error: dict.tooManyAttempts }, { status: 429 })
   }
-  await recordRateLimitHit(supabase, 'magic-link', ip)
 
   const { data: participant } = await supabase
     .from('participants')

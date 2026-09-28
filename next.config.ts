@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
   // Cloudflare-tunnelen (start-dev.ps1) skriver vertsnavnet sitt hit ved hver
   // start — hold denne linjen på ett format, skriptet regex-erstatter den.
   allowedDevOrigins: [
-    "duties-tony-fioricet-owners.trycloudflare.com",] as string[],
+    "frank-bra-skip-sticky.trycloudflare.com",] as string[],
   async headers() {
     return [{ source: "/(.*)", headers: SECURITY_HEADERS }];
   },

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { clientIp, isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
+import { clientIp, tryRecordRateLimitHit } from '@/lib/rateLimit'
 import { DEMO_COOKIE, DEMO_EMAIL, DEMO_ID, DEMO_PARTICIPANTS } from '@/lib/demo'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
@@ -38,10 +38,9 @@ export async function POST(req: NextRequest) {
   }
   const ip = clientIp(req)
 
-  if (await isRateLimited(supabase, 'finn', ip, LIMIT, WINDOW_MS)) {
+  if (!(await tryRecordRateLimitHit(supabase, 'finn', ip, LIMIT, WINDOW_MS))) {
     return NextResponse.json({ error: dict.finn.tooManyAttempts }, { status: 429 })
   }
-  await recordRateLimitHit(supabase, 'finn', ip)
 
   const { data, error } = await supabase
     .from('participants')

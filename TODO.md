@@ -2,66 +2,45 @@
 
 ## Ting du (Morten) må gjøre selv — jeg kan ikke gjøre disse
 
-- [ ] **HASTER (kveld 2026-09-27, før World Grand Prix-generalprøven kan gå live):**
-      push/deploy commit `33f7033` (og alt etter) til produksjon. Dette
-      repoet har ingen git-remote konfigurert lokalt, så jeg kan ikke pushe
-      selv: `git remote add origin <din-repo-url>` (hvis den mangler) →
-      `git push origin master`. Sjekk samtidig at Vercel-prosjektets
-      miljøvariabler (spesielt `NEXT_PUBLIC_BASE_URL`) faktisk peker på
-      produksjons-domenet, og gjør en rask manuell test (velg lag →
-      registrer deg → «Min side») på selve produksjons-URL-en før du sender
-      ut lenken.
-- [ ] **Spillerfakta i tippe-flyten er eksempeldata** (lagt inn 2026-09-24): `src/data/playerStats.ts` har snitt (three-dart average) og «beste prestasjon» for de 18 valgbare spillerne, alle med `verified: false` — panelet viser en gul «Eksempeldata»-merkelapp så lenge det står slik. Sjekk hver linje mot pdc.tv/Wikipedia, rett opp, og sett `verified: true`. **Snittet må oppdateres like før VM-start** (endrer seg gjennom sesongen). Det finnes ingen gratis PDC-API, så dette er manuelt.
-- [ ] **«Vei til finalen» og brakett-pop-upen bygger på eksempel-trekningen** (`src/lib/bracketProjection.ts`) og blir automatisk riktige når den ekte trekningen legges inn medio november — se README «Trekning — oppdatere med ekte data». Fjern «eksempel-trekning»-merknadene i `PlayerDetailPanel.tsx`/`BracketModal.tsx` når det er gjort.
+**Løst 2026-09-27/28 (generalprøve mot World Grand Prix er nå live i produksjon):**
+GitHub-repo opprettet og koblet til (`gh auth login` gjort), Vercel-prosjekt
+satt opp med miljøvariabler, `dart_vm`-skjemaet kjørt og eksponert i Supabase,
+og ekte påmelding verifisert på selve produksjons-URL-en
+(https://dart-vm-spillet.vercel.app). De tidligere «HASTER»/«KOBLE TIL
+SUPABASE»/«sett opp Vercel»-punktene som lå her er dermed unødvendige og
+fjernet — se git-historikk (commit-ene rundt 2026-09-27) hvis du trenger
+detaljene om hvordan det ble gjort.
+
+**VIKTIG — full sjekkliste for å bytte tilbake til det ekte VM i desember
+ligger nå i egen fil: [`WGP_PIVOT_REVERT.md`](WGP_PIVOT_REVERT.md).** Ikke
+stol på å søke etter «MIDLERTIDIG» alene — den fila lister alle ~40 filer
+med World Grand Prix-tekst, ikke bare de som har en kode-kommentar.
+
+- [ ] **Spillerfakta i tippe-flyten er kryssjekket denne runden (2026-09-27),
+      men verifiser på nytt før VM i desember**: `src/data/playerStats.ts`
+      har snitt (three-dart average) og «beste prestasjon» for World Grand
+      Prix-feltet. Den gule «Eksempeldata»-merkelappen og `verified`-feltet
+      er fjernet fra grensesnittet (var dødt kode-spor) — snittet må uansett
+      oppdateres manuelt like før hver turnering, siden det ikke finnes noen
+      gratis PDC-API.
+- [ ] **«Vei til finalen» og brakett-pop-upen bygger på den ekte, bekreftede
+      runde 1-trekningen for World Grand Prix** (`src/lib/bracketProjection.ts`)
+      — dette er IKKE lenger eksempeldata for denne turneringen. Se
+      `WGP_PIVOT_REVERT.md` for hva som må inn igjen (eksempel-trekning) når
+      appen peker mot VM i desember igjen, siden den ekte VM-trekningen ikke
+      er kjent før medio november.
 **Fjernet 2026-09-25:** «% valgt» i spillerpanelet (og `/api/pick-share`) — del av en opprydding for å gjøre panelet enklere/raskere å lese. Si fra om du vil ha den tilbake (den løste seg selv unna spørsmålet i den gamle TODO-linjen om flokkeffekt).
 
-- [ ] **Demo-deltakeren** (lagt inn 2026-09-24, se README → «Demo-deltaker»): `/finn` med `demo@dart-vm-spillet.no` → `/deltaker/demo`. Bestem før lansering om demoen skal være tilgjengelig i produksjon (den er harmløs og helt atskilt fra ekte data, men `/deltaker/demo` er en offentlig URL). Vil du fjerne den: slett demo-grenene i `src/lib/participantData.ts` og `src/app/api/finn/route.ts` (+ `league/mine`), så er `src/lib/demo.ts` død kode. Når `dart_vm`-skjemaet er eksponert kan jeg i tillegg legge inn en ekte testdeltaker i databasen.
-- [ ] `! gh auth login` — logg inn på GitHub, så kan jeg opprette repo og pushe
-- [ ] **KOBLE TIL SUPABASE (VM-tipping-prosjektet gjenbrukes, egen atskilt
-      del) — gjør denne når du er ved PC, steg for steg:**
-
-      **1. Logg inn og finn prosjektet**
-      1. Gå til supabase.com/dashboard og logg inn.
-      2. Klikk på prosjektet som heter noe med «VM-tipping» (det gamle
-         fotball-VM-prosjektet).
-
-      **2. Hent de tre nøklene**
-      1. Venstre meny → tannhjulet **Project Settings** (nederst) → **API**.
-      2. Kopier ut, én om gangen:
-         - **Project URL** (`https://xxxxx.supabase.co`)
-         - **anon public** key (under «Project API keys»)
-         - **service_role** key (rett under anon — klikk «Reveal» for å vise)
-      3. La fanen stå åpen, du trenger den igjen i steg 4.
-
-      **3. Kjør databaseoppsettet**
-      1. Venstre meny → **SQL Editor** → **New query**.
-      2. Åpne `supabase/schema.sql` i prosjektmappen (i Notisblokk, VS Code
-         e.l.), merk alt (Ctrl+A) og kopier (Ctrl+C).
-      3. Lim inn i SQL Editor-vinduet (Ctrl+V) og klikk **Run**
-         (eller Ctrl+Enter).
-      4. Skal gi en grønn «Success»-melding. Feilmelding i stedet? Ikke
-         prøv å fikse den selv — lim hele feilteksten inn til meg.
-
-      **4. Eksponer det nye skjemaet (kan IKKE gjøres med SQL)**
-      1. Tilbake til **Project Settings → API** (samme sted som steg 2).
-      2. Finn seksjonen **Exposed schemas** (kan også hete «Data API» →
-         «Exposed schemas», avhengig av Supabase-versjon).
-      3. `public` (og kanskje `graphql_public`) står der fra før — legg til
-         `dart_vm` i samme liste, og lagre.
-
-      **5. Send meg nøklene**
-      Lim inn Project URL + anon key + service role key her i chatten (eller
-      opprett `.env.local` selv basert på `.env.example` og si fra), så
-      setter jeg opp resten og verifiserer at ekte påmelding fungerer.
+- [ ] **Demo-deltakeren** (lagt inn 2026-09-24, se README → «Demo-deltaker»): `/finn` med `demo@dart-vm-spillet.no` → `/deltaker/demo`. Bestem før lansering om demoen skal være tilgjengelig i produksjon (den er harmløs og helt atskilt fra ekte data, men `/deltaker/demo` er en offentlig URL). Vil du fjerne den: slett demo-grenene i `src/lib/participantData.ts` og `src/app/api/finn/route.ts` (+ `league/mine`), så er `src/lib/demo.ts` død kode.
 - [ ] Bytt ut placeholder-e-posten `kontakt@dart-vm-spillet.no` med din egen, i:
   - `src/app/page.tsx`
   - `src/app/personvern/page.tsx`
   - `reply_to` i `src/app/api/send-daily-email/route.ts` og `src/app/api/admin/send-status-email/route.ts`
-- [ ] Sett repo-secreten `APP_BASE_URL` i GitHub (Settings → Secrets and variables → Actions) når appen er deployet, så `snapshot-ranks.yml` fungerer
+- [ ] Sett repo-secreten `APP_BASE_URL` i GitHub (Settings → Secrets and variables → Actions), så `snapshot-ranks.yml` fungerer
 - [ ] Fysisk mappenavn-bytte (`cl-spillet` → `dart-vm-spillet`) — kan ikke gjøres fra en økt som selv kjører i mappen. Gjør `Rename-Item` selv, eller be meg gjøre det i en ny økt som starter et annet sted
-- [ ] Sett opp Vercel-prosjekt og fyll inn alle miljøvariablene fra `.env.example` der
-- [ ] Når Vercel-prosjektet er satt opp: bytt lenken i `src/app/admin/page.tsx` («Trafikk»-kortet) fra den generelle `vercel.com/dashboard` til den direkte `/analytics`-lenken for RIKTIG prosjekt — den pekte tidligere feilaktig til det gamle fotball-VM-prosjektets dashbord
+- [ ] Bytt lenken i `src/app/admin/tabs/StatistikkTab.tsx` («Trafikk»-kortet) fra den generelle `vercel.com/dashboard` til den direkte `/analytics`-lenken for det ekte Vercel-prosjektet — jeg vet ikke team-slug-en din, så jeg vil ikke gjette URL-en
 - [ ] Nærmere desember: sjekk PDC sin offisielle seeding mot `src/data/pots.ts` (rangeringen der er et øyeblikksbilde fra september og vil ha glidd)
+- [ ] Sjekk om `RESEND_API_KEY`/`EMAIL_DOMAIN` faktisk er satt i Vercels produksjonsmiljø (ikke bare lokalt) nå som ekte påmelding er i gang — se eget punkt om e-post-oppsett lenger ned
 - [ ] Fyll inn navn/foretak og adresse under «Behandlingsansvarlig» i `src/app/personvern/page.tsx` (påkrevd etter GDPR art. 13) — kan ikke gjette dette selv
 - [ ] Når PDC publiserer den faktiske trekningen (normalt medio november): følg steg-for-steg-oppskriften i `README.md` → «Trekning — oppdatere med ekte data»
 

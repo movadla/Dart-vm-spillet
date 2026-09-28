@@ -60,7 +60,11 @@ $hostname = $tunnelUrl -replace "^https://",""
 # -- 4. Oppdater next.config.ts -----------------------------------------------
 Write-Host "  Oppdaterer next.config.ts..." -ForegroundColor DarkGray
 $configPath = Join-Path $root "next.config.ts"
-$config = Get-Content $configPath -Raw
+# -Encoding UTF8 er påkrevd her: uten den leser PowerShell 5.1 UTF-8-uten-BOM
+# (som filen lagres som nedenfor) som ANSI/Windows-1252, og alle norske tegn
+# (Å, æ, ø, —) i HELE filen blir permanent til søppeltegn neste gang scriptet
+# skriver den tilbake — skjedde i praksis og lå ulagret i git i flere dager.
+$config = Get-Content $configPath -Raw -Encoding UTF8
 
 if ($config -match "trycloudflare\.com") {
     $config = $config -replace '"[a-z0-9][a-z0-9-]+\.trycloudflare\.com"', ('"' + $hostname + '"')

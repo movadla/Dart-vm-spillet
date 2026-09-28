@@ -72,7 +72,10 @@ export function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep
               onClick={done ? () => onStep?.(i + 1) : undefined}
               disabled={!done}
               aria-label={done ? dict.tipp.progressDots.stepAriaLabelDone(i + 1, pickedName ?? '') : dict.tipp.progressDots.stepAriaLabelPending(i + 1)}
-              style={{ padding: '4px', background: 'none', border: 'none', cursor: done ? 'pointer' : 'default', display: 'flex', alignItems: 'center' }}
+              // minHeight/minWidth gir et trykkflate på ~40px uten at selve
+              // prikken/flagget (18px/8px) blir større å se på — padding
+              // alene ga under 20px trykkhøyde da raden ble strammet inn.
+              style={{ padding: 0, minHeight: 40, minWidth: 32, background: 'none', border: 'none', cursor: done ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               {done && picked ? (
                 <span style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 0 2px ${c}`, background: '#000' }}>

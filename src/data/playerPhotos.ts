@@ -92,11 +92,6 @@ export const PLAYER_PHOTOS: Record<string, { src: string; credit: string; credit
     credit: 'DARTS NOW · CC BY 3.0',
     creditUrl: 'https://commons.wikimedia.org/wiki/File:Luke_Woodhouse_2024.png',
   },
-  'Martin Schindler': {
-    src: '/players/martin-schindler-cutout.webp',
-    credit: 'Darts Actueel · CC BY 3.0',
-    creditUrl: 'https://commons.wikimedia.org/wiki/File:Martin_Schindler_Darts_Actueel_2023.jpg',
-  },
   'Krzysztof Ratajski': {
     src: '/players/krzysztof-ratajski-cutout.webp',
     credit: 'Darts Actueel · CC BY 3.0',
@@ -122,11 +117,13 @@ export const PLAYER_PHOTOS: Record<string, { src: string; credit: string; credit
     credit: 'DARTS NOW · CC BY 3.0',
     creditUrl: 'https://commons.wikimedia.org/wiki/File:Andrew_Gilding_2024.png',
   },
-  'Daryl Gurney': {
-    src: '/players/daryl-gurney-cutout.webp',
-    credit: 'DARTS NOW · CC BY 3.0',
-    creditUrl: 'https://commons.wikimedia.org/wiki/File:Team_NI_Darts_WC_2025_(Gurney_cropped).png',
-  },
+  // Martin Schindler og Daryl Gurney (World Championship-feltet, ikke med i
+  // World Grand Prix-generalprøven) hadde oppslag her tidligere — fjernet
+  // som dødt kode-spor 2026-09-28, men selve bildefilene
+  // (public/players/martin-schindler-cutout.webp,
+  // public/players/daryl-gurney-cutout.webp) er BEHOLDT, så de slipper å
+  // lastes ned/beskjæres på nytt når feltet er tilbake i desember.
+  //
   // Lagt til 2026-09-27 (World Grand Prix-generalprøven) — se
   // docs/PLAYER_PHOTO_DATABANK.md for research-notater per spiller.
   'Chris Dobey': {

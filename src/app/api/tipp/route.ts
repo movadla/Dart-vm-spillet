@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { clientIp, isRateLimited, recordRateLimitHit } from '@/lib/rateLimit'
-import { POTS } from '@/data/pots'
+import { POTS, getPickablePlayers } from '@/data/pots'
 import { Resend } from 'resend'
 import { buildWelcomeHtml, buildWelcomeText, iso2For } from '@/lib/email-welcome'
 import { KICKOFF } from '@/config/tournament'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
 
+// getPickablePlayers() her, IKKE pot.players direkte — pot.players er HELE
+// feltet (brukes i brakett/spilleroversikt), men noen av dem (f.eks. de 8
+// ikke-valgbare i nivå 6) skal ikke kunne velges som tips. Å bruke
+// pot.players her lot serveren stille godta et valg UI-et aldri tilbyr.
 const VALID_PICKS: Record<number, Set<string>> = Object.fromEntries(
-  POTS.map(p => [p.potNumber, new Set(p.players.map(pl => pl.name))])
+  POTS.map(p => [p.potNumber, new Set(getPickablePlayers(p).map(pl => pl.name))])
 )
 
 export async function POST(req: NextRequest) {

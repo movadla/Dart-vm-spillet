@@ -15,6 +15,13 @@ hver av 6 potter og får poeng per vunnet sett/kamp (× pott-multiplikator).
 Norsk UI. Mappenavnet `cl-spillet` er historisk (fotball-VM-forløper) — appen
 heter Dart-VM-spillet.
 
+**MIDLERTIDIG (siden 2026-09-27):** appen peker akkurat nå mot PDC World Grand
+Prix 2026, IKKE det faktiske VM i desember — en bevisst generalprøve mot en
+ekte, nært forestående turnering. Se **[`WGP_PIVOT_REVERT.md`](WGP_PIVOT_REVERT.md)**
+for den fulle, selv-verifiserende sjekklisten over alt som må byttes tilbake
+før desember — ikke stol på å bare søke etter «MIDLERTIDIG»-kommentarer, den
+fila forklarer hvorfor.
+
 ## Kommandoer
 
 | Hva | Kommando |
@@ -50,6 +57,7 @@ supabase/        schema.sql = hele databasen (skjema dart_vm). legacy/ = histori
 tools/verify/    CDP-harness + flyter
 docs/            PLAYER_PHOTO_DATABANK.md (bildekilder/lisenser)
 TODO.md          det brukeren må gjøre selv + åpne revisjonsfunn
+WGP_PIVOT_REVERT.md   sjekkliste for å bytte tilbake fra World Grand Prix-generalprøven til VM i desember
 ```
 
 ## Harde regler
