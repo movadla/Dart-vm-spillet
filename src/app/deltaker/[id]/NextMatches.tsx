@@ -56,7 +56,10 @@ export default async function NextMatches({ picks, matchResults }: { picks: Pick
     <div style={{ background: CARD_GRADIENT, borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', overflow: 'hidden', boxShadow: CARD_SHADOW }}>
       {upcoming.map(({ pick, next }, idx) => {
         const isLast = idx === upcoming.length - 1
-        const schedule = getScheduleLabel(next.stage as Stage, locale)
+        // pick.player_name holder for oppslaget (én av de to i kampen holder,
+        // se getScheduleLabel()) — funker uansett om det er MIN spiller eller
+        // motstanderen som tilfeldigvis er nøkkelen i R1_MATCH_TIMES.
+        const schedule = getScheduleLabel(next.stage as Stage, locale, pick.player_name)
         return (
           <div key={pick.pot_number} style={{
             display: 'grid', gridTemplateColumns: GRID_COLUMNS, alignItems: 'center', columnGap: 6,

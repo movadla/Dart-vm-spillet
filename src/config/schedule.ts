@@ -37,6 +37,25 @@ export const STAGE_SCHEDULE: Record<Stage, StageSchedule> = {
   final: { date: null, time: null },
 }
 
+// Bekreftede klokkeslett for ENKELTKAMPER i runde 1, kveld 1 (28. sep) — sett
+// inn 2026-09-28 fra en livescore-side (samme kveld som kampene faktisk
+// spilles). STAGE_SCHEDULE over dekker kun ett dato+klokkeslett PER RUNDE,
+// men runde 1 spilles over to kvelder med 8 forskjellige klokkeslett per
+// kveld — denne tabellen er derfor et overstyrings-oppslag PER SPILLER (én
+// av de to i hver kamp holder, se getScheduleLabel()), ikke en endring av
+// selve STAGE_SCHEDULE-modellen. Kveld 2 (29. sep) sine klokkeslett er IKKE
+// bekreftet ennå — spillerne derfra er bevisst utelatt, ikke glemt.
+const R1_MATCH_TIMES: Record<string, string> = {
+  'Danny Noppert': '19:10', 'Niko Springer': '19:10',
+  'Ross Smith': '19:40', 'Cameron Menzies': '19:40',
+  'Nathan Aspinall': '20:10', 'Kevin Doets': '20:10',
+  'Jonny Clayton': '20:40', 'Krzysztof Ratajski': '20:40',
+  'Gerwyn Price': '21:10', 'Sebastian Białecki': '21:10',
+  'Michael van Gerwen': '21:40', 'Ryan Joyce': '21:40',
+  'Luke Littler': '22:10', 'Luke Woodhouse': '22:10',
+  'Wessel Nijman': '22:40', 'Rob Cross': '22:40',
+}
+
 export interface ScheduleLabel {
   dateLabel: string
   timeLabel: string
@@ -47,12 +66,18 @@ export interface ScheduleLabel {
 const NOT_SET: Record<Locale, string> = { no: 'Ikke satt', en: 'Not set' }
 const INTL_LOCALE: Record<Locale, string> = { no: 'nb-NO', en: 'en-US' }
 
-/** Dato/klokkeslett-tekst for en runde, med riktig «ikke satt»-fallback i alle tre tilstander. */
-export function getScheduleLabel(stage: Stage, locale: Locale = 'no'): ScheduleLabel {
+/**
+ * Dato/klokkeslett-tekst for en runde, med riktig «ikke satt»-fallback i alle
+ * tre tilstander. `playerName` (én av de to spillerne i kampen) slår opp et
+ * eventuelt PER KAMP-klokkeslett i R1_MATCH_TIMES, som overstyrer det
+ * generelle rundenivå-klokkeslettet (kun relevant for runde 1 så langt).
+ */
+export function getScheduleLabel(stage: Stage, locale: Locale = 'no', playerName?: string): ScheduleLabel {
   const s = STAGE_SCHEDULE[stage]
   const notSet = NOT_SET[locale]
   if (!s.date) return { dateLabel: notSet, timeLabel: notSet, dateKnown: false, timeKnown: false }
   const d = new Date(`${s.date}T00:00:00Z`)
   const dateLabel = d.toLocaleDateString(INTL_LOCALE[locale], { day: 'numeric', month: 'short', timeZone: 'UTC' })
-  return { dateLabel, timeLabel: s.time ?? notSet, dateKnown: true, timeKnown: !!s.time }
+  const time = (playerName && R1_MATCH_TIMES[playerName]) || s.time
+  return { dateLabel, timeLabel: time ?? notSet, dateKnown: true, timeKnown: !!time }
 }

@@ -30,4 +30,21 @@ describe('getScheduleLabel', () => {
     STAGE_SCHEDULE.final.date = origDate
     STAGE_SCHEDULE.final.time = origTime
   })
+
+  it('kjent spiller i runde 1 gir det ekte per-kamp-klokkeslettet, ikke «Ikke satt»', () => {
+    const l = getScheduleLabel('r1', 'no', 'Luke Littler')
+    expect(l.dateLabel).toMatch(/28\.\s*sep/i)
+    expect(l).toMatchObject({ timeLabel: '22:10', dateKnown: true, timeKnown: true })
+  })
+
+  it('runde 1 uten spillernavn faller tilbake til rundenivå (ikke satt klokkeslett)', () => {
+    const l = getScheduleLabel('r1')
+    expect(l.timeKnown).toBe(false)
+    expect(l.timeLabel).toBe('Ikke satt')
+  })
+
+  it('en spiller som IKKE har et kjent per-kamp-klokkeslett (kveld 2) gir fortsatt «Ikke satt»', () => {
+    const l = getScheduleLabel('r1', 'no', 'Luke Humphries')
+    expect(l.timeKnown).toBe(false)
+  })
 })
