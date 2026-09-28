@@ -6,11 +6,24 @@ import type { Locale } from './i18n'
 // MIDLERTIDIG (2026-09-27): satt om til PDC World Grand Prix 2026 (28. sep–
 // 4. okt, Mattioli Arena, Leicester) som en generalprøve/test av appen mot en
 // ekte, nært forestående turnering — IKKE det faktiske dart-VM i desember.
-// Bytt tilbake til 2026-12-11T19:00:00Z (og se git-historikk for resten av
-// VM-oppsettet: pots.ts, bracketProjection.ts, scoring.ts STAGE_ORDER m.fl.)
-// når det nærmer seg VM-trekningen i november.
+// Bytt tilbake til KL. 19:00 NORSK TID 2026-12-11 (og se git-historikk for
+// resten av VM-oppsettet: pots.ts, bracketProjection.ts, scoring.ts
+// STAGE_ORDER m.fl.) når det nærmer seg VM-trekningen i november — se
+// WGP_PIVOT_REVERT.md for et VIKTIG forbehold om selve klokkeslett-verdien
+// (`2026-12-11T19:00:00Z` var det som sto her før pivoten, men det er
+// trolig FEIL på samme måte som WGP-datoen under var, se forklaringen).
 //
-export const KICKOFF = new Date('2026-09-28T19:00:00Z')
+// VIKTIG — Z-suffikset under er UTC, IKKE norsk tid: klokkeslettet man
+// faktisk vil ha (19:00 norsk tid, kveldsøktens åpningstidspunkt) må
+// regnes om for hånd til UTC FØR man skriver det inn her, siden det ikke
+// finnes noe tidssone-bibliotek i dette prosjektet. 2026-09-28 er sommertid
+// i Norge (CEST, UTC+2), så 19:00 norsk tid = 17:00 UTC — IKKE 19:00Z, som
+// feilaktig sto her og ga 21:00 norsk tid (2 timer feil nedtelling, funnet
+// av brukeren 2026-09-28). Sjekk alltid med:
+//   node -e "console.log(new Date('<ISO>Z').toLocaleString('nb-NO', {timeZone:'Europe/Oslo', hour:'2-digit', minute:'2-digit'}))"
+// — og husk at desember er vintertid (CET, UTC+1), altså en ANNEN offset
+// enn her, når datoen byttes tilbake til VM-oppsettet.
+export const KICKOFF = new Date('2026-09-28T17:00:00Z')
 
 const INTL_LOCALE: Record<Locale, string> = { no: 'nb-NO', en: 'en-US' }
 

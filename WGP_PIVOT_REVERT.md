@@ -31,7 +31,14 @@ hva som må endres:
 
 1. `src/config/tournament.ts` — `KICKOFF`-datoen. Sett tilbake til den ekte
    VM-datoen (var `2026-12-11T19:00:00Z` — bekreft mot PDC sin offisielle
-   kunngjøring, den kan ha endret seg).
+   kunngjøring, den kan ha endret seg). **VIKTIG:** `Z` betyr UTC, IKKE norsk
+   tid — den samme feilen (Z-suffiks brukt som om det var norsk klokkeslett)
+   ble funnet og fikset i WGP-datoen 2026-09-28 (var 2 timer feil, se
+   commit-historikk samme dag). `2026-12-11T19:00:00Z` er derfor mistenkt å
+   faktisk bety kl. 20:00 norsk tid (CET, UTC+1 i desember), ikke 19:00 som
+   trolig var meningen — regn om for hånd før du bruker denne verdien igjen:
+   ønsket norsk klokkeslett minus 1 time (CET) = riktig UTC-verdi. Sjekk med
+   `node -e "console.log(new Date('<ISO>Z').toLocaleString('nb-NO', {timeZone:'Europe/Oslo', hour:'2-digit', minute:'2-digit'}))"`.
 2. `src/data/pots.ts` — HELE fila må byttes tilbake til 128-spiller-feltet
    med de 6 opprinnelige pottene (`git log -- src/data/pots.ts` for å finne
    commit-en rett før pivoten, som utgangspunkt — men sjekk PDC sin ekte
