@@ -7,7 +7,7 @@ import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { PLAYER_STATS } from '@/data/playerStats'
 import { SPORT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
-import { formatAvg, formatOdds } from '@/lib/format'
+import { formatAvg, formatOdds, formatPercent } from '@/lib/format'
 
 const GOLD = '#f3d576'
 const LABEL_GOLD = 'rgba(243,213,118,0.75)'
@@ -195,7 +195,7 @@ function StatCol({
 }
 
 export function PlayerCard({
-  player, color, colorDark, selected, dimmed = false, index = 0, potNumber, onClick,
+  player, color, colorDark, selected, dimmed = false, index = 0, potNumber, pickPercent, onClick,
 }: {
   player: Player
   color: string
@@ -210,6 +210,11 @@ export function PlayerCard({
   // tidligere "potName"-propen, som ble tatt imot men aldri faktisk brukt
   // noe sted i komponenten.
   potNumber: number
+  // Andel av alle registrerte deltakere som har valgt akkurat denne
+  // spilleren (0-100), eller undefined for å skjule merket helt. Regnes ut
+  // i tipp/page.tsx fra /api/pick-share — én henting for hele steget, ikke
+  // ett kall per kort.
+  pickPercent?: number
   onClick: () => void
 }) {
   const { locale, dict } = useLocale()
@@ -401,6 +406,24 @@ export function PlayerCard({
 
       {/* Ingen hake: glød + skalering (.player-card--selected) og demping av de
           andre kortene er tydelig nok, og haken traff aldri skjoldformen. */}
+
+      {/* «% valgt» — hvor mange av alle registrerte deltakere som har denne
+          spilleren i laget sitt. pickPercent er undefined helt til det
+          finnes minst 1 registrert deltaker (se MIN_PARTICIPANTS_FOR_SHARE i
+          tipp/page.tsx) — vises da IKKE i det hele tatt, i stedet for et
+          missvisende "0 %". zIndex 3: over folie-glansen (2). */}
+      {pickPercent != null && (
+        <span aria-hidden="true" style={{
+          position: 'absolute', top: '3%', right: '4%', zIndex: 3,
+          fontFamily: SPORT, fontWeight: 800, fontSize: 'clamp(9px, 9cqw, 13px)',
+          color: GOLD, background: 'rgba(3,4,10,0.72)',
+          border: `1px solid ${GOLD}88`, borderRadius: 999,
+          padding: '0.3em 0.6em', lineHeight: 1.4,
+          boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
+        }}>
+          {formatPercent(pickPercent, locale)} valgt
+        </span>
+      )}
     </button>
 
     {/* Foto-krediteringen (påkrevd av CC-lisensen, se playerPhotos.ts) vises
