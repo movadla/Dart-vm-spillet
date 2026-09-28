@@ -37,23 +37,40 @@ export const STAGE_SCHEDULE: Record<Stage, StageSchedule> = {
   final: { date: null, time: null },
 }
 
-// Bekreftede klokkeslett for ENKELTKAMPER i runde 1, kveld 1 (28. sep) — sett
-// inn 2026-09-28 fra en livescore-side (samme kveld som kampene faktisk
-// spilles). STAGE_SCHEDULE over dekker kun ett dato+klokkeslett PER RUNDE,
-// men runde 1 spilles over to kvelder med 8 forskjellige klokkeslett per
-// kveld — denne tabellen er derfor et overstyrings-oppslag PER SPILLER (én
-// av de to i hver kamp holder, se getScheduleLabel()), ikke en endring av
-// selve STAGE_SCHEDULE-modellen. Kveld 2 (29. sep) sine klokkeslett er IKKE
-// bekreftet ennå — spillerne derfra er bevisst utelatt, ikke glemt.
-const R1_MATCH_TIMES: Record<string, string> = {
-  'Danny Noppert': '19:10', 'Niko Springer': '19:10',
-  'Ross Smith': '19:40', 'Cameron Menzies': '19:40',
-  'Nathan Aspinall': '20:10', 'Kevin Doets': '20:10',
-  'Jonny Clayton': '20:40', 'Krzysztof Ratajski': '20:40',
-  'Gerwyn Price': '21:10', 'Sebastian Białecki': '21:10',
-  'Michael van Gerwen': '21:40', 'Ryan Joyce': '21:40',
-  'Luke Littler': '22:10', 'Luke Woodhouse': '22:10',
-  'Wessel Nijman': '22:40', 'Rob Cross': '22:40',
+// Bekreftet dato+klokkeslett for ENKELTKAMPER i runde 1 — STAGE_SCHEDULE
+// over dekker kun étt dato+klokkeslett PER RUNDE, men runde 1 spilles over
+// to KVELDER (28. og 29. sep, bekreftet i ESPN/Sky Sports/Scotsman sin
+// dekning av trekningen, kryssjekket 2026-09-28 — én enkelt dato for hele
+// runde 1 var derfor feil for halvparten av kampene). Denne tabellen er et
+// per-spiller-oppslag (én av de to i hver kamp holder, se
+// getScheduleLabel()) som overstyrer BÅDE dato og klokkeslett fra
+// STAGE_SCHEDULE når den finnes.
+//
+// Kveld 1 (28. sep): klokkeslett bekreftet fra en livescore-side samme
+// kveld (19:10–22:40, 30 min mellomrom per kamp).
+// Kveld 2 (29. sep): DATOEN er bekreftet (samme kilder som over), men
+// ESPN/Sky Sports/Scotsman oppgir kun at kveldsøkten starter kl. 19:00
+// norsk tid (18:00 BST) — IKKE et eksakt klokkeslett per enkeltkamp slik vi
+// har for kveld 1. IKKE gjett/ekstrapoler dette (f.eks. anta samme 30-
+// minutters mønster som kveld 1) — sett time: null til en ekte kilde med
+// per-kamp-klokkeslett for 29. sep er funnet.
+const R1_MATCH_SCHEDULE: Record<string, { date: string; time: string | null }> = {
+  'Danny Noppert': { date: '2026-09-28', time: '19:10' }, 'Niko Springer': { date: '2026-09-28', time: '19:10' },
+  'Ross Smith': { date: '2026-09-28', time: '19:40' }, 'Cameron Menzies': { date: '2026-09-28', time: '19:40' },
+  'Nathan Aspinall': { date: '2026-09-28', time: '20:10' }, 'Kevin Doets': { date: '2026-09-28', time: '20:10' },
+  'Jonny Clayton': { date: '2026-09-28', time: '20:40' }, 'Krzysztof Ratajski': { date: '2026-09-28', time: '20:40' },
+  'Gerwyn Price': { date: '2026-09-28', time: '21:10' }, 'Sebastian Białecki': { date: '2026-09-28', time: '21:10' },
+  'Michael van Gerwen': { date: '2026-09-28', time: '21:40' }, 'Ryan Joyce': { date: '2026-09-28', time: '21:40' },
+  'Luke Littler': { date: '2026-09-28', time: '22:10' }, 'Luke Woodhouse': { date: '2026-09-28', time: '22:10' },
+  'Wessel Nijman': { date: '2026-09-28', time: '22:40' }, 'Rob Cross': { date: '2026-09-28', time: '22:40' },
+  'Chris Dobey': { date: '2026-09-29', time: null }, 'Jermaine Wattimena': { date: '2026-09-29', time: null },
+  'Ryan Searle': { date: '2026-09-29', time: null }, "William O'Connor": { date: '2026-09-29', time: null },
+  'Josh Rock': { date: '2026-09-29', time: null }, 'Niels Zonneveld': { date: '2026-09-29', time: null },
+  'James Wade': { date: '2026-09-29', time: null }, 'Joe Cullen': { date: '2026-09-29', time: null },
+  'Gary Anderson': { date: '2026-09-29', time: null }, 'Damon Heta': { date: '2026-09-29', time: null },
+  'Gian van Veen': { date: '2026-09-29', time: null }, 'Dirk van Duijvenbode': { date: '2026-09-29', time: null },
+  'Luke Humphries': { date: '2026-09-29', time: null }, 'Dave Chisnall': { date: '2026-09-29', time: null },
+  'Stephen Bunting': { date: '2026-09-29', time: null }, 'Andrew Gilding': { date: '2026-09-29', time: null },
 }
 
 export interface ScheduleLabel {
@@ -69,15 +86,18 @@ const INTL_LOCALE: Record<Locale, string> = { no: 'nb-NO', en: 'en-US' }
 /**
  * Dato/klokkeslett-tekst for en runde, med riktig «ikke satt»-fallback i alle
  * tre tilstander. `playerName` (én av de to spillerne i kampen) slår opp et
- * eventuelt PER KAMP-klokkeslett i R1_MATCH_TIMES, som overstyrer det
- * generelle rundenivå-klokkeslettet (kun relevant for runde 1 så langt).
+ * eventuelt PER KAMP-oppslag i R1_MATCH_SCHEDULE, som overstyrer BÅDE dato
+ * og klokkeslett fra STAGE_SCHEDULE når det finnes (kun relevant for runde 1
+ * så langt, siden det er den eneste runden som spilles over flere dager).
  */
 export function getScheduleLabel(stage: Stage, locale: Locale = 'no', playerName?: string): ScheduleLabel {
   const s = STAGE_SCHEDULE[stage]
   const notSet = NOT_SET[locale]
-  if (!s.date) return { dateLabel: notSet, timeLabel: notSet, dateKnown: false, timeKnown: false }
-  const d = new Date(`${s.date}T00:00:00Z`)
+  const override = playerName ? R1_MATCH_SCHEDULE[playerName] : undefined
+  const date = override?.date ?? s.date
+  if (!date) return { dateLabel: notSet, timeLabel: notSet, dateKnown: false, timeKnown: false }
+  const d = new Date(`${date}T00:00:00Z`)
   const dateLabel = d.toLocaleDateString(INTL_LOCALE[locale], { day: 'numeric', month: 'short', timeZone: 'UTC' })
-  const time = (playerName && R1_MATCH_TIMES[playerName]) || s.time
+  const time = override ? override.time : s.time
   return { dateLabel, timeLabel: time ?? notSet, dateKnown: true, timeKnown: !!time }
 }

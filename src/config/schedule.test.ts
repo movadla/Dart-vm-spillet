@@ -47,4 +47,15 @@ describe('getScheduleLabel', () => {
     const l = getScheduleLabel('r1', 'no', 'Luke Humphries')
     expect(l.timeKnown).toBe(false)
   })
+
+  it('kveld 2-spiller (29. sep) skal IKKE vises med kveld 1 sin dato (28. sep)', () => {
+    const l = getScheduleLabel('r1', 'no', 'Luke Humphries')
+    expect(l.dateLabel).toMatch(/29\.\s*sep/i)
+    expect(l.dateLabel).not.toMatch(/28\.\s*sep/i)
+  })
+
+  it('kveld 1-spiller viser fortsatt 28. sep (ikke 29.)', () => {
+    const l = getScheduleLabel('r1', 'no', 'Luke Littler')
+    expect(l.dateLabel).toMatch(/28\.\s*sep/i)
+  })
 })
