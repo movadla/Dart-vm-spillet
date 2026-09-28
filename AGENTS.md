@@ -20,7 +20,10 @@ Prix 2026, IKKE det faktiske VM i desember — en bevisst generalprøve mot en
 ekte, nært forestående turnering. Se **[`WGP_PIVOT_REVERT.md`](WGP_PIVOT_REVERT.md)**
 for den fulle, selv-verifiserende sjekklisten over alt som må byttes tilbake
 før desember — ikke stol på å bare søke etter «MIDLERTIDIG»-kommentarer, den
-fila forklarer hvorfor.
+fila forklarer hvorfor. Les også **[`LESSONS_LEARNED_WGP.md`](LESSONS_LEARNED_WGP.md)**
+FØR VM-lanseringen i desember — en samlet liste over alle reelle bugs
+(tidssone-feil, dato-lekkasje mellom runder, korrupte filer, m.m.) som
+oppsto under generalprøven, med rotårsak og hva som må gjøres annerledes.
 
 ## Kommandoer
 
@@ -58,6 +61,7 @@ tools/verify/    CDP-harness + flyter
 docs/            PLAYER_PHOTO_DATABANK.md (bildekilder/lisenser)
 TODO.md          det brukeren må gjøre selv + åpne revisjonsfunn
 WGP_PIVOT_REVERT.md   sjekkliste for å bytte tilbake fra World Grand Prix-generalprøven til VM i desember
+LESSONS_LEARNED_WGP.md  bugs/feil fra generalprøven + lærdom — les før VM-lansering
 ```
 
 ## Harde regler
