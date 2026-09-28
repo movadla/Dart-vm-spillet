@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Flag from '@/components/Flag'
+import { lastName } from '@/lib/playerName'
 import { POTS, getIso2, type Player } from '@/data/pots'
 import type { Stage } from '@/config/scoring'
 import { getScheduleLabel } from '@/config/schedule'
@@ -19,13 +20,13 @@ function iso2For(name: string): string {
  * «Neste kamper» på Min side: kun spillerne som faktisk HAR en neste kamp —
  * slåtte ut og VM-vinneren er ferdige og hører ikke hjemme i en liste over
  * kommende kamper, så de filtreres bort i stedet for å vises som «ute».
- * Raden i seg selv viser KUN hvem som møter hvem + dato — fullt navn, ikke
- * forkortet, siden runde/klokkeslett er flyttet ut av selve raden (se
- * kommentar ved GRID_COLUMNS i forrige versjon: å presse inn 8 felt på én
- * linje tvang navnene ned til "van ..."/"van D..." o.l., ikke lesbart). Trykk
- * på en rad for å se runde + klokkeslett i et utvidet felt under, samme
+ * Raden i seg selv viser KUN hvem som møter hvem + dato — etternavn (uten
+ * "van"/"de" osv., se lastName() i playerName.ts) i faste, justerte
+ * kolonner, siden runde/klokkeslett er flyttet ut av selve raden. Trykk på
+ * en rad for å se runde + klokkeslett i et utvidet felt under, samme
  * mønster som «Mitt lag»-radene over (se MyTeam.tsx sin openRow-state).
  */
+const GRID_COLUMNS = '18px 82px 14px 16px 82px 46px'
 export default function NextMatches({ picks, matchResults }: { picks: PickWithPot[]; matchResults: MatchResult[] }) {
   const { locale, dict } = useLocale()
   const { deltaker, players, common } = dict
@@ -63,29 +64,32 @@ export default function NextMatches({ picks, matchResults }: { picks: PickWithPo
               onClick={() => setOpenRow(isOpen ? null : pick.pot_number)}
               aria-expanded={isOpen}
               style={{
-                display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
+                display: 'grid', gridTemplateColumns: GRID_COLUMNS, alignItems: 'center', columnGap: 8, width: '100%', textAlign: 'left',
                 padding: '11px 14px', background: 'none', border: 'none', color: '#fff', cursor: 'pointer',
-                borderBottom: !isLast || isOpen ? '1px solid rgba(255,255,255,0.06)' : 'none', minWidth: 0,
+                borderBottom: !isLast || isOpen ? '1px solid rgba(255,255,255,0.06)' : 'none',
               }}
             >
               <Flag iso2={iso2For(pick.player_name)} size={18} />
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 1, minWidth: 0 }}>
-                {pick.player_name}
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                {lastName(pick.player_name)}
               </span>
-              <span aria-hidden style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>vs</span>
+              <span aria-hidden style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>vs</span>
               {hasOpponent ? (
                 <>
                   <Flag iso2={iso2For(next.opponent as string)} size={16} />
-                  <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 1, minWidth: 0 }}>
-                    {next.opponent}
+                  <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                    {lastName(next.opponent as string)}
                   </span>
                 </>
               ) : (
-                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flexShrink: 1, minWidth: 0 }}>
-                  {next.isFiller ? common.qualifiedFillerLabel : deltaker.playerDetailPanel.notDecided}
-                </span>
+                <>
+                  <span />
+                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+                    {next.isFiller ? common.qualifiedFillerLabel : deltaker.playerDetailPanel.notDecided}
+                  </span>
+                </>
               )}
-              <span style={{ fontFamily: SPORT, fontSize: 12, fontWeight: 700, color: schedule.dateKnown ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.3)', flexShrink: 0, whiteSpace: 'nowrap', marginLeft: 'auto', paddingLeft: 8 }}>
+              <span style={{ fontFamily: SPORT, fontSize: 12, fontWeight: 700, color: schedule.dateKnown ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap', textAlign: 'right' }}>
                 {schedule.dateLabel}
               </span>
             </button>

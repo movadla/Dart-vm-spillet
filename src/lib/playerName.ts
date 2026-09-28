@@ -1,11 +1,14 @@
 // Rene navnehjelpere — egen fil (ikke i TeamTile.tsx) fordi TeamTile er
 // 'use client': ALLE eksporter fra en 'use client'-fil blir klient-referanser,
-// selv rene funksjoner, og kan da ikke kalles fra en server-komponent (som
-// NextMatches.tsx). Denne filen har ingen 'use client' og kan importeres fra begge.
+// selv rene funksjoner. Denne fila har ingen 'use client' og kan importeres
+// fra både server- og klient-komponenter.
 
+/** Kun det siste ordet i navnet — «Dirk van Duijvenbode» → «Duijvenbode»,
+ * «Michael van Gerwen» → «Gerwen», ikke «van Duijvenbode»/«van Gerwen» (var
+ * forrige versjon, som fortsatt var for langt i trange rader). */
 export function lastName(name: string): string {
-  const i = name.indexOf(' ')
-  return i < 0 ? name : name.slice(i + 1)
+  const parts = name.trim().split(' ').filter(Boolean)
+  return parts[parts.length - 1] ?? name
 }
 
 export function initials(name: string): string {
