@@ -1,0 +1,26 @@
+name: Sync PDC results
+# Henter ferdigspilte kampresultater automatisk fra PDC sin egen offentlige
+# turnerings-API (se src/app/api/sync-pdc-results/route.ts for detaljer/kilde)
+# hvert 10. minutt gjennom hele World Grand Prix-generalprøven.
+#
+# Krever repo-secrets APP_BASE_URL (samme som snapshot-ranks.yml) og
+# SYNC_SECRET (samme verdi som SYNC_SECRET i Vercel-miljøvariablene).
+#
+# MIDLERTIDIG (2026-09-28): denne fila hører til World Grand Prix-
+# generalprøven. Skru av (kommenter ut "schedule" under, behold
+# "workflow_dispatch" for manuell trigger) eller slett når generalprøven er
+# over — og husk å bytte PDC_TOURNAMENT_ID i route.ts til riktig turnering
+# hvis den skal gjenbrukes for det ekte VM i desember, se WGP_PIVOT_REVERT.md.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call sync-pdc-results
+        run: |
+          curl -sf "${{ secrets.APP_BASE_URL }}/api/sync-pdc-results?secret=${{ secrets.SYNC_SECRET }}"
