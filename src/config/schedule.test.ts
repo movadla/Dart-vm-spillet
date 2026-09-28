@@ -64,6 +64,22 @@ describe('getScheduleLabel', () => {
     const l = getScheduleLabel('r1', 'no', 'Ukjent Spillernavn')
     expect(l.timeKnown).toBe(false)
   })
+
+  it('REGRESJON: en runde 1-spillers bekreftede tidspunkt skal IKKE lekke over på en runde 2-projeksjon for samme spiller', () => {
+    // Funnet av brukeren 2026-09-28: Noppert (bekreftet runde 1: 28. sep,
+    // 19:10) hadde allerede vunnet og fikk vist en eksempel-motstander i
+    // runde 2 — men runde 2-raden arvet feilaktig runde 1 sin egen dato/tid
+    // i stedet for STAGE_SCHEDULE.r2 sin «Ikke satt» (ingen runde 2-kamp er
+    // faktisk spilt eller tidfestet ennå).
+    const r2 = getScheduleLabel('r2', 'no', 'Danny Noppert')
+    expect(r2.dateKnown).toBe(false)
+    expect(r2.timeKnown).toBe(false)
+    expect(r2.dateLabel).toBe('Ikke satt')
+    expect(r2.timeLabel).toBe('Ikke satt')
+    // Runde 1-oppslaget for samme spiller skal fortsatt fungere som før.
+    const r1 = getScheduleLabel('r1', 'no', 'Danny Noppert')
+    expect(r1).toMatchObject({ timeLabel: '19:10', dateKnown: true, timeKnown: true })
+  })
 })
 
 describe('getScheduleSortKey', () => {

@@ -86,10 +86,17 @@ const INTL_LOCALE: Record<Locale, string> = { no: 'nb-NO', en: 'en-US' }
  * og klokkeslett fra STAGE_SCHEDULE når det finnes (kun relevant for runde 1
  * så langt, siden det er den eneste runden som spilles over flere dager).
  */
-/** Slår opp rå dato+klokkeslett (ikke tekst) — delt av getScheduleLabel() og getScheduleSortKey(). */
+/** Slår opp rå dato+klokkeslett (ikke tekst) — delt av getScheduleLabel() og getScheduleSortKey().
+ * BUG FUNNET 2026-09-28 av brukeren: overstyringen gjaldt tidligere for ALLE
+ * stadier, ikke bare runde 1 — en spiller som var ferdig med runde 1 (f.eks.
+ * Noppert) og fikk vist en runde 2-PROJEKSJON, arvet da feilaktig runde 1
+ * sitt eget bekreftede tidspunkt (28. sep) på runde 2-kampen, som ikke er
+ * spilt og ikke er kjent ennå. R1_MATCH_SCHEDULE skal KUN slå inn når man
+ * faktisk spør om runde 1 — `stage === 'r1'`-sjekken under er det som
+ * garanterer det. */
 function resolveSchedule(stage: Stage, playerName?: string): { date: string | null; time: string | null } {
   const s = STAGE_SCHEDULE[stage]
-  const override = playerName ? R1_MATCH_SCHEDULE[playerName] : undefined
+  const override = stage === 'r1' && playerName ? R1_MATCH_SCHEDULE[playerName] : undefined
   return { date: override?.date ?? s.date, time: override ? override.time : s.time }
 }
 
