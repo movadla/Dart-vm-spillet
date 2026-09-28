@@ -10,12 +10,12 @@ export const players = {
   },
   champion: 'Tournament winner',
   potNames: {
-    1: 'The Favourites',
-    2: 'Top Seeds',
-    3: 'Strong Favourites',
-    4: 'Seeded Outsiders',
-    5: 'Qualifiers',
-    6: 'The Rest',
+    1: 'Level 1',
+    2: 'Level 2',
+    3: 'Level 3',
+    4: 'Level 4',
+    5: 'Level 5',
+    6: 'Level 6',
   },
   nationalities: {
     England: 'England',

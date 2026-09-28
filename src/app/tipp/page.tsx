@@ -784,12 +784,16 @@ const inputStyle: React.CSSProperties = {
         {/* 176px per kort (var 128): på desktop ble kortene små og "bortkomne" i
             all luften rundt — mer presens uten å miste én-rad-garantien
             (1fr-kolonnene krymper fortsatt fritt på smale skjermer). Potter
-            med 5 kandidater rendres nå som TO separate rad-grid (3 øverst,
-            2 under, se playerRows over) i stedet for én trang 5-kolonners
-            rad — hver rad er sin egen sentrerte grid, ikke én stor grid med
-            et ufullstendig siste rad-forsøk. */}
-        {playerRows.map((row, rowIndex) => (
-          <div key={rowIndex} style={{ width: '100%', maxWidth: Math.min(row.length * 176, 400), margin: '0 auto' }}>
+            med 4+ kandidater rendres nå som TO separate rad-grid (se
+            playerRows over) i stedet for én trang rad — hver rad er sin
+            egen sentrerte grid, ikke én stor grid med et ufullstendig siste
+            rad-forsøk. Når det er flere rader brukes et lavere per-kort-tak
+            (132px, ikke 176px) — to rader av de store kortene stakk under
+            «Neste»-knappen på mobil og krevde scroll for å se hele valget. */}
+        {playerRows.map((row, rowIndex) => {
+          const cardMax = playerRows.length > 1 ? 132 : 176
+          return (
+          <div key={rowIndex} style={{ width: '100%', maxWidth: Math.min(row.length * cardMax, playerRows.length > 1 ? 360 : 400), margin: '0 auto' }}>
             <div
               role="radiogroup"
               aria-label={dict.tipp.step.chooseAriaLabel(translatePotName(dict.players, pot.potNumber, pot.name), playerRows.length > 1 ? rowIndex + 1 : undefined)}
@@ -816,7 +820,8 @@ const inputStyle: React.CSSProperties = {
               })}
             </div>
           </div>
-        ))}
+          )
+        })}
 
         {/* Hurtiginfo for valgt spiller + «Detaljer» som åpner bunnarket.
             Trykk på kortet er KUN valg — arket er et frivillig dypdykk. */}
