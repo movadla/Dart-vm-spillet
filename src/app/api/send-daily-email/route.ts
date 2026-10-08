@@ -114,7 +114,7 @@ export async function GET(request: Request) {
       : [{ ...leaderboard[0], email: testTo }]
     : leaderboard
 
-  const fromAddr = `World Grand Prix-Spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`
+  const fromAddr = `Grand Slam-Spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`
 
   const payloads = recipients.map(row => {
     // TODO (Grand Slam-formatet): poengmodellen er erstattet av «beste nivå»

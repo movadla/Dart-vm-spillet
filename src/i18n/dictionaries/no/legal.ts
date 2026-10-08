@@ -51,8 +51,8 @@ export const legal: LegalDict = {
     home: 'Til forsiden →',
   },
   ogImage: {
-    brandLine: 'WORLD GRAND PRIX 2026',
-    tagline: 'Velg 6 dartspillere. Følg turneringen. Spill mot venner.',
+    brandLine: 'GRAND SLAM 2026',
+    tagline: 'Velg 4 dartspillere. Treff vinneren. Spill mot venner.',
   },
   privacy: {
     metaTitle: 'Personvern',
@@ -60,7 +60,7 @@ export const legal: LegalDict = {
     back: '← Til forsiden',
     whatWeStore: {
       h: 'Hva vi lagrer',
-      p: 'Når du melder deg på World Grand Prix-Spillet lagrer vi navnet ditt, e-postadressen din, eventuelt telefonnummer om du oppgir det, og hvilke dartspillere du har valgt.',
+      p: 'Når du melder deg på Grand Slam-Spillet lagrer vi navnet ditt, e-postadressen din, eventuelt telefonnummer om du oppgir det, og hvilke dartspillere du har valgt.',
     },
     whatWeUseItFor: {
       h: 'Hva vi bruker det til',

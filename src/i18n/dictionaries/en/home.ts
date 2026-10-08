@@ -5,7 +5,7 @@ export const home = {
     seeAll: (total) => `See all ${total} →`,
   },
   stickyHeader: {
-    brand: 'DART-VM',
+    brand: 'GRAND SLAM',
     info: 'Info',
     leaderboard: 'Leaderboard',
     myPage: 'My page',
@@ -25,7 +25,7 @@ export const home = {
     getStarted: 'Get started →',
     alreadySignedUp: 'Already signed up? Find your page →',
     scrollHint: 'More info',
-    tagline: 'Pick 6 dart players. Follow them through the tournament.',
+    tagline: 'Pick 4 dart players. Follow them through the tournament.',
   },
   howItWorks: {
     eyebrow: 'How it works',

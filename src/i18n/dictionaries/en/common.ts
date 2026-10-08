@@ -1,8 +1,8 @@
 import type { CommonDict } from '../no/common'
 
 export const common = {
-  appName: 'World Grand Prix-Spillet',
-  appDescription: 'Pick 6 dart players. Follow them through the tournament. Win the pot.',
+  appName: 'Grand Slam-Spillet',
+  appDescription: 'Pick 4 dart players. Follow them through the tournament. Hit the winner and share the prize.',
   nav: {
     home: '← Home',
     myPage: '← My page',
@@ -18,8 +18,8 @@ export const common = {
     days: 'days',
     hours: 'hrs',
     minutes: 'min',
-    labelUntilStart: 'The Worlds starts in',
-    labelUntilFirstPoints: 'First points land in',
+    labelUntilStart: 'The tournament starts in',
+    labelUntilFirstPoints: 'First results arrive in',
   },
   lastUpdated: 'Updated {time}',
   share: {
@@ -30,7 +30,7 @@ export const common = {
     pressToCopy: 'Tap to copy',
   },
   teamTile: {
-    level: (n) => `Tier ${n}`,
+    level: (n) => `Pot ${n}`,
   },
   playerCard: {
     rank: 'RANK',

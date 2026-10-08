@@ -3,7 +3,7 @@ import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
 
 // Siden er en klientkomponent og kan ikke eksportere metadata selv — tittelen
-// («Finn min side – World Grand Prix-Spillet» / «Find my page – World Grand Prix-Spillet») settes her.
+// («Finn min side – Grand Slam-Spillet» / «Find my page – Grand Slam-Spillet») settes her.
 export async function generateMetadata(): Promise<Metadata> {
   const { finn } = getDictionary(await getLocale())
   return { title: `${finn.title.prefix} ${finn.title.highlight}` }

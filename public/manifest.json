@@ -1,7 +1,7 @@
 {
-  "name": "Dart-VM-spillet",
-  "short_name": "Dart-VM",
-  "description": "Velg 6 dartspillere. Følg dem gjennom PDC dart-VM. Vinn potten.",
+  "name": "Grand Slam-Spillet",
+  "short_name": "Grand Slam",
+  "description": "Velg 4 dartspillere. Følg dem gjennom PDC Grand Slam of Darts. Treff vinneren og del premien.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#080808",

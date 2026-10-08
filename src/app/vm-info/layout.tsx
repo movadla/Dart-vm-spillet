@@ -3,7 +3,7 @@ import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
 
 // Siden er en klientkomponent og kan ikke eksportere metadata selv — tittelen
-// («Turneringsguide – World Grand Prix-Spillet» / «Tournament Guide – World Grand Prix-Spillet») settes her.
+// («Turneringsguide – Grand Slam-Spillet» / «Tournament Guide – Grand Slam-Spillet») settes her.
 export async function generateMetadata(): Promise<Metadata> {
   const { vmInfo } = getDictionary(await getLocale())
   return { title: vmInfo.title }

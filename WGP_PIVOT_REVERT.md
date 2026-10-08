@@ -19,7 +19,9 @@ gruppene er IKKE bekreftet), `data/pots.ts` (4 potter fra flat `FIELD` sortert p
 tippe-flyten (pott 4 = 5 kort + liste), leaderboard/Min side/RankList (viser «nivå»,
 ikke poeng), intro-slideshow, forside, VM-guide (Kamper = resultatliste, Regler = premiedeling).
 
-## Åpent før lansering av Grand Slam (se også TODO.md)
+## Åpent før lansering av Grand Slam — se nå [`GRAND_SLAM_CHECKLIST.md`](GRAND_SLAM_CHECKLIST.md) (denne listen er foreldet)
+
+Gammel kortliste (beholdt for historikk):
 
 - [ ] `FIELD` i `data/pots.ts` er fortsatt World Grand Prix-feltet (PLASSHOLDER) — bytt til de 48 etter Tour Card Holder Qualifier 2026-11-06, med odds fra en ekte, navngitt kilde (ingen Grand Slam-marked var publisert 2026-10-08).
 - [ ] `KICKOFF` er satt konservativt til 00:00 norsk tid 2026-11-14 — oppdater med verifisert klokkeslett for første kamp (PDC-program).

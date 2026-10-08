@@ -15,6 +15,8 @@ hver av 6 potter og får poeng per vunnet sett/kamp (× pott-multiplikator).
 Norsk UI. Mappenavnet `cl-spillet` er historisk (fotball-VM-forløper) — appen
 heter Dart-VM-spillet.
 
+**GRAND SLAM-GRENEN (`grand-slam`, 2026-10-08) — les [`GRAND_SLAM_CHECKLIST.md`](GRAND_SLAM_CHECKLIST.md) først.** Appen på denne grenen er bygget om til et NYTT spill for PDC Grand Slam of Darts (2026-11-14 → 2026-11-22): velg 4 spillere, én fra hver av 4 potter (4/4/6/resten, satt etter vinnerodds). Vinner en av dine spillere turneringen, deler du premien med alle andre som har samme spiller; har ingen vinneren, går premien til dem som har spilleren som kom lengst. INGEN poeng, sett-scoring eller multiplikatorer lenger — modellen er «nivå» i `src/lib/prize.ts`. Beskrivelsen under (6 potter, poeng) gjelder `master`/World Grand Prix og det opprinnelige VM-formatet.
+
 **MIDLERTIDIG (siden 2026-09-27):** appen peker akkurat nå mot PDC World Grand
 Prix 2026, IKKE det faktiske VM i desember — en bevisst generalprøve mot en
 ekte, nært forestående turnering. Se **[`WGP_PIVOT_REVERT.md`](WGP_PIVOT_REVERT.md)**
@@ -51,8 +53,9 @@ stopp dev-serveren først (eller vent til økten er ferdig med den).
 ```
 src/config/      tournament.ts (KICKOFF — eneste kilde), scoring.ts, potColors.ts, theme.ts (SPORT, CARD_*)
 src/data/        pots.ts (spillere/potter), playerStats.ts, playerPhotos.ts (CC-kreditering)
-src/lib/         scoring.ts (poeng), ranking.ts (rene tabeller), participantData.ts (I/O: Supabase eller demo),
-                 demo.ts (fiktiv deltaker/ligaer/kamper), bracketProjection.ts (eksempel-trekning), format.ts (nb-NO)
+src/lib/         prize.ts (premie/«nivå»), scoring.ts (kamp-hjelpere), finish.ts (nivå → tekst), ranking.ts (rene tabeller),
+                 participantData.ts (I/O: Supabase eller demo), demo.ts (fiktiv deltaker/ligaer/kamper), format.ts (nb-NO)
+                 [grand-slam-grenen: bracketProjection/schedule er slettet — finnes på master]
 src/components/  delte UI-biter: BrandBanner, Countdown, TeamTile, RankList, PlayerCard, PlayerDetailPanel, LeagueSection …
 src/app/         ruter. Sideinterne komponenter ligger ved siden av page.tsx (deltaker/[id]/MyTeam.tsx, tipp/ProgressDots.tsx)
 src/app/api/     route handlers. admin/* krever checkAdminAuth(); skriving for deltakere krever vm_auth-cookie

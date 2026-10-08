@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { POTS, getIso2 } from '@/data/pots'
 import Flag from '@/components/Flag'
 import { STAGE_ORDER, STAGE_LABELS } from '@/config/scoring'
+import { finishShortLabel } from '@/lib/finish'
+import { getDictionary } from '@/i18n/dictionaries'
 import { SPORT } from '@/config/theme'
 import { ALL_PLAYERS, ALL_MATCH_PLAYERS, MATCH_STAGES, ADMIN_HEADERS, Tab, Participant, League, LeagueMember, MagicLink, card, cardHead, label, inputStyle, selectStyle, btn, csvExport } from '../shared'
 
@@ -126,7 +128,7 @@ export function LigaerTab({ headers }: { headers: Record<string, string> }) {
                     <div style={{ fontSize: 13, fontWeight: 600 }}>{m.name}</div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{m.email}</div>
                   </div>
-                  <div style={{ fontFamily: SPORT, fontSize: 17, fontWeight: 900, color: '#f59e0b' }}>{m.points}p</div>
+                  <div style={{ fontFamily: SPORT, fontSize: 17, fontWeight: 900, color: '#f59e0b' }}>{finishShortLabel(m.points, getDictionary('no'))}</div>
                   <Link href={`/deltaker/${m.id}`} style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', textDecoration: 'none' }}>Se →</Link>
                 </div>
               ))}

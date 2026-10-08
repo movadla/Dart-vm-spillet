@@ -100,7 +100,7 @@ export function VerktøyTab({ headers }: { headers: Record<string, string> }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {(['sets1', 'sets2'] as const).map((key) => (
                 <div key={key}>
-                  <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>{key === 'sets1' ? 'Sett 1' : 'Sett 2'}</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>{key === 'sets1' ? 'Legs 1' : 'Legs 2'}</label>
                   <input style={inputStyle} type="number" min={0} placeholder="0" value={matchForm[key]} onChange={(e) => setMatchForm((f) => ({ ...f, [key]: e.target.value }))} required />
                 </div>
               ))}

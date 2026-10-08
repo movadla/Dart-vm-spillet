@@ -48,7 +48,7 @@ export const liga: LigaDict = {
     bodyBefore: 'Del ligakoden ',
     bodyAfter: ' med venner så de kan bli med.',
   },
-  pointsComingWhenStarts: (date) => `Poeng og plassering kommer når turneringen starter ${date}.`,
+  pointsComingWhenStarts: (date) => `Plasseringer kommer når turneringen starter ${date}.`,
   rankChip: { ofTotal: (total) => `av ${total}` },
   kick: {
     button: 'Kick',

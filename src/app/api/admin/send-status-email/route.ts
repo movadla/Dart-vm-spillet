@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
   for (const m of memberRows) (leaguesByParticipant[m.participant_id] ??= []).push(m.league_id)
 
   const subject = `Status etter dag ${vmDay} av ${VM_TOTAL_DAYS} i dart-VM`
-  const fromAddr = `World Grand Prix-Spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`
+  const fromAddr = `Grand Slam-Spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`
 
   const payloads = recipients.map((row) => {
     // TODO (Grand Slam-formatet): poengmodellen er erstattet av «beste nivå»

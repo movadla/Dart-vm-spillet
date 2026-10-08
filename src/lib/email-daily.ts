@@ -1,4 +1,4 @@
-// MIDLERTIDIG (2026-09-27): PDC World Grand Prix varer 7 dager (28. sep–4. okt)
+// MIDLERTIDIG (2026-09-27): PDC Grand Slam of Darts varer 7 dager (28. sep–4. okt)
 // i stedet for VM sine normale ~3 ukene (medio desember – 3. januar) — bytt
 // tilbake til 24 når det nærmer seg VM i desember, se src/config/tournament.ts.
 export const VM_TOTAL_DAYS = 7
@@ -61,7 +61,7 @@ export function buildDailyPlainText(p: PlainTextParams): string {
   ].filter(Boolean)
   const leagues = leagueLines.length ? '\nDine ligaer:\n' + leagueLines.join('\n') + '\n' : ''
   return [
-    'WORLD GRAND PRIX-SPILLET 2026',
+    'GRAND SLAM-SPILLET 2026',
     '',
     `Hei ${p.name},`,
     `Din status etter dag ${p.vmDay} av ${VM_TOTAL_DAYS} i dart-VM`,
@@ -157,7 +157,7 @@ export function buildDailyEmail(p: EmailParams): string {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="supported-color-schemes" content="dark">
-  <title>World Grand Prix-Spillet</title>
+  <title>Grand Slam-Spillet</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&display=swap');
   </style>
@@ -179,9 +179,9 @@ export function buildDailyEmail(p: EmailParams): string {
             <!-- Logo -->
             <tr>
               <td align="left" style="padding-bottom:8px;">
-                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#60a5fa;margin-bottom:8px;text-shadow:0 0 16px rgba(59,130,246,0.5);">— PDC World Grand Prix —</div>
-                <div style="font-family:'Barlow Condensed','Arial Narrow',Impact,Arial,sans-serif;font-weight:900;text-transform:uppercase;font-size:42px;letter-spacing:-1px;line-height:1;white-space:nowrap;text-shadow:0 0 48px rgba(59,130,246,0.45),0 0 96px rgba(30,58,138,0.35);">
-                  <span style="color:rgba(147,197,253,0.5);">WORLD GRAND PRIX-</span><span style="color:#ffffff;">SPILLET</span><span style="font-size:18px;letter-spacing:0.04em;color:rgba(255,255,255,0.22);padding-left:8px;vertical-align:middle;">2026</span>
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;line-height:1.3;color:#4ade80;margin-bottom:8px;text-shadow:0 0 16px rgba(34,197,94,0.5);">— PDC Grand Slam of Darts —</div>
+                <div style="font-family:'Barlow Condensed','Arial Narrow',Impact,Arial,sans-serif;font-weight:900;text-transform:uppercase;font-size:42px;letter-spacing:-1px;line-height:1;white-space:nowrap;text-shadow:0 0 48px rgba(220,38,38,0.45),0 0 96px rgba(59,130,246,0.25);">
+                  <span style="color:rgba(255,255,255,0.35);">GRAND SLAM-</span><span style="color:#ffffff;">SPILLET</span><span style="font-size:18px;letter-spacing:0.04em;color:rgba(255,255,255,0.22);padding-left:8px;vertical-align:middle;">2026</span>
                 </div>
               </td>
             </tr>
@@ -248,7 +248,7 @@ ${leaguesHtml}${resultsHtml}
             <tr>
               <td>
                 <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.15);line-height:2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-                  Du mottar dette fordi du er påmeldt World Grand Prix-Spillet.<br>
+                  Du mottar dette fordi du er påmeldt Grand Slam-Spillet.<br>
                   <a href="${unsubscribeUrl}" style="color:rgba(255,255,255,0.28);text-decoration:underline;">Meld deg av daglige oppdateringer</a>
                 </p>
               </td>

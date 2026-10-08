@@ -94,8 +94,8 @@ export const deltaker: DeltakerDict = {
     allMatches: 'Alle kamper →',
     leaguesHeader: 'Ligaer',
     vmGuide: 'Turneringsguide →',
-    shareText: (rank, total) => `Jeg er #${rank} av ${total} i World Grand Prix-Spillet!`,
-    shareTextClosed: 'Bli med i World Grand Prix-Spillet – velg seks dartspillere og følg dem gjennom turneringen!',
+    shareText: (rank, total) => `Jeg er #${rank} av ${total} i Grand Slam-Spillet!`,
+    shareTextClosed: 'Bli med i Grand Slam-Spillet – velg fire dartspillere og se om du treffer vinneren!',
     shareLabel: 'Del →',
   },
   myTeam: {

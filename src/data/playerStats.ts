@@ -2,7 +2,7 @@
 // spiller — vises i spillerinfo-panelet i tippe-flyten (PlayerDetailPanel).
 //
 // Kryssjekket 2026-09-27 (snitt) og 2026-09-28 (checkout-%) mot
-// dartsorakel.com/Wikipedia for World Grand Prix 2026-generalprøven
+// dartsorakel.com/Wikipedia for Grand Slam 2026-generalprøven
 // (rullerende 12-måneders tall, ikke et offisielt PDC-sesongtall — finnes
 // ikke for noen av disse). Det finnes ingen gratis PDC-API, så dette må
 // vedlikeholdes manuelt: oppdater begge tallene like før hver turnering (de

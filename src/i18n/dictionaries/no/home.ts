@@ -31,7 +31,7 @@ export const home: HomeDict = {
     seeAll: (total) => `Se alle ${total} →`,
   },
   stickyHeader: {
-    brand: 'DART-VM',
+    brand: 'GRAND SLAM',
     info: 'Info',
     leaderboard: 'Leaderboard',
     myPage: 'Min side',
@@ -51,7 +51,7 @@ export const home: HomeDict = {
     getStarted: 'Kom i gang →',
     alreadySignedUp: 'Allerede påmeldt? Finn siden din →',
     scrollHint: 'Mer info',
-    tagline: 'Velg 6 dartspillere. Følg dem gjennom turneringen.',
+    tagline: 'Velg 4 dartspillere. Følg dem gjennom turneringen.',
   },
   howItWorks: {
     eyebrow: 'Slik fungerer det',

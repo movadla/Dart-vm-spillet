@@ -16,7 +16,7 @@ interface Props {
 
 export default function ShareButton({
   url,
-  title = 'World Grand Prix-Spillet',
+  title = 'Grand Slam-Spillet',
   text,
   label,
   variant = 'default',

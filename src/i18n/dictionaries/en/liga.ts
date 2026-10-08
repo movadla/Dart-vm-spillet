@@ -6,7 +6,7 @@ export const liga = {
   participants: (n) => `${n} ${n === 1 ? 'participant' : 'participants'}`,
   inviteCode: { label: 'League code' },
   hidden: {
-    title: 'The participant list is hidden until the Worlds start',
+    title: 'The participant list is hidden until the tournament starts',
     body: 'The league owner has chosen to keep teams secret until the first match.',
   },
   empty: {
@@ -14,7 +14,7 @@ export const liga = {
     bodyBefore: 'Share the league code ',
     bodyAfter: ' with friends so they can join.',
   },
-  pointsComingWhenStarts: (date) => `Points and ranking arrive once the Worlds start ${date}.`,
+  pointsComingWhenStarts: (date) => `Rankings arrive once the tournament starts ${date}.`,
   rankChip: { ofTotal: (total) => `of ${total}` },
   kick: {
     button: 'Kick',
@@ -36,7 +36,7 @@ export const liga = {
     wholeLeaderboard: 'Full leaderboard',
     joinBtn: 'Join a league',
     createBtn: 'Start a league',
-    lockedAfterStart: 'Leagues are locked once the Worlds start.',
+    lockedAfterStart: 'Leagues are locked once the tournament starts.',
     genericError: 'Something went wrong',
     createForm: {
       heading: 'Start a league',

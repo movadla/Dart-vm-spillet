@@ -54,8 +54,8 @@ export interface CommonDict {
 }
 
 export const common: CommonDict = {
-  appName: 'World Grand Prix-Spillet',
-  appDescription: 'Velg 6 dartspillere. Følg dem gjennom turneringen. Vinn potten.',
+  appName: 'Grand Slam-Spillet',
+  appDescription: 'Velg 4 dartspillere. Følg dem gjennom turneringen. Treff vinneren og del premien.',
   nav: {
     home: '← Hjem',
     myPage: '← Min side',
@@ -72,7 +72,7 @@ export const common: CommonDict = {
     hours: 'timer',
     minutes: 'min',
     labelUntilStart: 'Turneringen starter om',
-    labelUntilFirstPoints: 'Første poeng deles ut om',
+    labelUntilFirstPoints: 'Første resultater kommer om',
   },
   lastUpdated: 'Oppdatert {time}',
   share: {
@@ -83,7 +83,7 @@ export const common: CommonDict = {
     pressToCopy: 'Trykk for å kopiere',
   },
   teamTile: {
-    level: (n) => `Nivå ${n}`,
+    level: (n) => `Pott ${n}`,
   },
   playerCard: {
     rank: 'RANK',

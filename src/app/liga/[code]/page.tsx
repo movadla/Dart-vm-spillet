@@ -88,7 +88,7 @@ export default async function LigaPage({ params, searchParams }: {
           </div>
           <ShareButton
             url={`/liga/${league.invite_code}`}
-            title={`${league.name} – World Grand Prix-Spillet`}
+            title={`${league.name} – Grand Slam-Spillet`}
             text={liga.shareLeague.inviteText(league.name, league.invite_code)}
             label={`${liga.shareLeague.label} →`}
             variant="pill"

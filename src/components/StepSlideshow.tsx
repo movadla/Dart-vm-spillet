@@ -133,21 +133,21 @@ export default function StepSlideshow({ onStart, onCtaReady, onSlide, ctaHref = 
               textTransform: 'uppercase',
               letterSpacing: '0.18em',
               marginBottom: 6,
-              background: 'linear-gradient(125deg, #eff6ff 0%, #93c5fd 14%, #3b82f6 45%, #1e3a8a 100%)',
+              background: 'linear-gradient(125deg, #f0fff4 0%, #86efac 12%, #22c55e 42%, #15803d 100%)',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              textShadow: '0 0 18px rgba(59,130,246,0.45), 0 0 5px rgba(59,130,246,0.55)',
+              textShadow: '0 0 18px rgba(34,197,94,0.4), 0 0 5px rgba(34,197,94,0.5)',
             }}
           >
-            — PDC World Grand Prix —
+            — PDC Grand Slam of Darts —
           </div>
         )}
         <div style={{ fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase', fontSize: compactHeader ? 'clamp(16px, 5vw, 22px)' : 'clamp(22px, 6.5vw, 36px)', letterSpacing: '-1px', lineHeight: 1, transition: 'font-size 0.3s ease' }}>
-          <span style={{ color: 'rgba(147,197,253,0.45)' }}>WORLD GRAND PRIX-</span>
+          <span style={{ color: 'rgba(255,255,255,0.38)' }}>GRAND SLAM-</span>
           <span
             style={{
-              background: 'linear-gradient(180deg, #ffffff 0%, #bfdbfe 100%)',
+              background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
