@@ -1,15 +1,11 @@
 // Delte konstanter, typer og stiler for admin-fanene (src/app/admin/tabs/*).
 
 import { POTS, getIso2 } from '@/data/pots'
-import { R1_MATCHES } from '@/lib/bracketProjection'
 import { STAGE_ORDER, STAGE_LABELS } from '@/config/scoring'
 import { SPORT } from '@/config/theme'
 
 export const ALL_PLAYERS = POTS.flatMap((p) => p.players.map((pl) => pl.name)).sort((a, b) => a.localeCompare(b, 'no'))
-// Runde 1 inneholder også 64 plasseringsspillere ("Kvalifisert spiller N") som ikke er valgbare
-// i pott-listene — de må likevel kunne velges her, ellers kan admin ikke registrere resultatet
-// for halvparten av runde 1-kampene.
-export const ALL_MATCH_PLAYERS = Array.from(new Set([...ALL_PLAYERS, ...R1_MATCHES.flat()])).sort((a, b) => a.localeCompare(b, 'no'))
+export const ALL_MATCH_PLAYERS = ALL_PLAYERS
 export const MATCH_STAGES = STAGE_ORDER
 // Statisk — auth går via httpOnly-cookien fra innlogging, ikke denne headeren. Hoistet til
 // modulnivå slik at den har stabil identitet på tvers av rerendere (unngår at useEffect/

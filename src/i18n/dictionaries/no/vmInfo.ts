@@ -15,40 +15,12 @@ export interface VmInfoDict {
     notPlayed: string
     notDecided: string
   }
-  drawTab: {
-    disclaimer: { before: string; example: string; after: string }
-    selectPlayer: string
-    selectPlaceholder: string
-    round1: string
-    round2: string
-    otherSeeded: string
-    otherSeededHint: string
-    showFullBracket: string
-    hideFullBracket: string
-    fullBracketLabel: (matches: number, players: number) => string
-    matchLabel: (n: number) => string
-    winnerMatch1: string
-    winnerMatch2: string
-  }
   rulesTab: {
     inShort: string
     bullets: string[]
-    pointsOverview: string
-    perSet: string
-    perAdvancement: string
-    forWinning: string
-    multiplier: string
+    prizeTitle: string
+    prizeSteps: { label: string; value: string }[]
     photoCredit: { summary: string; intro: string }
-  }
-  bracketModal: {
-    dialogAriaLabel: (name: string) => string
-    title: string
-    subtitle: string
-    close: string
-    pathToFinal: (name: string) => string
-    round1Section: string
-    section: (n: number) => string
-    vs: string
   }
 }
 
@@ -65,54 +37,29 @@ export const vmInfo: VmInfoDict = {
     others: (n) => `+${n} andre i feltet (ikke valgbare)`,
   },
   matchesTab: {
-    empty: 'Ingen kamper registrert ennå — sluttspilltreet fylles ut etter hvert som resultater legges inn.',
+    empty: 'Ingen kamper registrert ennå — resultatene fylles ut etter hvert som de legges inn.',
     notPlayed: 'Ikke spilt',
     notDecided: 'Ikke avgjort',
-  },
-  drawTab: {
-    disclaimer: {
-      before: 'Dette er en ',
-      example: 'eksempel-trekning',
-      after: ' — PDC har ikke publisert den faktiske trekningen ennå (kommer normalt medio november). Oppsettet under viser hvordan braketten kunne sett ut, og oppdateres når det ekte oppsettet er kjent.',
-    },
-    selectPlayer: 'Velg en spiller',
-    selectPlaceholder: '— Velg spiller —',
-    round1: '1. runde',
-    round2: '2. runde',
-    otherSeeded: 'Andre seedede spillere i samme del av braketten',
-    otherSeededHint: 'Dette er spillere du potensielt kan møte senere i turneringen dersom begge går langt.',
-    showFullBracket: 'Vis hele bracketen →',
-    hideFullBracket: 'Skjul hele bracketen',
-    fullBracketLabel: (matches, players) => `Runde 1 — hele feltet (${matches} kamper, ${players} spillere)`,
-    matchLabel: (n) => `Kamp ${n}`,
-    winnerMatch1: 'Vinner kamp 1',
-    winnerMatch2: 'Vinner kamp 2',
   },
   rulesTab: {
     inShort: 'Kort fortalt',
     bullets: [
-      'Du velger én spiller fra hver av 6 potter',
-      'Pottene er basert på PDC-ranking og vinnerodds',
-      'Du får poeng for hvert sett spilleren din vinner og for hver kampseier — pluss bonus om han vinner hele turneringen',
+      'Du velger én spiller fra hver av 4 potter',
+      'Pottene er satt etter vinnerodds: de 4 største favorittene, de neste 4, deretter 6, og resten av feltet',
+      'Vinner en av spillerne dine turneringen, deler du premien med alle andre som har valgt samme spiller',
+      'Har ingen valgt vinneren, går premien til dem som har spilleren som kom lengst',
+      'Du kan ikke bytte spillere etter at turneringen har startet',
     ],
-    pointsOverview: 'Poengoversikt',
-    perSet: 'Per vunnet sett',
-    perAdvancement: 'Per kampseier (avansement)',
-    forWinning: 'For å vinne hele turneringen',
-    multiplier: 'Multiplikator',
+    prizeTitle: 'Slik deles premien',
+    prizeSteps: [
+      { label: 'Du har turneringsvinneren', value: 'Delt likt med de som har ham' },
+      { label: 'Ingen har vinneren', value: 'Finalisten' },
+      { label: 'Heller ingen har finalisten', value: 'Semifinalistene' },
+      { label: 'Og så videre', value: 'Kvartfinalistene …' },
+    ],
     photoCredit: {
       summary: 'Fotokreditering',
       intro: 'Spillerfotoene er hentet fra Wikimedia Commons under Creative Commons-lisenser og beskåret/frilagt for kortene. Fotograf og lisens per bilde:',
     },
-  },
-  bracketModal: {
-    dialogAriaLabel: (name) => `Trekning for ${name}`,
-    title: 'Trekningen',
-    subtitle: 'Runde 1 er den bekreftede trekningen. Runde 2 og senere er beste estimat inntil de faktisk avgjøres.',
-    close: 'Lukk',
-    pathToFinal: (name) => `Potensiell vei til finalen for ${name}`,
-    round1Section: 'Runde 1 – din seksjon',
-    section: (n) => `Seksjon ${n}`,
-    vs: 'vs',
   },
 }

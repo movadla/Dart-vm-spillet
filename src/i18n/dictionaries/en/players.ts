@@ -2,8 +2,8 @@ import type { PlayersDict } from '../no/players'
 
 export const players = {
   stages: {
-    r1: 'Round 1',
-    r2: 'Round 2',
+    group: 'Group stage',
+    r16: 'Last 16',
     qf: 'Quarter-final',
     sf: 'Semi-final',
     final: 'Final',

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
+import type { MatchResult } from '@/lib/scoring'
+import { bestFinishLevel } from '@/lib/prize'
 
 // Ligaer som skal ha rang-piler (i tillegg til 'overall'). Bruk invite_code.
 const SNAPSHOT_LEAGUES = ['4B86F9', 'QTXXCF']
@@ -38,7 +39,7 @@ export async function GET(req: Request) {
 
   const picksByParticipant: Record<string, Pick[]> = {}
   for (const p of allPicks) (picksByParticipant[p.participant_id] ??= []).push(p)
-  const pointsOf = (id: string) => calcParticipantPoints(picksByParticipant[id] ?? [], matchResults)
+  const pointsOf = (id: string) => bestFinishLevel(picksByParticipant[id] ?? [], matchResults)
 
   const today = new Date().toISOString().slice(0, 10)
   const rows: { scope: string; participant_id: string; rank_pos: number; snapshot_date: string }[] = []

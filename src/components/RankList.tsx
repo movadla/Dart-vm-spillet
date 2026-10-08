@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import Flag from '@/components/Flag'
 import KickButton from '@/app/liga/[code]/KickButton'
-import { formatPoints } from '@/lib/format'
+import { finishShortLabel } from '@/lib/finish'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
@@ -38,6 +38,7 @@ export interface RankEntry {
   id: string
   name: string
   flags: FlagEntry[]
+  /** «Nivå» (src/lib/prize.ts): hvor langt deltakerens beste valg har kommet. 0 = ikke spilt. */
   points: number
   rankDelta?: number // posisjonsendring siden i går: + = opp, − = ned, 0 = uendret
 }
@@ -56,7 +57,9 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
   scrollToMe?: boolean
   backRef?: string
 }) {
-  const { locale, dict } = useLocale()
+  const { dict } = useLocale()
+  // points = nivå (se src/lib/prize.ts), vist som stadiets navn i stedet for et poengtall.
+  const finishText = (level: number): string => finishShortLabel(level, dict)
   const [myId, setMyId] = useState<string | null>(null)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const myRowRef = useRef<HTMLAnchorElement>(null)
@@ -121,7 +124,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
 
         return (
           <Link key={id} ref={isMe ? myRowRef : undefined} href={`/deltaker/${id}${backRef ? `?from=${backRef}` : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}
-            aria-label={vmStarted ? `${rank}. ${name}, ${formatPoints(points, locale)}${isMe ? ` (${dict.common.rankList.you})` : ''}` : `${name}${isMe ? ` (${dict.common.rankList.you})` : ''}`}
+            aria-label={vmStarted ? `${rank}. ${name}, ${finishText(points)}${isMe ? ` (${dict.common.rankList.you})` : ''}` : `${name}${isMe ? ` (${dict.common.rankList.you})` : ''}`}
             onClick={() => { try { sessionStorage.setItem(`rl_scroll_${window.location.pathname}`, String(window.scrollY)) } catch {} }}
           >
             <div className="lb-card" style={{
@@ -166,7 +169,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                     {kick && <KickButton leagueId={kick.leagueId} memberId={id} memberName={name} createdBy={kick.createdBy} />}
                     <div style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, color: vmStarted ? '#f0f2f5' : 'rgba(255,255,255,0.4)', lineHeight: 1, letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums' }}>
-                      {vmStarted ? formatPoints(points, locale) : '–'}
+                      {vmStarted ? finishText(points) : '–'}
                     </div>
                   </div>
                 </div>

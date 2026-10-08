@@ -9,6 +9,7 @@ import LeaderboardMyPage from './LeaderboardMyPage'
 import RankList from '@/components/RankList'
 import LastUpdated from '@/components/LastUpdated'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
+import { finishLabel } from '@/lib/finish'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
 
@@ -17,7 +18,7 @@ export const metadata: Metadata = { title: 'Leaderboard' }
 
 export default async function LeaderboardPage({ searchParams }: { searchParams: Promise<{ fase?: string }> }) {
   const { fase } = await searchParams
-  const { rows, vmStarted, demo } = await getLeaderboardData(fase)
+  const { rows, vmStarted, demo, prize } = await getLeaderboardData(fase)
   const dict = getDictionary(await getLocale())
 
   return (
@@ -48,6 +49,15 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
       </div>
 
       <LeaderboardMyPage />
+
+      {/* Premie-linjen: hvem som leder / deler akkurat nå — vises først når noen har kommet til sluttspillet */}
+      {vmStarted && prize && rows.length > 0 && (prize.topLevel >= 2 || prize.final) && (
+        <div style={{ background: CARD_GRADIENT, borderRadius: 14, padding: '11px 14px', marginBottom: 12, border: '1px solid rgba(251,191,36,0.35)', boxShadow: CARD_SHADOW, fontSize: 13, fontWeight: 600, lineHeight: 1.4, color: 'rgba(255,255,255,0.9)' }}>
+          {prize.final
+            ? (prize.rollover ? dict.leaderboard.prize.rollover : dict.leaderboard.prize.final(prize.sharerCount))
+            : dict.leaderboard.prize.leading(finishLabel(prize.topLevel, dict.players) ?? '', prize.sharerCount)}
+        </div>
+      )}
 
       {!vmStarted ? (
         <LeaderboardCountdown participants={rows.length} />

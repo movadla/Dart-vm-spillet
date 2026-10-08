@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
+import type { MatchResult } from '@/lib/scoring'
+import { bestFinishLevel } from '@/lib/prize'
 import { isDemoId, parseDemoPhase, DEMO_COOKIE } from '@/lib/demo'
 import { getDemoLeaguesFor } from '@/lib/participantData'
 
@@ -48,9 +49,9 @@ export async function GET(req: NextRequest) {
       .in('participant_id', memberIds)
 
     const allPicks = picks ?? []
-    const myPts = calcParticipantPoints(allPicks.filter(p => p.participant_id === participantId), matchResults)
+    const myPts = bestFinishLevel(allPicks.filter(p => p.participant_id === participantId), matchResults)
     const rank = memberIds.filter(id => {
-      const pts = calcParticipantPoints(allPicks.filter(p => p.participant_id === id), matchResults)
+      const pts = bestFinishLevel(allPicks.filter(p => p.participant_id === id), matchResults)
       return pts > myPts
     }).length + 1
 

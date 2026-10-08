@@ -1,21 +1,16 @@
 'use client'
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import dynamic from 'next/dynamic'
 import Flag from '@/components/Flag'
 import type { Player } from '@/data/pots'
 import { POTS } from '@/data/pots'
 import { PLAYER_STATS } from '@/data/playerStats'
-import { getPathToFinal } from '@/lib/bracketProjection'
-import { calcPlayerPoints, getPlayerMatches, type MatchResult } from '@/lib/scoring'
-import type { Stage } from '@/config/scoring'
-import { formatAvg, formatPercent, formatPoints } from '@/lib/format'
+import { getPlayerMatches, type MatchResult } from '@/lib/scoring'
+import { GROUP_STAGE, type Stage } from '@/config/scoring'
+import { formatAvg, formatPercent } from '@/lib/format'
 import { lastName } from '@/components/TeamTile'
 import { SPORT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
-
-// Braketten trengs sjelden — lastes først når noen åpner den.
-const BracketModal = dynamic(() => import('@/components/BracketModal'), { ssr: false })
 
 const ALL_PLAYERS = POTS.flatMap((p) => p.players)
 function iso2For(name: string): string {
@@ -52,7 +47,7 @@ function Stat({ label, children }: { label: string; children: ReactNode }) {
  * poeng) står øverst, så STATISTIKK og INFO. Lukkes med sveip ned (arket
  * følger fingeren), klikk utenfor, Escape eller knappene nederst.
  */
-export default function PlayerDetailPanel({ player, color, open, onClose, onNext, nextLabel, matchResults = [], potNumber = 1 }: {
+export default function PlayerDetailPanel({ player, color, open, onClose, onNext, nextLabel, matchResults = [] }: {
   player: Player
   color: string
   open: boolean
@@ -61,28 +56,24 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
   nextLabel: string
   /** Registrerte kamper — gir «Neste kamp»/«Tidligere kamper» ekte innhold. Tomt før VM-start. */
   matchResults?: MatchResult[]
-  /** Potten spilleren er valgt fra — avgjør multiplikatoren for poeng per kamp. */
-  potNumber?: number
 }) {
   const { locale, dict } = useLocale()
-  const [bracketOpen, setBracketOpen] = useState(false)
   const [dragY, setDragY] = useState(0)
   const dragStart = useRef<number | null>(null)
   const bodyRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !bracketOpen) onClose() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev }
-  }, [open, bracketOpen, onClose])
+  }, [open, onClose])
 
   if (!open) return null
 
   const stats = PLAYER_STATS[player.name]
-  const path = getPathToFinal(player.name, matchResults)
   // Kamper — liste over spilte kamper med poengene spilleren faktisk fikk i hver av dem.
   const myMatches = getPlayerMatches(player.name, matchResults)
 
@@ -165,20 +156,16 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
                 const oppSets = isP1 ? m.sets2 : m.sets1
                 const opp = isP1 ? m.player2 : m.player1
                 const won = m.winner ? m.winner === player.name : mySets > oppSets
-                const pts = calcPlayerPoints({ player_name: player.name, pot_number: potNumber }, [m]).total
                 return (
                   <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: k < myMatches.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
                     <span style={{ width: 68, flexShrink: 0, fontSize: 11, fontWeight: 700, letterSpacing: '0.03em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', whiteSpace: 'nowrap' }}>
-                      {dict.players.stages[(m.stage ?? 'r1') as Stage] ?? m.stage}
+                      {dict.players.stages[(m.stage ?? GROUP_STAGE) as Stage] ?? m.stage}
                     </span>
                     <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, width: 32, flexShrink: 0, color: won ? '#4ade80' : '#f87171', fontVariantNumeric: 'tabular-nums' }}>
                       {mySets}–{oppSets}
                     </span>
                     <Flag iso2={iso2For(opp)} size={13} />
                     <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName(opp)}</span>
-                    <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, flexShrink: 0, color: pts > 0 ? '#4ade80' : 'rgba(255,255,255,0.35)', fontVariantNumeric: 'tabular-nums' }}>
-                      {formatPoints(pts, locale)}
-                    </span>
                   </div>
                 )
               })}
@@ -194,35 +181,6 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
             </Stat>
           </div>
 
-          {/* Potensiell vei til finalen — vertikal liste, alle 5 runder t.o.m.
-              finalen (ikke bare topp 3), med fullt navn og PDC-rangering. */}
-          <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <div style={{ marginBottom: 8 }}>
-              <FieldLabel>{dict.deltaker.playerDetailPanel.potentialPathTitle(player.name)}</FieldLabel>
-            </div>
-            {path.length ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {path.map((s) => (
-                  <div key={s.stage} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderRadius: 10, background: `${color}14`, border: `1px solid ${color}44` }}>
-                    <span style={{ width: 96, flexShrink: 0, fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>
-                      {dict.players.stages[s.stage]}
-                    </span>
-                    <span style={{ flex: 1, minWidth: 0, fontSize: s.opponent ? 15 : 13, fontWeight: s.opponent ? 700 : 500, fontStyle: s.opponent ? 'normal' : 'italic', color: s.opponent ? '#fff' : 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {s.opponent ?? (s.candidates ? `${lastName(s.candidates[0])}/${lastName(s.candidates[1])}` : dict.deltaker.playerDetailPanel.notDecided)}
-                    </span>
-                    {s.pdcRanking != null && (
-                      <span style={{ fontSize: 14, fontWeight: 900, color: '#fbbf24', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                        #{s.pdcRanking}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{dict.deltaker.playerDetailPanel.noTop16}</div>}
-            <button type="button" onClick={() => setBracketOpen(true)} style={{ display: 'block', marginTop: 10, background: 'none', border: 'none', padding: 0, color: 'rgba(255,255,255,0.65)', fontSize: 12, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}>
-              {dict.deltaker.playerDetailPanel.seeFullDraw}
-            </button>
-          </div>
         </div>
 
         {/* Bunn: lukk / gå videre */}
@@ -244,7 +202,6 @@ export default function PlayerDetailPanel({ player, color, open, onClose, onNext
           </button>
         </div>
 
-        {bracketOpen && <BracketModal playerName={player.name} color={color} matchResults={matchResults} onClose={() => setBracketOpen(false)} />}
       </div>
     </div>
   )

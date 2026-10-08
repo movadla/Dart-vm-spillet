@@ -7,11 +7,10 @@ import BrandBanner from '@/components/BrandBanner'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
 import { POTS, getPickablePlayers, type Player } from '@/data/pots'
 import { POT_COLORS } from '@/config/potColors'
-import { formatOdds, formatPoints } from '@/lib/format'
+import { formatOdds } from '@/lib/format'
 import Flag from '@/components/Flag'
-import { STAGE_ORDER, SCORING } from '@/config/scoring'
 import type { MatchResult } from '@/lib/scoring'
-import MatchBracket from '@/components/MatchBracket'
+import MatchList from '@/components/MatchList'
 import { KICKOFF } from '@/config/tournament'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
@@ -215,7 +214,7 @@ export default function VmInfoPage() {
       {/* ── KAMPER (bracket) ── */}
       {activeTab === 'kamper' && (
         <div role="tabpanel" id="panel-kamper" aria-labelledby="tab-kamper">
-          <MatchBracket stages={STAGE_ORDER} matches={matches} />
+          <MatchList matches={matches} />
         </div>
       )}
 
@@ -233,35 +232,13 @@ export default function VmInfoPage() {
           </div>
 
           <div style={cardWithAccent('#f59e0b')}>
-            <div style={LABEL}>{dict.vmInfo.rulesTab.pointsOverview}</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0' }}>
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.vmInfo.rulesTab.perSet}</span>
-              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{formatPoints(SCORING.perSetWon, locale)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.vmInfo.rulesTab.perAdvancement}</span>
-              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{formatPoints(SCORING.perAdvancement, locale)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.vmInfo.rulesTab.forWinning}</span>
-              <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>+{formatPoints(SCORING.tournamentWinner, locale)}</span>
-            </div>
-          </div>
-
-          <div style={cardWithAccent('#ef4444')}>
-            <div style={LABEL}>{dict.vmInfo.rulesTab.multiplier}</div>
-            {POTS
-              .filter((pot) => (SCORING.underdogMultiplier[pot.potNumber] ?? 1) > 1)
-              .map((pot, i) => {
-                const mult = SCORING.underdogMultiplier[pot.potNumber] ?? 1
-                const col = mult >= 3 ? '#ef4444' : '#f59e0b'
-                return (
-                  <div key={pot.potNumber} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{dict.common.teamTile.level(pot.potNumber)}</span>
-                    <span style={{ fontSize: 20, color: col, fontWeight: 900, fontFamily: SPORT }}>×{mult}</span>
-                  </div>
-                )
-              })}
+            <div style={LABEL}>{dict.vmInfo.rulesTab.prizeTitle}</div>
+            {dict.vmInfo.rulesTab.prizeSteps.map((step, i) => (
+              <div key={step.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '9px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{step.label}</span>
+                <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700, textAlign: 'right' }}>{step.value}</span>
+              </div>
+            ))}
           </div>
 
           <Link href={ctaHref} className="cta-btn" style={{ display: 'block', padding: '15px', background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontFamily: SPORT, fontSize: 20, fontWeight: 900, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 999, textDecoration: 'none', textAlign: 'center', boxShadow: '0 4px 20px rgba(220,38,38,0.35)' }}>

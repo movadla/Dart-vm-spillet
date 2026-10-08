@@ -1,10 +1,12 @@
-import { SCORING, STAGE_ORDER } from '@/config/scoring'
+import { GROUP_STAGE, STAGE_ORDER } from '@/config/scoring'
 
 const STAGE_INDEX: Record<string, number> = Object.fromEntries(STAGE_ORDER.map((s, i) => [s, i]))
 
 export interface MatchResult {
   player1: string
   player2: string
+  // Felt-navnene er historiske (sett i World Grand Prix) — for Grand Slam
+  // holder de antall LEGS. Kun brukt til visning av resultatet.
   sets1: number
   sets2: number
   stage?: string
@@ -16,46 +18,26 @@ export interface PickWithPot {
   pot_number: number
 }
 
-export function calcPlayerPoints(
-  pick: PickWithPot,
-  matches: MatchResult[],
-): { setPts: number; advPts: number; winnerBonus: number; multiplier: number; total: number } {
-  let setPts = 0
-  let wins = 0
-  let wonFinal = false
-  for (const m of matches) {
-    const isP1 = m.player1 === pick.player_name
-    const isP2 = m.player2 === pick.player_name
-    if (!isP1 && !isP2) continue
-    setPts += (isP1 ? m.sets1 : m.sets2) * SCORING.perSetWon
-    if (m.winner === pick.player_name) {
-      wins++
-      if (m.stage === 'final') wonFinal = true
-    }
-  }
-  const advPts = wins * SCORING.perAdvancement
-  const winnerBonus = wonFinal ? SCORING.tournamentWinner : 0
-  const multiplier = SCORING.underdogMultiplier[pick.pot_number] ?? 1
-  return { setPts, advPts, winnerBonus, multiplier, total: (setPts + advPts + winnerBonus) * multiplier }
-}
-
-export function calcParticipantPoints(picks: PickWithPot[], matches: MatchResult[]): number {
-  return picks.reduce((sum, pick) => sum + calcPlayerPoints(pick, matches).total, 0)
-}
-
-/** Slått ut = det finnes en registrert kamp der spilleren deltok, men ikke vant. */
+/**
+ * Slått ut. I gruppespillet (round robin) taper man ikke ut av én tapt kamp,
+ * og vi har ikke oppsettet for sluttspillet (hvem som gikk videre) — bare de
+ * spilte resultatene. Derfor:
+ *  - har spilleren spilt sluttspill, er hen ute når hen taper en sluttspillkamp;
+ *  - har hen IKKE spilt sluttspill, regnes hen først som ute når første runde
+ *    ETTER åpningsrunden i sluttspillet (kvartfinalene) er i gang — da er alle
+ *    som gikk videre fra gruppene garantert registrert med en sluttspillkamp.
+ *    Før det kan en gruppevinner fortsatt vente på sin første sluttspillkamp.
+ */
 export function isPlayerEliminated(playerName: string, matches: MatchResult[]): boolean {
-  return matches.some(
-    (m) =>
-      (m.player1 === playerName || m.player2 === playerName) &&
-      m.winner != null &&
-      m.winner !== playerName,
-  )
+  const idx = (m: MatchResult) => (m.stage ? STAGE_INDEX[m.stage] ?? -1 : -1)
+  const knockoutMine = matches.filter((m) => idx(m) > 0 && (m.player1 === playerName || m.player2 === playerName))
+  if (knockoutMine.length > 0) return knockoutMine.some((m) => m.winner != null && m.winner !== playerName)
+  return matches.some((m) => idx(m) >= 2)
 }
 
 /** Vant finalen. */
 export function isPlayerChampion(playerName: string, matches: MatchResult[]): boolean {
-  return matches.some((m) => m.stage === 'final' && m.winner === playerName)
+  return matches.some((m) => m.stage === STAGE_ORDER[STAGE_ORDER.length - 1] && m.winner === playerName)
 }
 
 /**
@@ -66,7 +48,7 @@ export function isPlayerChampion(playerName: string, matches: MatchResult[]): bo
 export function getPlayerMatches(playerName: string, matches: MatchResult[]): MatchResult[] {
   return matches
     .filter((m) => m.player1 === playerName || m.player2 === playerName)
-    .sort((a, b) => STAGE_INDEX[a.stage ?? 'r1'] - STAGE_INDEX[b.stage ?? 'r1'])
+    .sort((a, b) => STAGE_INDEX[a.stage ?? GROUP_STAGE] - STAGE_INDEX[b.stage ?? GROUP_STAGE])
 }
 
 /** Siste (høyeste) runde spilleren har deltatt i, basert på registrerte kamper — eller null om ingen ennå. */

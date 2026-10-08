@@ -5,7 +5,11 @@ export const deltaker = {
     backLeague: '← League',
     backLeaderboard: '← Leaderboard',
     myPage: 'My page',
-    totalPoints: 'Total points',
+    bestFinish: 'Best pick',
+    prizeLeading: (others) => (others === 0 ? 'You are leading alone' : `You share the lead with ${others} ${others === 1 ? 'other' : 'others'}`),
+    prizeWon: (others) => (others === 0 ? 'You win the whole prize' : `You share the prize with ${others} ${others === 1 ? 'other' : 'others'}`),
+    prizeNone: 'None of your players lead yet',
+    prizeLost: 'The prize went to others this time',
     rank: 'Rank',
     startsIn: 'The Worlds starts in',
     editTeam: 'Edit team →',
@@ -14,7 +18,6 @@ export const deltaker = {
     vmDecided: 'decided',
     vmInStagePrefix: 'The tournament is in the',
     allMatches: 'All matches →',
-    nextMatchesHeader: 'Next matches',
     leaguesHeader: 'Leagues',
     vmGuide: 'Tournament guide →',
     shareText: (rank, total) => `I'm #${rank} of ${total} in World Grand Prix-Spillet!`,
@@ -29,14 +32,9 @@ export const deltaker = {
     noMatchesYet: 'No matches played yet.',
     won: 'beat',
     lost: 'lost to',
-    matchSummary: (sets, wins, wonTournament, multiplier) =>
-      `${sets} sets · ${wins} ${wins === 1 ? 'win' : 'wins'}${wonTournament ? ' · tournament win' : ''}${multiplier > 1 ? ` · ×${multiplier}` : ''}`,
     playerInfo: 'Player info →',
     allMatches: 'All matches →',
     nextPlayer: 'Next player →',
-  },
-  nextMatches: {
-    none: 'No upcoming matches for your team.',
   },
   demoBanner: {
     badge: 'Demo',
@@ -69,6 +67,6 @@ export const deltaker = {
     noTop16: 'No top 16 before the final',
     seeFullDraw: 'See the full draw →',
     photo: 'Photo',
-    shortStage: { r1: 'Round 1', r2: 'Round 2', qf: 'Quarter', sf: 'Semi', final: 'Final' },
+    shortStage: { group: 'Group', r16: 'Last 16', qf: 'Quarter', sf: 'Semi', final: 'Final' },
   },
 } satisfies DeltakerDict

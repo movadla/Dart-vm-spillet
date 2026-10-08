@@ -4,7 +4,8 @@
 
 import { POTS } from '@/data/pots'
 import { STAGE_ORDER } from '@/config/scoring'
-import { calcParticipantPoints, isPlayerEliminated, isPlayerChampion, furthestStageReached, type MatchResult, type PickWithPot } from '@/lib/scoring'
+import { isPlayerEliminated, isPlayerChampion, furthestStageReached, type MatchResult, type PickWithPot } from '@/lib/scoring'
+import { bestFinishLevel } from '@/lib/prize'
 import type { RankEntry } from '@/components/RankList'
 
 export interface PickRow extends PickWithPot { participant_id: string }
@@ -22,7 +23,7 @@ export function groupPicks(rows: PickRow[]): Map<string, PickWithPot[]> {
 
 export function rankAmong(myPoints: number, byParticipant: Map<string, PickWithPot[]>, matches: MatchResult[]): number {
   let above = 0
-  for (const picks of byParticipant.values()) if (calcParticipantPoints(picks, matches) > myPoints) above++
+  for (const picks of byParticipant.values()) if (bestFinishLevel(picks, matches) > myPoints) above++
   return above + 1
 }
 
@@ -38,7 +39,7 @@ export function buildRankRows(
   const scored = participants
     .map((p) => {
       const playerPicks = (by.get(p.id) ?? []).slice().sort((a, b) => a.pot_number - b.pot_number)
-      const points = calcParticipantPoints(playerPicks, matches)
+      const points = bestFinishLevel(playerPicks, matches)
       return { p, playerPicks, points }
     })
     // Tie-breaker: den som meldte seg på først vinner uavgjort — enkel å

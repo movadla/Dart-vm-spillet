@@ -142,23 +142,9 @@ function TippContent() {
     return () => ro.disconnect()
   }, [step])
 
-  // «% valgt» på kortene — hentes ÉN gang for hele tippe-flyten (ikke ett
-  // kall per kort/steg). Gjeninnført 2026-09-28 (var fjernet 2026-09-25).
-  // MIN_PARTICIPANTS_FOR_SHARE = 1 er et BEVISST valg denne runden (brukeren
-  // ba eksplisitt om at det skal vises fra og med første registrerte
-  // deltaker) — den opprinnelige versjonen brukte 10 for å unngå at f.eks.
-  // 3 av 5 (60 %) leses som en sterk anbefaling. Vurder å heve denne igjen
-  // før et stort, ekte lanseringsvolum.
-  const MIN_PARTICIPANTS_FOR_SHARE = 1
-  const [pickShare, setPickShare] = useState<{ total: number; counts: Record<string, number> }>({ total: 0, counts: {} })
-  useEffect(() => {
-    let cancelled = false
-    fetch('/api/pick-share')
-      .then((r) => (r.ok ? r.json() : { total: 0, counts: {} }))
-      .catch(() => ({ total: 0, counts: {} }))
-      .then((data) => { if (!cancelled) setPickShare(data) })
-    return () => { cancelled = true }
-  }, [])
+  // «% valgt» på kortene er BEVISST fjernet (avgjort 2026-10-08): i et spill der
+  // delt premie belønner unike valg ville synlig popularitet styre folk mot
+  // eller bort fra de samme spillerne. Ikke gjeninnfør uten å avklare det.
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -845,9 +831,6 @@ const inputStyle: React.CSSProperties = {
                   )
                 }
                 const player = item.player
-                const pickPercent = pickShare.total >= MIN_PARTICIPANTS_FOR_SHARE
-                  ? ((pickShare.counts[player.name] ?? 0) / pickShare.total) * 100
-                  : undefined
                 return (
                   <PlayerCard
                     key={player.name}
@@ -856,7 +839,6 @@ const inputStyle: React.CSSProperties = {
                     color={color}
                     colorDark={colorDark}
                     potNumber={pot.potNumber}
-                    pickPercent={pickPercent}
                     selected={selectedPlayer === player.name}
                     dimmed={selectedPlayer != null && selectedPlayer !== player.name}
                     onClick={() => setPicks(prev => ({ ...prev, [pot.potNumber]: player.name }))}
@@ -926,7 +908,6 @@ const inputStyle: React.CSSProperties = {
                 onClose={() => setPanelOpen(false)}
                 onNext={() => { setPanelOpen(false); goNext() }}
                 nextLabel={step < POT_COUNT ? dict.tipp.step.next : dict.tipp.step.seeSummary}
-                potNumber={pot.potNumber}
               />
             </>
           )

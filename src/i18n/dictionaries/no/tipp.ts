@@ -117,10 +117,10 @@ export interface TippDict {
       subtitle: string
       exampleLabel: string
       vs: string
-      setsUnit: string
-      win: string
-      setsWon: string
-      total: string
+      legsUnit: string
+      champion: string
+      holders: string
+      yourShare: string
     }
     progress: {
       title: string
@@ -255,22 +255,22 @@ export const tipp: TippDict = {
     skip: 'Hopp over',
     intro: {
       title: 'Slik fungerer det',
-      subtitle: 'Velg 6 spillere – én fra hvert nivå',
+      subtitle: 'Velg 4 spillere – én fra hver pott',
       skipHint: 'Trykk på laget for å spole fram',
     },
     example: {
-      title: 'Følg spillerne gjennom turneringen',
-      subtitle: 'Du får poeng for hver seier og hvert sett',
+      title: 'Treffer du vinneren, deler du premien',
+      subtitle: 'Alle som har valgt turneringsvinneren deler premien likt',
       exampleLabel: 'Eksempel',
       vs: 'VS',
-      setsUnit: 'sett',
-      win: 'Seier',
-      setsWon: 'Sett vunnet',
-      total: 'Totalt',
+      legsUnit: 'legs',
+      champion: 'Turneringsvinner',
+      holders: 'Har valgt ham',
+      yourShare: 'Din andel',
     },
     progress: {
-      title: 'Følg utviklingen på «Min side»',
-      leagues: 'Opprett eller delta i egne ligaer',
+      title: 'Følg spillerne dine på «Min side»',
+      leagues: 'Lag egne ligaer med vennene dine',
       rank: (n) => `${n}. plass`,
       rivals: ['Team 180', 'Bullseye-gjengen', 'Triple 20', 'Dartmestrene', 'Oche-banden', 'Nine-darter', 'Kasteskjeva', 'Tungvekterne', 'Bakerste bord'],
     },

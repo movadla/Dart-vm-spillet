@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
+import type { MatchResult } from '@/lib/scoring'
+import { bestFinishLevel } from '@/lib/prize'
 
 export const revalidate = 30
 
@@ -26,7 +27,7 @@ export async function GET() {
   const rows = participants
     .map((p) => {
       const pp = (picks ?? []).filter((pk) => pk.participant_id === p.id)
-      return { id: p.id, name: p.name, points: calcParticipantPoints(pp, matchResults) }
+      return { id: p.id, name: p.name, points: bestFinishLevel(pp, matchResults) }
     })
     .sort((a, b) => b.points - a.points)
 

@@ -1,5 +1,4 @@
 export interface HomeDict {
-  miniDashboard: { points: string; rank: string; ofTotal: (total: number) => string }
   miniLeaderboard: { seeAll: (total: number) => string }
   stickyHeader: { brand: string; info: string; leaderboard: string; myPage: string; join: string }
   closedCta: {
@@ -23,17 +22,11 @@ export interface HomeDict {
     title: string
     subtitle: string
     cards: { title: string; desc: string }[]
-    pointsDesc: (perSet: string, perAdvancement: string) => string
   }
   footer: { myPage: string; join: string; infoAndRules: string; privacy: string }
 }
 
 export const home: HomeDict = {
-  miniDashboard: {
-    points: 'Poeng',
-    rank: 'Plassering',
-    ofTotal: (total) => `av ${total}`,
-  },
   miniLeaderboard: {
     seeAll: (total) => `Se alle ${total} →`,
   },
@@ -62,14 +55,13 @@ export const home: HomeDict = {
   },
   howItWorks: {
     eyebrow: 'Slik fungerer det',
-    title: 'De 6 pottene',
-    subtitle: 'Velg 6 spillere – én fra hvert nivå',
+    title: 'De 4 pottene',
+    subtitle: 'Velg 4 spillere – én fra hver pott',
     cards: [
-      { title: 'Velg 6 spillere', desc: 'Velg én dartspiller fra hvert av de 6 nivåene' },
-      { title: 'Poeng underveis', desc: 'Avansement i sluttspillet gir poeng for hver av spillerne dine' },
+      { title: 'Velg 4 spillere', desc: 'Velg én dartspiller fra hver av de 4 pottene — ingen kunnskap om dart nødvendig' },
+      { title: 'Treff vinneren', desc: 'Vinner en av spillerne dine turneringen, deler du premien med alle som har valgt samme spiller' },
       { title: 'Spill mot venner', desc: 'Opprett private ligaer og sammenlign deg med andre på leaderboardet' },
     ],
-    pointsDesc: (perSet, perAdvancement) => `${perSet} per vunnet sett, ${perAdvancement} per kampseier i sluttspillet — for hver av spillerne dine`,
   },
   footer: {
     myPage: 'Min side',

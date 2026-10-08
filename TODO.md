@@ -1,5 +1,7 @@
 # Todo
 
+> **Grand Slam-grenen (2026-10-08):** egen åpen-liste øverst i [`WGP_PIVOT_REVERT.md`](WGP_PIVOT_REVERT.md). Poengpunktene lenger ned i denne fila gjelder det gamle formatet.
+
 ## Ting du (Morten) må gjøre selv — jeg kan ikke gjøre disse
 
 **Løst 2026-09-27/28 (generalprøve mot World Grand Prix er nå live i produksjon):**

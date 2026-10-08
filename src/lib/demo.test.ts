@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { DEMO_LEAGUES, DEMO_PARTICIPANTS, demoTeamsAreValid, getDemoMatches, isDemoId, isDemoLeagueCode, parseDemoPhase } from './demo'
 import { STAGE_ORDER } from '@/config/scoring'
-import { calcParticipantPoints, isPlayerChampion, isPlayerEliminated } from './scoring'
+import { isPlayerChampion, isPlayerEliminated } from './scoring'
+import { bestFinishLevel, summarizePrize } from './prize'
+import { groupPicks } from './ranking'
 
 describe('demo-verdenen', () => {
   it('alle demo-lag består av valgbare spillere, én per pott', () => {
@@ -54,12 +56,23 @@ describe('demo-verdenen', () => {
 
   it('fasene gir tre tydelig ulike tilstander for demo-deltakeren', () => {
     const me = DEMO_PARTICIPANTS[0]
-    expect(calcParticipantPoints(me.picks, getDemoMatches('for'))).toBe(0)
-    const live = calcParticipantPoints(me.picks, getDemoMatches('live'))
-    const done = calcParticipantPoints(me.picks, getDemoMatches('ferdig'))
+    expect(bestFinishLevel(me.picks, getDemoMatches('for'))).toBe(0)
+    const live = bestFinishLevel(me.picks, getDemoMatches('live'))
+    const done = bestFinishLevel(me.picks, getDemoMatches('ferdig'))
     expect(live).toBeGreaterThan(0)
     expect(done).toBeGreaterThan(live)
     expect(isPlayerChampion('Luke Humphries', getDemoMatches('ferdig'))).toBe(true)
-    expect(isPlayerEliminated('Luke Woodhouse', getDemoMatches('live'))).toBe(true)
+    // Slått ut i siste 16 allerede underveis
+    expect(isPlayerEliminated('Ryan Searle', getDemoMatches('live'))).toBe(true)
+  })
+
+  it('etter finalen deler de som har vinneren premien', () => {
+    const by = groupPicks(DEMO_PARTICIPANTS.flatMap((p) => p.picks.map((pk) => ({ ...pk, participant_id: p.id }))))
+    const prize = summarizePrize(by, getDemoMatches('ferdig'))
+    expect(prize.final).toBe(true)
+    expect(prize.rollover).toBe(false)
+    const holders = DEMO_PARTICIPANTS.filter((p) => p.picks.some((pk) => pk.player_name === 'Luke Humphries'))
+    expect(prize.sharerCount).toBe(holders.length)
+    expect(holders.length).toBeGreaterThan(1)
   })
 })

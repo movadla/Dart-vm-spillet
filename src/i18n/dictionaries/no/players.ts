@@ -14,8 +14,8 @@ export interface PlayersDict {
 
 export const players: PlayersDict = {
   stages: {
-    r1: '1. runde',
-    r2: '2. runde',
+    group: 'Gruppespill',
+    r16: 'Siste 16',
     qf: 'Kvartfinale',
     sf: 'Semifinale',
     final: 'Finale',

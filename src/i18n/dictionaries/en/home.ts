@@ -1,11 +1,6 @@
 import type { HomeDict } from '../no/home'
 
 export const home = {
-  miniDashboard: {
-    points: 'Points',
-    rank: 'Rank',
-    ofTotal: (total) => `of ${total}`,
-  },
   miniLeaderboard: {
     seeAll: (total) => `See all ${total} →`,
   },
@@ -34,14 +29,13 @@ export const home = {
   },
   howItWorks: {
     eyebrow: 'How it works',
-    title: 'The 6 pots',
-    subtitle: 'Pick 6 players – one from each tier',
+    title: 'The 4 pots',
+    subtitle: 'Pick 4 players – one from each pot',
     cards: [
-      { title: 'Pick 6 players', desc: 'Pick one dart player from each of the 6 tiers' },
-      { title: 'Points as you go', desc: 'Advancing in the knockout stage earns points for each of your players' },
+      { title: 'Pick 4 players', desc: 'Pick one dart player from each of the 4 pots — no darts knowledge needed' },
+      { title: 'Hit the winner', desc: 'If one of your players wins the tournament, you share the prize with everyone who picked the same player' },
       { title: 'Play against friends', desc: 'Start private leagues and compare yourself with others on the leaderboard' },
     ],
-    pointsDesc: (perSet, perAdvancement) => `${perSet} per set won, ${perAdvancement} per match win in the knockout stage — for each of your players`,
   },
   footer: {
     myPage: 'My page',

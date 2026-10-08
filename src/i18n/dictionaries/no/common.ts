@@ -45,6 +45,9 @@ export interface CommonDict {
     rankDown: (n: number) => string
     rankUnchanged: string
     allEliminated: string
+    /** Visning av «nivå» i leaderboard-raden: turneringsvinner / ikke spilt ennå. */
+    champion: string
+    notPlayed: string
     remaining: (left: number, total: number) => string
     showMore: (shown: number, total: number) => string
   }
@@ -97,6 +100,8 @@ export const common: CommonDict = {
     rankDown: (n) => `ned ${n}`,
     rankUnchanged: 'uendret',
     allEliminated: 'alle ute',
+    champion: 'Mester',
+    notPlayed: '–',
     remaining: (left, total) => `${left} av ${total} igjen`,
     showMore: (shown, total) => `Vis flere (${shown} av ${total}) →`,
   },

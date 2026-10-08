@@ -4,7 +4,6 @@ import { useEffect, useState, Suspense, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { POTS, getIso2 } from '@/data/pots'
-import { R1_MATCHES } from '@/lib/bracketProjection'
 import Flag from '@/components/Flag'
 import { STAGE_ORDER, STAGE_LABELS } from '@/config/scoring'
 import { SPORT } from '@/config/theme'
@@ -29,7 +28,7 @@ export function VerktøyTab({ headers }: { headers: Record<string, string> }) {
   const [linksLoading, setLinksLoading] = useState(true)
   const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([])
   const [auditLoading, setAuditLoading] = useState(true)
-  const [matchForm, setMatchForm] = useState({ player1: '', player2: '', sets1: '', sets2: '', stage: 'r1' })
+  const [matchForm, setMatchForm] = useState({ player1: '', player2: '', sets1: '', sets2: '', stage: STAGE_ORDER[0] as string })
   const [matchMsg, setMatchMsg] = useState('')
   const [bulkText, setBulkText] = useState('')
   const [bulkBusy, setBulkBusy] = useState(false)
@@ -52,7 +51,7 @@ export function VerktøyTab({ headers }: { headers: Record<string, string> }) {
     e.preventDefault(); setMatchMsg('')
     try {
       const res = await fetch('/api/admin/match-result', { method: 'POST', headers, body: JSON.stringify({ player1: matchForm.player1, player2: matchForm.player2, sets1: parseInt(matchForm.sets1), sets2: parseInt(matchForm.sets2), stage: matchForm.stage }) })
-      if (res.ok) { setMatchMsg('✅ Resultat lagret'); setMatchForm({ player1: '', player2: '', sets1: '', sets2: '', stage: 'r1' }) }
+      if (res.ok) { setMatchMsg('✅ Resultat lagret'); setMatchForm({ player1: '', player2: '', sets1: '', sets2: '', stage: STAGE_ORDER[0] }) }
       else setMatchMsg('❌ Feil ved lagring')
     } catch { setMatchMsg('❌ Serverfeil') }
   }
@@ -62,7 +61,7 @@ export function VerktøyTab({ headers }: { headers: Record<string, string> }) {
     const lines = bulkText.split('\n').map((l) => l.trim()).filter(Boolean)
     const matches = lines.map((line) => {
       const [player1, player2, sets1, sets2, stage] = line.split(';').map((s) => s.trim())
-      return { player1, player2, sets1: Number(sets1), sets2: Number(sets2), stage: stage || 'r1' }
+      return { player1, player2, sets1: Number(sets1), sets2: Number(sets2), stage: stage || STAGE_ORDER[0] }
     })
     try {
       const res = await fetch('/api/admin/match-result/bulk', { method: 'POST', headers, body: JSON.stringify({ matches }) })

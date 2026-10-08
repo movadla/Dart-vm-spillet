@@ -1,3 +1,37 @@
+# ⚠️ Grand Slam-grenen (`grand-slam`, 2026-10-08) — les først
+
+Denne grenen bygger **Grand Slam of Darts 2026** (14.–22. nov) med et NYTT
+spillformat («4 valg, vinneren deler premien»), ikke bare en ny turnering.
+Sjekklisten under (World Grand Prix → VM) gjelder fortsatt for `master`, men
+på denne grenen er flere av filene den nevner **slettet eller skrevet om**.
+Ved retur til VM i desember må man derfor bestemme om VM også skal bruke dette
+formatet (da er det meste allerede gjort) eller gå tilbake til poengmodellen
+(da hentes den fra `master`/git-historikken).
+
+**Slettet på denne grenen** (finnes i git-historikken, f.eks. `git show master:src/lib/bracketProjection.ts`):
+`bracketProjection.ts` (+ tester), `config/schedule.ts` (+ test), `BracketModal`,
+`DrawBracket`, `MatchBracket`, `deltaker/[id]/NextMatches`, `CountUp`, `PointsDelta`,
+`api/my-stats`, `api/pick-share`, `scripts/simulate-scoring-suspense.ts`.
+
+**Skrevet om:** `lib/prize.ts` (ny premiemodell), `lib/scoring.ts` (poeng fjernet),
+`config/scoring.ts` (STAGE_ORDER = group/r16/qf/sf/final — FORELØPIG, 16 videre fra
+gruppene er IKKE bekreftet), `data/pots.ts` (4 potter fra flat `FIELD` sortert på odds),
+tippe-flyten (pott 4 = 5 kort + liste), leaderboard/Min side/RankList (viser «nivå»,
+ikke poeng), intro-slideshow, forside, VM-guide (Kamper = resultatliste, Regler = premiedeling).
+
+## Åpent før lansering av Grand Slam (se også TODO.md)
+
+- [ ] `FIELD` i `data/pots.ts` er fortsatt World Grand Prix-feltet (PLASSHOLDER) — bytt til de 48 etter Tour Card Holder Qualifier 2026-11-06, med odds fra en ekte, navngitt kilde (ingen Grand Slam-marked var publisert 2026-10-08).
+- [ ] `KICKOFF` er satt konservativt til 00:00 norsk tid 2026-11-14 — oppdater med verifisert klokkeslett for første kamp (PDC-program).
+- [ ] `STAGE_NAME_MAP` i `api/sync-pdc-results` er UVERIFISERT mot API 10871 (stages var tom) — sjekk når trekningen er ute. Samme for om det er 16 eller flere som går videre fra gruppene.
+- [ ] **Databasen må nullstilles** (`picks`, `match_results`, deltakere): den inneholder World Grand Prix-data (6 valg per deltaker, andre potter) og 96 bot-deltakere med 6 valg. `.env.local` peker på PRODUKSJONS-databasen — ikke send inn ekte påmelding lokalt. Botene bør lages på nytt med 4 valg (de skal fortsatt telle med i premiedelingen, avgjort 2026-10-08).
+- [ ] E-postmalene (`lib/email-*.ts`) og e-postrutene beskriver fortsatt poeng — skriv om før e-post skrus på.
+- [ ] Branding: all tekst/farge sier fortsatt «World Grand Prix» (blått tema) — se `git grep -l "World Grand Prix" -- src`.
+- [ ] «% valgt» er fjernet fra kortene (avgjort 2026-10-08, gir strategisk informasjon i et spill der delt premie belønner unike valg).
+- [ ] Juridisk: avklar om premien/innsatsen trenger lotteritillatelse (Lotteritilsynet) før den utbetales — utsatt av Morten 2026-10-08.
+
+---
+
 # Tilbake til det ekte VM i desember — full sjekkliste
 
 Denne fila finnes fordi et tidligere forsøk på å spore reverteringen (kode-

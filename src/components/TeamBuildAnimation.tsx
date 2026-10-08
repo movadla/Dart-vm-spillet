@@ -27,7 +27,8 @@ interface Level {
 }
 
 const LEVELS: Level[] = POTS.map((pot, i) => {
-  const candidates = getPickablePlayers(pot)
+  // Pott med mange kandidater (pott 4) vises med de 6 beste i animasjonen.
+  const candidates = getPickablePlayers(pot).slice(0, 6)
   const found = candidates.findIndex((p) => p.name === EXAMPLE_PICKS[i])
   return {
     potNumber: pot.potNumber,

@@ -14,11 +14,12 @@
 // Fase (`for` = før turneringen, `live` = underveis, `ferdig` = avgjort) velges i
 // demo-banneret øverst på Min side og huskes i cookien `vm_demo`.
 //
-// MIDLERTIDIG (2026-09-27): kampresultatene under er bygget for PDC World
-// Grand Prix 2026-oppsettet (32 spillere, 5 runder — se bracketProjection.ts
-// og pots.ts), ikke det vanlige 128-spiller-VM-oppsettet. Siden HELE
-// World Grand Prix-feltet er kjent og navngitt, er det ingen
-// "Kvalifisert spiller N"-plasseringsspillere her i det hele tatt.
+// MIDLERTIDIG (2026-10-08): kampresultatene under er en FORENKLET Grand
+// Slam-turnering bygget av plassholder-feltet i src/data/pots.ts: 16
+// gruppevinnere (hver slo én motstander — ikke komplette grupper på tre),
+// deretter siste 16, kvartfinaler, semifinaler og finale. Formålet er bare å
+// vise alle tilstander i brukergrensesnittet, ikke å etterligne et ekte
+// gruppespill. Bytt når det ekte feltet og programmet er kjent.
 
 import { POTS, getPickablePlayers } from '@/data/pots'
 import type { MatchResult, PickWithPot } from '@/lib/scoring'
@@ -90,71 +91,63 @@ export const DEMO_LEAGUES: DemoLeague[] = [
     members: ['demo', 'demo-4', 'demo-9', 'demo-10'] },
 ]
 
-// Kampresultater per fase — hele 32-spiller-braketten til World Grand Prix
-// (16 runde 1-kamper, ingen walkover: alle 32, også de seedede, spiller
-// runde 1 — se bracketProjection.ts sin R1_MATCHES for selve trekningen,
-// som denne simuleringen er bygget fra slik at «neste kamp»-projeksjonen kan
-// slå opp ekte, avgjorte motstandere helt ut braketten). Sett-tallene følger
-// World Grand Prix sitt faktiske format (double-in/double-out): runde 1 er
-// best of 3 sett, runde 2/kvartfinale best of 5, semifinale best of 9,
-// finale best of 11.
-//
-// «live» = turneringen er midt i 2. runde: halvparten av runde 2-kampene er
-// spilt. «ferdig» = full turnering — Luke Humphries snur en 2-2 (sett) i
-// semifinalen og vinner finalen 6–4 over storfavoritt Luke Littler.
+// Kampresultater per fase. «live» = gruppespillet er ferdig og halvparten av
+// siste 16 er spilt. «ferdig» = full turnering — Luke Humphries slår
+// storfavoritt Luke Littler i finalen. Tallene er legs (best av 9 i
+// gruppen, lengre kamper utover).
 function m(stage: string, player1: string, sets1: number, player2: string, sets2: number): MatchResult {
   return { stage, player1, player2, sets1, sets2, winner: sets1 > sets2 ? player1 : player2 }
 }
 
-const R1_RESULTS: MatchResult[] = [
-  m('r1', 'Luke Littler', 2, 'Luke Woodhouse', 0),
-  m('r1', 'Nathan Aspinall', 2, 'Kevin Doets', 1),
-  m('r1', 'Danny Noppert', 2, 'Niko Springer', 0),
-  m('r1', 'Michael van Gerwen', 2, 'Ryan Joyce', 1),
-  m('r1', 'Gerwyn Price', 2, 'Sebastian Białecki', 0),
-  m('r1', 'Ross Smith', 2, 'Cameron Menzies', 1),
-  m('r1', 'Jonny Clayton', 2, 'Krzysztof Ratajski', 0),
-  m('r1', 'Wessel Nijman', 2, 'Rob Cross', 1),
-  m('r1', 'Luke Humphries', 2, 'Dave Chisnall', 0),
-  m('r1', 'Jermaine Wattimena', 2, 'Chris Dobey', 1),
-  m('r1', 'Josh Rock', 2, 'Niels Zonneveld', 0),
-  m('r1', 'Gary Anderson', 2, 'Damon Heta', 1),
-  m('r1', 'Gian van Veen', 2, 'Dirk van Duijvenbode', 0),
-  m('r1', 'Ryan Searle', 2, "William O'Connor", 1),
-  m('r1', 'James Wade', 2, 'Joe Cullen', 0),
-  m('r1', 'Stephen Bunting', 2, 'Andrew Gilding', 1),
+const GROUP_RESULTS: MatchResult[] = [
+  m('group', 'Luke Littler', 5, 'Luke Woodhouse', 1),
+  m('group', 'Luke Humphries', 5, 'Dave Chisnall', 2),
+  m('group', 'Gerwyn Price', 5, 'Joe Cullen', 3),
+  m('group', 'Gian van Veen', 5, 'Cameron Menzies', 0),
+  m('group', 'James Wade', 5, 'Kevin Doets', 2),
+  m('group', 'Gary Anderson', 5, 'Rob Cross', 3),
+  m('group', 'Ross Smith', 5, 'Ryan Joyce', 4),
+  m('group', 'Michael van Gerwen', 5, 'Niko Springer', 1),
+  m('group', 'Wessel Nijman', 5, 'Niels Zonneveld', 2),
+  m('group', 'Jonny Clayton', 5, 'Krzysztof Ratajski', 3),
+  m('group', 'Chris Dobey', 5, 'Andrew Gilding', 3),
+  m('group', 'Nathan Aspinall', 5, "William O'Connor", 2),
+  m('group', 'Josh Rock', 5, 'Sebastian Białecki', 4),
+  m('group', 'Stephen Bunting', 5, 'Danny Noppert', 3),
+  m('group', 'Damon Heta', 5, 'Jermaine Wattimena', 2),
+  m('group', 'Ryan Searle', 5, 'Dirk van Duijvenbode', 1),
 ]
 
-const R2_LIVE: MatchResult[] = [
-  m('r2', 'Luke Littler', 3, 'Nathan Aspinall', 1),
-  m('r2', 'Michael van Gerwen', 3, 'Danny Noppert', 2),
-  m('r2', 'Gerwyn Price', 3, 'Ross Smith', 1),
-  m('r2', 'Wessel Nijman', 3, 'Jonny Clayton', 2),
+const R16_LIVE: MatchResult[] = [
+  m('r16', 'Luke Littler', 10, 'Ryan Searle', 4),
+  m('r16', 'Michael van Gerwen', 10, 'James Wade', 7),
+  m('r16', 'Gerwyn Price', 10, 'Wessel Nijman', 5),
+  m('r16', 'Jonny Clayton', 10, 'Chris Dobey', 8),
 ]
-const R2_REST: MatchResult[] = [
-  m('r2', 'Luke Humphries', 3, 'Jermaine Wattimena', 0),
-  m('r2', 'Josh Rock', 3, 'Gary Anderson', 2),
-  m('r2', 'Gian van Veen', 3, 'Ryan Searle', 1),
-  m('r2', 'Stephen Bunting', 2, 'James Wade', 3),
+const R16_REST: MatchResult[] = [
+  m('r16', 'Luke Humphries', 10, 'Stephen Bunting', 3),
+  m('r16', 'Josh Rock', 10, 'Gary Anderson', 6),
+  m('r16', 'Gian van Veen', 10, 'Ross Smith', 4),
+  m('r16', 'Damon Heta', 10, 'Nathan Aspinall', 9),
 ]
 const QF_RESULTS: MatchResult[] = [
-  m('qf', 'Luke Littler', 3, 'Michael van Gerwen', 2),
-  m('qf', 'Gerwyn Price', 3, 'Wessel Nijman', 1),
-  m('qf', 'Luke Humphries', 3, 'Josh Rock', 2),
-  m('qf', 'Gian van Veen', 3, 'James Wade', 0),
+  m('qf', 'Luke Littler', 11, 'Michael van Gerwen', 7),
+  m('qf', 'Gerwyn Price', 11, 'Jonny Clayton', 5),
+  m('qf', 'Luke Humphries', 11, 'Josh Rock', 8),
+  m('qf', 'Gian van Veen', 11, 'Damon Heta', 6),
 ]
 const SF_RESULTS: MatchResult[] = [
-  m('sf', 'Luke Littler', 5, 'Gerwyn Price', 3),
-  m('sf', 'Luke Humphries', 5, 'Gian van Veen', 4),
+  m('sf', 'Luke Littler', 15, 'Gerwyn Price', 10),
+  m('sf', 'Luke Humphries', 15, 'Gian van Veen', 13),
 ]
 const FINAL_RESULT: MatchResult[] = [
-  m('final', 'Luke Humphries', 6, 'Luke Littler', 4),
+  m('final', 'Luke Humphries', 16, 'Luke Littler', 12),
 ]
 
-const LIVE_MATCHES: MatchResult[] = [...R1_RESULTS, ...R2_LIVE]
+const LIVE_MATCHES: MatchResult[] = [...GROUP_RESULTS, ...R16_LIVE]
 
 const FINISHED_MATCHES: MatchResult[] = [
-  ...R1_RESULTS, ...R2_LIVE, ...R2_REST,
+  ...GROUP_RESULTS, ...R16_LIVE, ...R16_REST,
   ...QF_RESULTS, ...SF_RESULTS, ...FINAL_RESULT,
 ]
 

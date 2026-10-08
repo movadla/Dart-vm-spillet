@@ -3,8 +3,8 @@ import { Resend } from 'resend'
 import { createHmac } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { checkAdminAuth } from '@/lib/adminAuth'
-import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
-import { SCORING } from '@/config/scoring'
+import type { MatchResult } from '@/lib/scoring'
+import { bestFinishLevel } from '@/lib/prize'
 import { buildDailyEmail, buildDailyPlainText, VM_TOTAL_DAYS } from '@/lib/email-daily'
 import { logAdminAction } from '@/lib/adminAudit'
 
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
   const leaderboard = allActive.map((p) => {
     const picks = (allPicks ?? []).filter((pk) => pk.participant_id === p.id)
-    return { ...p, picks, points: calcParticipantPoints(picks, matchResults) }
+    return { ...p, picks, points: bestFinishLevel(picks, matchResults) }
   }).sort((a, b) => b.points - a.points)
 
   const pointsById: Record<string, number> = {}
@@ -109,20 +109,11 @@ export async function POST(req: NextRequest) {
   const fromAddr = `World Grand Prix-Spillet <oppdatering@${process.env.EMAIL_DOMAIN ?? 'resend.dev'}>`
 
   const payloads = recipients.map((row) => {
-    const pointsDelta = row.picks.reduce((sum: number, pick: { player_name: string; pot_number: number }) => {
-      const recent = recentMatches24h.filter((m) =>
-        m.player1 === pick.player_name || m.player2 === pick.player_name
-      )
-      if (!recent.length) return sum
-      const rawPts = recent.reduce((s, m) => {
-        const isP1 = m.player1 === pick.player_name
-        const setPts = (isP1 ? m.sets1 : m.sets2) * SCORING.perSetWon
-        const advPts = m.winner === pick.player_name ? SCORING.perAdvancement : 0
-        const winnerBonus = m.winner === pick.player_name && m.stage === 'final' ? SCORING.tournamentWinner : 0
-        return s + setPts + advPts + winnerBonus
-      }, 0)
-      return sum + rawPts * (SCORING.underdogMultiplier[pick.pot_number] ?? 1)
-    }, 0)
+    // TODO (Grand Slam-formatet): poengmodellen er erstattet av «beste nivå»
+    // (src/lib/prize.ts), så «poeng siden i går» finnes ikke lenger. Malene i
+    // src/lib/email-*.ts beskriver fortsatt poeng og MÅ skrives om før e-post
+    // skrus på (e-post er bevisst utsatt — se TODO.md).
+    const pointsDelta = 0
     const ctaUrl = `${BASE_URL}/deltaker/${row.id}`
     const unsubscribeUrl = `${BASE_URL}/api/unsubscribe?id=${row.id}&token=${makeUnsubscribeToken(row.id)}`
     const myLeagues = (leaguesByParticipant[row.id] ?? [])

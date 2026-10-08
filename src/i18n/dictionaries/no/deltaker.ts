@@ -5,7 +5,14 @@ export interface DeltakerDict {
     backLeague: string
     backLeaderboard: string
     myPage: string
-    totalPoints: string
+    bestFinish: string
+    /** Du leder (nivå ≥ siste 16) — others = antall ANDRE som deler nivået. */
+    prizeLeading: (others: number) => string
+    /** Turneringen er avgjort og du har premien. */
+    prizeWon: (others: number) => string
+    prizeNone: string
+    /** Turneringen er avgjort og premien gikk til andre. */
+    prizeLost: string
     rank: string
     startsIn: string
     editTeam: string
@@ -14,7 +21,6 @@ export interface DeltakerDict {
     vmDecided: string
     vmInStagePrefix: string
     allMatches: string
-    nextMatchesHeader: string
     leaguesHeader: string
     vmGuide: string
     shareText: (rank: number, total: number) => string
@@ -29,13 +35,9 @@ export interface DeltakerDict {
     noMatchesYet: string
     won: string
     lost: string
-    matchSummary: (sets: number, wins: number, wonTournament: boolean, multiplier: number) => string
     playerInfo: string
     allMatches: string
     nextPlayer: string
-  }
-  nextMatches: {
-    none: string
   }
   demoBanner: {
     badge: string
@@ -77,7 +79,11 @@ export const deltaker: DeltakerDict = {
     backLeague: '← Ligaen',
     backLeaderboard: '← Leaderboard',
     myPage: 'Min side',
-    totalPoints: 'Totalpoeng',
+    bestFinish: 'Beste valg',
+    prizeLeading: (others) => (others === 0 ? 'Du leder alene' : `Du deler ledelsen med ${others} ${others === 1 ? 'annen' : 'andre'}`),
+    prizeWon: (others) => (others === 0 ? 'Du vinner hele premien' : `Du deler premien med ${others} ${others === 1 ? 'annen' : 'andre'}`),
+    prizeNone: 'Ingen av dine spillere leder ennå',
+    prizeLost: 'Premien gikk til andre denne gangen',
     rank: 'Plassering',
     startsIn: 'Turneringen starter om',
     editTeam: 'Endre laget →',
@@ -86,7 +92,6 @@ export const deltaker: DeltakerDict = {
     vmDecided: 'avgjort',
     vmInStagePrefix: 'Turneringen er i',
     allMatches: 'Alle kamper →',
-    nextMatchesHeader: 'Neste kamper',
     leaguesHeader: 'Ligaer',
     vmGuide: 'Turneringsguide →',
     shareText: (rank, total) => `Jeg er #${rank} av ${total} i World Grand Prix-Spillet!`,
@@ -101,14 +106,9 @@ export const deltaker: DeltakerDict = {
     noMatchesYet: 'Ingen kamper spilt ennå.',
     won: 'over',
     lost: 'mot',
-    matchSummary: (sets, wins, wonTournament, multiplier) =>
-      `${sets} sett · ${wins} ${wins === 1 ? 'seier' : 'seire'}${wonTournament ? ' · Turneringsseier' : ''}${multiplier > 1 ? ` · ×${multiplier}` : ''}`,
     playerInfo: 'Spillerinfo →',
     allMatches: 'Alle kamper →',
     nextPlayer: 'Neste spiller →',
-  },
-  nextMatches: {
-    none: 'Ingen kommende kamper for laget ditt.',
   },
   demoBanner: {
     badge: 'Demo',
@@ -144,6 +144,6 @@ export const deltaker: DeltakerDict = {
     // Alle syv formene skal være like «tunge» (ett ord + evt. tall) — «4. runde»
     // ved siden av «kvart»/«semi» så synlig ujevnt ut i de tre kolonnene i
     // «vei til finalen» (én lang, to korte).
-    shortStage: { r1: 'Runde 1', r2: 'Runde 2', qf: 'Kvart', sf: 'Semi', final: 'Finale' },
+    shortStage: { group: 'Gruppe', r16: 'Siste 16', qf: 'Kvart', sf: 'Semi', final: 'Finale' },
   },
 }

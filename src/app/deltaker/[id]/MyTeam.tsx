@@ -7,9 +7,8 @@ import Flag from '@/components/Flag'
 import TeamTile, { lastName } from '@/components/TeamTile'
 import { POTS, getIso2, type Player } from '@/data/pots'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
-import { STAGE_ORDER, type Stage } from '@/config/scoring'
-import { calcPlayerPoints, getPlayerMatches, isPlayerEliminated, isPlayerChampion, furthestStageReached, type PickWithPot, type MatchResult } from '@/lib/scoring'
-import { formatPoints } from '@/lib/format'
+import { STAGE_ORDER, GROUP_STAGE, type Stage } from '@/config/scoring'
+import { getPlayerMatches, isPlayerEliminated, isPlayerChampion, furthestStageReached, type PickWithPot, type MatchResult } from '@/lib/scoring'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
 import type { Dictionary } from '@/i18n/dictionaries'
@@ -45,6 +44,8 @@ function statusFor(name: string, matches: MatchResult[], dict: Dictionary): { la
   // Bare stadienavnet («Kvartfinale»/«4. runde») i stedet for en hel setning
   // («Videre til kvartfinale») — grønnfargen alene skiller dette tydelig fra
   // «Ute i …»-radene rett under, så prefikset var overflødig tekst.
+  // Gruppespill uten sluttspillkamp ennå: vis gruppespillet selv, ikke «neste» runde.
+  if (reached === GROUP_STAGE) return { label: dict.players.stages[GROUP_STAGE], color: '#4ade80', strong: false }
   const next = STAGE_ORDER[STAGE_INDEX[reached] + 1]
   return { label: dict.players.stages[next ?? reached], color: '#4ade80', strong: false }
 }
@@ -56,7 +57,7 @@ function statusFor(name: string, matches: MatchResult[], dict: Dictionary): { la
  * åpner det samme spillerpanelet som i tippe-flyten.
  */
 export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
-  const { locale, dict } = useLocale()
+  const { dict } = useLocale()
   const [openRow, setOpenRow] = useState<string | null>(null)
   const [sheetPlayer, setSheetPlayer] = useState<Player | null>(null)
 
@@ -84,8 +85,6 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
           const color = POT_COLORS[i]
           const isLast = idx === sorted.length - 1
           const isOpen = openRow === pick.player_name
-          const { setPts, advPts, winnerBonus, multiplier, total } = calcPlayerPoints(pick, matchResults)
-          const wins = advPts / 2
           const eliminated = vmStarted && isPlayerEliminated(pick.player_name, matchResults)
           const champion = vmStarted && isPlayerChampion(pick.player_name, matchResults)
           const status = vmStarted ? statusFor(pick.player_name, matchResults, dict) : null
@@ -120,25 +119,8 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
                       </span>
                     )}
                   </span>
-                  {multiplier > 1 && (
-                    // Flyttet ut av navnets egen flex-rad og inn som en fast
-                    // kolonne helt til høyre for navnet (før poeng-kolonnen) —
-                    // lå tidligere RETT ETTER navnet, som ga en annen
-                    // horisontal posisjon per rad avhengig av navnelengde
-                    // («James Wade ×2» vs. «Wessel Nijman ×2»). Nå står alle
-                    // badgene i samme kolonne uansett navnelengde.
-                    <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, flexShrink: 0, color: multiplier >= 3 ? '#ff6b6b' : '#fbbf24', background: multiplier >= 3 ? 'rgba(220,38,38,0.18)' : 'rgba(245,158,11,0.18)', border: `1px solid ${multiplier >= 3 ? 'rgba(239,68,68,0.55)' : 'rgba(245,158,11,0.55)'}`, borderRadius: 5, padding: '2px 8px', lineHeight: 1.4, boxShadow: `0 0 10px ${multiplier >= 3 ? 'rgba(239,68,68,0.3)' : 'rgba(245,158,11,0.3)'}` }}>
-                      ×{multiplier}
-                    </span>
-                  )}
                 </span>
-                {vmStarted ? (
-                  <span style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, lineHeight: 1, flexShrink: 0, minWidth: 48, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: total > 0 ? '#4ade80' : 'rgba(255,255,255,0.35)' }}>
-                    {formatPoints(total, locale)}
-                  </span>
-                ) : (
-                  <span aria-hidden style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>›</span>
-                )}
+                <span aria-hidden style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>›</span>
               </button>
 
               {isOpen && (
@@ -156,7 +138,7 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
                         return (
                           <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
                             <span style={{ width: 74, flexShrink: 0, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>
-                              {dict.players.stages[(m.stage ?? 'r1') as Stage] ?? m.stage}
+                              {dict.players.stages[(m.stage ?? GROUP_STAGE) as Stage] ?? m.stage}
                             </span>
                             <span style={{ fontFamily: SPORT, fontSize: 15, fontWeight: 900, width: 34, flexShrink: 0, color: won ? '#4ade80' : '#f87171', fontVariantNumeric: 'tabular-nums' }}>
                               {mySets}–{oppSets}
@@ -167,15 +149,6 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
                           </div>
                         )
                       })}
-                    </div>
-                  )}
-
-                  {total > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10, padding: '7px 10px', borderRadius: 8, background: 'rgba(34,197,94,0.07)', borderLeft: '2px solid rgba(34,197,94,0.4)' }}>
-                      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', flex: 1, fontVariantNumeric: 'tabular-nums' }}>
-                        {dict.deltaker.myTeam.matchSummary(setPts, wins, winnerBonus > 0, multiplier)}
-                      </span>
-                      <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: '#4ade80', fontVariantNumeric: 'tabular-nums' }}>{formatPoints(total, locale)}</span>
                     </div>
                   )}
 
@@ -205,7 +178,6 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
           onNext={() => { const p = nextPick && findPlayer(nextPick.player_name); if (p) setSheetPlayer(p) }}
           nextLabel={dict.deltaker.myTeam.nextPlayer}
           matchResults={matchResults}
-          potNumber={sorted[sheetIndex]?.pot_number}
         />
       )}
     </>

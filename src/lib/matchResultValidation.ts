@@ -37,7 +37,7 @@ export function validateMatchResultInput(
     return { ok: false, error: 'Uavgjort er ikke gyldig — én spiller må ha flere sett enn den andre' }
   }
 
-  const matchStage = typeof stage === 'string' && validStages.includes(stage) ? stage : 'r1'
+  const matchStage = typeof stage === 'string' && validStages.includes(stage) ? stage : validStages[0]
   const winner = sets1 > sets2 ? player1 : player2
 
   return { ok: true, value: { player1, player2, sets1, sets2, stage: matchStage, winner } }

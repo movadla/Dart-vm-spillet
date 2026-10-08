@@ -3,7 +3,8 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
 
-import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
+import type { MatchResult } from '@/lib/scoring'
+import { bestFinishLevel } from '@/lib/prize'
 
 interface Pick { participant_id: string; pot_number: number; player_name: string }
 
@@ -47,7 +48,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ cod
       const p = m.participant as unknown as { id: string; name: string } | null
       if (!p) return null
       const playerPicks = ((picks as Pick[]) ?? []).filter((pk) => pk.participant_id === p.id)
-      const points = calcParticipantPoints(playerPicks, (matches as MatchResult[]) ?? [])
+      const points = bestFinishLevel(playerPicks, (matches as MatchResult[]) ?? [])
       return { id: p.id, name: p.name, points, picks: playerPicks.sort((a, b) => a.pot_number - b.pot_number) }
     })
     .filter(Boolean)

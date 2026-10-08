@@ -7,7 +7,8 @@
 import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { calcParticipantPoints, type MatchResult, type PickWithPot } from '@/lib/scoring'
+import type { MatchResult, PickWithPot } from '@/lib/scoring'
+import { bestFinishLevel, summarizePrize, type PrizeSummary } from '@/lib/prize'
 import { getRankBaseline, RANK_ARROW_LEAGUES } from '@/lib/rankSnapshot'
 import type { RankEntry } from '@/components/RankList'
 import { buildRankRows, groupPicks, rankAmong, type PickRow } from '@/lib/ranking'
@@ -26,7 +27,10 @@ export interface ParticipantPageData {
   participant: ParticipantRow
   picks: PickWithPot[]
   matchResults: MatchResult[]
-  totalPoints: number
+  /** «Nivå» for deltakerens beste valg (src/lib/prize.ts). */
+  finishLevel: number
+  /** Premiesituasjonen over alle deltakere. */
+  prize: PrizeSummary
   rank: number
   totalParticipants: number
   vmStarted: boolean
@@ -39,6 +43,8 @@ export interface BoardData {
   matchResults: MatchResult[]
   vmStarted: boolean
   demo: DemoPhase | null
+  /** Premiesituasjonen (hvem som deler akkurat nå) — null for ligaer. */
+  prize?: PrizeSummary | null
 }
 
 export interface LeagueData extends BoardData {
@@ -104,13 +110,14 @@ export const getParticipantPageData = cache(async function getParticipantPageDat
     const phase = (await readDemoPhase(phaseFromQuery)) ?? 'live'
     const matchResults = getDemoMatches(phase)
     const by = groupPicks(demoPickRows())
-    const totalPoints = calcParticipantPoints(p.picks, matchResults)
+    const finishLevel = bestFinishLevel(p.picks, matchResults)
     return {
       participant: { id: p.id, name: p.name, email: p.email, created_at: p.created_at },
       picks: p.picks,
       matchResults,
-      totalPoints,
-      rank: rankAmong(totalPoints, by, matchResults),
+      finishLevel,
+      prize: summarizePrize(by, matchResults),
+      rank: rankAmong(finishLevel, by, matchResults),
       totalParticipants: by.size,
       vmStarted: phase !== 'for',
       demo: phase,
@@ -131,13 +138,14 @@ export const getParticipantPageData = cache(async function getParticipantPageDat
   const picks = (picksData as PickWithPot[]) ?? []
   const matchResults = (matches as MatchResult[]) ?? []
   const by = groupPicks((allPicksData as PickRow[]) ?? [])
-  const totalPoints = calcParticipantPoints(picks, matchResults)
+  const finishLevel = bestFinishLevel(picks, matchResults)
   return {
     participant: participant as ParticipantRow,
     picks,
     matchResults,
-    totalPoints,
-    rank: rankAmong(totalPoints, by, matchResults),
+    finishLevel,
+    prize: summarizePrize(by, matchResults),
+    rank: rankAmong(finishLevel, by, matchResults),
     totalParticipants: by.size,
     vmStarted: new Date() >= KICKOFF,
     demo: null,
@@ -153,7 +161,7 @@ export async function getLeaderboardData(phaseFromQuery?: string | null): Promis
     const vmStarted = phase !== 'for'
     const ids = DEMO_PARTICIPANTS.map((p) => p.id)
     const rows = buildRankRows(DEMO_PARTICIPANTS, demoPickRows(), matchResults, vmStarted ? demoBaseline(phase, ids) : {}, vmStarted)
-    return { rows, matchResults, vmStarted, demo: phase }
+    return { rows, matchResults, vmStarted, demo: phase, prize: summarizePrize(groupPicks(demoPickRows()), matchResults) }
   }
 
   const vmStarted = new Date() >= KICKOFF
@@ -172,8 +180,9 @@ export async function getLeaderboardData(phaseFromQuery?: string | null): Promis
     supabase.from('picks').select('participant_id, pot_number, player_name').in('participant_id', ids),
     getRankBaseline('overall'),
   ])
-  const rows = buildRankRows(participants as ParticipantRow[], (picks as PickRow[]) ?? [], matchResults, baseline, vmStarted)
-  return { rows, matchResults, vmStarted, demo: null }
+  const pickRows = (picks as PickRow[]) ?? []
+  const rows = buildRankRows(participants as ParticipantRow[], pickRows, matchResults, baseline, vmStarted)
+  return { rows, matchResults, vmStarted, demo: null, prize: summarizePrize(groupPicks(pickRows), matchResults) }
 }
 
 // ── Liga ───────────────────────────────────────────────────────────────────
@@ -233,7 +242,7 @@ export function getDemoLeaguesFor(participantId: string, phase: DemoPhase): MyLe
   const matches = getDemoMatches(phase)
   return DEMO_LEAGUES.filter((l) => l.members.includes(participantId)).map((l) => {
     const by = groupPicks(demoPickRows(l.members))
-    const myPts = calcParticipantPoints(by.get(participantId) ?? [], matches)
+    const myPts = bestFinishLevel(by.get(participantId) ?? [], matches)
     return { name: l.name, invite_code: l.invite_code, rank: rankAmong(myPts, by, matches), total: l.members.length }
   })
 }

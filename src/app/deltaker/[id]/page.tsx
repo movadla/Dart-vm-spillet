@@ -3,19 +3,17 @@ import { notFound } from 'next/navigation'
 import BrandBanner from '@/components/BrandBanner'
 import ShareButton from '@/components/ShareButton'
 import { getParticipantPageData } from '@/lib/participantData'
-import { STAGE_ORDER, type Stage } from '@/config/scoring'
-import CountUp from './CountUp'
-import PointsDelta from './PointsDelta'
+import { STAGE_ORDER, GROUP_STAGE, type Stage } from '@/config/scoring'
+import { finishLabel } from '@/lib/finish'
 import LogoutButton from './LogoutButton'
 import Countdown from '@/components/Countdown'
 import type { Metadata } from 'next'
 import DemoBanner from './DemoBanner'
 import MyTeam from './MyTeam'
-import NextMatches from './NextMatches'
 import LeagueSection from '@/components/LeagueSection'
 import SectionHeader from '@/components/SectionHeader'
 import LocaleSwitch from '@/components/LocaleSwitch'
-import { IconTarget, IconNextMatch, IconTrophy } from '@/components/icons'
+import { IconTarget, IconTrophy } from '@/components/icons'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
@@ -25,7 +23,6 @@ const STAGE_INDEX: Record<string, number> = Object.fromEntries(STAGE_ORDER.map((
 // Én farge per seksjon — sammen med ikonet gjør dette det umiddelbart tydelig
 // hvilken del av Min side man ser på.
 const TEAM_COLOR = '#f3d576' // gull — samme farge som «Laget ditt»-finalen i intro-animasjonen
-const MATCH_COLOR = '#60a5fa' // blå — «neste kamper»
 const LEAGUE_COLOR = '#4ade80' // grønn — samme som leaderboard/plassering
 
 const CARD: React.CSSProperties = {
@@ -60,7 +57,7 @@ export default async function DeltakerPage({ params, searchParams }: {
   if (!data) notFound()
   const locale = await getLocale()
   const { deltaker, common, players } = getDictionary(locale)
-  const { participant: p, picks, matchResults, totalPoints, rank, totalParticipants, vmStarted, demo } = data
+  const { participant: p, picks, matchResults, finishLevel, prize, rank, totalParticipants, vmStarted, demo } = data
 
   // Kontekst-bevisst tilbake-lenke: kom man fra en liga/leaderboard, gå dit — ellers startside.
   const back = from?.startsWith('liga-')
@@ -76,10 +73,18 @@ export default async function DeltakerPage({ params, searchParams }: {
   const finalWon = matchResults.some(m => m.stage === 'final' && m.winner != null)
   let maxIdx = -1
   for (const m of matchResults) {
-    const idx = STAGE_INDEX[m.stage ?? 'r1']
+    const idx = STAGE_INDEX[m.stage ?? GROUP_STAGE]
     if (idx !== undefined && idx > maxIdx) maxIdx = idx
   }
   const displayStage: Stage | 'winner' | null = finalWon ? 'winner' : maxIdx >= 0 ? STAGE_ORDER[maxIdx] : null
+
+  // Premie-status: leder jeg (deler det høyeste nivået blant alle deltakere)?
+  // Gruppespillet alene (nivå 1) avgjør ingenting, så linjen vises først fra sluttspillet.
+  const finish = finishLabel(finishLevel, players)
+  const leading = prize.topLevel >= 2 && finishLevel === prize.topLevel
+  const prizeLine = leading
+    ? (prize.final ? deltaker.page.prizeWon(prize.sharerCount - 1) : deltaker.page.prizeLeading(prize.sharerCount - 1))
+    : prize.topLevel >= 2 ? (prize.final ? deltaker.page.prizeLost : deltaker.page.prizeNone) : null
 
   return (
     <div className="page-bg app-frame" style={{ minHeight: '100vh', color: '#fff', padding: '16px 20px 40px', position: 'relative' }}>
@@ -102,9 +107,9 @@ export default async function DeltakerPage({ params, searchParams }: {
         /* ── Poeng og plassering — kompakt, dette er en oppslagsboks, ikke en hovedvisning ── */
         <div style={{ ...CARD, display: 'flex', alignItems: 'stretch' }}>
           <div style={{ flex: 1, padding: '10px 14px', minWidth: 0 }}>
-            <div style={{ ...LABEL, marginBottom: 4 }}>{deltaker.page.totalPoints}</div>
-            <CountUp value={totalPoints} size={34} />
-            <div style={{ marginTop: 4, minHeight: 20 }}><PointsDelta participantId={p.id} totalPoints={totalPoints} /></div>
+            <div style={{ ...LABEL, marginBottom: 4 }}>{deltaker.page.bestFinish}</div>
+            <div style={{ fontFamily: SPORT, fontSize: 30, fontWeight: 900, lineHeight: 1, textTransform: 'uppercase', color: finish ? '#fff' : 'rgba(255,255,255,0.4)' }}>{finish ?? '–'}</div>
+            <div style={{ marginTop: 4, minHeight: 20, fontSize: 13, fontWeight: 600, color: leading ? '#4ade80' : 'rgba(255,255,255,0.55)' }}>{prizeLine}</div>
           </div>
           <div style={{ width: 1, background: 'rgba(255,255,255,0.08)', margin: '8px 0' }} />
           <Link href="/leaderboard" className="pick-row" style={{ flex: '0 0 auto', padding: '10px 16px', textAlign: 'center', textDecoration: 'none', color: 'inherit', minWidth: 88 }}>
@@ -143,10 +148,6 @@ export default async function DeltakerPage({ params, searchParams }: {
           <span style={{ fontWeight: 700, color: '#fff' }}>{deltaker.page.allMatches}</span>
         </Link>
       )}
-
-      {/* ── Neste kamper ── */}
-      <SectionHeader icon={<IconNextMatch />} color={MATCH_COLOR} title={deltaker.page.nextMatchesHeader} />
-      <NextMatches picks={picks} matchResults={matchResults} />
 
       {/* ── Ligaer ── */}
       <SectionHeader icon={<IconTrophy />} color={LEAGUE_COLOR} title={deltaker.page.leaguesHeader} />

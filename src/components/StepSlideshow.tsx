@@ -2,13 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { POTS, type Player } from '@/data/pots'
-import { SCORING } from '@/config/scoring'
+import { POTS } from '@/data/pots'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 import { PlayerCard } from '@/components/PlayerCard'
 import TeamTile, { lastName } from '@/components/TeamTile'
+import { finishShortLabel } from '@/lib/finish'
 import TeamBuildAnimation, { EXAMPLE_TEAM } from '@/components/TeamBuildAnimation'
-import { formatPoints } from '@/lib/format'
 import { usePageVisible } from '@/lib/usePageVisible'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
@@ -28,24 +27,13 @@ interface Props {
   ctaLabel?: string
 }
 
-// ── Eksempeldata til intro-sekvensen (illustrerer spillmekanikken, ikke ekte VM-resultater) ──
-function findPick(name: string) {
-  const pot = POTS.find((p) => p.players.some((pl) => pl.name === name))
-  const player = pot?.players.find((pl) => pl.name === name)
-  if (!pot || !player) throw new Error(`Fant ikke eksempelspiller: ${name}`)
-  return { potNumber: pot.potNumber, player }
-}
-
-const EXAMPLE_PICK = findPick('Luke Littler')
-// Motstanderen trekkes tilfeldig blant de useedede (seedNumber null) ved
-// mount — de har ingen foto, så kortet viser initial-plassholderen. Lange
-// etternavn («van der Voort») trunkeres på et 92 px-kort, så de utelates.
-const UNSEEDED: Player[] = POTS.flatMap((p) => p.players).filter((p) => p.seedNumber == null && lastName(p.name).length <= 9)
-const EXAMPLE_SETS_WON = 3
-const EXAMPLE_SETS_LOST = 1
-const EXAMPLE_SET_PTS = EXAMPLE_SETS_WON * SCORING.perSetWon
-const EXAMPLE_WIN_PTS = SCORING.perAdvancement
-const EXAMPLE_TOTAL = EXAMPLE_SET_PTS + EXAMPLE_WIN_PTS
+// ── Eksempeldata til intro-sekvensen (illustrerer spillmekanikken, ikke et ekte resultat) ──
+// De to største favorittene (pott 1) — IKKE bestemte navn, så introen ikke
+// går i stykker når spillerfeltet byttes ut.
+const EXAMPLE_CHAMPION = { potNumber: 1, player: POTS[0].players[0] }
+const EXAMPLE_FINALIST = { potNumber: 1, player: POTS[0].players[1] }
+const EXAMPLE_SCORE = [16, 11] as const
+const EXAMPLE_HOLDERS = 3
 
 const LAST_PHASE = 2
 /** Siste slide (0-indeksert) — tipp/page.tsx skjuler «Hopp over» der, siden
@@ -317,23 +305,17 @@ function IntroPhase({ onFinished }: { onFinished: () => void }) {
   )
 }
 
-// Fase 1: tekst → tekst → runde → kampoppsett med ekte kort → resultat →
-// poengrader → sum.
+// Fase 1: tekst → tekst → finalen → kampoppsett med ekte kort → resultat →
+// vinneren → antall som har ham → din andel av premien.
 const EXAMPLE_STEPS = [0, 975, 2025, 2550, 4050, 4950, 5475, 6075]
 const EXAMPLE_CARD_WIDTH = 92
 
 function ExamplePhase() {
-  const { locale, dict } = useLocale()
+  const { dict } = useLocale()
   const step = useTimedSteps(EXAMPLE_STEPS)
-  const [opponent, setOpponent] = useState<Player>(UNSEEDED[0])
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOpponent(UNSEEDED[Math.floor(Math.random() * UNSEEDED.length)])
-  }, [])
-
-  const opponentPot = POTS.find((p) => p.players.includes(opponent))?.potNumber ?? 6
   const rowStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14, color: 'rgba(255,255,255,0.75)', padding: '0 4px' }
   const valueStyle: React.CSSProperties = { fontFamily: SPORT, fontWeight: 900, color: '#fff', fontSize: 16, fontVariantNumeric: 'tabular-nums' }
+  const { champion: c, finalist: f } = { champion: EXAMPLE_CHAMPION, finalist: EXAMPLE_FINALIST }
 
   return (
     <div className="card-mini" style={{ textAlign: 'center' }}>
@@ -345,59 +327,58 @@ function ExamplePhase() {
       <div style={reveal(step, 2, { marginBottom: 10 })}>
         {/* «Eksempel» over runden, så ingen tror det er en ekte kamp */}
         <div style={{ ...LABEL, fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 2 }}>{dict.tipp.stepSlideshow.example.exampleLabel}</div>
-        <div style={{ ...LABEL, color: '#f3d576' }}>{dict.players.stages.r1}</div>
+        <div style={{ ...LABEL, color: '#f3d576' }}>{dict.players.stages.final}</div>
       </div>
 
-      {/* Kampoppsett: Littler-kortet vs. en tilfeldig useeded — «VS» byttes
-          ut med resultatet når det kommer */}
+      {/* Finalen: favoritten mot en annen favoritt — «VS» byttes ut med resultatet */}
       <div style={reveal(step, 3, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 14 })} inert>
         <div style={{ width: EXAMPLE_CARD_WIDTH, flexShrink: 0, pointerEvents: 'none' }}>
           <PlayerCard
-            player={EXAMPLE_PICK.player}
-            color={POT_COLORS[(EXAMPLE_PICK.potNumber - 1) % POT_COLORS.length]}
-            colorDark={POT_COLORS_DARK[(EXAMPLE_PICK.potNumber - 1) % POT_COLORS_DARK.length]}
+            player={c.player}
+            color={POT_COLORS[(c.potNumber - 1) % POT_COLORS.length]}
+            colorDark={POT_COLORS_DARK[(c.potNumber - 1) % POT_COLORS_DARK.length]}
             selected={step >= 4}
             index={0}
-            potNumber={EXAMPLE_PICK.potNumber}
+            potNumber={c.potNumber}
             onClick={() => {}}
           />
         </div>
-        <div style={{ width: 64, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+        <div style={{ width: 80, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
           {step >= 4 ? (
-            <div key="score" style={{ fontFamily: SPORT, fontSize: 34, fontWeight: 900, color: '#fff', lineHeight: 1, letterSpacing: '-1px', fontVariantNumeric: 'tabular-nums', animation: 'flag-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both' }}>
-              {EXAMPLE_SETS_WON}–{EXAMPLE_SETS_LOST}
+            <div key="score" style={{ fontFamily: SPORT, fontSize: 26, whiteSpace: 'nowrap', fontWeight: 900, color: '#fff', lineHeight: 1, letterSpacing: '-1px', fontVariantNumeric: 'tabular-nums', animation: 'flag-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+              {EXAMPLE_SCORE[0]}–{EXAMPLE_SCORE[1]}
             </div>
           ) : (
             <div key="vs" style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>{dict.tipp.stepSlideshow.example.vs}</div>
           )}
-          <div style={{ ...LABEL, fontSize: 11, opacity: step >= 4 ? 1 : 0, transition: 'opacity 0.4s ease' }}>{dict.tipp.stepSlideshow.example.setsUnit}</div>
+          <div style={{ ...LABEL, fontSize: 11, opacity: step >= 4 ? 1 : 0, transition: 'opacity 0.4s ease' }}>{dict.tipp.stepSlideshow.example.legsUnit}</div>
         </div>
         <div style={{ width: EXAMPLE_CARD_WIDTH, flexShrink: 0, pointerEvents: 'none' }}>
           <PlayerCard
-            player={opponent}
-            color={POT_COLORS[(opponentPot - 1) % POT_COLORS.length]}
-            colorDark={POT_COLORS_DARK[(opponentPot - 1) % POT_COLORS_DARK.length]}
+            player={f.player}
+            color={POT_COLORS[(f.potNumber - 1) % POT_COLORS.length]}
+            colorDark={POT_COLORS_DARK[(f.potNumber - 1) % POT_COLORS_DARK.length]}
             selected={false}
             dimmed={step >= 4}
             index={1}
-            potNumber={opponentPot}
+            potNumber={f.potNumber}
             onClick={() => {}}
           />
         </div>
       </div>
 
-      {/* Poengrader — én og én, så summen */}
+      {/* Én og én rad: vinneren → hvor mange som har ham → din andel */}
       <div style={{ maxWidth: 260, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
         <div style={reveal(step, 5, rowStyle)}>
-          <span>{dict.tipp.stepSlideshow.example.win}</span>
-          <span style={valueStyle}>{formatPoints(EXAMPLE_WIN_PTS, locale)}</span>
+          <span>{dict.tipp.stepSlideshow.example.champion}</span>
+          <span style={valueStyle}>{lastName(c.player.name)}</span>
         </div>
         <div style={reveal(step, 6, rowStyle)}>
-          <span>{dict.tipp.stepSlideshow.example.setsWon}</span>
-          <span style={valueStyle}>{formatPoints(EXAMPLE_SET_PTS, locale)}</span>
+          <span>{dict.tipp.stepSlideshow.example.holders}</span>
+          <span style={valueStyle}>{EXAMPLE_HOLDERS}</span>
         </div>
         <div style={reveal(step, 7, { ...rowStyle, borderTop: '1px solid rgba(243,213,118,0.3)', marginTop: 2, padding: '8px 4px 0' })}>
-          <span style={LABEL}>{dict.tipp.stepSlideshow.example.total}</span>
+          <span style={LABEL}>{dict.tipp.stepSlideshow.example.yourShare}</span>
           <span
             className={step >= 7 ? 'multiplier-badge' : undefined}
             style={{
@@ -406,7 +387,7 @@ function ExamplePhase() {
               borderRadius: 8, padding: '4px 12px',
             }}
           >
-            +{formatPoints(EXAMPLE_TOTAL, locale)}
+            1/{EXAMPLE_HOLDERS}
           </span>
         </div>
       </div>
@@ -414,59 +395,39 @@ function ExamplePhase() {
   )
 }
 
-// Fase 2: «Min side» med laget og poeng → «egne ligaer» → en liga-tabell der
-// laget ditt klatrer fra 10. til 3. plass. Lagets poeng i tabellen er ALLTID
-// summen av brikkene over: startsummen fordeles tilfeldig på de seks, og hvert
-// klatretrinn legger økningen på én tilfeldig spiller.
+// Fase 2: «Min side» — laget ditt, der spillerne faller fra én etter én og
+// den siste vinner → en liga-tabell der du klatrer til topps. Nivåene er
+// samme modell som leaderboardet (src/lib/prize.ts): 1 = gruppespill …
+// 5 = finalist, 6 = turneringsvinner.
 const PROGRESS_STEPS = [0, 975, 2475, 3450, 4275, 4875, 5475, 6075]
-// Poengene per rival-navn, indeksmatchet med dict.tipp.stepSlideshow.progress.rivals
-// (navnene er språkavhengig eksempeldata, poengene er ikke).
-const LEAGUE_RIVAL_POINTS = [41, 38, 36, 33, 31, 29, 27, 25, 22]
-// 20 p = 10. plass, så 26/30/34/37 → 8./6./4./3. plass.
-const YOUR_POINTS_BY_STEP = [20, 20, 20, 20, 26, 30, 34, 37]
+// Rivalenes nivå, indeksmatchet med dict.tipp.stepSlideshow.progress.rivals
+// (navnene er språkavhengig eksempeldata, nivåene er ikke).
+const LEAGUE_RIVAL_LEVELS = [4, 3, 3, 2, 2, 1, 1, 1, 1]
+// Ditt beste nivå per steg: starter i gruppespillet og ender som mester.
+const YOUR_LEVEL_BY_STEP = [1, 1, 1, 2, 3, 4, 6, 6]
+// Hvilke av de fire brikkene som er «ute» ved hvert steg (indeks → fra steg).
+const OUT_FROM_STEP = [3, 4, 5, Infinity]
 const LEAGUE_ROW_H = 22
 
-function distribute(total: number, buckets: number, min: number): number[] {
-  const out = Array.from({ length: buckets }, () => min)
-  for (let i = 0; i < total - min * buckets; i++) out[Math.floor(Math.random() * buckets)]++
-  return out
-}
-
 function ProgressPhase() {
-  const { locale, dict } = useLocale()
+  const { dict } = useLocale()
   const step = useTimedSteps(PROGRESS_STEPS)
-  const [playerPoints, setPlayerPoints] = useState<number[]>(() => distribute(YOUR_POINTS_BY_STEP[0], EXAMPLE_TEAM.length, 2))
-  const appliedRef = useRef(0)
-  const leagueRivals = dict.tipp.stepSlideshow.progress.rivals.map((name, i) => ({ name, points: LEAGUE_RIVAL_POINTS[i] }))
+  const leagueRivals = dict.tipp.stepSlideshow.progress.rivals.map((name, i) => ({ name, level: LEAGUE_RIVAL_LEVELS[i] }))
 
-  // Hvert klatretrinn: legg økningen på én tilfeldig spiller, så brikkene og
-  // tabellen alltid summerer likt.
-  useEffect(() => {
-    const target = YOUR_POINTS_BY_STEP[step]
-    const current = YOUR_POINTS_BY_STEP[appliedRef.current]
-    if (target === current) return
-    appliedRef.current = step
-    setPlayerPoints((prev) => {
-      const next = [...prev]
-      next[Math.floor(Math.random() * next.length)] += target - current
-      return next
-    })
-  }, [step])
-
-  const yourPoints = playerPoints.reduce((a, b) => a + b, 0)
-  const table = [...leagueRivals.map((r) => ({ ...r, you: false })), { name: dict.common.yourTeam, points: yourPoints, you: true }]
-    .sort((a, b) => b.points - a.points)
-  const yourRank = table.findIndex((r) => r.you) + 1
+  const yourLevel = YOUR_LEVEL_BY_STEP[step]
+  const table = [...leagueRivals.map((r) => ({ ...r, you: false })), { name: dict.common.yourTeam, level: yourLevel, you: true }]
+    .sort((a, b) => b.level - a.level || Number(a.you) - Number(b.you))
+  const yourRank = 1 + table.filter((r) => r.level > yourLevel).length
 
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ ...H1, marginBottom: 14 }}>{dict.tipp.stepSlideshow.progress.title}</div>
 
-      {/* Laget med poeng per spiller */}
+      {/* Laget ditt — spillerne dempes etter hvert som de er ute */}
       <div style={reveal(step, 1, { display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16 })} inert>
         {EXAMPLE_TEAM.map((t, i) => (
           <div key={t.player.name} style={{ width: 52 }}>
-            <TeamTile player={t.player} potNumber={t.potNumber} color={t.color} colorDark={t.colorDark} points={playerPoints[i]} pop={step >= 1} popDelayMs={i * 70} />
+            <TeamTile player={t.player} potNumber={t.potNumber} color={t.color} colorDark={t.colorDark} dimmed={step >= OUT_FROM_STEP[i]} glow={step >= 6 && i === EXAMPLE_TEAM.length - 1} pop={step >= 1} popDelayMs={i * 70} />
           </div>
         ))}
       </div>
@@ -494,13 +455,13 @@ function ProgressPhase() {
             }}
           >
             <span style={{ fontFamily: SPORT, fontSize: 13, fontWeight: 900, width: 18, textAlign: 'right', color: i < 3 ? '#fbbf24' : row.you ? '#fff' : 'rgba(255,255,255,0.45)', fontVariantNumeric: 'tabular-nums' }}>
-              {i + 1}
+              {1 + table.filter((r) => r.level > row.level).length}
             </span>
             <span style={{ flex: 1, textAlign: 'left', fontSize: 12, fontWeight: row.you ? 800 : 500, color: row.you ? '#fff' : 'rgba(255,255,255,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {row.name}
             </span>
-            <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: row.you ? '#f59e0b' : 'rgba(255,255,255,0.6)', fontVariantNumeric: 'tabular-nums' }}>
-              {formatPoints(row.points, locale)}
+            <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: row.you ? '#f59e0b' : 'rgba(255,255,255,0.6)' }}>
+              {finishShortLabel(row.level, dict)}
             </span>
           </div>
         ))}

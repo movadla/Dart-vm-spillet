@@ -10,53 +10,12 @@ import { KICKOFF } from '@/config/tournament'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
 import { IconTarget, IconChart, IconTrophy } from '@/components/icons'
 import { useLocale } from '@/lib/i18n/useLocale'
-import { POINTS_SUFFIX, formatPoints } from '@/lib/format'
-import { SCORING } from '@/config/scoring'
+import { finishShortLabel } from '@/lib/finish'
 
-type MyStats = { name: string; points: number; rank: number; totalParticipants: number }
 type PreviewRow = { id: string; name: string; points: number }
 
-function MiniDashboard({ participantId }: { participantId: string }) {
-  const { dict } = useLocale()
-  const [stats, setStats] = React.useState<MyStats | null>(null)
-
-  React.useEffect(() => {
-    fetch(`/api/my-stats?id=${participantId}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d) setStats(d) })
-      .catch(() => {})
-  }, [participantId])
-
-  if (!stats) return (
-    <div className="skeleton" style={{ height: 76, borderRadius: 16, marginBottom: 20 }} />
-  )
-
-  return (
-    <div style={{
-      background: CARD_GRADIENT,
-      border: '1px solid rgba(255,255,255,0.12)',
-      borderRadius: 16,
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 20px rgba(0,0,0,0.25)',
-      display: 'flex',
-      overflow: 'hidden',
-      marginBottom: 20,
-    }}>
-      <div style={{ flex: 1, padding: '14px 18px 12px' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', marginBottom: 4 }}>{dict.home.miniDashboard.points}</div>
-        <div style={{ fontFamily: SPORT, fontSize: 40, fontWeight: 900, color: '#f59e0b', lineHeight: 1, letterSpacing: '-1.5px' }}>{stats.points}</div>
-      </div>
-      <div style={{ width: 1, background: 'rgba(255,255,255,0.07)', alignSelf: 'stretch' }} />
-      <div style={{ padding: '14px 18px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(251,191,36,0.5)', marginBottom: 2 }}>{dict.home.miniDashboard.rank}</div>
-        <div style={{ fontFamily: SPORT, fontSize: 40, fontWeight: 900, color: '#fbbf24', lineHeight: 1, letterSpacing: '-1.5px' }}>#{stats.rank}</div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.22)', marginTop: 2 }}>{dict.home.miniDashboard.ofTotal(stats.totalParticipants)}</div>
-      </div>
-    </div>
-  )
-}
-
 function MiniLeaderboard() {
-  const { dict, locale } = useLocale()
+  const { dict } = useLocale()
   const [data, setData] = React.useState<{ rows: PreviewRow[]; total: number } | null>(null)
 
   React.useEffect(() => {
@@ -85,7 +44,7 @@ function MiniLeaderboard() {
         <Link key={row.id} href={`/deltaker/${row.id}?from=leaderboard`} className="lb-card" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)', textDecoration: 'none' }}>
           <span style={{ fontFamily: SPORT, fontSize: 14, fontWeight: 900, color: i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.22)', width: 20, textAlign: 'right', flexShrink: 0 }}>{i + 1}</span>
           <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#fff', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</span>
-          <span style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: '#f59e0b', flexShrink: 0, lineHeight: 1 }}>{row.points}<span style={{ fontSize: 11, color: 'rgba(245,158,11,0.5)' }}>{POINTS_SUFFIX[locale]}</span></span>
+          <span style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: '#f59e0b', flexShrink: 0, lineHeight: 1 }}>{finishShortLabel(row.points, dict)}</span>
         </Link>
       ))}
     </div>
@@ -347,12 +306,7 @@ export default function HomePage() {
           { icon: <IconTrophy />, glow: 'rgba(251,191,36,0.22)' },
         ].map(({ icon, glow }, i) => {
           const { title, desc } = dict.home.howItWorks.cards[i]
-          // Kort 2 («Poeng underveis») bytter den abstrakte teksten ut med
-          // konkrete tall fra selve poengsystemet — konkrete tall overbeviser
-          // raskere enn en generell påstand.
-          const body = i === 1
-            ? dict.home.howItWorks.pointsDesc(formatPoints(SCORING.perSetWon, locale), formatPoints(SCORING.perAdvancement, locale))
-            : desc
+          const body = desc
           return (
           <div key={title} className="how-it-works-card" style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
             <div style={{

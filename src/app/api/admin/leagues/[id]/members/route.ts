@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { checkAdminAuth } from '@/lib/adminAuth'
-import { calcParticipantPoints, MatchResult } from '@/lib/scoring'
+import type { MatchResult } from '@/lib/scoring'
+import { bestFinishLevel } from '@/lib/prize'
 
 interface Pick { participant_id: string; pot_number: number; player_name: string }
 
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       const p = m.participant as unknown as { id: string; name: string; email: string } | null
       if (!p) return null
       const playerPicks = ((picks as Pick[]) ?? []).filter((pk) => pk.participant_id === p.id)
-      const points = calcParticipantPoints(playerPicks, (matches as MatchResult[]) ?? [])
+      const points = bestFinishLevel(playerPicks, (matches as MatchResult[]) ?? [])
       return { id: p.id, name: p.name, email: p.email, points }
     })
     .filter(Boolean)

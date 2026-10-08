@@ -3,28 +3,31 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { upsertMatchResult } from '@/lib/upsertMatchResult'
 import { logAdminAction } from '@/lib/adminAudit'
 
-// MIDLERTIDIG (2026-09-28): henter runde-for-runde resultater automatisk fra
-// PDC sin egen offentlige, uautentiserte turnerings-API — funnet ved å
-// inspisere nettverkstrafikken på pdc.tv sin "Tournament Hub"-side for
-// World Grand Prix 2026 (tournament-hub/10869), IKKE en tredjeparts
-// livescore-side. Ingen ToS-problem: dette er PDC sin egen offisielle
-// datakilde, samme data som vises til enhver besøkende på pdc.tv.
-//
-// Tournament-ID-en (10869) er SPESIFIKK for World Grand Prix 2026 — må
-// byttes til riktig ID for det ekte VM i desember når den pivoten skjer
-// (se WGP_PIVOT_REVERT.md). Finn ny ID ved å besøke pdc.tv/calendar,
-// klikke "Tournament Hub" på riktig turnering, og lese tallet i URL-en.
-const PDC_TOURNAMENT_ID = '10869'
+// MIDLERTIDIG (2026-10-08): henter resultater automatisk fra PDC sin egen
+// offentlige, uautentiserte turnerings-API (samme data som pdc.tv sin
+// «Tournament Hub»). Tournament-ID-en er SPESIFIKK for Grand Slam of Darts
+// 2026 (10871, funnet ved å lese PDC-APIet direkte 2026-10-08); World Grand
+// Prix var 10869. Må byttes til riktig ID for det ekte VM i desember (se
+// WGP_PIVOT_REVERT.md) — finn den via pdc.tv/calendar → «Tournament Hub».
+const PDC_TOURNAMENT_ID = '10871'
 const PDC_API_URL = `https://tournaments.darts.web.gc.pdcservices.co.uk/v2/${PDC_TOURNAMENT_ID}`
 
 // PDC sine stadienavn → våre interne stage-nøkler (config/scoring.ts STAGE_ORDER).
-// Kun relevant for World Grand Prix sitt 32-spiller/5-runde-format.
+// UVERIFISERT: stages-listen for 10871 var TOM 2026-10-08 (ingen trekning ennå),
+// så disse navnene er hentet fra Grand Prix-oppsettet og et antatt gruppenavn.
+// Sjekk faktiske stage-navn mot API-et så snart turneringen er trukket, og
+// rett opp her — ukjente stadienavn hoppes trygt over (se løkken under), så
+// feil navn gir manglende resultater, ikke feil data.
 const STAGE_NAME_MAP: Record<string, string> = {
-  'Last 32': 'r1',
-  'Last 16': 'r2',
+  'Last 16': 'r16',
   'Quarter-Final': 'qf',
   'Semi-Final': 'sf',
   'Final': 'final',
+}
+function stageKeyFor(name: string): string | undefined {
+  if (STAGE_NAME_MAP[name]) return STAGE_NAME_MAP[name]
+  if (/group/i.test(name)) return 'group'
+  return undefined
 }
 
 // Kryssjekket 2026-09-28: alle 32 spillernavn fra PDC sin API matcher våre
@@ -78,7 +81,7 @@ export async function GET(req: NextRequest) {
   const errors: string[] = []
 
   for (const stage of json.data.attributes.stages) {
-    const stageKey = STAGE_NAME_MAP[stage.stage.name]
+    const stageKey = stageKeyFor(stage.stage.name)
     if (!stageKey) continue // ukjent stadienavn — ikke noe vi kjenner igjen, hopp over trygt
 
     for (const fixture of stage.fixtures) {

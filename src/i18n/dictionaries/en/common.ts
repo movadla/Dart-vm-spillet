@@ -47,6 +47,8 @@ export const common = {
     rankDown: (n) => `down ${n}`,
     rankUnchanged: 'unchanged',
     allEliminated: 'all out',
+    champion: 'Champion',
+    notPlayed: '–',
     remaining: (left, total) => `${left} of ${total} left`,
     showMore: (shown, total) => `Show more (${shown} of ${total}) →`,
   },

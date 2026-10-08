@@ -14,6 +14,7 @@
 // deltakere som deler det høyeste nivået i hele feltet deler premien.
 
 import type { MatchResult, PickWithPot } from '@/lib/scoring'
+import { STAGE_ORDER } from '@/config/scoring'
 
 /** Nivået til én spiller, utledet av de registrerte kampene. */
 export function playerFinishLevel(
@@ -85,4 +86,22 @@ export function computePrizeStanding(
   // spiller har faktisk spilt i sluttspillet.
   const rollover = topLevel <= 1
   return { topLevel, sharers, rollover, final }
+}
+
+/** Deltakerens beste nivå, med appens stadier — det tallet leaderboardet rangerer på. */
+export function bestFinishLevel(picks: PickWithPot[], matches: MatchResult[]): number {
+  return participantLevel(picks, matches, STAGE_ORDER)
+}
+
+/** Sammendrag av premiesituasjonen over ALLE deltakere (alle med samme beste nivå deler). */
+export interface PrizeSummary {
+  topLevel: number
+  sharerCount: number
+  rollover: boolean
+  final: boolean
+}
+
+export function summarizePrize(picksByParticipant: Map<string, PickWithPot[]>, matches: MatchResult[]): PrizeSummary {
+  const s = computePrizeStanding(picksByParticipant, matches, STAGE_ORDER)
+  return { topLevel: s.topLevel, sharerCount: s.sharers.length, rollover: s.rollover, final: s.final }
 }
