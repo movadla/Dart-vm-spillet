@@ -40,11 +40,14 @@ export function buildRankRows(
     .map((p) => {
       const playerPicks = (by.get(p.id) ?? []).slice().sort((a, b) => a.pot_number - b.pot_number)
       const points = bestFinishLevel(playerPicks, matches)
-      return { p, playerPicks, points }
+      // Spillere som fortsatt er med — sorteringsnøkkel INNENFOR samme nivå.
+      // Påvirker IKKE premien (alle med samme nivå deler), bare rekkefølgen.
+      const alive = playerPicks.filter((pk) => !isPlayerEliminated(pk.player_name, matches)).length
+      return { p, playerPicks, points, alive }
     })
-    // Tie-breaker: den som meldte seg på først vinner uavgjort — enkel å
-    // forklare, krever ingen ekstra data.
-    .sort((a, b) => b.points - a.points || a.p.created_at.localeCompare(b.p.created_at))
+    // Først nivå, så flest spillere igjen, til slutt den som meldte seg på
+    // først (stabil rekkefølge når alt annet er likt).
+    .sort((a, b) => b.points - a.points || b.alive - a.alive || a.p.created_at.localeCompare(b.p.created_at))
 
   return scored.map(({ p, playerPicks, points }, i) => ({
     id: p.id,

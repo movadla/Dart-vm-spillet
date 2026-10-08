@@ -41,6 +41,7 @@ export const common = {
   yourTeam: 'Your team',
   skipToFinishedTeam: 'Skip ahead to the finished team',
   qualifiedFillerLabel: 'Qualifier',
+  bottomNav: { aria: 'Main menu', home: 'Home', mine: 'My page', board: 'Leaderboard', guide: 'Guide' },
   rankList: {
     you: 'you',
     rankUp: (n) => `up ${n}`,
@@ -49,6 +50,10 @@ export const common = {
     allEliminated: 'all out',
     champion: 'Champion',
     notPlayed: '–',
+    groupParticipants: (n) => (n === 1 ? '1 participant' : `${n} participants`),
+    sharesLead: 'share the lead',
+    leads: 'leads',
+    notPlayedYet: 'Not played yet',
     remaining: (left, total) => `${left} of ${total} left`,
     showMore: (shown, total) => `Show more (${shown} of ${total}) →`,
   },

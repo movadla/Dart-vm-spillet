@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { getLocale } from '@/lib/i18n/getLocale'
 import { getDictionary } from '@/i18n/dictionaries'
 import { LocaleProvider } from '@/components/i18n/LocaleProvider'
+import BottomNav from '@/components/BottomNav'
 import './globals.css'
 
 const inter = Inter({
@@ -72,6 +73,7 @@ export default async function RootLayout({
         <div className="app-container" style={{ maxWidth: 'var(--app-width)', margin: '0 auto', minHeight: '100vh', position: 'relative', zIndex: 1, boxShadow: '0 0 80px rgba(0,0,0,0.6)' }}>
           <LocaleProvider initialLocale={locale}>
             {children}
+            <BottomNav />
           </LocaleProvider>
         </div>
         <Analytics />

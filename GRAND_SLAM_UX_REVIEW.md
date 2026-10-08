@@ -190,3 +190,14 @@ Reviewed by walking every screen in a mobile browser (430×900, plus 390×600 fo
 - Should the leaderboard order ties by "picks still alive", or leave ties fully equal and unordered? (My recommendation: alive count, clearly labelled.)
 - Do you want a bottom tab bar, or is the current "Hjem / Min side" linking enough for a game that runs nine days?
 - Is a random "Overrask meg" button in line with how you want people to play?
+
+---
+
+## 7. Beslutninger og status (2026-10-08, senere)
+
+- **Spørsmål 1 (vinnersjanse i % i stedet for odds):** nei. Odds beholdes på kortene.
+- **Spørsmål 2 (skjule demo-deltakeren):** nei. Den beholdes.
+- **Spørsmål 3 (sortere uavgjort etter spillere igjen):** ja. Bygget: leaderboard og ligaer er gruppert per nivå med felles overskrift («1. Siste 16 · 11 deltakere · deler ledelsen»), og rader sorteres på nivå, deretter flest spillere igjen, deretter påmeldingstid.
+- **Spørsmål 4 (fane-linje):** ja. Bygget som `BottomNav`: vises bare for påmeldte, og bare på Min side, leaderboard, liga og guide. Fanene heter Hjem · Min side · Leaderboard · Guide.
+- **Spørsmål 5 («Overrask meg»):** ja. Bygget på hvert valgsteg (terning ved pott-tittelen) og som «Overrask hele laget» med «Angre» på oppsummeringen.
+- Resten av listene over (frist, header, hero, registrering, neste kamp …) er **ikke** bestilt ennå.

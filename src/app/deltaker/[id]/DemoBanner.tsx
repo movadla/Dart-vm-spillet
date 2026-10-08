@@ -21,6 +21,8 @@ export default function DemoBanner({ phase, participantId }: { phase: DemoPhase;
       // leaderboardet osv.) — men overskriv aldri en ekte innlogging.
       if (participantId === DEMO_ID && !localStorage.getItem('vm_participant_id')) {
         localStorage.setItem('vm_participant_id', DEMO_ID)
+        // Si fra til fane-linjen (BottomNav), som ellers først leser id-en ved neste sidebytte.
+        window.dispatchEvent(new Event('vm-participant-changed'))
       }
     } catch {}
   }, [phase, participantId])

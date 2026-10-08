@@ -33,6 +33,8 @@ import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
 import { translatePotName, translateBestAchievement } from '@/lib/i18n/translatePlayer'
 import LocaleSwitch from '@/components/LocaleSwitch'
+import { IconDice } from '@/components/icons'
+import { pickRandom, pickRandomTeam } from '@/lib/random'
 
 const POT_COUNT = POTS.length
 const REGISTRATION_STEP = POT_COUNT + 1
@@ -110,10 +112,16 @@ function TippContent() {
   const [panelOpen, setPanelOpen] = useState(false)
   // «Se alle»-listen (pott 4) lukkes også når man bytter steg.
   const [listOpen, setListOpen] = useState(false)
+  // «Overrask meg»: rulle-animasjon per pott, og angre-minne for «hele laget».
+  const [rolling, setRolling] = useState(false)
+  const rollTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [undoPicks, setUndoPicks] = useState<Record<number, string> | null>(null)
+  useEffect(() => () => { if (rollTimer.current) clearInterval(rollTimer.current) }, [])
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPanelOpen(false)
     setListOpen(false)
+    setUndoPicks(null)
   }, [step])
 
   // Kort-gridets faktiske tilgjengelige plass i pikker-steget — MÅLT, ikke
@@ -587,6 +595,10 @@ const inputStyle: React.CSSProperties = {
   // ── Oppsummering ──
   if (step === SUMMARY_STEP) {
     const allPicked = Object.keys(picks).length === POT_COUNT
+    function randomizeAll() {
+      setUndoPicks(picks)
+      setPicks(pickRandomTeam(POTS.map((p) => ({ potNumber: p.potNumber, players: getPickablePlayers(p) }))))
+    }
     return (
       <div className="page-bg app-frame" style={{ minHeight: '100vh', padding: '20px 20px 40px', color: '#fff', position: 'relative' }}>
         {/* Brand banner — komprimert: dette er bare en oppsummering, alt
@@ -653,6 +665,26 @@ const inputStyle: React.CSSProperties = {
           })}
         </div>
 
+        {/* «Overrask hele laget» — erstatter alle fire valg; «Angre» henter de forrige tilbake. */}
+        <div style={{ marginBottom: 14 }}>
+          <button
+            type="button"
+            onClick={randomizeAll}
+            className="btn-hover"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', borderRadius: 12, color: '#fff', fontFamily: SPORT, fontSize: 15, fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer' }}
+          >
+            <IconDice size={18} />{dict.tipp.summary.randomAll}
+          </button>
+          {undoPicks && (
+            <div role="status" style={{ display: 'flex', justifyContent: 'center', gap: 10, alignItems: 'center', marginTop: 8, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+              {dict.tipp.summary.randomAllDone}
+              <button type="button" onClick={() => { setPicks(undoPicks); setUndoPicks(null) }} style={{ background: 'none', border: 'none', padding: 0, color: '#fff', fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: 3, cursor: 'pointer', fontSize: 13 }}>
+                {dict.tipp.summary.undo}
+              </button>
+            </div>
+          )}
+        </div>
+
         {error && (
           <div style={{ padding: 12, background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: 10, color: '#ef4444', fontSize: 14, marginBottom: 16 }}>
             {error}
@@ -707,6 +739,26 @@ const inputStyle: React.CSSProperties = {
     ...topPlayers.map((player): GridItem => ({ kind: 'player', player })),
     ...(hasList ? [listPick ? ({ kind: 'player', player: listPick } as GridItem) : ({ kind: 'more' } as GridItem)] : []),
   ]
+  // «Overrask meg» for denne potten: kort rulling over de viste kortene, så et
+  // helt tilfeldig valg blant ALLE kandidater i potten (også de bak «Se alle»).
+  function rollPot() {
+    if (rolling) return
+    const final = pickRandom(allPickable)
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduceMotion) { setPicks((prev) => ({ ...prev, [pot.potNumber]: final.name })); return }
+    setRolling(true)
+    let ticks = 0
+    rollTimer.current = setInterval(() => {
+      ticks++
+      if (ticks >= 7) {
+        if (rollTimer.current) clearInterval(rollTimer.current)
+        setPicks((prev) => ({ ...prev, [pot.potNumber]: final.name }))
+        setRolling(false)
+        return
+      }
+      setPicks((prev) => ({ ...prev, [pot.potNumber]: pickRandom(topPlayers).name }))
+    }, 90)
+  }
   // Potter med 4+ kort i én rad ble for trangt/lite kortene fylte for lite av
   // skjermen — split i to rader i stedet (4 → 2+2, 6 → 3+3, 5 → 3+2 osv. via
   // ceil av halvparten). Potter med ≤3 kort beholder én rad.
@@ -780,6 +832,15 @@ const inputStyle: React.CSSProperties = {
             </div>
           )}
         </div>
+        <button
+          type="button"
+          onClick={rollPot}
+          disabled={rolling}
+          className="btn-hover"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#fff', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 999, padding: '8px 12px', cursor: rolling ? 'default' : 'pointer', opacity: rolling ? 0.6 : 1 }}
+        >
+          <IconDice />{dict.tipp.step.random}
+        </button>
       </div>
       {showScoreInfo && (
         <div style={{ marginBottom: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px', fontSize: 13, lineHeight: 1.5 }}>
@@ -856,7 +917,7 @@ const inputStyle: React.CSSProperties = {
             idet den fylles ved første valg. flexShrink: 0 — denne skal ALDRI
             ofres for å gi kortene mer plass, det er omvendt (kortene måler
             seg etter det som er igjen når denne har tatt sitt). */}
-        <div style={{ minHeight: 44, marginTop: 8, flexShrink: 0 }}>
+        <div aria-live="polite" style={{ minHeight: 44, marginTop: 8, flexShrink: 0 }}>
         {selectedPlayer && (() => {
           const selectedPlayerData = pot.players.find(p => p.name === selectedPlayer)
           if (!selectedPlayerData) return null

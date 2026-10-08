@@ -63,6 +63,9 @@ export const tipp = {
     consentAfter: 'for details.',
   },
   summary: {
+    randomAll: 'Surprise me with a whole team',
+    randomAllDone: 'Your team was drawn at random.',
+    undo: 'Undo',
     rulesAndPoints: 'Rules →',
     confirmChanges: 'Confirm changes',
     heading: 'Summary',
@@ -107,6 +110,8 @@ export const tipp = {
     seeSummary: 'See summary →',
     choosePlayer: 'Pick a player',
     back: '← Back',
+    random: 'Surprise me',
+    randomDone: (name) => `Drawn: ${name}`,
   },
   progressDots: {
     stepAriaLabelDone: (n, name) => `Go to step ${n} (${name})`,

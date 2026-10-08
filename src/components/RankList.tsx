@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import Flag from '@/components/Flag'
 import KickButton from '@/app/liga/[code]/KickButton'
-import { finishShortLabel } from '@/lib/finish'
+import { finishLabel, finishShortLabel } from '@/lib/finish'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
 import { PLAYER_PHOTOS } from '@/data/playerPhotos'
@@ -100,6 +100,10 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
     displayRanks.push(rows[i].points === rows[i - 1].points ? displayRanks[i - 1] : i + 1)
   }
 
+  // Antall per nivå — brukes i gruppeoverskriftene (over HELE listen, ikke bare de synlige).
+  const groupSize = new Map<number, number>()
+  for (const r of rows) groupSize.set(r.points, (groupSize.get(r.points) ?? 0) + 1)
+
   const myIndex = myId ? rows.findIndex(r => r.id === myId) : -1
   // Egen rad tas alltid med, selv om den ligger lenger ned enn PAGE_SIZE.
   const effectiveVisibleCount = Math.max(visibleCount, myIndex >= 0 ? myIndex + 1 : 0)
@@ -113,8 +117,15 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
         const rank = displayRanks[index]
         const styleIdx = Math.min(rank - 1, 2)
 
-        // Før VM har alle 0 p — ingen pall, ingen glød, bare påmeldingsrekkefølge.
-        const isTop3 = vmStarted && rank <= 3
+        // Etter start grupperes listen per nivå: plasseringen står på gruppen, ikke på
+        // hver rad (ellers ser 11 likt stilte ut som 11 førsteplasser). Før start er
+        // alle like og listen er bare påmeldingsrekkefølge.
+        const grouped = vmStarted
+        const groupStart = grouped && (index === 0 || points !== visibleRows[index - 1].points)
+        const topGroup = rank === 1 && points >= 2
+        const count = groupSize.get(points) ?? 0
+
+        const isTop3 = !grouped && vmStarted && rank <= 3
         const borderColor = isMe
           ? 'rgba(96,165,250,0.45)'
           : isTop3 ? RANK_BORDER[styleIdx] : 'rgba(255,255,255,0.12)'
@@ -123,7 +134,27 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
           : isTop3 ? RANK_BG[styleIdx] : CARD_GRADIENT
 
         return (
-          <Link key={id} ref={isMe ? myRowRef : undefined} href={`/deltaker/${id}${backRef ? `?from=${backRef}` : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}
+          <Fragment key={id}>
+          {groupStart && (
+            <div role="heading" aria-level={2} style={{
+              display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10,
+              padding: '9px 14px', marginTop: index === 0 ? 0 : 10, borderRadius: 14,
+              background: topGroup ? 'rgba(251,191,36,0.10)' : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${topGroup ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.12)'}`,
+            }}>
+              <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, minWidth: 0 }}>
+                <span style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, color: topGroup ? RANK_COLORS[0] : 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums' }}>{rank}.</span>
+                <span style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, textTransform: 'uppercase', color: topGroup ? RANK_COLORS[0] : '#fff', whiteSpace: 'nowrap' }}>
+                  {finishLabel(points, dict.players) ?? dict.common.rankList.notPlayedYet}
+                </span>
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>
+                {dict.common.rankList.groupParticipants(count)}
+                {topGroup && <> · <span style={{ color: RANK_COLORS[0] }}>{count === 1 ? dict.common.rankList.leads : dict.common.rankList.sharesLead}</span></>}
+              </span>
+            </div>
+          )}
+          <Link ref={isMe ? myRowRef : undefined} href={`/deltaker/${id}${backRef ? `?from=${backRef}` : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}
             aria-label={vmStarted ? `${rank}. ${name}, ${finishText(points)}${isMe ? ` (${dict.common.rankList.you})` : ''}` : `${name}${isMe ? ` (${dict.common.rankList.you})` : ''}`}
             onClick={() => { try { sessionStorage.setItem(`rl_scroll_${window.location.pathname}`, String(window.scrollY)) } catch {} }}
           >
@@ -142,6 +173,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                   ? `inset 0 1px 0 rgba(255,255,255,0.10)${RANK_GLOW[styleIdx] ? `, ${RANK_GLOW[styleIdx]}` : ''}`
                   : 'inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.25)',
             }}>
+              {grouped ? <div aria-hidden style={{ width: 12, flexShrink: 0 }} /> : (
               <div style={{
                 width: 52, flexShrink: 0,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -160,6 +192,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                   </span>
                 )}
               </div>
+              )}
 
               <div style={{ flex: 1, padding: '8px 12px 7px', minWidth: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4, gap: 8 }}>
@@ -169,7 +202,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                     {kick && <KickButton leagueId={kick.leagueId} memberId={id} memberName={name} createdBy={kick.createdBy} />}
                     <div style={{ fontFamily: SPORT, fontSize: 20, fontWeight: 900, color: vmStarted ? '#f0f2f5' : 'rgba(255,255,255,0.4)', lineHeight: 1, letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums' }}>
-                      {vmStarted ? finishText(points) : '–'}
+                      {vmStarted ? null : '–'}
                     </div>
                   </div>
                 </div>
@@ -217,6 +250,7 @@ export default function RankList({ rows, vmStarted, kick, scrollToMe = true, bac
               </div>
             </div>
           </Link>
+          </Fragment>
         )
       })}
 

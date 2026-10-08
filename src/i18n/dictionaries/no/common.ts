@@ -39,6 +39,7 @@ export interface CommonDict {
   yourTeam: string
   skipToFinishedTeam: string
   qualifiedFillerLabel: string
+  bottomNav: { aria: string; home: string; mine: string; board: string; guide: string }
   rankList: {
     you: string
     rankUp: (n: number) => string
@@ -48,6 +49,11 @@ export interface CommonDict {
     /** Visning av «nivå» i leaderboard-raden: turneringsvinner / ikke spilt ennå. */
     champion: string
     notPlayed: string
+    /** Gruppeoverskrift i leaderboardet (alle med samme nivå). */
+    groupParticipants: (n: number) => string
+    sharesLead: string
+    leads: string
+    notPlayedYet: string
     remaining: (left: number, total: number) => string
     showMore: (shown: number, total: number) => string
   }
@@ -94,6 +100,7 @@ export const common: CommonDict = {
   yourTeam: 'Laget ditt',
   skipToFinishedTeam: 'Spol fram til ferdig lag',
   qualifiedFillerLabel: 'Kvalifisert',
+  bottomNav: { aria: 'Hovedmeny', home: 'Hjem', mine: 'Min side', board: 'Leaderboard', guide: 'Guide' },
   rankList: {
     you: 'deg',
     rankUp: (n) => `opp ${n}`,
@@ -102,6 +109,10 @@ export const common: CommonDict = {
     allEliminated: 'alle ute',
     champion: 'Mester',
     notPlayed: '–',
+    groupParticipants: (n) => (n === 1 ? '1 deltaker' : `${n} deltakere`),
+    sharesLead: 'deler ledelsen',
+    leads: 'leder',
+    notPlayedYet: 'Ikke spilt ennå',
     remaining: (left, total) => `${left} av ${total} igjen`,
     showMore: (shown, total) => `Vis flere (${shown} av ${total}) →`,
   },

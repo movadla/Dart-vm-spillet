@@ -58,6 +58,29 @@ describe('ranking', () => {
     expect(rows[1].rankDelta).toBeUndefined()
   })
 
+
+  it('samme nivå: flest spillere igjen kommer først, uavhengig av påmeldingstid', () => {
+    const picks2 = [
+      { participant_id: 'e', pot_number: 1, player_name: 'Luke Littler' },
+      { participant_id: 'e', pot_number: 4, player_name: 'Luke Woodhouse' },
+      { participant_id: 'd', pot_number: 1, player_name: 'Luke Littler' },
+      { participant_id: 'd', pot_number: 4, player_name: 'Kevin Doets' },
+    ]
+    const parts = [
+      { id: 'e', name: 'E', created_at: '2026-09-01T00:00:00Z' }, // meldte seg på først, men har tapt en spiller
+      { id: 'd', name: 'D', created_at: '2026-09-05T00:00:00Z' },
+    ]
+    // Littler og Doets slo hver sin motstander i siste 16; Woodhouse tapte. D: Littler + Doets (begge igjen).
+    const ms = [
+      m('r16', 'Luke Littler', 10, 'Ryan Searle', 4),
+      m('r16', 'Kevin Doets', 10, 'Dave Chisnall', 6),
+      m('r16', 'Andrew Gilding', 10, 'Luke Woodhouse', 3),
+    ]
+    const rows = buildRankRows(parts, picks2, ms, {}, true)
+    expect(rows.map((r) => r.points)).toEqual([2, 2]) // samme nivå
+    expect(rows.map((r) => r.id)).toEqual(['d', 'e']) // D har 2 igjen, E har 1
+  })
+
   it('før turneringen: like nivå → påmeldingsrekkefølge, ingen rankDelta', () => {
     const rows = buildRankRows(participants, picks, [], { a: 1 }, false)
     expect(rows.map((r) => r.id)).toEqual(['c', 'a', 'b'])

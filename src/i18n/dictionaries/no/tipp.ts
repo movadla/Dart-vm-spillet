@@ -56,6 +56,10 @@ export interface TippDict {
     consentAfter: string
   }
   summary: {
+    /** «Overrask hele laget» på oppsummeringen + angre. */
+    randomAll: string
+    randomAllDone: string
+    undo: string
     rulesAndPoints: string
     confirmChanges: string
     heading: string
@@ -92,6 +96,9 @@ export interface TippDict {
     seeSummary: string
     choosePlayer: string
     back: string
+    /** «Overrask meg» — trekker en tilfeldig spiller i denne potten. */
+    random: string
+    randomDone: (name: string) => string
   }
   progressDots: {
     stepAriaLabelDone: (n: number, name: string) => string
@@ -194,6 +201,9 @@ export const tipp: TippDict = {
     consentAfter: 'for detaljer.',
   },
   summary: {
+    randomAll: 'Overrask hele laget',
+    randomAllDone: 'Laget er trukket tilfeldig.',
+    undo: 'Angre',
     rulesAndPoints: 'Regler →',
     confirmChanges: 'Bekreft endringer',
     heading: 'Oppsummering',
@@ -238,6 +248,8 @@ export const tipp: TippDict = {
     seeSummary: 'Se oppsummering →',
     choosePlayer: 'Velg en spiller',
     back: '← Tilbake',
+    random: 'Overrask meg',
+    randomDone: (name) => `Trukket: ${name}`,
   },
   progressDots: {
     stepAriaLabelDone: (n, name) => `Gå til steg ${n} (${name})`,
