@@ -22,10 +22,10 @@ export const home = {
   hero: {
     myPage: 'My page →',
     switchUser: 'Switch user',
-    getStarted: 'Get started →',
+    getStarted: 'Sign up →',
     alreadySignedUp: 'Already signed up? Find your page →',
     scrollHint: 'More info',
-    tagline: 'Pick 4 dart players. Follow them through the tournament.',
+    tagline: 'Pick 4 players. If one of them wins, you share the prize.',
   },
   howItWorks: {
     eyebrow: 'How it works',

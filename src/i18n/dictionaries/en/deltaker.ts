@@ -13,6 +13,7 @@ export const deltaker = {
     rank: 'Rank',
     startsIn: 'The tournament starts in',
     editTeam: 'Edit team →',
+    editUntil: (when) => `You can edit your team until ${when}`,
     myTeamHeader: 'My team',
     vmDecidedPrefix: 'The tournament is',
     vmDecided: 'decided',

@@ -48,10 +48,10 @@ export const home: HomeDict = {
   hero: {
     myPage: 'Min side →',
     switchUser: 'Bytt bruker',
-    getStarted: 'Kom i gang →',
+    getStarted: 'Meld deg på →',
     alreadySignedUp: 'Allerede påmeldt? Finn siden din →',
     scrollHint: 'Mer info',
-    tagline: 'Velg 4 dartspillere. Følg dem gjennom turneringen.',
+    tagline: 'Velg 4 spillere. Treffer en av dem vinneren, deler du premien.',
   },
   howItWorks: {
     eyebrow: 'Slik fungerer det',

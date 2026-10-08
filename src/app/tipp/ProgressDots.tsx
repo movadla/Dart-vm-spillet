@@ -8,6 +8,7 @@ import Flag from '@/components/Flag'
 import SmartBackButton from '@/components/SmartBackButton'
 import { POT_COLORS } from '@/config/potColors'
 import { useLocale } from '@/lib/i18n/useLocale'
+import { formatKickoffShort } from '@/config/tournament'
 
 const POT_COUNT = POTS.length
 
@@ -51,7 +52,7 @@ export function ProgressDots({ step, picks = {}, onGuide, onStep, onTogglePoeng,
   onTogglePoeng?: () => void
   poengActive?: boolean
 }) {
-  const { dict } = useLocale()
+  const { locale, dict } = useLocale()
   return (
     <div style={{ marginBottom: 8 }}>
       {/* Fullførte steg viser flagget til spilleren du valgte (og er klikkbare
@@ -88,8 +89,13 @@ export function ProgressDots({ step, picks = {}, onGuide, onStep, onTogglePoeng,
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <SmartBackButton />
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.12em', fontVariantNumeric: 'tabular-nums' }}>
-          {dict.tipp.progressDots.stepOf(step, POT_COUNT)}
+        <div style={{ textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.12em' }}>
+            {dict.tipp.progressDots.stepOf(step, POT_COUNT)}
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginTop: 1 }}>
+            {dict.common.deadline.short(formatKickoffShort(locale))}
+          </div>
         </div>
         {/* Guide og Poeng samlet i én liten, sammensatt pille i stedet for to
             separate knapper — mindre visuell konkurranse med «STEG X AV 6»,

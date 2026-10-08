@@ -41,3 +41,25 @@ export function formatKickoffDateTime(locale: Locale): string {
 export function isVmStarted(now: Date = new Date()): boolean {
   return now >= KICKOFF
 }
+
+// Turneringsfakta til visning (bekreftet mot PDC sitt eget turnerings-API, ID 10871,
+// og Sky Sports 2026-10-08). Selve påmeldingsfristen er KICKOFF over — vis alltid den
+// via formatKickoffDateTime/formatKickoffShort, aldri som hardkodet tekst.
+const TOURNAMENT_START = new Date('2026-11-14T12:00:00Z')
+const TOURNAMENT_END = new Date('2026-11-22T12:00:00Z')
+const TOURNAMENT_PLACE = 'Wolverhampton'
+
+/** «14.–22. november · Wolverhampton» / «November 14–22 · Wolverhampton». */
+export function formatTournamentFacts(locale: Locale): string {
+  const fmt = new Intl.DateTimeFormat(INTL_LOCALE[locale], { day: 'numeric', month: 'long', timeZone: 'Europe/Oslo' })
+  let range: string
+  try { range = fmt.formatRange(TOURNAMENT_START, TOURNAMENT_END) } catch { range = `${fmt.format(TOURNAMENT_START)} – ${fmt.format(TOURNAMENT_END)}` }
+  return `${range} · ${TOURNAMENT_PLACE}`
+}
+
+/** Kort form til trange plasser: «14. nov., 00:00» / «Nov 14, 12:00 AM». */
+export function formatKickoffShort(locale: Locale): string {
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo', hour12: locale === 'en',
+  }).format(KICKOFF)
+}

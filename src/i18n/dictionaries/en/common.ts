@@ -41,6 +41,7 @@ export const common = {
   yourTeam: 'Your team',
   skipToFinishedTeam: 'Skip ahead to the finished team',
   qualifiedFillerLabel: 'Qualifier',
+  deadline: { label: (when) => `Sign-up deadline: ${when}`, short: (when) => `Deadline ${when}`, noChanges: 'After the deadline you cannot change your picks.' },
   bottomNav: { aria: 'Main menu', home: 'Home', mine: 'My page', board: 'Leaderboard', guide: 'Guide' },
   rankList: {
     you: 'you',

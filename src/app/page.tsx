@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import TeamBuildAnimation from '@/components/TeamBuildAnimation'
 import Countdown from '@/components/Countdown'
 import LocaleSwitch from '@/components/LocaleSwitch'
-import { KICKOFF } from '@/config/tournament'
+import { KICKOFF, formatKickoffDateTime, formatTournamentFacts } from '@/config/tournament'
 import { SPORT, CARD_GRADIENT } from '@/config/theme'
 import { IconTarget, IconChart, IconTrophy } from '@/components/icons'
 import { useLocale } from '@/lib/i18n/useLocale'
@@ -61,22 +61,19 @@ function StickyHeader({ visible, isLive }: { visible: boolean; isLive: boolean }
       background: 'rgba(13,17,23,0.9)', backdropFilter: 'blur(14px)',
       WebkitBackdropFilter: 'blur(14px)',
       borderBottom: '1px solid rgba(255,255,255,0.08)',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 20px 12px',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+      padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 16px 12px 20px',
     }}>
-      <span style={{ fontFamily: SPORT, fontSize: 19, fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
-        {dict.home.stickyHeader.brand} <span style={{ color: '#dc2626' }}>2026</span>
+      <span style={{ fontFamily: SPORT, fontSize: 18, fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase', color: '#fff', lineHeight: 1, whiteSpace: 'nowrap', flexShrink: 0 }}>
+        {dict.home.stickyHeader.brand}
       </span>
-      <div style={{ display: 'flex', gap: 14, alignItems: 'center', whiteSpace: 'nowrap' }}>
-        <Link href="/vm-info" className="text-link" style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textDecoration: 'none', letterSpacing: '0.03em' }}>
-          {dict.home.stickyHeader.info}
-        </Link>
-        <Link href="/leaderboard" className="text-link" style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textDecoration: 'none', letterSpacing: '0.03em' }}>
-          {dict.home.stickyHeader.leaderboard}
-        </Link>
-        <Link href="/finn" className="text-link" style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textDecoration: 'none', letterSpacing: '0.03em' }}>
-          {dict.home.stickyHeader.myPage}
-        </Link>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', whiteSpace: 'nowrap' }}>
+        {/* Leaderboardet er bare en nedtelling før turneringen starter — lenken vises først når den gir mening (og sparer plass på smale skjermer). */}
+        {isLive && (
+          <Link href="/leaderboard" className="text-link" style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textDecoration: 'none', letterSpacing: '0.03em' }}>
+            {dict.home.stickyHeader.leaderboard}
+          </Link>
+        )}
         {!isLive && (
           <Link href="/tipp" className="btn-hover" style={{ fontSize: 12, fontWeight: 700, color: '#dc2626', textDecoration: 'none', letterSpacing: '0.03em' }}>
             {dict.home.stickyHeader.join}
@@ -215,6 +212,10 @@ export default function HomePage() {
               man hadde scrollet forbi hele første skjermbilde. */}
           <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.75)', marginBottom: 20, letterSpacing: '0.01em' }}>
             {dict.home.hero.tagline}
+          </div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginBottom: 14, lineHeight: 1.6 }}>
+            {formatTournamentFacts(locale)}
+            {!isLive && <><br />{dict.common.deadline.label(formatKickoffDateTime(locale))}</>}
           </div>
 
           {/* Nedtelling — mindre enn før (var 38) så den ikke konkurrerer

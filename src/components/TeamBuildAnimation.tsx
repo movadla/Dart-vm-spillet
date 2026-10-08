@@ -268,7 +268,8 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
           «Laget ditt» når alt er på plass */}
       {/* Scenen krymper når finalen vises — ellers står det igjen ~120 px tom
           plass under «Laget ditt» (kortene som ikke lenger er der). */}
-      <div style={{ position: 'relative', height: finished ? 64 : 186, zIndex: 2, transition: 'height 0.5s cubic-bezier(0.22,1,0.36,1)' }}>
+      {/* overflowX: clip — opptil 6 kort på rad er bredere enn en 390 px-skjerm og ga sidescroll for hele siden; Y forblir synlig så kortene kan fly opp til laget. */}
+      <div style={{ position: 'relative', height: finished ? 64 : 186, zIndex: 2, overflowX: 'clip', transition: 'height 0.5s cubic-bezier(0.22,1,0.36,1)' }}>
         {activeLevel && (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', gap: 10, justifyContent: 'center', alignItems: 'flex-start', paddingTop: 4 }}>
             {activeLevel.candidates.map((c, ci) => {

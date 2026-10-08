@@ -5,6 +5,7 @@ import ShareButton from '@/components/ShareButton'
 import { getParticipantPageData } from '@/lib/participantData'
 import { STAGE_ORDER, GROUP_STAGE, type Stage } from '@/config/scoring'
 import { finishLabel } from '@/lib/finish'
+import { formatKickoffDateTime } from '@/config/tournament'
 import LogoutButton from './LogoutButton'
 import Countdown from '@/components/Countdown'
 import type { Metadata } from 'next'
@@ -125,6 +126,7 @@ export default async function DeltakerPage({ params, searchParams }: {
           <div>
             <div style={{ ...LABEL, marginBottom: 6 }}>{deltaker.page.startsIn}</div>
             <Countdown size={26} />
+            {editable && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 8 }}>{deltaker.page.editUntil(formatKickoffDateTime(locale))}</div>}
           </div>
           {editable && (
             <Link href={`/tipp?edit=${p.id}`} className="cta-btn" style={{ padding: '10px 18px', borderRadius: 999, background: 'linear-gradient(180deg, #e53030 0%, #b91c1c 100%)', color: '#fff', fontFamily: SPORT, fontSize: 14, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap', boxShadow: '0 4px 16px rgba(220,38,38,0.3)' }}>

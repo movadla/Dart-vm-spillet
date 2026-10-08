@@ -16,6 +16,7 @@ export interface DeltakerDict {
     rank: string
     startsIn: string
     editTeam: string
+    editUntil: (when: string) => string
     myTeamHeader: string
     vmDecidedPrefix: string
     vmDecided: string
@@ -87,6 +88,7 @@ export const deltaker: DeltakerDict = {
     rank: 'Plassering',
     startsIn: 'Turneringen starter om',
     editTeam: 'Endre laget →',
+    editUntil: (when) => `Du kan endre laget frem til ${when}`,
     myTeamHeader: 'Mitt lag',
     vmDecidedPrefix: 'Turneringen er',
     vmDecided: 'avgjort',

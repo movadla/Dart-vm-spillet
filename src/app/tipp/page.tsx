@@ -34,6 +34,7 @@ import { useLocale } from '@/lib/i18n/useLocale'
 import { translatePotName, translateBestAchievement } from '@/lib/i18n/translatePlayer'
 import LocaleSwitch from '@/components/LocaleSwitch'
 import { IconDice } from '@/components/icons'
+import DeadlineNote from '@/components/DeadlineNote'
 import { pickRandom, pickRandomTeam } from '@/lib/random'
 
 const POT_COUNT = POTS.length
@@ -51,6 +52,7 @@ function TippContent() {
   const [step, setStep] = useState(isEditMode ? 1 : 0)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [email2, setEmail2] = useState('')
   const [picks, setPicks] = useState<Record<number, string>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -481,7 +483,8 @@ const inputStyle: React.CSSProperties = {
 
   // ── Registrering (kun nye deltakere) ──
   if (step === REGISTRATION_STEP) {
-    const valid = name.trim().length > 1 && email.includes('@')
+    const emailsMatch = email.trim().toLowerCase() === email2.trim().toLowerCase()
+    const valid = name.trim().length > 1 && email.includes('@') && emailsMatch
     return (
       <div className="page-bg app-frame" style={{ minHeight: '100vh', padding: '20px 20px 40px', color: '#fff', position: 'relative' }}>
         {/* Samme kompakte banner og knapperad som oppsummeringen */}
@@ -509,6 +512,7 @@ const inputStyle: React.CSSProperties = {
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
             {dict.tipp.registration.intro}
           </div>
+          <div style={{ marginTop: 10 }}><DeadlineNote /></div>
         </div>
 
         {/* Laget du melder på — så det er tydelig hva som registreres */}
@@ -526,11 +530,19 @@ const inputStyle: React.CSSProperties = {
         <div style={{ background: CARD_GRADIENT, borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)', padding: '24px 20px', marginBottom: 16, boxShadow: CARD_SHADOW }}>
           <div style={{ marginBottom: 16 }}>
             <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>{dict.tipp.registration.nameLabel}</label>
-            <input style={inputStyle} type="text" placeholder={dict.tipp.registration.namePlaceholder} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
+            <input style={inputStyle} type="text" placeholder={dict.tipp.registration.namePlaceholder} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} aria-describedby="name-hint" />
+            <div id="name-hint" style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 6, lineHeight: 1.4 }}>{dict.tipp.registration.nameHint}</div>
           </div>
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>{dict.tipp.registration.emailLabel}</label>
             <input style={inputStyle} type="email" placeholder={dict.tipp.registration.emailPlaceholder} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <label htmlFor="email2" style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 8 }}>{dict.tipp.registration.confirmEmailLabel}</label>
+            <input id="email2" style={inputStyle} type="email" placeholder={dict.tipp.registration.confirmEmailPlaceholder} autoComplete="off" value={email2} onChange={(e) => setEmail2(e.target.value)} aria-invalid={email2.length > 0 && !emailsMatch} />
+            {email2.length > 0 && !emailsMatch && (
+              <div role="alert" style={{ fontSize: 12, color: '#f87171', marginTop: 6 }}>{dict.tipp.registration.emailMismatch}</div>
+            )}
           </div>
         </div>
 
@@ -684,6 +696,8 @@ const inputStyle: React.CSSProperties = {
             </div>
           )}
         </div>
+
+        <div style={{ marginBottom: 14 }}><DeadlineNote showNoChanges /></div>
 
         {error && (
           <div style={{ padding: 12, background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: 10, color: '#ef4444', fontSize: 14, marginBottom: 16 }}>

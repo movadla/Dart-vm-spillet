@@ -524,3 +524,6 @@ body::after {
 .bottom-nav-item[data-active="true"] { color: #fff; }
 .bottom-nav-item[data-active="true"] svg { stroke: #dc2626; }
 .bottom-nav-item:focus-visible { outline: 2px solid #f3d576; outline-offset: 2px; }
+
+/* Sikkerhetsnett mot sidescroll (leksjon fra 390 px-testen 2026-10-08): ingenting inne i appen skal kunne gjøre siden bredere enn skjermen. */
+.app-container { overflow-x: clip; }

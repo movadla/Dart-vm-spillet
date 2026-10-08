@@ -43,6 +43,10 @@ export interface TippDict {
     nameLabel: string
     namePlaceholder: string
     emailLabel: string
+    nameHint: string
+    confirmEmailLabel: string
+    confirmEmailPlaceholder: string
+    emailMismatch: string
     emailPlaceholder: string
     notFoundError: string
     genericError: string
@@ -188,6 +192,10 @@ export const tipp: TippDict = {
     nameLabel: 'Navn',
     namePlaceholder: 'Ola Nordmann',
     emailLabel: 'E-post',
+    nameHint: 'Navnet vises på leaderboardet. Bruk gjerne et kallenavn.',
+    confirmEmailLabel: 'Gjenta e-post',
+    confirmEmailPlaceholder: 'Skriv e-posten én gang til',
+    emailMismatch: 'E-postadressene er ikke like.',
     emailPlaceholder: 'ola@example.com',
     notFoundError: 'Fant ikke siden din. Ta kontakt.',
     genericError: 'Noe gikk galt',

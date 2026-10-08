@@ -39,6 +39,7 @@ export interface CommonDict {
   yourTeam: string
   skipToFinishedTeam: string
   qualifiedFillerLabel: string
+  deadline: { label: (when: string) => string; short: (when: string) => string; noChanges: string }
   bottomNav: { aria: string; home: string; mine: string; board: string; guide: string }
   rankList: {
     you: string
@@ -100,6 +101,7 @@ export const common: CommonDict = {
   yourTeam: 'Laget ditt',
   skipToFinishedTeam: 'Spol fram til ferdig lag',
   qualifiedFillerLabel: 'Kvalifisert',
+  deadline: { label: (when) => `Påmeldingsfrist: ${when}`, short: (when) => `Frist ${when}`, noChanges: 'Etter fristen kan du ikke endre valgene.' },
   bottomNav: { aria: 'Hovedmeny', home: 'Hjem', mine: 'Min side', board: 'Leaderboard', guide: 'Guide' },
   rankList: {
     you: 'deg',
