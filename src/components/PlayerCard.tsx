@@ -157,6 +157,20 @@ const ZONES = {
   snittIcon: { left: '62.4%', top: '61.2%', width: '13.7%', height: '8.4%' },
 } as const
 
+// Liste-ikon (tre streker med prikker) i samme gullbehandling som de andre ikonene.
+function ListIcon({ size }: { size: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ filter: ICON_BEVEL, overflow: 'visible' }}>
+      <IconDefs id="listGrad" />
+      <g fill="url(#listGrad)">
+        <circle cx="4.5" cy="6.5" r="1.7" /><rect x="9" y="5" width="12" height="3" rx="1.2" />
+        <circle cx="4.5" cy="12" r="1.7" /><rect x="9" y="10.5" width="12" height="3" rx="1.2" />
+        <circle cx="4.5" cy="17.5" r="1.7" /><rect x="9" y="16" width="12" height="3" rx="1.2" />
+      </g>
+    </svg>
+  )
+}
+
 function IconBadge({ zone, children }: { zone: { left: string; top: string; width: string; height: string }; children: ReactNode }) {
   return (
     <div style={{
@@ -429,6 +443,102 @@ export function PlayerCard({
     {/* Foto-krediteringen (påkrevd av CC-lisensen, se playerPhotos.ts) vises
         i spillerpanelet («Foto: …») — «i»-knappen på kortet var det eneste
         trykkbare som IKKE valgte spilleren, og folk bommet på den. */}
+    </div>
+  )
+}
+
+/**
+ * «Se alle»-kortet — står som siste kort i en pott med flere kandidater enn
+ * kortene har plass til (pott 4). Samme mal, størrelse og aspekt som
+ * PlayerCard, så det passer rett inn i gridet; trykk åpner listen med hele
+ * potten (PlayerListSheet).
+ */
+export function MorePlayersCard({ hiddenCount, total, potNumber, color, index = 0, onClick }: {
+  hiddenCount: number
+  total: number
+  potNumber: number
+  color: string
+  index?: number
+  onClick: () => void
+}) {
+  const { dict } = useLocale()
+  const template = templateSrc(potNumber)
+  const buttonStyle = {
+    position: 'relative', display: 'block', width: '100%',
+    aspectRatio: `${TEMPLATE_ASPECT}`,
+    containerType: 'inline-size',
+    border: 'none', padding: 0, cursor: 'pointer', background: 'transparent',
+    backgroundImage: `url(${template})`,
+    backgroundSize: '100% 100%',
+    '--card-color': color,
+  } as CSSProperties
+
+  return (
+    <div className="card-enter" style={{ width: '100%', position: 'relative', animationDelay: `${index * 70}ms` }}>
+      <button type="button" aria-label={dict.tipp.step.list.showAll(total)} onClick={onClick} className="player-card" style={buttonStyle}>
+        <div aria-hidden="true" style={{
+          position: 'absolute',
+          left: ZONES.photo.left, right: ZONES.photo.right, top: ZONES.photo.top, bottom: ZONES.photo.bottom,
+          background: `radial-gradient(ellipse 55% 48% at 50% 42%, ${color} 0%, transparent 70%)`,
+          opacity: 0.32, mixBlendMode: 'screen', pointerEvents: 'none',
+        }} />
+        {/* Venstre kolonne som på et ekte spillerkort: liste-ikon der flagget
+            står, «ALLE» der RANK står, og antallet som hero-tall. */}
+        <div style={{
+          position: 'absolute', left: ZONES.topCol.left, width: ZONES.topCol.width, bottom: ZONES.topCol.flag.bottom, zIndex: 1,
+          display: 'flex', justifyContent: 'center', lineHeight: 0,
+        }}>
+          <ListIcon size="10cqw" />
+        </div>
+        <div style={{
+          position: 'absolute', left: ZONES.topCol.left, width: ZONES.topCol.width, top: ZONES.topCol.iconLabelRow.top, zIndex: 1,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <span style={{ fontFamily: SPORT, fontWeight: 700, whiteSpace: 'nowrap', lineHeight: 1, fontSize: '3.9cqw', letterSpacing: '0.03em', color: LABEL_GOLD, textShadow: SHADOW_OVER_PHOTO }}>
+            {dict.tipp.step.list.allLabel}
+          </span>
+        </div>
+        <div style={{
+          position: 'absolute', left: ZONES.topCol.left, width: ZONES.topCol.width, top: ZONES.topCol.valueRow.top, zIndex: 1,
+          lineHeight: 0, textAlign: 'center',
+        }}>
+          <span style={{ fontFamily: SPORT, fontWeight: 900, whiteSpace: 'nowrap', lineHeight: 0.95, fontSize: 'clamp(10px, 12.5cqw, 23px)', color: GOLD, textShadow: SHADOW_OVER_PHOTO }}>
+            {total}
+          </span>
+        </div>
+        <div style={{
+          position: 'absolute', left: '28%', right: ZONES.photo.right, top: ZONES.photo.top, bottom: ZONES.photo.bottom,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',
+        }}>
+          <span style={{
+            fontFamily: SPORT, fontWeight: 900, lineHeight: 1, color: GOLD,
+            fontSize: 'clamp(22px, 30cqw, 56px)', textShadow: SHADOW_OVER_PHOTO,
+          }}>+{hiddenCount}</span>
+        </div>
+        {/* Dekker det tomme stat-feltet (mynt-ikonet er bakt inn i malen) med en
+            kort forklaring i stedet for tomme ODDS/SNITT-kolonner. */}
+        <div style={{
+          position: 'absolute', left: '9%', right: '9%', top: '66%', bottom: '14%',
+          background: 'rgba(3,4,10,0.92)', borderRadius: 8, zIndex: 1,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+          fontFamily: SPORT, fontWeight: 700, fontSize: 'clamp(7px, 8cqw, 13px)', letterSpacing: '0.03em',
+          textTransform: 'uppercase', color: LABEL_GOLD, lineHeight: 1.2, padding: '0 6%',
+        }}>
+          {dict.tipp.step.list.cardHint}
+        </div>
+        <div style={{
+          position: 'absolute', left: ZONES.name.left, right: ZONES.name.right, bottom: ZONES.name.bottom,
+          textAlign: 'center', zIndex: 1, lineHeight: 0,
+        }}>
+          <div style={{
+            fontFamily: SPORT, fontWeight: 900, textTransform: 'uppercase',
+            fontSize: 'clamp(10px, 11cqw, 20px)', color: GOLD, lineHeight: 1, letterSpacing: '0.01em',
+            textShadow: SHADOW_OVER_PHOTO, whiteSpace: 'nowrap',
+          }}>
+            {dict.tipp.step.list.showAll(total)}
+          </div>
+        </div>
+      </button>
     </div>
   )
 }

@@ -76,15 +76,29 @@ export const tipp = {
     back: '← Back',
   },
   step: {
-    multiplierWords: { double: 'Double', triple: 'Triple', quadruple: 'Quadruple' },
-    multiplierNote: (word) => `${word} points in this pot`,
-    scoreInfo: {
-      title: 'Points',
-      perSet: 'Per set won',
-      perAdvancement: 'Per match win (advancement)',
-      forWinning: 'For winning the tournament',
-      potLabel: (from, to) => (to != null ? `Pot ${from}–${to}` : `Pot ${from}`),
-      tieBreak: 'In case of a tie, whoever signed up earliest wins.',
+    potHints: {
+      1: 'The four biggest favourites',
+      2: 'The next four on the odds list',
+      3: 'Six challengers',
+      4: 'The rest of the field — the biggest payout if you hit',
+    },
+    rulesInfo: {
+      title: 'How you win',
+      lines: [
+        'You pick one player from each of four pots.',
+        'If one of your players wins the tournament, you share the prize with everyone else who picked that player.',
+        'If nobody picked the winner, the prize goes to those who have the player who got furthest — first the finalist, then the semi-finalists.',
+      ],
+    },
+    list: {
+      showAll: (n) => `See all ${n}`,
+      title: 'All players in this pot',
+      avg: 'Avg',
+      odds: 'Odds',
+      close: 'Close',
+      allLabel: 'ALL',
+      cardHint: 'Names, avg and odds',
+      dialogAriaLabel: (potName) => `All players in ${potName}`,
     },
     chooseAriaLabel: (potName, row) => `Pick a player from ${potName}${row != null ? `, row ${row}` : ''}`,
     avgLabel: 'Avg',
@@ -99,7 +113,7 @@ export const tipp = {
     stepAriaLabelPending: (n) => `Step ${n}`,
     stepOf: (step, total) => `STEP ${step} OF ${total}`,
     guide: 'Guide',
-    points: 'Points',
+    points: 'Rules',
   },
   stepSlideshow: {
     tablistAriaLabel: 'Steps in the intro',

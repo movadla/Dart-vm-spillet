@@ -15,14 +15,14 @@ import { useState, useEffect, useLayoutEffect, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SmartBackButton from '@/components/SmartBackButton'
-import { POTS, getPickablePlayers } from '@/data/pots'
+import { POTS, getPickablePlayers, type Player } from '@/data/pots'
 import Flag from '@/components/Flag'
-import { SCORING } from '@/config/scoring'
-import { PlayerCard, TEMPLATE_ASPECT } from '@/components/PlayerCard'
+import { PlayerCard, MorePlayersCard, TEMPLATE_ASPECT } from '@/components/PlayerCard'
+import PlayerListSheet from '@/components/PlayerListSheet'
 import PlayerDetailPanel from '@/components/PlayerDetailPanel'
 import TeamTile from '@/components/TeamTile'
 import { PLAYER_STATS } from '@/data/playerStats'
-import { formatAvg, formatPoints } from '@/lib/format'
+import { formatAvg } from '@/lib/format'
 import StepSlideshow, { INTRO_LAST_SLIDE } from '@/components/StepSlideshow'
 import LeagueSection from '@/components/LeagueSection'
 import ShareButton from '@/components/ShareButton'
@@ -108,9 +108,12 @@ function TippContent() {
 
   // Spillerpanelet (bunnark) lukkes når man bytter steg.
   const [panelOpen, setPanelOpen] = useState(false)
+  // «Se alle»-listen (pott 4) lukkes også når man bytter steg.
+  const [listOpen, setListOpen] = useState(false)
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPanelOpen(false)
+    setListOpen(false)
   }, [step])
 
   // Kort-gridets faktiske tilgjengelige plass i pikker-steget — MÅLT, ikke
@@ -638,7 +641,6 @@ const inputStyle: React.CSSProperties = {
             const player = pot.players.find((p) => p.name === playerName)
             const color = POT_COLORS[(pot.potNumber - 1) % POT_COLORS.length]
             const colorDark = POT_COLORS_DARK[(pot.potNumber - 1) % POT_COLORS_DARK.length]
-            const multiplier = SCORING.underdogMultiplier[pot.potNumber]
             return (
               // Hele raden er trykkflate (ikke bare «Endre»-pillen) — går til pottens steg.
               <button key={pot.potNumber} type="button" onClick={() => setStep(pot.potNumber)} className="pick-row" aria-label={dict.tipp.summary.changeAriaLabel(pot.potNumber)} style={{ display: 'flex', alignItems: 'center', width: '100%', padding: 0, background: 'none', border: 'none', color: 'inherit', textAlign: 'left', cursor: 'pointer', borderBottom: pot.potNumber < POT_COUNT ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
@@ -652,13 +654,6 @@ const inputStyle: React.CSSProperties = {
                   <Flag iso2={player?.iso2 ?? ''} size={20} />
                   <div style={{ flex: 1, minWidth: 0, fontFamily: SPORT, fontSize: 16, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1.1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: player ? '#fff' : 'rgba(255,255,255,0.45)' }}>
                     {playerName ?? dict.tipp.summary.notSelected}
-                  </div>
-                  {/* Fast kolonne, så «Endre» står på samme sted i alle rader; ×1 vises ikke (tom plass) */}
-                  <div style={{ width: 34, textAlign: 'center', flexShrink: 0, padding: '3px 0', borderRadius: 6, fontFamily: SPORT, fontSize: 13, fontWeight: 900, fontVariantNumeric: 'tabular-nums',
-                    background: multiplier > 1 ? (multiplier === 2 ? 'rgba(245,158,11,0.12)' : 'rgba(220,38,38,0.12)') : 'transparent',
-                    border: `1px solid ${multiplier > 1 ? (multiplier === 2 ? 'rgba(245,158,11,0.3)' : 'rgba(220,38,38,0.3)') : 'transparent'}`,
-                    color: multiplier === 2 ? '#f59e0b' : '#ef4444' }}>
-                    {multiplier > 1 ? `×${multiplier}` : ''}
                   </div>
                   <span
                     className="btn-hover"
@@ -708,17 +703,30 @@ const inputStyle: React.CSSProperties = {
   const potIndex = step - 1
   const pot = POTS[potIndex]
   const selectedPlayer = picks[pot.potNumber]
-  const multiplier = SCORING.underdogMultiplier[pot.potNumber]
   const color = POT_COLORS[potIndex % POT_COLORS.length]
   const colorDark = POT_COLORS_DARK[potIndex % POT_COLORS_DARK.length]
-  const pickablePlayers = getPickablePlayers(pot)
-  // Potter med 4+ kandidater i én rad ble for trangt/lite kortene fylte for
-  // lite av skjermen — split i to rader i stedet (4 → 2+2, 6 → 3+3, 5 → 3+2
-  // osv. via generell formel/ceil av halvparten). Potter med ≤3 (pott 1)
-  // beholder én rad uendret.
-  const rowSize = pickablePlayers.length > 3 ? Math.ceil(pickablePlayers.length / 2) : pickablePlayers.length
-  const playerRows: (typeof pickablePlayers)[] = []
-  for (let i = 0; i < pickablePlayers.length; i += rowSize) playerRows.push(pickablePlayers.slice(i, i + rowSize))
+  const allPickable = getPickablePlayers(pot)
+  // Inntil 6 kort i gridet. Har potten flere kandidater (pott 4) vises de 5
+  // beste som kort, og det sjette kortet er «Se alle» som åpner hele listen
+  // (navn, snitt, odds). Velges en spiller fra listen, tar hen det sjette
+  // kortets plass, så valget alltid er synlig i gridet.
+  const CARD_LIMIT = 6
+  const hasList = allPickable.length > CARD_LIMIT
+  const topPlayers = hasList ? allPickable.slice(0, CARD_LIMIT - 1) : allPickable
+  const listPick = hasList && selectedPlayer
+    ? allPickable.find((p) => p.name === selectedPlayer && !topPlayers.includes(p))
+    : undefined
+  type GridItem = { kind: 'player'; player: Player } | { kind: 'more' }
+  const gridItems: GridItem[] = [
+    ...topPlayers.map((player): GridItem => ({ kind: 'player', player })),
+    ...(hasList ? [listPick ? ({ kind: 'player', player: listPick } as GridItem) : ({ kind: 'more' } as GridItem)] : []),
+  ]
+  // Potter med 4+ kort i én rad ble for trangt/lite kortene fylte for lite av
+  // skjermen — split i to rader i stedet (4 → 2+2, 6 → 3+3, 5 → 3+2 osv. via
+  // ceil av halvparten). Potter med ≤3 kort beholder én rad.
+  const rowSize = gridItems.length > 3 ? Math.ceil(gridItems.length / 2) : gridItems.length
+  const playerRows: GridItem[][] = []
+  for (let i = 0; i < gridItems.length; i += rowSize) playerRows.push(gridItems.slice(i, i + rowSize))
 
   // Kort-bredde: fyller den MÅLTE tilgjengelige plassen (cardsAreaSize over)
   // i stedet for et gjettet fast tak — et fast pikseltall traff enten for
@@ -754,7 +762,6 @@ const inputStyle: React.CSSProperties = {
     <div className="page-bg app-frame" style={{ height: '100dvh', padding: '14px 16px 10px', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
       <ProgressDots
         step={step}
-        multiplier={multiplier}
         picks={picks}
         onGuide={() => { setStep(0); setSlideshowSlide(0) }}
         onStep={setStep}
@@ -780,54 +787,20 @@ const inputStyle: React.CSSProperties = {
           <div style={{ fontFamily: SPORT, fontSize: 22, fontWeight: 900, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>
             {translatePotName(dict.players, pot.potNumber, pot.name)}
           </div>
-          {/* Multiplikatoren står i steg-linjen over («Steg 3 av 6 · ×2»);
-              her kun en rolig forklaring i vanlig tekst når den er > 1 */}
-          {multiplier > 1 && (
+          {/* Kort forklaring av hvem som er i potten — for dem som ikke kjenner spillerne */}
+          {dict.tipp.step.potHints[pot.potNumber] && (
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>
-              {dict.tipp.step.multiplierNote(multiplier === 2 ? dict.tipp.step.multiplierWords.double : multiplier === 3 ? dict.tipp.step.multiplierWords.triple : dict.tipp.step.multiplierWords.quadruple)}
+              {dict.tipp.step.potHints[pot.potNumber]}
             </div>
           )}
         </div>
       </div>
       {showScoreInfo && (
-        <div style={{ marginBottom: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px', fontSize: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>{dict.tipp.step.scoreInfo.title}</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.7)' }}>{dict.tipp.step.scoreInfo.perSet}</span>
-            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>+{formatPoints(SCORING.perSetWon, locale)}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.7)' }}>{dict.tipp.step.scoreInfo.perAdvancement}</span>
-            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>+{formatPoints(SCORING.perAdvancement, locale)}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'rgba(255,255,255,0.7)' }}>{dict.tipp.step.scoreInfo.forWinning}</span>
-            <span style={{ fontFamily: SPORT, fontWeight: 600, color: '#f59e0b' }}>+{formatPoints(SCORING.tournamentWinner, locale)}</span>
-          </div>
-          <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
-          {(() => {
-            // Grupper sammenhengende potter med samme multiplikator til én linje.
-            const groups: { pots: number[]; mult: number }[] = []
-            for (const pot of POTS) {
-              const mult = SCORING.underdogMultiplier[pot.potNumber] ?? 1
-              const last = groups[groups.length - 1]
-              if (last && last.mult === mult) last.pots.push(pot.potNumber)
-              else groups.push({ pots: [pot.potNumber], mult })
-            }
-            return groups.map((g, i) => {
-              const label = dict.tipp.step.scoreInfo.potLabel(g.pots[0], g.pots.length > 1 ? g.pots[g.pots.length - 1] : undefined)
-              return (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: i === groups.length - 1 ? 0 : 4 }}>
-                  <span style={{ color: 'rgba(255,255,255,0.7)' }}>{label} ×{g.mult}</span>
-                  <span style={{ fontFamily: SPORT, fontWeight: 600, color: g.mult >= 3 ? '#ef4444' : '#f59e0b' }}>×{g.mult}</span>
-                </div>
-              )
-            })
-          })()}
-          <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
-          <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, lineHeight: 1.5 }}>
-            {dict.tipp.step.scoreInfo.tieBreak}
-          </div>
+        <div style={{ marginBottom: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px', fontSize: 13, lineHeight: 1.5 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>{dict.tipp.step.rulesInfo.title}</div>
+          {dict.tipp.step.rulesInfo.lines.map((line, i) => (
+            <div key={i} style={{ color: 'rgba(255,255,255,0.8)', marginBottom: i === dict.tipp.step.rulesInfo.lines.length - 1 ? 0 : 6 }}>{line}</div>
+          ))}
         </div>
       )}
 
@@ -856,8 +829,22 @@ const inputStyle: React.CSSProperties = {
                 gap: colGap, padding: '4px 6px',
               }}
             >
-              {row.map((player) => {
-                const index = pickablePlayers.indexOf(player)
+              {row.map((item) => {
+                const index = gridItems.indexOf(item)
+                if (item.kind === 'more') {
+                  return (
+                    <MorePlayersCard
+                      key="more"
+                      hiddenCount={allPickable.length - topPlayers.length}
+                      total={allPickable.length}
+                      potNumber={pot.potNumber}
+                      color={color}
+                      index={index}
+                      onClick={() => setListOpen(true)}
+                    />
+                  )
+                }
+                const player = item.player
                 const pickPercent = pickShare.total >= MIN_PARTICIPANTS_FOR_SHARE
                   ? ((pickShare.counts[player.name] ?? 0) / pickShare.total) * 100
                   : undefined
@@ -921,6 +908,16 @@ const inputStyle: React.CSSProperties = {
                 >
                   {dict.tipp.step.details}
                 </button>
+                {hasList && listPick && (
+                  <button
+                    type="button"
+                    onClick={() => setListOpen(true)}
+                    className="btn-hover"
+                    style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', color: '#fff', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 999, padding: '7px 14px', cursor: 'pointer', flexShrink: 0 }}
+                  >
+                    {dict.tipp.step.list.showAll(allPickable.length)}
+                  </button>
+                )}
               </div>
               <PlayerDetailPanel
                 player={selectedPlayerData}
@@ -966,6 +963,17 @@ const inputStyle: React.CSSProperties = {
       >
         {dict.tipp.step.back}
       </button>
+      {listOpen && hasList && (
+        <PlayerListSheet
+          players={allPickable}
+          potNumber={pot.potNumber}
+          potName={pot.name}
+          color={color}
+          selectedName={selectedPlayer}
+          onSelect={(name) => { setPicks((prev) => ({ ...prev, [pot.potNumber]: name })); setListOpen(false) }}
+          onClose={() => setListOpen(false)}
+        />
+      )}
     </div>
   )
 }

@@ -69,15 +69,21 @@ export interface TippDict {
     back: string
   }
   step: {
-    multiplierWords: { double: string; triple: string; quadruple: string }
-    multiplierNote: (word: string) => string
-    scoreInfo: {
+    /** Nøkkel = potNumber — én linje under pott-tittelen som forklarer hvem som er i potten. */
+    potHints: Record<number, string>
+    rulesInfo: { title: string; lines: string[] }
+    list: {
+      /** Teksten på «se alle»-kortet / knappen. n = antall spillere i potten. */
+      showAll: (n: number) => string
       title: string
-      perSet: string
-      perAdvancement: string
-      forWinning: string
-      potLabel: (from: number, to?: number) => string
-      tieBreak: string
+      avg: string
+      odds: string
+      close: string
+      /** Liten etikett på «se alle»-kortet (der «RANK» står på spillerkort). */
+      allLabel: string
+      /** Tekst i stat-feltet på «se alle»-kortet. */
+      cardHint: string
+      dialogAriaLabel: (potName: string) => string
     }
     chooseAriaLabel: (potName: string, row?: number) => string
     avgLabel: string
@@ -201,15 +207,29 @@ export const tipp: TippDict = {
     back: '← Tilbake',
   },
   step: {
-    multiplierWords: { double: 'Dobbelt', triple: 'Trippelt', quadruple: 'Firedobbelt' },
-    multiplierNote: (word) => `${word} poeng i denne potten`,
-    scoreInfo: {
-      title: 'Poeng',
-      perSet: 'Per vunnet sett',
-      perAdvancement: 'Per kampseier (avansement)',
-      forWinning: 'For å vinne turneringen',
-      potLabel: (from, to) => (to != null ? `Pott ${from}–${to}` : `Pott ${from}`),
-      tieBreak: 'Ved lik poengsum vinner den som meldte seg på tidligst.',
+    potHints: {
+      1: 'De fire største favorittene',
+      2: 'De neste fire på oddslisten',
+      3: 'Seks utfordrere',
+      4: 'Resten av feltet — størst gevinst om du treffer',
+    },
+    rulesInfo: {
+      title: 'Slik vinner du',
+      lines: [
+        'Du velger én spiller fra hver av fire potter.',
+        'Vinner en av dine spillere turneringen, deler du premien med alle andre som har valgt samme spiller.',
+        'Har ingen valgt vinneren, går premien til dem som har spilleren som kom lengst — først finalisten, så semifinalistene.',
+      ],
+    },
+    list: {
+      showAll: (n) => `Se alle ${n}`,
+      title: 'Alle spillere i potten',
+      avg: 'Snitt',
+      odds: 'Odds',
+      close: 'Lukk',
+      allLabel: 'ALLE',
+      cardHint: 'Navn, snitt og odds',
+      dialogAriaLabel: (potName) => `Alle spillere i ${potName}`,
     },
     chooseAriaLabel: (potName, row) => `Velg spiller fra ${potName}${row != null ? `, rad ${row}` : ''}`,
     avgLabel: 'Snitt',
@@ -224,7 +244,7 @@ export const tipp: TippDict = {
     stepAriaLabelPending: (n) => `Steg ${n}`,
     stepOf: (step, total) => `STEG ${step} AV ${total}`,
     guide: 'Guide',
-    points: 'Poeng',
+    points: 'Regler',
   },
   stepSlideshow: {
     tablistAriaLabel: 'Steg i introduksjonen',

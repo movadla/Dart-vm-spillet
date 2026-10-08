@@ -42,10 +42,8 @@ export function Confetti() {
   )
 }
 
-export function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep, onTogglePoeng, poengActive }: {
+export function ProgressDots({ step, picks = {}, onGuide, onStep, onTogglePoeng, poengActive }: {
   step: number
-  /** Pottens multiplikator — vises i steg-linjen («Steg 3 av 6 · ×2») */
-  multiplier?: number
   /** Valgene så langt — fullførte steg viser flagget til spilleren du valgte */
   picks?: Record<number, string>
   onGuide?: () => void
@@ -92,7 +90,6 @@ export function ProgressDots({ step, multiplier = 1, picks = {}, onGuide, onStep
         <SmartBackButton />
         <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.12em', fontVariantNumeric: 'tabular-nums' }}>
           {dict.tipp.progressDots.stepOf(step, POT_COUNT)}
-          {multiplier > 1 && <span style={{ color: multiplier === 2 ? '#f59e0b' : '#ef4444', marginLeft: 6 }}>· ×{multiplier}</span>}
         </div>
         {/* Guide og Poeng samlet i én liten, sammensatt pille i stedet for to
             separate knapper — mindre visuell konkurranse med «STEG X AV 6»,

@@ -22,12 +22,10 @@ export const players: PlayersDict = {
   },
   champion: 'Turneringsvinner',
   potNames: {
-    1: 'Nivå 1',
-    2: 'Nivå 2',
-    3: 'Nivå 3',
-    4: 'Nivå 4',
-    5: 'Nivå 5',
-    6: 'Nivå 6',
+    1: 'Favorittene',
+    2: 'Utfordrerne',
+    3: 'Mørkehestene',
+    4: 'Outsiderne',
   },
   nationalities: {
     England: 'England',
