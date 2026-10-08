@@ -897,7 +897,6 @@ const inputStyle: React.CSSProperties = {
                     <MorePlayersCard
                       key="more"
                       hiddenCount={allPickable.length - topPlayers.length}
-                      total={allPickable.length}
                       potNumber={pot.potNumber}
                       color={color}
                       index={index}
@@ -972,7 +971,7 @@ const inputStyle: React.CSSProperties = {
                     className="btn-hover"
                     style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', color: '#fff', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 999, padding: '7px 14px', cursor: 'pointer', flexShrink: 0 }}
                   >
-                    {dict.tipp.step.list.showAll(allPickable.length)}
+                    {dict.tipp.step.list.showRest(allPickable.length - topPlayers.length)}
                   </button>
                 )}
               </div>
@@ -1021,7 +1020,7 @@ const inputStyle: React.CSSProperties = {
       </button>
       {listOpen && hasList && (
         <PlayerListSheet
-          players={allPickable}
+          players={allPickable.filter((p) => !topPlayers.includes(p))}
           potNumber={pot.potNumber}
           potName={pot.name}
           color={color}

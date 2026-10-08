@@ -41,6 +41,14 @@ export const common = {
   yourTeam: 'Your team',
   skipToFinishedTeam: 'Skip ahead to the finished team',
   qualifiedFillerLabel: 'Qualifier',
+  teamBuild: {
+    pickOne: 'Pick one player',
+    players: (n) => `${n} players`,
+    youPick: (name) => `You pick ${name}`,
+    joins: (name) => `${name} joins your team`,
+    ready: 'Your team is ready',
+    hook: 'If one of them wins the tournament, you share the prize',
+  },
   deadline: { label: (when) => `Sign-up deadline: ${when}`, short: (when) => `Deadline ${when}`, noChanges: 'After the deadline you cannot change your picks.' },
   bottomNav: { aria: 'Main menu', home: 'Home', mine: 'My page', board: 'Leaderboard', guide: 'Guide' },
   rankList: {

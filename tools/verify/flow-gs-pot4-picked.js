@@ -1,4 +1,4 @@
-// Åpner «Se alle»-listen på steg 4 og velger spiller nr. 10 fra listen —
+// Åpner «Se alle»-listen på steg 4 og velger spiller nr. 5 i resten-listen —
 // valget skal ta det sjette kortets plass i gridet.
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const find = (t) => [...document.querySelectorAll('button')].find((b) => b.textContent.trim().startsWith(t))
@@ -13,8 +13,8 @@ for (let step = 1; step <= 3; step++) {
 const cards = [...document.querySelectorAll('button.player-card')]
 cards[cards.length - 1].click(); await sleep(700)
 const rows = [...document.querySelectorAll('[role=dialog] [role=radio]')]
-const valgt = rows[9]?.innerText.replace(/\s+/g, ' ')
-rows[9]?.click(); await sleep(900)
+const valgt = rows[4]?.innerText.replace(/\s+/g, ' ')
+rows[4]?.click(); await sleep(900)
 const after = [...document.querySelectorAll('button.player-card')]
 return {
   valgt,
@@ -22,5 +22,5 @@ return {
   kort: after.length,
   sisteAria: after[after.length - 1]?.getAttribute('aria-label'),
   sisteValgt: after[after.length - 1]?.getAttribute('aria-checked'),
-  seAlleKnapp: !!find('Se alle'),
+  seAlleKnapp: !!find('Se resten'),
 }

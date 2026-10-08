@@ -39,6 +39,7 @@ export interface CommonDict {
   yourTeam: string
   skipToFinishedTeam: string
   qualifiedFillerLabel: string
+  teamBuild: { pickOne: string; players: (n: number) => string; youPick: (name: string) => string; joins: (name: string) => string; ready: string; hook: string }
   deadline: { label: (when: string) => string; short: (when: string) => string; noChanges: string }
   bottomNav: { aria: string; home: string; mine: string; board: string; guide: string }
   rankList: {
@@ -101,6 +102,14 @@ export const common: CommonDict = {
   yourTeam: 'Laget ditt',
   skipToFinishedTeam: 'Spol fram til ferdig lag',
   qualifiedFillerLabel: 'Kvalifisert',
+  teamBuild: {
+    pickOne: 'Velg én spiller',
+    players: (n) => `${n} spillere`,
+    youPick: (name) => `Du velger ${name}`,
+    joins: (name) => `${name} går i laget ditt`,
+    ready: 'Laget ditt er klart',
+    hook: 'Vinner en av dem turneringen, deler du premien',
+  },
   deadline: { label: (when) => `Påmeldingsfrist: ${when}`, short: (when) => `Frist ${when}`, noChanges: 'Etter fristen kan du ikke endre valgene.' },
   bottomNav: { aria: 'Hovedmeny', home: 'Hjem', mine: 'Min side', board: 'Leaderboard', guide: 'Guide' },
   rankList: {

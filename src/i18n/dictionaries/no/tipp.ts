@@ -81,16 +81,18 @@ export interface TippDict {
     potHints: Record<number, string>
     rulesInfo: { title: string; lines: string[] }
     list: {
-      /** Teksten på «se alle»-kortet / knappen. n = antall spillere i potten. */
-      showAll: (n: number) => string
+      /** Knappen som åpner listen (n = antall spillere i listen). */
+      showRest: (n: number) => string
+      /** Navnet på det siste kortet i pott 4. */
+      restLabel: string
+      /** Tekst på kortet. n = antall spillere som ikke står som kort. */
+      restHint: (n: number) => string
       title: string
       avg: string
       odds: string
       close: string
-      /** Liten etikett på «se alle»-kortet (der «RANK» står på spillerkort). */
+      /** Liten etikett på «Resten»-kortet (der «RANK» står på spillerkort). */
       allLabel: string
-      /** Tekst i stat-feltet på «se alle»-kortet. */
-      cardHint: string
       dialogAriaLabel: (potName: string) => string
     }
     chooseAriaLabel: (potName: string, row?: number) => string
@@ -229,7 +231,7 @@ export const tipp: TippDict = {
       1: 'De fire største favorittene',
       2: 'De neste fire på oddslisten',
       3: 'Seks utfordrere',
-      4: 'Resten av feltet — størst gevinst om du treffer',
+      4: 'Resten av feltet. Størst gevinst.',
     },
     rulesInfo: {
       title: 'Slik vinner du',
@@ -240,14 +242,15 @@ export const tipp: TippDict = {
       ],
     },
     list: {
-      showAll: (n) => `Se alle ${n}`,
-      title: 'Alle spillere i potten',
+      showRest: (n) => `Se resten (${n})`,
+      restLabel: 'Resten',
+      restHint: (n) => `Se de ${n} andre spillerne`,
+      title: 'Resten av feltet',
       avg: 'Snitt',
       odds: 'Odds',
       close: 'Lukk',
-      allLabel: 'ALLE',
-      cardHint: 'Navn, snitt og odds',
-      dialogAriaLabel: (potName) => `Alle spillere i ${potName}`,
+      allLabel: 'ANDRE',
+      dialogAriaLabel: (potName) => `Resten av spillerne i ${potName}`,
     },
     chooseAriaLabel: (potName, row) => `Velg spiller fra ${potName}${row != null ? `, rad ${row}` : ''}`,
     avgLabel: 'Snitt',

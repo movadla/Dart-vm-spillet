@@ -282,9 +282,8 @@ function reveal(step: number, from: number, extra?: React.CSSProperties): React.
 
 // Fase 0 i tre trinn, så folk rekker å lese: overskrift → undertekst →
 // selve animasjonen (som tar plass fra start, så ingenting hopper).
-// MIDLERTIDIG (2026-09-27): alle tre STEPS-arrayene er skalert ×0.75
-// (25 % raskere) etter tilbakemelding om at introen gikk litt tregt.
-const INTRO_STEPS = [0, 975, 2025]
+// Rolig tempo med vilje: tilbakemelding 2026-10-08 var at animasjonen var vanskelig å følge.
+const INTRO_STEPS = [0, 1300, 2700]
 
 function IntroPhase({ onFinished }: { onFinished: () => void }) {
   const { dict } = useLocale()
@@ -307,7 +306,7 @@ function IntroPhase({ onFinished }: { onFinished: () => void }) {
 
 // Fase 1: tekst → tekst → finalen → kampoppsett med ekte kort → resultat →
 // vinneren → antall som har ham → din andel av premien.
-const EXAMPLE_STEPS = [0, 975, 2025, 2550, 4050, 4950, 5475, 6075]
+const EXAMPLE_STEPS = [0, 1300, 2700, 3400, 5400, 6600, 7300, 8100]
 const EXAMPLE_CARD_WIDTH = 92
 
 function ExamplePhase() {
@@ -399,7 +398,7 @@ function ExamplePhase() {
 // den siste vinner → en liga-tabell der du klatrer til topps. Nivåene er
 // samme modell som leaderboardet (src/lib/prize.ts): 1 = gruppespill …
 // 5 = finalist, 6 = turneringsvinner.
-const PROGRESS_STEPS = [0, 975, 2475, 3450, 4275, 4875, 5475, 6075]
+const PROGRESS_STEPS = [0, 1300, 3300, 4600, 5700, 6500, 7300, 8100]
 // Rivalenes nivå, indeksmatchet med dict.tipp.stepSlideshow.progress.rivals
 // (navnene er språkavhengig eksempeldata, nivåene er ikke).
 const LEAGUE_RIVAL_LEVELS = [4, 3, 3, 2, 2, 1, 1, 1, 1]

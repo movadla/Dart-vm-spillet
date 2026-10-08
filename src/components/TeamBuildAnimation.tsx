@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { PlayerCard } from '@/components/PlayerCard'
-import TeamTile from '@/components/TeamTile'
+import TeamTile, { lastName } from '@/components/TeamTile'
 import { POTS, getPickablePlayers, type Player } from '@/data/pots'
 import { POT_COLORS, POT_COLORS_DARK } from '@/config/potColors'
 import { usePageVisible } from '@/lib/usePageVisible'
@@ -14,27 +14,33 @@ import { useLocale } from '@/lib/i18n/useLocale'
 // resten er bare første kandidat i hver pott.
 const EXAMPLE_PICKS = ['Luke Littler', 'Gerwyn Price', 'James Wade', 'Wessel Nijman', 'Ross Smith', 'Luke Woodhouse']
 
-const CARD_WIDTH = 104
-const SLOT_WIDTH = 54
-const SLOT_WIDTH_FINISHED = 66
+// Fire lagplasser (én per pott) — større enn da det var seks, så de er lette å lese.
+const SLOT_WIDTH = 70
+const SLOT_WIDTH_FINISHED = 80
+// Alltid FIRE kandidatkort i scenen: de får plass på en 360 px-skjerm uten å klippes, og
+// teksten over kortene sier hvor mange spillere potten egentlig har.
+const SCENE_CARDS = 4
 
 interface Level {
   potNumber: number
   color: string
   colorDark: string
   candidates: Player[]
+  /** Antall spillere potten faktisk har (kortene i scenen er bare de første). */
+  potSize: number
   pickIndex: number
 }
 
 const LEVELS: Level[] = POTS.map((pot, i) => {
-  // Pott med mange kandidater (pott 4) vises med de 6 beste i animasjonen.
-  const candidates = getPickablePlayers(pot).slice(0, 6)
+  const all = getPickablePlayers(pot)
+  const candidates = all.slice(0, SCENE_CARDS)
   const found = candidates.findIndex((p) => p.name === EXAMPLE_PICKS[i])
   return {
     potNumber: pot.potNumber,
     color: POT_COLORS[i % POT_COLORS.length],
     colorDark: POT_COLORS_DARK[i % POT_COLORS_DARK.length],
     candidates,
+    potSize: all.length,
     pickIndex: found < 0 ? 0 : found,
   }
 })
@@ -51,41 +57,27 @@ export const EXAMPLE_TEAM = LEVELS.map((l) => ({
 type SubPhase = 'revealed' | 'highlighted' | 'flying' | 'hidden'
 type Event = { t: number; kind: 'level'; level: number; phase: SubPhase } | { t: number; kind: 'finish' }
 
-// De to første nivåene spilles rolig av med tydelige pauser mellom hvert
-// steg (nivåene → kandidatene → valget → flyr inn i laget), resten kjøres
-// raskt for å vise at mønsteret bare fortsetter. Alle tider i ms fra start.
-// MIDLERTIDIG (2026-09-27): hele tidsskjemaet er skalert ×0.75 (25 % raskere)
-// etter tilbakemelding om at introen gikk litt tregt.
-const PACE_SCALE = 0.75
-const SLOT_STAGGER = 90 * PACE_SCALE
-const SLOT_START = 150 * PACE_SCALE
-const FLY_DUR_SLOW = 700 * PACE_SCALE
-const FLY_DUR_FAST = 420 * PACE_SCALE
+// Alle fire pottene spilles av i SAMME rolige tempo (tidligere gikk de to siste så
+// fort at det ble uskarpt, og hele skjemaet var skrudd 25 % opp). Hvert steg har
+// en forklarende tekst: velg én → du velger X → X går i laget. Alle tider i ms.
+const SLOT_STAGGER = 120
+const SLOT_START = 200
+const FLY_DUR = 700
+const PACE = { hold: 1700, pick: 1200, fly: FLY_DUR, gap: 450 }
 
 function buildSchedule(): Event[] {
   const events: Event[] = []
-  // Bufferen etter at de 6 lagplassene har poppet inn var 700ms — nesten
-  // halvannet sekund uten synlig bevegelse rett etter at demoen kommer inn i
-  // synsfeltet på forsiden, som leste som at siden hang. Bufferen under er
-  // nok til at plass-poppingen rekker å fullføre uten å kollidere med
-  // kandidat-kortene, skalert med samme PACE_SCALE som resten.
-  const buffer = 350 * PACE_SCALE
+  const buffer = 400
   let t = SLOT_START + LEVELS.length * SLOT_STAGGER + buffer
-  const PACE = [
-    { hold: 1700 * PACE_SCALE, pick: 1100 * PACE_SCALE, fly: FLY_DUR_SLOW, gap: 850 * PACE_SCALE },
-    { hold: 1500 * PACE_SCALE, pick: 1000 * PACE_SCALE, fly: FLY_DUR_SLOW, gap: 650 * PACE_SCALE },
-  ]
-  const fast = { hold: 560 * PACE_SCALE, pick: 320 * PACE_SCALE, fly: FLY_DUR_FAST, gap: 260 * PACE_SCALE }
   for (let i = 0; i < LEVELS.length; i++) {
-    const p = PACE[i] ?? fast
     events.push({ t, kind: 'level', level: i, phase: 'revealed' })
-    t += p.hold
+    t += PACE.hold
     events.push({ t, kind: 'level', level: i, phase: 'highlighted' })
-    t += p.pick
+    t += PACE.pick
     events.push({ t, kind: 'level', level: i, phase: 'flying' })
-    t += p.fly
+    t += PACE.fly
     events.push({ t, kind: 'level', level: i, phase: 'hidden' })
-    t += p.gap
+    t += PACE.gap
   }
   events.push({ t: t + buffer, kind: 'finish' })
   return events
@@ -189,7 +181,7 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
 
   const activeLevel = active ? LEVELS[active.level] : null
   const activePhase = active?.phase ?? 'hidden'
-  const flyDur = active && active.level < 2 ? FLY_DUR_SLOW : FLY_DUR_FAST
+  const flyDur = FLY_DUR
 
   function skip() {
     if (!allowSkip || !started || finished) return
@@ -217,7 +209,7 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
         tilgjengelige navn (Lighthouse: label-content-name-mismatch), på tvers
         av den eksplisitte aria-label-en over. */}
     <div ref={rootRef} className="card-mini" inert aria-hidden="true">
-      {/* Laget — 6 plasser som fylles etter hvert som spillere landes */}
+      {/* Laget — 4 plasser som fylles etter hvert som spillere landes */}
       <div
         style={{
           display: 'flex', gap: 6, justifyContent: 'center', margin: '0 auto 20px', padding: '8px 10px',
@@ -269,9 +261,27 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
       {/* Scenen krymper når finalen vises — ellers står det igjen ~120 px tom
           plass under «Laget ditt» (kortene som ikke lenger er der). */}
       {/* overflowX: clip — opptil 6 kort på rad er bredere enn en 390 px-skjerm og ga sidescroll for hele siden; Y forblir synlig så kortene kan fly opp til laget. */}
-      <div style={{ position: 'relative', height: finished ? 64 : 186, zIndex: 2, overflowX: 'clip', transition: 'height 0.5s cubic-bezier(0.22,1,0.36,1)' }}>
+      <div style={{ position: 'relative', height: finished ? 88 : 206, zIndex: 2, overflowX: 'clip', transition: 'height 0.5s cubic-bezier(0.22,1,0.36,1)' }}>
+        {/* Teksten som forklarer hva som skjer akkurat nå (pott → du velger → går i laget). */}
         {activeLevel && (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', gap: 10, justifyContent: 'center', alignItems: 'flex-start', paddingTop: 4 }}>
+          <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 3, zIndex: 3 }}>
+            <div style={{ fontFamily: SPORT, fontWeight: 900, fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1, color: activeLevel.color }}>
+              {dict.players.potNames[activeLevel.potNumber]}
+              <span style={{ fontFamily: 'var(--font-inter), sans-serif', fontWeight: 600, fontSize: 12, letterSpacing: 0, textTransform: 'none', color: 'rgba(255,255,255,0.6)', marginLeft: 8 }}>
+                {dict.common.teamBuild.players(activeLevel.potSize)}
+              </span>
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', minHeight: 20 }}>
+              {activePhase === 'revealed'
+                ? dict.common.teamBuild.pickOne
+                : activePhase === 'highlighted'
+                  ? dict.common.teamBuild.youPick(lastName(activeLevel.candidates[activeLevel.pickIndex].name))
+                  : dict.common.teamBuild.joins(lastName(activeLevel.candidates[activeLevel.pickIndex].name))}
+            </div>
+          </div>
+        )}
+        {activeLevel && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'flex-start', paddingTop: 50 }}>
             {activeLevel.candidates.map((c, ci) => {
               const isPick = ci === activeLevel.pickIndex
               const flying = isPick && activePhase === 'flying'
@@ -283,7 +293,7 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
                   key={c.name}
                   ref={isPick ? chosenRef : undefined}
                   style={{
-                    width: CARD_WIDTH, flexShrink: 0, pointerEvents: 'none',
+                    width: `calc((100% - ${(SCENE_CARDS - 1) * 8}px) / ${SCENE_CARDS})`, maxWidth: 96, flexShrink: 0, pointerEvents: 'none',
                     opacity: fadingOut || (flying && fly) ? 0 : 1,
                     transform,
                     zIndex: isPick ? 3 : 1, position: 'relative',
@@ -311,7 +321,7 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
         )}
 
         {finished && (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: 22, animation: 'slide-enter 0.6s cubic-bezier(0.22,1,0.36,1) both' }}>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 20, animation: 'slide-enter 0.6s cubic-bezier(0.22,1,0.36,1) both' }}>
             <div
               style={{
                 fontFamily: SPORT, fontWeight: 900, fontSize: 28, letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1,
@@ -320,8 +330,9 @@ export default function TeamBuildAnimation({ startOnView = false, startDelay = 0
                 filter: 'drop-shadow(0 2px 8px rgba(243,213,118,0.35))',
               }}
             >
-              {dict.common.yourTeam}
+              {dict.common.teamBuild.ready}
             </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', textAlign: 'center', maxWidth: 300 }}>{dict.common.teamBuild.hook}</div>
           </div>
         )}
       </div>

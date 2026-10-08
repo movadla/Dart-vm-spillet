@@ -8,7 +8,7 @@ if (String(h.s || '').startsWith('intro')) {
   find('Guide')?.click(); await sleep(1200)
   const n = Number(h.s.slice(5))
   for (let i = 0; i < n; i++) { find('Neste')?.click(); await sleep(700) }
-  await sleep(n === 0 ? 9000 : 8000)
+  await sleep(Number(h.w) || (n === 0 ? 9000 : 8000))
   return { slide: n }
 }
 localStorage.setItem('vm_tipp_intro_seen', '1')

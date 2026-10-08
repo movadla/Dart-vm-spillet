@@ -426,14 +426,13 @@ export function PlayerCard({
 }
 
 /**
- * «Se alle»-kortet — står som siste kort i en pott med flere kandidater enn
+ * «Resten»-kortet — står som siste kort i en pott med flere kandidater enn
  * kortene har plass til (pott 4). Samme mal, størrelse og aspekt som
  * PlayerCard, så det passer rett inn i gridet; trykk åpner listen med hele
  * potten (PlayerListSheet).
  */
-export function MorePlayersCard({ hiddenCount, total, potNumber, color, index = 0, onClick }: {
+export function MorePlayersCard({ hiddenCount, potNumber, color, index = 0, onClick }: {
   hiddenCount: number
-  total: number
   potNumber: number
   color: string
   index?: number
@@ -453,7 +452,7 @@ export function MorePlayersCard({ hiddenCount, total, potNumber, color, index = 
 
   return (
     <div className="card-enter" style={{ width: '100%', position: 'relative', animationDelay: `${index * 70}ms` }}>
-      <button type="button" aria-label={dict.tipp.step.list.showAll(total)} onClick={onClick} className="player-card" style={buttonStyle}>
+      <button type="button" aria-label={dict.tipp.step.list.showRest(hiddenCount)} onClick={onClick} className="player-card" style={buttonStyle}>
         <div aria-hidden="true" style={{
           position: 'absolute',
           left: ZONES.photo.left, right: ZONES.photo.right, top: ZONES.photo.top, bottom: ZONES.photo.bottom,
@@ -477,14 +476,6 @@ export function MorePlayersCard({ hiddenCount, total, potNumber, color, index = 
           </span>
         </div>
         <div style={{
-          position: 'absolute', left: ZONES.topCol.left, width: ZONES.topCol.width, top: ZONES.topCol.valueRow.top, zIndex: 1,
-          lineHeight: 0, textAlign: 'center',
-        }}>
-          <span style={{ fontFamily: SPORT, fontWeight: 900, whiteSpace: 'nowrap', lineHeight: 0.95, fontSize: 'clamp(10px, 12.5cqw, 23px)', color: GOLD, textShadow: SHADOW_OVER_PHOTO }}>
-            {total}
-          </span>
-        </div>
-        <div style={{
           position: 'absolute', left: '28%', right: ZONES.photo.right, top: ZONES.photo.top, bottom: ZONES.photo.bottom,
           display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',
         }}>
@@ -502,7 +493,7 @@ export function MorePlayersCard({ hiddenCount, total, potNumber, color, index = 
           fontFamily: SPORT, fontWeight: 700, fontSize: 'clamp(7px, 8cqw, 13px)', letterSpacing: '0.03em',
           textTransform: 'uppercase', color: LABEL_GOLD, lineHeight: 1.2, padding: '0 6%',
         }}>
-          {dict.tipp.step.list.cardHint}
+          {dict.tipp.step.list.restHint(hiddenCount)}
         </div>
         <div style={{
           position: 'absolute', left: ZONES.name.left, right: ZONES.name.right, bottom: ZONES.name.bottom,
@@ -513,7 +504,7 @@ export function MorePlayersCard({ hiddenCount, total, potNumber, color, index = 
             fontSize: 'clamp(10px, 11cqw, 20px)', color: GOLD, lineHeight: 1, letterSpacing: '0.01em',
             textShadow: SHADOW_OVER_PHOTO, whiteSpace: 'nowrap',
           }}>
-            {dict.tipp.step.list.showAll(total)}
+            {dict.tipp.step.list.restLabel}
           </div>
         </div>
       </button>
