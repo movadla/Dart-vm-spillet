@@ -7,7 +7,7 @@ describe('demo-verdenen', () => {
   it('alle demo-lag består av valgbare spillere, én per pott', () => {
     expect(demoTeamsAreValid()).toBe(true)
     for (const p of DEMO_PARTICIPANTS) {
-      expect(p.picks.map((pk) => pk.pot_number)).toEqual([1, 2, 3, 4, 5, 6])
+      expect(p.picks.map((pk) => pk.pot_number)).toEqual([1, 2, 3, 4])
     }
   })
 
