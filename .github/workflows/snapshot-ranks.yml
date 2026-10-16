@@ -3,10 +3,8 @@ name: Snapshot ranks
 # og SYNC_SECRET (samme verdi som SYNC_SECRET i Vercel-miljøvariablene).
 
 on:
-  schedule:
-    # Daglig 06:00 UTC (08:00 norsk) — etter at gårsdagens kamper er ferdige og synket.
-    # Brukes som baseline for rang-piler ▲/▼ (endring siden i går).
-    - cron: '0 6 * * *'
+  # Den daglige kjøringen (cron 06:00 UTC) er slått av 2026-10-16: jobben feilet hver dag og sendte e-post.
+  # Rang-pilene ▲/▼ hører til poengspillet. Legg schedule: - cron: '0 6 * * *' tilbake før VM i desember.
   workflow_dispatch:
 
 jobs:
