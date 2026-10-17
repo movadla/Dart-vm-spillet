@@ -11,6 +11,8 @@ import { STAGE_ORDER, GROUP_STAGE, type Stage } from '@/config/scoring'
 import { getPlayerMatches, isPlayerEliminated, isPlayerChampion, furthestStageReached, type PickWithPot, type MatchResult } from '@/lib/scoring'
 import { SPORT, CARD_GRADIENT, CARD_SHADOW } from '@/config/theme'
 import { useLocale } from '@/lib/i18n/useLocale'
+import { playerFinishLevel } from '@/lib/prize'
+import PathToTitle from './PathToTitle'
 import type { Dictionary } from '@/i18n/dictionaries'
 
 const PlayerDetailPanel = dynamic(() => import('@/components/PlayerDetailPanel'), { ssr: false })
@@ -125,6 +127,7 @@ export default function MyTeam({ picks, matchResults, vmStarted }: Props) {
 
               {isOpen && (
                 <div style={{ padding: '10px 14px 12px 20px', background: 'rgba(255,255,255,0.025)', borderBottom: !isLast ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                  <PathToTitle name={pick.player_name} level={playerFinishLevel(pick.player_name, matchResults, STAGE_ORDER)} eliminated={eliminated} />
                   {myMatches.length === 0 ? (
                     <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{dict.deltaker.myTeam.noMatchesYet}</div>
                   ) : (
